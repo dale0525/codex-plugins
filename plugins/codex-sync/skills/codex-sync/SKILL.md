@@ -93,7 +93,7 @@ The engine publishes one commit only when the remote branch still matches the fe
 
 ## Guardrails
 
-- Keep provider credentials in environment variables or the OS credential store. Synchronize only `env_key` references.
+- Prefer provider credentials in environment variables, command-backed authentication, or the OS credential store. If the user explicitly chooses plaintext cross-device storage, allow only `providers.<name>.experimental_bearer_token`, warn that it persists in Git history and global `config.toml`, and treat it as a high-risk provider change. Never ask the user to paste the token into chat.
 - Do not bypass a secret-scan failure.
 - Do not apply a plan whose ID, base hashes, or commit no longer match.
 - Do not automatically trust plugin hooks. Each device must review them locally.

@@ -16,6 +16,7 @@ pub fn load_managed_values(
     device_id: &str,
 ) -> Result<ManagedValues> {
     let mut values = ManagedValues::new();
+    let mut allowed_secret_paths = BTreeSet::new();
     let common_path = repository.join(&manifest.common_config);
     if common_path.exists() {
         let common: toml::Value = read_toml(&common_path)?;
@@ -31,13 +32,29 @@ pub fn load_managed_values(
     let providers: ProviderFile = read_optional_toml(&repository.join(&manifest.providers))?;
     for (name, provider) in providers.providers {
         validate_segment(&name)?;
+        if let Some(token) = provider
+            .as_table()
+            .and_then(|table| table.get("experimental_bearer_token"))
+        {
+            let token = token
+                .as_str()
+                .context("provider experimental_bearer_token must be a non-empty string")?;
+            if token.trim().is_empty() {
+                anyhow::bail!("provider experimental_bearer_token must be a non-empty string");
+            }
+            allowed_secret_paths.insert(vec![
+                "model_providers".to_owned(),
+                name.clone(),
+                "experimental_bearer_token".to_owned(),
+            ]);
+        }
         flatten_table(
             &mut values,
             vec!["model_providers".to_owned(), name],
             provider,
         )?;
     }
-    validate_no_secrets(&values)?;
+    validate_no_secrets(&values, &allowed_secret_paths)?;
     Ok(values)
 }
 
@@ -72,7 +89,10 @@ fn validate_segment(value: &str) -> Result<()> {
     Ok(())
 }
 
-fn validate_no_secrets(values: &ManagedValues) -> Result<()> {
+fn validate_no_secrets(
+    values: &ManagedValues,
+    allowed_secret_paths: &BTreeSet<Vec<String>>,
+) -> Result<()> {
     const SECRET_KEYS: &[&str] = &[
         "access_token",
         "api_key",
@@ -83,6 +103,9 @@ fn validate_no_secrets(values: &ManagedValues) -> Result<()> {
         "refresh_token",
     ];
     for path in values.keys() {
+        if allowed_secret_paths.contains(path) {
+            continue;
+        }
         let key = path
             .last()
             .expect("managed path is non-empty")
@@ -292,7 +315,7 @@ hash = "device-only"
             vec!["model_providers".into(), "safe".into(), "env_key".into()],
             toml::Value::String("SAFE_TOKEN".into()),
         );
-        assert!(validate_no_secrets(&values).is_ok());
+        assert!(validate_no_secrets(&values, &BTreeSet::new()).is_ok());
         values.insert(
             vec![
                 "model_providers".into(),
@@ -301,6 +324,42 @@ hash = "device-only"
             ],
             toml::Value::String("secret".into()),
         );
-        assert!(validate_no_secrets(&values).is_err());
+        assert!(validate_no_secrets(&values, &BTreeSet::new()).is_err());
+    }
+
+    #[test]
+    fn plaintext_bearer_token_is_allowed_only_in_providers_file() {
+        let directory = tempfile::tempdir().unwrap();
+        fs::write(
+            directory.path().join("providers.toml"),
+            "[providers.company]\nexperimental_bearer_token = \"plain-text-token\"\n",
+        )
+        .unwrap();
+        let manifest = RepositoryManifest {
+            schema_version: 1,
+            agents: "AGENTS.md".to_owned(),
+            common_config: "common.toml".to_owned(),
+            devices: "devices".to_owned(),
+            marketplaces: "marketplaces.toml".to_owned(),
+            plugins: "plugins.toml".to_owned(),
+            providers: "providers.toml".to_owned(),
+        };
+        let values = load_managed_values(directory.path(), &manifest, "test-device").unwrap();
+        let token_path = vec![
+            "model_providers".to_owned(),
+            "company".to_owned(),
+            "experimental_bearer_token".to_owned(),
+        ];
+        assert_eq!(
+            values.get(&token_path),
+            Some(&toml::Value::String("plain-text-token".to_owned()))
+        );
+
+        fs::write(
+            directory.path().join("common.toml"),
+            "[model_providers.other]\nexperimental_bearer_token = \"rejected\"\n",
+        )
+        .unwrap();
+        assert!(load_managed_values(directory.path(), &manifest, "test-device").is_err());
     }
 }

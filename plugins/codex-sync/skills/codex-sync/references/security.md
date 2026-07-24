@@ -21,7 +21,7 @@ Installing Codex Sync does not automatically trust its update-check hook. Review
 
 GitHub access and refresh tokens belong in the operating-system credential store. `CODEX_SYNC_GITHUB_TOKEN` is an ephemeral automation override for trusted noninteractive environments only. Inject it for one process, ensure the process environment is not logged, and unset it immediately afterward. Never persist it in shell profiles, repository files, logs, or prompts. The engine strips it before invoking Codex child processes.
 
-Provider secrets belong in an OS credential store or environment injection mechanism. Repository files may contain only secret references such as `env_key`.
+Provider secrets should use an OS credential store, `env_key`, or command-backed authentication. As an explicit exception, `providers.<name>.experimental_bearer_token` may contain a plaintext static bearer token for cross-device synchronization. It is copied into global `config.toml` and persists in Git history, clones, backups, and GitHub audit surfaces. Confirm the repository is private with narrowly selected access before publishing, never place the token in chat or logs, and rotate it after any suspected exposure. No other probable secret field is allowed.
 
 Publication rejects obvious private-key filenames, `.env`, `auth.json`, GitHub token prefixes, and private-key markers. Treat a rejection as a security incident to investigate; do not rename a secret merely to bypass detection.
 

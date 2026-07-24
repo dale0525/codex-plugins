@@ -69,7 +69,17 @@ env_key = "COMPANY_OPENAI_API_KEY"
 requires_openai_auth = false
 ```
 
-Never include access tokens, API keys, bearer tokens, passwords, client secrets, refresh tokens, or private keys. The engine rejects probable secret fields.
+Prefer `env_key` or command-backed authentication. When a provider must carry a static token across devices, the provider file may explicitly store Codex's dev-only plaintext field:
+
+```toml
+[providers.company]
+name = "Company API"
+base_url = "https://api.example.com/v1"
+wire_api = "responses"
+experimental_bearer_token = "replace-with-the-real-token"
+```
+
+Only `providers.<name>.experimental_bearer_token` receives this exception. The engine still rejects `bearer_token`, access tokens, API keys, passwords, client secrets, refresh tokens, private keys, and secret-looking fields elsewhere. The plaintext value is copied into global `config.toml` and remains in Git history, clones, backups, and GitHub audit surfaces even after replacement. Use only a private repository with narrowly selected access and rotate the token after any suspected exposure.
 
 ## Marketplaces
 
@@ -114,7 +124,7 @@ Plugin IDs must use `plugin@marketplace` syntax. `enabled = false` means the plu
 
 The repository declares desired portable state. It does not own or transport:
 
-- `auth.json` or provider secrets
+- `auth.json` or provider secrets other than an explicitly declared `experimental_bearer_token`
 - sessions, history, memories, goals, logs, or SQLite databases
 - project trust decisions
 - hook trusted hashes

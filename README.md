@@ -31,8 +31,9 @@ codex plugin add codex-sync@dale0525-codex-plugins
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, portable `config.toml` values, providers, marketplaces, or
-plugins. The bundled GitHub App uses Device Flow, and GitHub and provider
-credentials remain device-local.
+plugins. The bundled GitHub App uses Device Flow. Provider credentials remain
+device-local by default; an explicitly configured `experimental_bearer_token`
+can be synchronized in plaintext through the private repository.
 
 Apple Design packages seven MIT-licensed design-engineering skills from
 [emilkowalski/skills](https://github.com/emilkowalski/skills). The upstream
@@ -59,7 +60,7 @@ planning and review, design-engineering guidance, and UI library selection.
 
 Bootstraps new devices from a private GitHub repository through GitHub App
 device authorization. It applies configuration with managed-key ownership,
-atomic writes, drift detection, secret rejection, pre-apply backups, and
+atomic writes, drift detection, scoped secret policy, pre-apply backups, and
 rollback. Private marketplaces are downloaded at immutable commit SHAs and
 registered as local versioned snapshots instead of exposing GitHub credentials
 to Git subprocesses.
