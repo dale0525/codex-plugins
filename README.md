@@ -28,7 +28,13 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
-When asked to upload the current device configuration, Codex Sync 0.3.1 first
+Codex Sync 0.3.2 makes agent-driven onboarding non-blocking: the device-login
+URL and one-time code are flushed before authorization polling begins. On
+Windows, the engine probes `codex.exe`, `codex.cmd`, and `codex.bat` launchers,
+skips broken PATH entries, and uses the same resolved CLI for diagnostics and
+synchronization, so setup no longer needs a temporary hard link or PATH change.
+
+When asked to upload the current device configuration, Codex Sync first
 captures current values for already managed settings, complete providers, global
 instructions, synchronized profiles, and installed non-OpenAI plugins into the
 local repository cache. It excludes app-managed `openai` and `openai-*`

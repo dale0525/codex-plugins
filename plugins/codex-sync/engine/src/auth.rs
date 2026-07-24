@@ -100,14 +100,13 @@ pub fn login(client: &Client, client_id: &str, open_browser: bool) -> Result<Cre
         .json()
         .context("parse GitHub device authorization response")?;
 
-    println!(
-        "Open {} and enter code {}",
-        device.verification_uri, device.user_code
-    );
+    let stdout = io::stdout();
+    let mut stdout = stdout.lock();
+    write_device_prompt(&mut stdout, &device.verification_uri, &device.user_code)?;
+    drop(stdout);
     if open_browser {
         let _ = open::that(&device.verification_uri);
     }
-    io::stdout().flush().ok();
 
     let deadline = std::time::Instant::now() + Duration::from_secs(device.expires_in);
     let mut interval = device.interval.max(1);
@@ -158,6 +157,18 @@ pub fn login(client: &Client, client_id: &str, open_browser: bool) -> Result<Cre
         }
     }
     anyhow::bail!("GitHub device authorization timed out")
+}
+
+fn write_device_prompt(
+    output: &mut impl Write,
+    verification_uri: &str,
+    user_code: &str,
+) -> Result<()> {
+    writeln!(output, "Open {verification_uri} and enter code {user_code}")
+        .context("write GitHub device authorization instructions")?;
+    output
+        .flush()
+        .context("flush GitHub device authorization instructions")
 }
 
 fn refresh(client: &Client, client_id: &str, previous: &Credential) -> Result<Credential> {
@@ -227,5 +238,40 @@ pub fn logout() -> Result<()> {
     match entry.delete_credential() {
         Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
         Err(error) => Err(error).context("delete GitHub credential from OS credential store"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(Default)]
+    struct FlushTrackingWriter {
+        bytes: Vec<u8>,
+        flushed: bool,
+    }
+
+    impl Write for FlushTrackingWriter {
+        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+            self.bytes.extend_from_slice(bytes);
+            Ok(bytes.len())
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            self.flushed = true;
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn device_prompt_is_exact_and_flushed_before_polling() {
+        let mut writer = FlushTrackingWriter::default();
+        write_device_prompt(&mut writer, "https://github.com/login/device", "ABCD-EFGH").unwrap();
+
+        assert!(writer.flushed);
+        assert_eq!(
+            String::from_utf8(writer.bytes).unwrap(),
+            "Open https://github.com/login/device and enter code ABCD-EFGH\n"
+        );
     }
 }

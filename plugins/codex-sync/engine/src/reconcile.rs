@@ -264,21 +264,103 @@ pub fn portable_name(value: &str) -> bool {
         })
 }
 
-fn codex_binary() -> PathBuf {
-    std::env::var_os("CODEX_SYNC_CODEX_BIN")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from("codex"))
+pub fn verify_codex_available() -> Result<PathBuf> {
+    let binary = codex_binary()?;
+    let output = codex_command(&binary)
+        .arg("--version")
+        .output()
+        .with_context(|| format!("run {} --version", binary.display()))?;
+    if !output.status.success() {
+        anyhow::bail!(
+            "Codex CLI version check failed for {}: {}",
+            binary.display(),
+            String::from_utf8_lossy(&output.stderr).trim()
+        );
+    }
+    Ok(binary)
+}
+
+fn codex_binary() -> Result<PathBuf> {
+    if let Some(explicit) = std::env::var_os("CODEX_SYNC_CODEX_BIN") {
+        return resolve_explicit_codex_binary(PathBuf::from(explicit));
+    }
+    resolve_default_codex_binary()
+}
+
+#[cfg(not(windows))]
+fn resolve_explicit_codex_binary(path: PathBuf) -> Result<PathBuf> {
+    Ok(path)
+}
+
+#[cfg(not(windows))]
+fn resolve_default_codex_binary() -> Result<PathBuf> {
+    Ok(PathBuf::from("codex"))
+}
+
+#[cfg(windows)]
+fn resolve_explicit_codex_binary(path: PathBuf) -> Result<PathBuf> {
+    let extension = path
+        .extension()
+        .and_then(|value| value.to_str())
+        .map(str::to_ascii_lowercase);
+    if !matches!(extension.as_deref(), Some("exe" | "cmd" | "bat")) {
+        anyhow::bail!(
+            "CODEX_SYNC_CODEX_BIN must point to codex.exe, codex.cmd, or codex.bat on Windows; got {}",
+            path.display()
+        );
+    }
+    if !path.is_file() {
+        anyhow::bail!(
+            "CODEX_SYNC_CODEX_BIN does not point to a file: {}",
+            path.display()
+        );
+    }
+    Ok(path)
+}
+
+#[cfg(windows)]
+fn resolve_default_codex_binary() -> Result<PathBuf> {
+    let path = std::env::var_os("PATH").context("PATH is not set")?;
+    let directories: Vec<PathBuf> = std::env::split_paths(&path)
+        .filter(|directory| !directory.as_os_str().is_empty())
+        .collect();
+    for filename in ["codex.exe", "codex.cmd", "codex.bat"] {
+        for directory in &directories {
+            let candidate = directory.join(filename);
+            if candidate.is_file() && codex_candidate_works(&candidate) {
+                return Ok(candidate);
+            }
+        }
+    }
+    anyhow::bail!(
+        "Codex CLI is not executable from PATH; checked codex.exe, codex.cmd, and codex.bat. Set CODEX_SYNC_CODEX_BIN to the full path of a working launcher"
+    )
+}
+
+#[cfg(windows)]
+fn codex_candidate_works(path: &Path) -> bool {
+    codex_command(path)
+        .arg("--version")
+        .output()
+        .is_ok_and(|output| output.status.success())
+}
+
+fn codex_command(binary: &Path) -> Command {
+    let mut command = Command::new(binary);
+    command.env_remove("CODEX_SYNC_GITHUB_TOKEN");
+    command
 }
 
 fn codex_output(arguments: &[&str]) -> Result<Output> {
-    let output = Command::new(codex_binary())
+    let binary = codex_binary()?;
+    let output = codex_command(&binary)
         .args(arguments)
-        .env_remove("CODEX_SYNC_GITHUB_TOKEN")
         .output()
-        .with_context(|| format!("run codex {}", arguments.join(" ")))?;
+        .with_context(|| format!("run {} {}", binary.display(), arguments.join(" ")))?;
     if !output.status.success() {
         anyhow::bail!(
-            "codex {} failed: {}",
+            "{} {} failed: {}",
+            binary.display(),
             arguments.join(" "),
             String::from_utf8_lossy(&output.stderr).trim()
         );
@@ -294,6 +376,12 @@ fn codex_owned(arguments: &[String]) -> Result<Output> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[cfg(windows)]
+    use std::sync::Mutex;
+
+    #[cfg(windows)]
+    static ENVIRONMENT_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn plugin_ids_require_marketplace() {
@@ -346,5 +434,48 @@ mod tests {
             plugin_ids_to_remove(&installed, &specs, &managed_marketplaces).unwrap(),
             ["retired@managed-market"]
         );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_resolver_skips_broken_exe_and_uses_cmd_wrapper() {
+        let _guard = ENVIRONMENT_LOCK.lock().unwrap();
+        let temporary = tempfile::tempdir().unwrap();
+        let broken = temporary.path().join("broken");
+        let working = temporary.path().join("working");
+        fs::create_dir_all(&broken).unwrap();
+        fs::create_dir_all(&working).unwrap();
+        fs::write(broken.join("codex.exe"), b"not a Windows executable").unwrap();
+        fs::write(
+            working.join("codex.cmd"),
+            b"@echo off\r\nif \"%~1\"==\"--version\" exit /b 0\r\nexit /b 1\r\n",
+        )
+        .unwrap();
+        let original = std::env::var_os("PATH");
+        let joined = std::env::join_paths([broken.as_path(), working.as_path()]).unwrap();
+        std::env::set_var("PATH", joined);
+
+        let resolved = resolve_default_codex_binary().unwrap();
+
+        if let Some(value) = original {
+            std::env::set_var("PATH", value);
+        } else {
+            std::env::remove_var("PATH");
+        }
+        assert_eq!(resolved, working.join("codex.cmd"));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_explicit_override_rejects_extensionless_wrapper() {
+        let temporary = tempfile::tempdir().unwrap();
+        let wrapper = temporary.path().join("codex");
+        fs::write(&wrapper, b"wrapper").unwrap();
+
+        let error = resolve_explicit_codex_binary(wrapper).unwrap_err();
+
+        assert!(error
+            .to_string()
+            .contains("must point to codex.exe, codex.cmd, or codex.bat"));
     }
 }

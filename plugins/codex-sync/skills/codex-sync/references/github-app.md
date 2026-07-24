@@ -17,4 +17,6 @@ Verify the installation on GitHub's App installation page: the configuration rep
 
 Device authorization presents a browser URL and one-time code. The resulting user token is limited by the intersection of the App permissions, selected repositories, and the user's own access. Expiring user tokens are refreshed with the rotated refresh token when GitHub provides one.
 
+For agent-driven setup, use `login --no-browser`. The engine flushes the URL and code before polling GitHub, allowing the caller to relay them without restarting or redirecting the authorization process.
+
 Organization installations may require administrator approval. A `403` or `404` for a private repository can mean that the App is not installed for that repository even when browser login succeeded.
