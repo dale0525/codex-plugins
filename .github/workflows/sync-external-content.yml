@@ -1,0 +1,82 @@
+name: Sync external skills and plugins
+
+on:
+  schedule:
+    - cron: "23 17 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-external-content
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out marketplace
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.10.0
+        with:
+          cache: true
+          frozen: true
+
+      - name: Synchronize configured sources
+        run: pixi run sync
+
+      - name: Validate synchronized repository
+        run: pixi run check
+
+      - name: Detect changes
+        id: changes
+        shell: bash
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update synchronization pull request
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SYNC_BRANCH: codex/sync-apple-design
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
+        run: |
+          git config user.name "Logic Tan"
+          git config user.email "logictan89@gmail.com"
+          git switch -C "$SYNC_BRANCH"
+          git add --all
+          git commit -m "Sync external skills and plugins"
+
+          remote_sha=""
+          if git fetch origin "$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH"; then
+            remote_sha="$(git rev-parse "refs/remotes/origin/$SYNC_BRANCH")"
+          fi
+          if [[ -n "$remote_sha" ]]; then
+            git push \
+              --force-with-lease="refs/heads/$SYNC_BRANCH:$remote_sha" \
+              origin "HEAD:refs/heads/$SYNC_BRANCH"
+          else
+            git push --set-upstream origin "HEAD:refs/heads/$SYNC_BRANCH"
+          fi
+
+          if [[ -z "$(gh pr list --head "$SYNC_BRANCH" --state open --json url --jq '.[0].url')" ]]; then
+            gh pr create \
+              --base "$BASE_BRANCH" \
+              --head "$SYNC_BRANCH" \
+              --title "Sync external skills and plugins" \
+              --body "Automated daily synchronization from the sources in \`sync-sources.toml\`. The pull request remains open for supply-chain review and is refreshed when upstream changes again."
+          fi

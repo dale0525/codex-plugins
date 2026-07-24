@@ -1,0 +1,398 @@
+#!/usr/bin/env python3
+"""Synchronize configured external skill or plugin directories into this repository."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import tempfile
+import tomllib
+import uuid
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+from urllib.parse import urlsplit
+
+
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_CONFIG = REPOSITORY_ROOT / "sync-sources.toml"
+DEFAULT_LOCK = REPOSITORY_ROOT / "sync-lock.json"
+SEMVER_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
+SOURCE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+
+
+class SyncError(RuntimeError):
+    """Raised for invalid configuration or unsafe upstream content."""
+
+
+@dataclass(frozen=True)
+class SourceSpec:
+    source_id: str
+    repository: str
+    ref: str
+    source: str
+    destination: str
+    plugin_manifest: str
+    license_source: str | None
+    license_destination: str | None
+    remove_frontmatter_fields: tuple[str, ...]
+    skill_description_suffixes: tuple[tuple[str, str], ...]
+
+
+@dataclass(frozen=True)
+class StagedSource:
+    spec: SourceSpec
+    commit: str
+    content: Path
+    license_content: bytes | None
+
+
+def _required_string(data: dict[str, Any], key: str, context: str) -> str:
+    value = data.get(key)
+    if not isinstance(value, str) or not value.strip():
+        raise SyncError(f"{context}.{key} must be a non-empty string")
+    return value
+
+
+def load_config(config_path: Path, repository_root: Path = REPOSITORY_ROOT) -> list[SourceSpec]:
+    with config_path.open("rb") as handle:
+        config = tomllib.load(handle)
+    if config.get("version") != 1:
+        raise SyncError("sync-sources.toml must declare version = 1")
+    raw_sources = config.get("sources")
+    if not isinstance(raw_sources, list) or not raw_sources:
+        raise SyncError("sync-sources.toml must contain at least one [[sources]] entry")
+
+    specs: list[SourceSpec] = []
+    seen_ids: set[str] = set()
+    destinations: list[Path] = []
+    for index, raw in enumerate(raw_sources):
+        context = f"sources[{index}]"
+        if not isinstance(raw, dict):
+            raise SyncError(f"{context} must be a table")
+        source_id = _required_string(raw, "id", context)
+        if not SOURCE_ID_PATTERN.fullmatch(source_id):
+            raise SyncError(f"{context}.id must use lower-case letters, digits, and hyphens")
+        if source_id in seen_ids:
+            raise SyncError(f"duplicate source id: {source_id}")
+        seen_ids.add(source_id)
+
+        license_source = raw.get("license_source")
+        license_destination = raw.get("license_destination")
+        if (license_source is None) != (license_destination is None):
+            raise SyncError(
+                f"{context} must set license_source and license_destination together"
+            )
+        if license_source is not None and not isinstance(license_source, str):
+            raise SyncError(f"{context}.license_source must be a string")
+        if license_destination is not None and not isinstance(license_destination, str):
+            raise SyncError(f"{context}.license_destination must be a string")
+
+        fields = raw.get("remove_skill_frontmatter_fields", [])
+        if not isinstance(fields, list) or not all(isinstance(item, str) for item in fields):
+            raise SyncError(f"{context}.remove_skill_frontmatter_fields must be strings")
+        if {"name", "description"}.intersection(fields):
+            raise SyncError(f"{context} cannot remove required skill frontmatter fields")
+        suffixes = raw.get("skill_description_suffixes", {})
+        if not isinstance(suffixes, dict) or not all(
+            isinstance(name, str) and isinstance(suffix, str) and suffix.strip()
+            for name, suffix in suffixes.items()
+        ):
+            raise SyncError(f"{context}.skill_description_suffixes must map names to text")
+
+        repository = _required_string(raw, "repository", context)
+        parsed_repository = urlsplit(repository)
+        if parsed_repository.scheme not in {"https", "file"}:
+            raise SyncError(f"{context}.repository must use https:// or file://")
+        if parsed_repository.username or parsed_repository.password:
+            raise SyncError(f"{context}.repository must not contain credentials")
+
+        destination_value = _required_string(raw, "destination", context)
+        manifest_value = _required_string(raw, "plugin_manifest", context)
+        for field_name, value in (
+            ("destination", destination_value),
+            ("plugin_manifest", manifest_value),
+        ):
+            if not Path(value).parts or Path(value).parts[0] != "plugins":
+                raise SyncError(f"{context}.{field_name} must stay under plugins/")
+        if license_destination is not None:
+            if not Path(license_destination).parts or Path(license_destination).parts[0] != "plugins":
+                raise SyncError(f"{context}.license_destination must stay under plugins/")
+
+        spec = SourceSpec(
+            source_id=source_id,
+            repository=repository,
+            ref=_required_string(raw, "ref", context),
+            source=_required_string(raw, "source", context),
+            destination=destination_value,
+            plugin_manifest=manifest_value,
+            license_source=license_source,
+            license_destination=license_destination,
+            remove_frontmatter_fields=tuple(fields),
+            skill_description_suffixes=tuple(sorted(suffixes.items())),
+        )
+        destination = _safe_repository_path(repository_root, spec.destination)
+        for existing in destinations:
+            if destination == existing or destination in existing.parents or existing in destination.parents:
+                raise SyncError(f"overlapping destinations: {existing} and {destination}")
+        destinations.append(destination)
+        specs.append(spec)
+    return specs
+
+
+def _safe_repository_path(root: Path, relative: str, *, allow_root: bool = False) -> Path:
+    path = Path(relative)
+    if path.is_absolute():
+        raise SyncError(f"path must be relative: {relative}")
+    resolved_root = root.resolve()
+    resolved = (resolved_root / path).resolve()
+    if resolved != resolved_root and resolved_root not in resolved.parents:
+        raise SyncError(f"path escapes repository root: {relative}")
+    if resolved == resolved_root and not allow_root:
+        raise SyncError("repository root cannot be a synchronization target")
+    if ".git" in path.parts:
+        raise SyncError(f".git paths cannot be synchronized: {relative}")
+    return resolved
+
+
+def _run(command: list[str]) -> str:
+    result = subprocess.run(command, check=False, capture_output=True, text=True)
+    if result.returncode != 0:
+        detail = result.stderr.strip().splitlines()[-1] if result.stderr.strip() else "unknown error"
+        raise SyncError(f"command failed ({command[0]}): {detail}")
+    return result.stdout.strip()
+
+
+def _reject_symlinks(root: Path) -> None:
+    for path in root.rglob("*"):
+        if path.is_symlink():
+            raise SyncError(f"upstream content contains a symlink: {path.relative_to(root)}")
+
+
+def _normalize_skill_frontmatter(
+    skill_path: Path,
+    fields: tuple[str, ...],
+    description_suffixes: tuple[tuple[str, str], ...],
+) -> None:
+    suffix = dict(description_suffixes).get(skill_path.parent.name)
+    if not fields and suffix is None:
+        return
+    text = skill_path.read_text(encoding="utf-8")
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].strip() != "---":
+        raise SyncError(f"SKILL.md has no YAML frontmatter: {skill_path}")
+    try:
+        end = next(index for index in range(1, len(lines)) if lines[index].strip() == "---")
+    except StopIteration as error:
+        raise SyncError(f"SKILL.md has unterminated YAML frontmatter: {skill_path}") from error
+
+    field_set = set(fields)
+    normalized = [lines[0]]
+    for line in lines[1:end]:
+        match = re.match(r"^([A-Za-z0-9_-]+):", line)
+        if match and match.group(1) in field_set:
+            continue
+        normalized.append(line)
+    if suffix is not None:
+        description_indexes = [
+            index for index, line in enumerate(normalized) if line.startswith("description:")
+        ]
+        if len(description_indexes) != 1:
+            raise SyncError(f"cannot adapt skill description: {skill_path}")
+        index = description_indexes[0]
+        line = normalized[index]
+        newline = "\n" if line.endswith("\n") else ""
+        body = line[:-1] if newline else line
+        if suffix not in body:
+            normalized[index] = f"{body} {suffix.strip()}{newline}"
+    normalized.extend(lines[end:])
+    skill_path.write_text("".join(normalized), encoding="utf-8")
+
+
+def _stage_source(spec: SourceSpec, temporary_root: Path) -> StagedSource:
+    clone_path = temporary_root / f"clone-{spec.source_id}"
+    _run(
+        [
+            "git",
+            "clone",
+            "--quiet",
+            "--depth",
+            "1",
+            "--branch",
+            spec.ref,
+            "--no-tags",
+            "--",
+            spec.repository,
+            str(clone_path),
+        ]
+    )
+    commit = _run(["git", "-C", str(clone_path), "rev-parse", "HEAD"])
+    source_path = _safe_repository_path(clone_path, spec.source, allow_root=True)
+    if not source_path.is_dir():
+        raise SyncError(f"upstream directory does not exist: {spec.source_id}/{spec.source}")
+    _reject_symlinks(source_path)
+
+    staged_content = temporary_root / f"content-{spec.source_id}"
+    shutil.copytree(source_path, staged_content, ignore=shutil.ignore_patterns(".git"))
+    for skill_path in staged_content.rglob("SKILL.md"):
+        _normalize_skill_frontmatter(
+            skill_path,
+            spec.remove_frontmatter_fields,
+            spec.skill_description_suffixes,
+        )
+
+    license_content = None
+    if spec.license_source is not None:
+        license_path = _safe_repository_path(clone_path, spec.license_source, allow_root=True)
+        if not license_path.is_file():
+            raise SyncError(f"upstream license does not exist: {spec.license_source}")
+        if license_path.is_symlink():
+            raise SyncError("upstream license cannot be a symlink")
+        license_content = license_path.read_bytes()
+
+    return StagedSource(spec, commit, staged_content, license_content)
+
+
+def _directory_digest(path: Path) -> str | None:
+    if not path.is_dir():
+        return None
+    digest = hashlib.sha256()
+    for item in sorted(candidate for candidate in path.rglob("*") if candidate.is_file()):
+        if item.is_symlink():
+            raise SyncError(f"destination contains a symlink: {item}")
+        relative = item.relative_to(path).as_posix().encode("utf-8")
+        digest.update(len(relative).to_bytes(8, "big"))
+        digest.update(relative)
+        content = item.read_bytes()
+        digest.update(len(content).to_bytes(8, "big"))
+        digest.update(content)
+    return digest.hexdigest()
+
+
+def _replace_directory(source: Path, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    token = uuid.uuid4().hex
+    incoming = destination.parent / f".{destination.name}.sync-new-{token}"
+    backup = destination.parent / f".{destination.name}.sync-old-{token}"
+    shutil.copytree(source, incoming)
+    moved_old = False
+    try:
+        if destination.exists():
+            destination.rename(backup)
+            moved_old = True
+        incoming.rename(destination)
+        if moved_old:
+            shutil.rmtree(backup)
+    except Exception:
+        if incoming.exists():
+            shutil.rmtree(incoming)
+        if moved_old and backup.exists() and not destination.exists():
+            backup.rename(destination)
+        raise
+
+
+def _write_bytes_atomic(destination: Path, content: bytes) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(f".{destination.name}.tmp-{uuid.uuid4().hex}")
+    temporary.write_bytes(content)
+    temporary.replace(destination)
+
+
+def _write_json_atomic(destination: Path, data: dict[str, Any]) -> None:
+    content = (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    _write_bytes_atomic(destination, content)
+
+
+def _bump_patch_version(manifest_path: Path) -> tuple[str, str]:
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise SyncError(f"cannot read plugin manifest: {manifest_path}") from error
+    version = manifest.get("version")
+    if not isinstance(version, str) or not (match := SEMVER_PATTERN.fullmatch(version)):
+        raise SyncError(f"plugin version must be numeric semver: {manifest_path}")
+    old_version = version
+    manifest["version"] = f"{match.group(1)}.{match.group(2)}.{int(match.group(3)) + 1}"
+    _write_json_atomic(manifest_path, manifest)
+    return old_version, manifest["version"]
+
+
+def synchronize(config_path: Path = DEFAULT_CONFIG, lock_path: Path = DEFAULT_LOCK) -> bool:
+    config_path = config_path.resolve()
+    lock_path = lock_path.resolve()
+    repository_root = config_path.parent
+    if lock_path != repository_root and repository_root not in lock_path.parents:
+        raise SyncError("lock path must stay inside the repository")
+    specs = load_config(config_path, repository_root)
+    changed_manifests: set[Path] = set()
+    lock_sources: dict[str, dict[str, str]] = {}
+    any_change = False
+
+    with tempfile.TemporaryDirectory(prefix="codex-plugin-sync-") as temporary:
+        temporary_root = Path(temporary)
+        staged_sources = [_stage_source(spec, temporary_root) for spec in specs]
+
+        for staged in staged_sources:
+            spec = staged.spec
+            destination = _safe_repository_path(repository_root, spec.destination)
+            content_changed = _directory_digest(staged.content) != _directory_digest(destination)
+            license_changed = False
+            if spec.license_destination is not None and staged.license_content is not None:
+                license_destination = _safe_repository_path(
+                    repository_root, spec.license_destination
+                )
+                current_license = (
+                    license_destination.read_bytes() if license_destination.is_file() else None
+                )
+                license_changed = current_license != staged.license_content
+            if content_changed:
+                _replace_directory(staged.content, destination)
+            if license_changed:
+                _write_bytes_atomic(license_destination, staged.license_content)
+            if content_changed or license_changed:
+                changed_manifests.add(
+                    _safe_repository_path(repository_root, spec.plugin_manifest)
+                )
+                any_change = True
+            lock_sources[spec.source_id] = {
+                "repository": spec.repository,
+                "ref": spec.ref,
+                "commit": staged.commit,
+                "destination": spec.destination,
+            }
+            state = "updated" if content_changed or license_changed else "unchanged"
+            print(f"{spec.source_id}: {state} at {staged.commit[:12]}")
+
+    for manifest_path in sorted(changed_manifests):
+        old_version, new_version = _bump_patch_version(manifest_path)
+        print(f"{manifest_path.relative_to(repository_root)}: {old_version} -> {new_version}")
+
+    lock_data: dict[str, Any] = {"version": 1, "sources": lock_sources}
+    serialized_lock = (json.dumps(lock_data, indent=2, ensure_ascii=False) + "\n").encode()
+    current_lock = lock_path.read_bytes() if lock_path.is_file() else None
+    if current_lock != serialized_lock:
+        _write_bytes_atomic(lock_path, serialized_lock)
+        any_change = True
+        print(f"updated {lock_path.relative_to(repository_root)}")
+    return any_change
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    parser.add_argument("--lock", type=Path, default=DEFAULT_LOCK)
+    args = parser.parse_args()
+    try:
+        synchronize(args.config.resolve(), args.lock.resolve())
+    except SyncError as error:
+        print(f"sync error: {error}")
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
