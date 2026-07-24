@@ -28,7 +28,7 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
-When asked to upload the current device configuration, Codex Sync 0.3.0 first
+When asked to upload the current device configuration, Codex Sync 0.3.1 first
 captures current values for already managed settings, complete providers, global
 instructions, synchronized profiles, and installed non-OpenAI plugins into the
 local repository cache. It excludes app-managed `openai` and `openai-*`

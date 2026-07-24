@@ -158,6 +158,30 @@ fn repository_zip_with_plugins() -> Vec<u8> {
     cursor.into_inner()
 }
 
+fn repository_zip_with_managed_marketplace_and_no_plugins() -> Vec<u8> {
+    let mut cursor = Cursor::new(Vec::new());
+    {
+        let mut zip = zip::ZipWriter::new(&mut cursor);
+        let options = SimpleFileOptions::default();
+        let files = [
+            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
+            ("owner-config-commit/AGENTS.md", "# New\n"),
+            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
+            (
+                "owner-config-commit/marketplaces.toml",
+                "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.com/market.git\"\ngit_ref = \"main\"\n",
+            ),
+            ("owner-config-commit/plugins.toml", ""),
+        ];
+        for (path, content) in files {
+            zip.start_file(path, options).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+        zip.finish().unwrap();
+    }
+    cursor.into_inner()
+}
+
 fn repository_zip_for_capture() -> Vec<u8> {
     let mut cursor = Cursor::new(Vec::new());
     {
@@ -825,6 +849,66 @@ fn failed_plugin_transaction_restores_files_and_plugin_state() {
         fs::read_to_string(codex_home.join("AGENTS.md")).unwrap(),
         "# Old\n"
     );
+}
+
+#[test]
+fn removed_plugin_spec_uninstalls_managed_plugin() {
+    let temporary = tempfile::tempdir().unwrap();
+    let sync_home = temporary.path().join("sync");
+    let codex_home = temporary.path().join("codex");
+    fs::create_dir_all(&codex_home).unwrap();
+    let codex_bin = temporary.path().join("codex-stateful");
+    let plugin_state = temporary.path().join("plugin-state");
+    let marketplace_state = temporary.path().join("marketplace-state");
+    fs::write(&plugin_state, "subagent-dispatch@market|true").unwrap();
+    fs::write(&marketplace_state, "").unwrap();
+    stateful_fake_codex(&codex_bin);
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_STATE", &plugin_state)
+        .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
+        .args([
+            "setup",
+            "--repository",
+            "owner/config",
+            "--device",
+            "test-device",
+        ])
+        .assert()
+        .success();
+    let (api_url, server) = serve_github(
+        "abc123",
+        repository_zip_with_managed_marketplace_and_no_plugins(),
+    );
+    let output = command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_STATE", &plugin_state)
+        .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
+        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
+        .arg("sync")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    server.join().unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("plugin subagent-dispatch@market"));
+    assert!(stdout.contains("remove plugin no longer declared"));
+    let plan_id = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("Plan "))
+        .and_then(|line| line.split_whitespace().next())
+        .unwrap();
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_STATE", &plugin_state)
+        .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
+        .args(["apply", plan_id, "--approve-high-risk"])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains(
+            "removed plugin subagent-dispatch@market",
+        ));
+
+    assert_eq!(fs::read_to_string(plugin_state).unwrap(), "");
 }
 
 #[test]
