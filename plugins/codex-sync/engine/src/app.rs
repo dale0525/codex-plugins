@@ -14,7 +14,11 @@ use crate::config::{
 use crate::github::{http_client, GithubClient};
 use crate::model::{
     LocalState, MarketplaceFile, MarketplaceSpec, PendingPlan, PlannedChange, PluginFile,
-    RepositoryManifest, RepositoryRef, Risk, SCHEMA_VERSION,
+    RepositoryManifest, RepositoryRef, Risk, LOCAL_STATE_SCHEMA_VERSION,
+};
+use crate::profiles::{
+    current_profile_bytes, load_agent_profiles, managed_profile_names, profile_state_sha256,
+    synchronize_agent_profiles,
 };
 use crate::reconcile::{
     add_local_marketplace, installed_plugins, marketplace_names, marketplace_roots, portable_name,
@@ -58,7 +62,7 @@ pub fn setup(
         None
     };
     let state = LocalState {
-        schema_version: SCHEMA_VERSION,
+        schema_version: LOCAL_STATE_SCHEMA_VERSION,
         repository: RepositoryRef::parse(repository, git_ref.to_owned())?,
         device_id: device_id.to_owned(),
         github_client_id: Some(
@@ -79,6 +83,10 @@ pub fn setup(
         managed_paths: previous
             .as_ref()
             .map(|state| state.managed_paths.clone())
+            .unwrap_or_default(),
+        managed_agent_profiles: previous
+            .as_ref()
+            .map(|state| state.managed_agent_profiles.clone())
             .unwrap_or_default(),
         latest_backup: previous.and_then(|state| state.latest_backup),
     };
@@ -204,6 +212,27 @@ fn build_plan(
         });
     }
 
+    let desired_profiles = load_agent_profiles(&paths.repository_dir, &manifest.agent_profiles)?;
+    let profile_names = managed_profile_names(&desired_profiles, &state.managed_agent_profiles)?;
+    for name in &profile_names {
+        let current = current_profile_bytes(&paths.codex_home.join("agents"), name)?;
+        let desired = desired_profiles.get(name);
+        if current.as_ref() != desired {
+            changes.push(PlannedChange {
+                risk: Risk::High,
+                kind: "agent-profile".to_owned(),
+                target: format!("{name}.toml"),
+                summary: match (current.is_some(), desired.is_some()) {
+                    (false, true) => "add synchronized agent profile",
+                    (true, true) => "replace synchronized agent profile",
+                    (true, false) => "remove previously synchronized agent profile",
+                    (false, false) => continue,
+                }
+                .to_owned(),
+            });
+        }
+    }
+
     let marketplace_file: MarketplaceFile =
         read_optional_toml(&paths.repository_dir.join(&manifest.marketplaces))?;
     let configured_marketplaces = marketplace_names()?;
@@ -248,12 +277,15 @@ fn build_plan(
     let high_risk = changes.iter().any(|change| change.risk == Risk::High);
     let base_config_sha256 = sha256(current_config.as_bytes());
     let base_agents_sha256 = sha256(&current_agents);
+    let base_agent_profiles_sha256 =
+        profile_state_sha256(&paths.codex_home.join("agents"), &profile_names)?;
     let repository_sha256 = tree_sha256(&paths.repository_dir)?;
     let plan_seed = serde_json::to_vec(&(
         commit,
         &state.device_id,
         &base_config_sha256,
         &base_agents_sha256,
+        &base_agent_profiles_sha256,
         &repository_sha256,
         &changes,
     ))?;
@@ -265,10 +297,12 @@ fn build_plan(
         device_id: state.device_id.clone(),
         base_config_sha256,
         base_agents_sha256,
+        base_agent_profiles_sha256,
         repository_sha256,
         high_risk,
         changes,
         managed_paths: desired.keys().cloned().collect(),
+        managed_agent_profiles: desired_profiles.keys().cloned().collect(),
     })
 }
 
@@ -291,23 +325,35 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
     }
     let current_config = read_current_config(&paths.codex_home)?;
     let current_agents = fs::read(paths.codex_home.join("AGENTS.md")).unwrap_or_default();
+    let manifest = load_repository_manifest(&paths.repository_dir)?;
+    let desired_profiles = load_agent_profiles(&paths.repository_dir, &manifest.agent_profiles)?;
+    let profile_names = managed_profile_names(&desired_profiles, &state.managed_agent_profiles)?;
     if sha256(current_config.as_bytes()) != plan.base_config_sha256
         || sha256(&current_agents) != plan.base_agents_sha256
+        || profile_state_sha256(&paths.codex_home.join("agents"), &profile_names)?
+            != plan.base_agent_profiles_sha256
     {
         anyhow::bail!("Codex configuration changed after planning; run sync again");
     }
     if tree_sha256(&paths.repository_dir)? != plan.repository_sha256 {
         anyhow::bail!("local repository cache changed after planning; run sync again");
     }
-    let manifest = load_repository_manifest(&paths.repository_dir)?;
     let desired = load_managed_values(&paths.repository_dir, &manifest, &state.device_id)?;
     let rendered = render_config(&current_config, &state.managed_paths, &desired)?;
     let backup = create_backup(&paths, &state, &plan)?;
     let result = (|| -> Result<()> {
-        apply_transaction(&paths, &manifest, &mut state, &plan, &rendered)?;
+        apply_transaction(
+            &paths,
+            &manifest,
+            &desired_profiles,
+            &mut state,
+            &plan,
+            &rendered,
+        )?;
         state.latest_backup = Some(backup.file_name().unwrap().to_string_lossy().into_owned());
         state.last_applied_commit = Some(plan.commit.clone());
         state.managed_paths = plan.managed_paths.clone();
+        state.managed_agent_profiles = plan.managed_agent_profiles.clone();
         save_state(&paths, &state)
     })();
     if let Err(error) = result {
@@ -327,6 +373,7 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
 fn apply_transaction(
     paths: &crate::model::Paths,
     manifest: &RepositoryManifest,
+    desired_profiles: &crate::profiles::AgentProfiles,
     state: &mut LocalState,
     plan: &PendingPlan,
     rendered_config: &str,
@@ -337,6 +384,11 @@ fn apply_transaction(
     )?;
     let agents = fs::read(paths.repository_dir.join(&manifest.agents))?;
     atomic_write(&paths.codex_home.join("AGENTS.md"), &agents)?;
+    synchronize_agent_profiles(
+        &paths.codex_home.join("agents"),
+        desired_profiles,
+        &state.managed_agent_profiles,
+    )?;
 
     let client = http_client()?;
     let token = auth::resolve_token(&client, state.github_client_id.as_deref())?;
@@ -375,6 +427,20 @@ fn create_backup(
             fs::copy(&source, backup.join(file))?;
         } else {
             atomic_write(&backup.join(format!("{file}.absent")), b"")?;
+        }
+    }
+    let profile_backup = backup.join("agent-profiles");
+    fs::create_dir_all(&profile_backup)?;
+    let profile_names: BTreeSet<_> = state
+        .managed_agent_profiles
+        .iter()
+        .chain(plan.managed_agent_profiles.iter())
+        .cloned()
+        .collect();
+    for name in profile_names {
+        match current_profile_bytes(&paths.codex_home.join("agents"), &name)? {
+            Some(bytes) => atomic_write(&profile_backup.join(format!("{name}.toml")), &bytes)?,
+            None => atomic_write(&profile_backup.join(format!("{name}.absent")), b"")?,
         }
     }
     let state_text = toml::to_string_pretty(state)?;
@@ -486,9 +552,42 @@ fn restore_core_files(paths: &crate::model::Paths, backup: &Path) -> Result<()> 
             atomic_write(&destination, &fs::read(&source)?)?;
         }
     }
+    restore_agent_profiles(paths, backup)?;
     let state_backup = backup.join("state.toml");
     if state_backup.exists() {
         atomic_write(&paths.state_file, &fs::read(state_backup)?)?;
+    }
+    Ok(())
+}
+
+fn restore_agent_profiles(paths: &crate::model::Paths, backup: &Path) -> Result<()> {
+    let profile_backup = backup.join("agent-profiles");
+    if !profile_backup.is_dir() {
+        return Ok(());
+    }
+    let previous: LocalState = read_toml(&backup.join("state.toml"))?;
+    let plan: PendingPlan = read_json(&backup.join("plan.json"))?;
+    let names: BTreeSet<_> = previous
+        .managed_agent_profiles
+        .iter()
+        .chain(plan.managed_agent_profiles.iter())
+        .cloned()
+        .collect();
+    let destination = paths.codex_home.join("agents");
+    for name in names {
+        let target = destination.join(format!("{name}.toml"));
+        let source = profile_backup.join(format!("{name}.toml"));
+        if profile_backup.join(format!("{name}.absent")).exists() {
+            match fs::remove_file(&target) {
+                Ok(()) => {}
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(error) => {
+                    return Err(error).with_context(|| format!("remove {}", target.display()))
+                }
+            }
+        } else if source.is_file() {
+            atomic_write(&target, &fs::read(source)?)?;
+        }
     }
     Ok(())
 }
@@ -538,6 +637,14 @@ pub fn status(json: bool) -> Result<()> {
         println!("State: {}", paths.state_file.display());
         println!("Repository cache: {}", paths.repository_dir.display());
         println!("Backups: {}", paths.backups_dir.display());
+        println!(
+            "Managed agent profiles: {}",
+            if state.managed_agent_profiles.is_empty() {
+                "none".to_owned()
+            } else {
+                state.managed_agent_profiles.join(", ")
+            }
+        );
     }
     Ok(())
 }
@@ -553,6 +660,17 @@ pub fn doctor() -> Result<()> {
     if paths.repository_dir.exists() {
         let manifest = load_repository_manifest(&paths.repository_dir)?;
         load_managed_values(&paths.repository_dir, &manifest, &state.device_id)?;
+        let desired_profiles =
+            load_agent_profiles(&paths.repository_dir, &manifest.agent_profiles)?;
+        let profile_names =
+            managed_profile_names(&desired_profiles, &state.managed_agent_profiles)?;
+        for name in profile_names {
+            if current_profile_bytes(&paths.codex_home.join("agents"), &name)?.as_ref()
+                != desired_profiles.get(&name)
+            {
+                println!("warning: synchronized agent profile drift: {name}.toml");
+            }
+        }
         let marketplaces: MarketplaceFile =
             read_optional_toml(&paths.repository_dir.join(&manifest.marketplaces))?;
         let plugins: PluginFile =
@@ -573,34 +691,6 @@ pub fn doctor() -> Result<()> {
         anyhow::bail!("Codex CLI version check failed");
     }
     println!("Codex Sync doctor found no blocking problems");
-    Ok(())
-}
-
-pub fn check_update() -> Result<()> {
-    let result = (|| -> Result<()> {
-        let paths = resolve_paths()?;
-        if !paths.state_file.exists() {
-            return Ok(());
-        }
-        let state = load_state(&paths)?;
-        let client = http_client()?;
-        let token = auth::resolve_token(&client, state.github_client_id.as_deref())?;
-        let github = GithubClient::new(client, token)?;
-        let remote = github.resolve_commit(&state.repository)?;
-        if state.last_applied_commit.as_deref() != Some(remote.as_str()) {
-            println!(
-                "Codex Sync update available: local {}, remote {}. Run `$codex-sync` to review it.",
-                state.last_applied_commit.as_deref().unwrap_or("never"),
-                remote
-            );
-        }
-        Ok(())
-    })();
-    if let Err(error) = result {
-        if std::env::var_os("CODEX_SYNC_DEBUG").is_some() {
-            eprintln!("Codex Sync update check skipped: {error:#}");
-        }
-    }
     Ok(())
 }
 
@@ -754,7 +844,7 @@ fn validate_desired_state(marketplaces: &MarketplaceFile, plugins: &PluginFile) 
 }
 
 fn validate_state(state: &LocalState) -> Result<()> {
-    if state.schema_version != SCHEMA_VERSION {
+    if state.schema_version != LOCAL_STATE_SCHEMA_VERSION {
         anyhow::bail!("unsupported local state schema version");
     }
     validate_device_id(&state.device_id)

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Subagent Dispatch"
-  short_description: "Route and synchronize native Codex subagents"
-  default_prompt: "Use $subagent-dispatch:subagent-dispatch to route this delegated task to the correct native Codex subagent profile."

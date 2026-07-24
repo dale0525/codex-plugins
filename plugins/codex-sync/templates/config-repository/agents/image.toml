@@ -21,7 +21,3 @@ Return saved paths, dimensions, prompts used, reference-input lists, quality-con
 
 [features]
 image_generation = true
-
-[model_providers.cpa]
-name = "cpa"
-supports_websockets = false

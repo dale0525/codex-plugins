@@ -336,8 +336,9 @@ hash = "device-only"
         )
         .unwrap();
         let manifest = RepositoryManifest {
-            schema_version: 1,
+            schema_version: 2,
             agents: "AGENTS.md".to_owned(),
+            agent_profiles: "agents".to_owned(),
             common_config: "common.toml".to_owned(),
             devices: "devices".to_owned(),
             marketplaces: "marketplaces.toml".to_owned(),

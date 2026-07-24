@@ -3,7 +3,8 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
-pub const SCHEMA_VERSION: u32 = 1;
+pub const LOCAL_STATE_SCHEMA_VERSION: u32 = 1;
+pub const REPOSITORY_SCHEMA_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct RepositoryRef {
@@ -57,6 +58,8 @@ pub struct LocalState {
     #[serde(default)]
     pub managed_paths: Vec<Vec<String>>,
     #[serde(default)]
+    pub managed_agent_profiles: Vec<String>,
+    #[serde(default)]
     pub latest_backup: Option<String>,
 }
 
@@ -65,6 +68,8 @@ pub struct RepositoryManifest {
     pub schema_version: u32,
     #[serde(default = "default_agents_path")]
     pub agents: String,
+    #[serde(default = "default_agent_profiles_path")]
+    pub agent_profiles: String,
     #[serde(default = "default_common_config_path")]
     pub common_config: String,
     #[serde(default = "default_devices_path")]
@@ -79,6 +84,10 @@ pub struct RepositoryManifest {
 
 fn default_agents_path() -> String {
     "AGENTS.md".to_owned()
+}
+
+fn default_agent_profiles_path() -> String {
+    "agents".to_owned()
 }
 
 fn default_common_config_path() -> String {
@@ -103,15 +112,16 @@ fn default_providers_path() -> String {
 
 impl RepositoryManifest {
     pub fn validate(&self) -> anyhow::Result<()> {
-        if self.schema_version != SCHEMA_VERSION {
+        if self.schema_version != REPOSITORY_SCHEMA_VERSION {
             anyhow::bail!(
                 "unsupported repository schema version {}; expected {}",
                 self.schema_version,
-                SCHEMA_VERSION
+                REPOSITORY_SCHEMA_VERSION
             );
         }
         for value in [
             &self.agents,
+            &self.agent_profiles,
             &self.common_config,
             &self.devices,
             &self.marketplaces,
@@ -201,10 +211,14 @@ pub struct PendingPlan {
     pub device_id: String,
     pub base_config_sha256: String,
     pub base_agents_sha256: String,
+    #[serde(default)]
+    pub base_agent_profiles_sha256: String,
     pub repository_sha256: String,
     pub high_risk: bool,
     pub changes: Vec<PlannedChange>,
     pub managed_paths: Vec<Vec<String>>,
+    #[serde(default)]
+    pub managed_agent_profiles: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
