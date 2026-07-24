@@ -1,6 +1,6 @@
 {
   "name": "codex-sync",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Synchronize global Codex instructions, portable settings, providers, marketplaces, and plugins through a private GitHub repository.",
   "author": {
     "name": "Logic Tan",

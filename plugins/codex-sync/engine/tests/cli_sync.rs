@@ -75,6 +75,28 @@ fn repository_zip(model: Option<&str>) -> Vec<u8> {
     cursor.into_inner()
 }
 
+fn repository_zip_with_plaintext_provider_token() -> Vec<u8> {
+    let mut cursor = Cursor::new(Vec::new());
+    {
+        let mut zip = zip::ZipWriter::new(&mut cursor);
+        let options = SimpleFileOptions::default();
+        let files = [
+            ("owner-config-commit/codex-sync.toml", "schema_version = 1\n"),
+            ("owner-config-commit/AGENTS.md", "# Synchronized\n"),
+            (
+                "owner-config-commit/providers.toml",
+                "[providers.company]\nname = \"Company API\"\nbase_url = \"https://api.example.com/v1\"\nwire_api = \"responses\"\nexperimental_bearer_token = \"test-provider-bearer-token\"\n",
+            ),
+        ];
+        for (path, content) in files {
+            zip.start_file(path, options).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+        zip.finish().unwrap();
+    }
+    cursor.into_inner()
+}
+
 fn repository_zip_with_plugins() -> Vec<u8> {
     let mut cursor = Cursor::new(Vec::new());
     {
@@ -371,6 +393,56 @@ fn setup_sync_and_apply_preserve_unmanaged_config() {
     let config = fs::read_to_string(codex_home.join("config.toml")).unwrap();
     assert!(!config.contains("model ="));
     assert!(config.contains("/tmp/example"));
+}
+
+#[test]
+fn plaintext_provider_token_is_applied_without_leaking_into_plan_output() {
+    let temporary = tempfile::tempdir().unwrap();
+    let sync_home = temporary.path().join("sync");
+    let codex_home = temporary.path().join("codex");
+    fs::create_dir_all(&codex_home).unwrap();
+    let codex_bin = temporary.path().join("codex-fake");
+    fake_codex(&codex_bin);
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            "owner/config",
+            "--device",
+            "test-device",
+        ])
+        .assert()
+        .success();
+    let (api_url, server) = serve_github("abc123", repository_zip_with_plaintext_provider_token());
+    let output = command(&sync_home, &codex_home, &codex_bin)
+        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
+        .arg("sync")
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    server.join().unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("model_providers.company.experimental_bearer_token"));
+    assert!(!stdout.contains("test-provider-bearer-token"));
+    assert!(!String::from_utf8_lossy(&output.stderr).contains("test-provider-bearer-token"));
+    let plan_id = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("Plan "))
+        .and_then(|line| line.split_whitespace().next())
+        .unwrap();
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .args(["apply", plan_id, "--approve-high-risk"])
+        .assert()
+        .success();
+    assert!(fs::read_to_string(codex_home.join("config.toml"))
+        .unwrap()
+        .contains("experimental_bearer_token = \"test-provider-bearer-token\""));
 }
 
 #[test]
