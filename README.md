@@ -28,6 +28,15 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
+When asked to upload the current device configuration, Codex Sync 0.3.0 first
+captures current values for already managed settings, complete providers, global
+instructions, synchronized profiles, and installed non-OpenAI plugins into the
+local repository cache. It excludes app-managed `openai` and `openai-*`
+marketplaces and plugins, shows the resulting diff, and publishes only after
+explicit approval. Portable HTTPS Git marketplaces can be captured automatically;
+local-only plugin sources are reported and skipped because their code cannot be
+restored on another device.
+
 Apple Design packages seven MIT-licensed design-engineering skills from
 [emilkowalski/skills](https://github.com/emilkowalski/skills). The upstream
 license is preserved in the plugin's `third-party/` directory.

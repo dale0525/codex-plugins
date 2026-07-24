@@ -6,7 +6,7 @@ use anyhow::{Context, Result};
 use toml_edit::{DocumentMut, Item};
 
 use crate::model::{ProviderFile, RepositoryManifest, Risk};
-use crate::storage::{read_optional_toml, read_toml};
+use crate::storage::{atomic_write, read_optional_toml, read_toml};
 
 pub type ManagedValues = BTreeMap<Vec<String>, toml::Value>;
 
@@ -279,6 +279,99 @@ pub fn read_current_config(codex_home: &Path) -> Result<String> {
         Ok(value) => Ok(value),
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(String::new()),
         Err(error) => Err(error).with_context(|| format!("read {}", path.display())),
+    }
+}
+
+pub fn managed_value_paths(target: &Path) -> Result<BTreeSet<Vec<String>>> {
+    if !target.exists() {
+        return Ok(BTreeSet::new());
+    }
+    let target_text = fs::read_to_string(target)
+        .with_context(|| format!("read managed configuration {}", target.display()))?;
+    let target_value = target_text
+        .parse::<toml::Value>()
+        .with_context(|| format!("parse managed configuration {}", target.display()))?;
+    let mut paths = Vec::new();
+    collect_leaf_paths(&target_value, Vec::new(), &mut paths);
+    Ok(paths.into_iter().collect())
+}
+
+pub fn capture_existing_managed_values(
+    current: &str,
+    target: &Path,
+    excluded: &BTreeSet<Vec<String>>,
+) -> Result<()> {
+    if !target.exists() {
+        return Ok(());
+    }
+    let current_value = current
+        .parse::<toml::Value>()
+        .context("parse current Codex config.toml")?;
+    let target_text = fs::read_to_string(target)
+        .with_context(|| format!("read managed configuration {}", target.display()))?;
+    let target_value = target_text
+        .parse::<toml::Value>()
+        .with_context(|| format!("parse managed configuration {}", target.display()))?;
+    let mut paths = Vec::new();
+    collect_leaf_paths(&target_value, Vec::new(), &mut paths);
+    let mut document = if target_text.trim().is_empty() {
+        DocumentMut::new()
+    } else {
+        target_text
+            .parse::<DocumentMut>()
+            .with_context(|| format!("parse managed configuration {}", target.display()))?
+    };
+    for path in paths {
+        if excluded.contains(&path) {
+            continue;
+        }
+        match get_value(&current_value, &path) {
+            Some(value) => set_path(document.as_item_mut(), &path, value)?,
+            None => {
+                remove_path(document.as_item_mut(), &path);
+            }
+        }
+    }
+    let captured = document.to_string();
+    if captured != target_text {
+        atomic_write(target, captured.as_bytes())?;
+    }
+    Ok(())
+}
+
+pub fn capture_current_providers(current: &str, target: &Path) -> Result<()> {
+    let current_value = current
+        .parse::<toml::Value>()
+        .context("parse current Codex config.toml")?;
+    let providers = current_value
+        .as_table()
+        .and_then(|table| table.get("model_providers"))
+        .and_then(toml::Value::as_table)
+        .map(|table| {
+            table
+                .iter()
+                .map(|(name, value)| (name.clone(), value.clone()))
+                .collect()
+        })
+        .unwrap_or_default();
+    let captured = toml::to_string_pretty(&ProviderFile { providers })
+        .context("serialize captured model providers")?;
+    let previous = fs::read_to_string(target).unwrap_or_default();
+    if captured != previous {
+        atomic_write(target, captured.as_bytes())?;
+    }
+    Ok(())
+}
+
+fn collect_leaf_paths(value: &toml::Value, prefix: Vec<String>, output: &mut Vec<Vec<String>>) {
+    if let Some(table) = value.as_table() {
+        for (key, value) in table {
+            let mut path = prefix.clone();
+            path.push(key.clone());
+            collect_leaf_paths(value, path, output);
+        }
+    } else if !prefix.is_empty() {
+        output.push(prefix);
     }
 }
 

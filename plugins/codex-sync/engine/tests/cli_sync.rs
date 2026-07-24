@@ -38,7 +38,11 @@ if [ "${1:-}" = "--version" ]; then
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "list" ]; then
   printf 'MARKETPLACE ROOT\n'
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ]; then
-  printf '{"installed":[]}'
+  if [ -n "${FAKE_CODEX_INSTALLED_JSON:-}" ]; then
+    cat "$FAKE_CODEX_INSTALLED_JSON"
+  else
+    printf '{"installed":[]}'
+  fi
 else
   echo "unexpected codex invocation: $*" >&2
   exit 1
@@ -143,6 +147,45 @@ fn repository_zip_with_plugins() -> Vec<u8> {
             (
                 "owner-config-commit/plugins.toml",
                 "[[plugins]]\nid = \"good@market\"\nenabled = true\n\n[[plugins]]\nid = \"fail@market\"\nenabled = true\n",
+            ),
+        ];
+        for (path, content) in files {
+            zip.start_file(path, options).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+        zip.finish().unwrap();
+    }
+    cursor.into_inner()
+}
+
+fn repository_zip_for_capture() -> Vec<u8> {
+    let mut cursor = Cursor::new(Vec::new());
+    {
+        let mut zip = zip::ZipWriter::new(&mut cursor);
+        let options = SimpleFileOptions::default();
+        let files = [
+            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
+            ("owner-config-commit/AGENTS.md", "# Remote instructions\n"),
+            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
+            (
+                "owner-config-commit/config/common.toml",
+                "model = \"remote-model\"\nmodel_reasoning_effort = \"low\"\n",
+            ),
+            (
+                "owner-config-commit/devices/test-device.toml",
+                "model = \"device-model\"\nweb_search = \"cached\"\n",
+            ),
+            (
+                "owner-config-commit/providers.toml",
+                "[providers.cpa]\nname = \"Old\"\nbase_url = \"https://old.example/v1\"\n",
+            ),
+            (
+                "owner-config-commit/marketplaces.toml",
+                "[[marketplaces]]\nsource = \"git\"\nname = \"private-market\"\nurl = \"https://example.com/private.git\"\ngit_ref = \"main\"\nsparse = []\n",
+            ),
+            (
+                "owner-config-commit/plugins.toml",
+                "[[plugins]]\nid = \"existing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"missing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"documents@openai-primary-runtime\"\nenabled = true\n",
             ),
         ];
         for (path, content) in files {
@@ -430,6 +473,120 @@ fn setup_sync_and_apply_preserve_unmanaged_config() {
     let config = fs::read_to_string(codex_home.join("config.toml")).unwrap();
     assert!(!config.contains("model ="));
     assert!(config.contains("/tmp/example"));
+}
+
+#[test]
+fn capture_updates_managed_state_and_excludes_openai_plugins() {
+    let temporary = tempfile::tempdir().unwrap();
+    let sync_home = temporary.path().join("sync");
+    let codex_home = temporary.path().join("codex");
+    fs::create_dir_all(codex_home.join("agents")).unwrap();
+    fs::write(codex_home.join("AGENTS.md"), "# Local instructions\n").unwrap();
+    fs::write(
+        codex_home.join("agents/default.toml"),
+        UPDATED_DEFAULT_PROFILE,
+    )
+    .unwrap();
+    fs::write(
+        codex_home.join("config.toml"),
+        r#"model = "local-model"
+model_reasoning_effort = "high"
+web_search = "live"
+
+[model_providers.cpa]
+name = "New CPA"
+base_url = "https://new.example/v1"
+wire_api = "responses"
+experimental_bearer_token = "test-captured-token"
+
+[marketplaces.new-private]
+source_type = "git"
+source = "https://example.com/new-private.git"
+ref = "stable"
+"#,
+    )
+    .unwrap();
+    let installed = temporary.path().join("installed.json");
+    fs::write(
+        &installed,
+        r#"{"installed":[
+{"pluginId":"existing@private-market","installed":true,"enabled":true},
+{"pluginId":"new-tool@new-private","installed":true,"enabled":true},
+{"pluginId":"documents@openai-primary-runtime","installed":true,"enabled":true},
+{"pluginId":"browser@openai-bundled","installed":true,"enabled":true},
+{"pluginId":"local-tool@personal","installed":true,"enabled":true}
+]}"#,
+    )
+    .unwrap();
+    let codex_bin = temporary.path().join("codex-fake");
+    fake_codex(&codex_bin);
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            "owner/config",
+            "--device",
+            "test-device",
+        ])
+        .assert()
+        .success();
+    let (api_url, server) = serve_github("abc123", repository_zip_for_capture());
+    command(&sync_home, &codex_home, &codex_bin)
+        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
+        .arg("sync")
+        .assert()
+        .success();
+    server.join().unwrap();
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_INSTALLED_JSON", &installed)
+        .arg("capture")
+        .assert()
+        .success()
+        .stdout(predicates::str::contains(
+            "captured 2 installed non-OpenAI plugin(s)",
+        ))
+        .stdout(predicates::str::contains(
+            "excluded 2 OpenAI-managed plugin(s)",
+        ))
+        .stdout(predicates::str::contains("skipped local-tool@personal"));
+
+    let repository = sync_home.join("repository");
+    let common = fs::read_to_string(repository.join("config/common.toml")).unwrap();
+    assert!(common.contains("model = \"remote-model\""));
+    assert!(common.contains("model_reasoning_effort = \"high\""));
+    let device = fs::read_to_string(repository.join("devices/test-device.toml")).unwrap();
+    assert!(device.contains("model = \"local-model\""));
+    assert!(device.contains("web_search = \"live\""));
+    let providers = fs::read_to_string(repository.join("providers.toml")).unwrap();
+    assert!(providers.contains("name = \"New CPA\""));
+    assert!(providers.contains("experimental_bearer_token = \"test-captured-token\""));
+    assert_eq!(
+        fs::read_to_string(repository.join("AGENTS.md")).unwrap(),
+        "# Local instructions\n"
+    );
+    assert_eq!(
+        fs::read_to_string(repository.join("agents/default.toml")).unwrap(),
+        UPDATED_DEFAULT_PROFILE
+    );
+    let plugins = fs::read_to_string(repository.join("plugins.toml")).unwrap();
+    assert!(plugins.contains("existing@private-market"));
+    assert!(plugins.contains("new-tool@new-private"));
+    assert!(plugins.contains("missing@private-market"));
+    assert!(plugins.contains("enabled = false"));
+    assert!(!plugins.contains("openai-"));
+    assert!(!plugins.contains("local-tool@personal"));
+    let marketplaces = fs::read_to_string(repository.join("marketplaces.toml")).unwrap();
+    assert!(marketplaces.contains("name = \"new-private\""));
+    assert!(marketplaces.contains("git_ref = \"stable\""));
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_INSTALLED_JSON", &installed)
+        .arg("capture")
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("unpublished edits"));
 }
 
 #[test]

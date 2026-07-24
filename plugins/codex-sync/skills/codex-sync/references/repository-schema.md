@@ -149,3 +149,18 @@ The repository declares desired portable state. It does not own or transport:
 - hook trust decisions
 - desktop runtime state unless explicitly placed in portable or device config
 - downloaded marketplace or plugin caches
+
+## Current-device capture
+
+`codex-sync capture` transactionally updates the repository cache from the current device. It captures:
+
+- current values for leaf keys already declared by common and current-device configuration, while preserving common values shadowed by a device override
+- complete current `model_providers` tables into `providers.toml`, subject to the normal secret policy
+- global `AGENTS.md` and the profile files already synchronized by the repository
+- installed and enabled plugins outside marketplaces named `openai` or beginning with `openai-`
+
+Capture removes OpenAI-managed plugin and marketplace declarations from the cache. A previously declared portable plugin that is absent on the current device is retained with `enabled = false`, allowing other devices to remove it after reviewed synchronization.
+
+When an installed plugin uses an undeclared marketplace, capture can add that marketplace only when current Codex configuration records a portable HTTPS Git source and ref. Local marketplaces, including the implicit personal marketplace, are skipped with a warning because the configuration repository does not transport plugin source code.
+
+Capture does not discover arbitrary new common or device configuration keys. Add a new key to the appropriate repository file once to establish its ownership and portability; later captures update its current value automatically.

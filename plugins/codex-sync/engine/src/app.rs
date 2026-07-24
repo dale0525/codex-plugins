@@ -778,13 +778,16 @@ fn scan_repository_for_obvious_secrets(root: &Path) -> Result<()> {
     visit(root, root)
 }
 
-fn load_repository_manifest(repository: &Path) -> Result<RepositoryManifest> {
+pub(crate) fn load_repository_manifest(repository: &Path) -> Result<RepositoryManifest> {
     let manifest: RepositoryManifest = read_toml(&repository.join("codex-sync.toml"))?;
     manifest.validate()?;
     Ok(manifest)
 }
 
-fn validate_desired_state(marketplaces: &MarketplaceFile, plugins: &PluginFile) -> Result<()> {
+pub(crate) fn validate_desired_state(
+    marketplaces: &MarketplaceFile,
+    plugins: &PluginFile,
+) -> Result<()> {
     let mut names = BTreeSet::new();
     for marketplace in &marketplaces.marketplaces {
         if !portable_name(marketplace.name()) {
@@ -843,7 +846,7 @@ fn validate_desired_state(marketplaces: &MarketplaceFile, plugins: &PluginFile) 
     Ok(())
 }
 
-fn validate_state(state: &LocalState) -> Result<()> {
+pub(crate) fn validate_state(state: &LocalState) -> Result<()> {
     if state.schema_version != LOCAL_STATE_SCHEMA_VERSION {
         anyhow::bail!("unsupported local state schema version");
     }
