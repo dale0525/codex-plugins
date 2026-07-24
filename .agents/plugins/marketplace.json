@@ -1,0 +1,20 @@
+{
+  "name": "dale0525-codex-plugins",
+  "interface": {
+    "displayName": "Dale's Codex Plugins"
+  },
+  "plugins": [
+    {
+      "name": "subagent-dispatch",
+      "source": {
+        "source": "local",
+        "path": "./plugins/subagent-dispatch"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

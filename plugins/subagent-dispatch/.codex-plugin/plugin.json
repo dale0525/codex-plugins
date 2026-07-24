@@ -1,0 +1,35 @@
+{
+  "name": "subagent-dispatch",
+  "version": "1.0.0",
+  "description": "Stable native subagent profile routing and cross-device profile initialization for Codex.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins#readme",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "subagents",
+    "profiles",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Subagent Dispatch",
+    "shortDescription": "Route work through three stable native profiles.",
+    "longDescription": "Routes delegated work to default, creative_text, or image and keeps those native Codex profiles synchronized across devices through plugin lifecycle hooks.",
+    "developerName": "Logic Tan",
+    "category": "Productivity",
+    "capabilities": [
+      "Subagent routing",
+      "Profile synchronization"
+    ],
+    "defaultPrompt": [
+      "Use the right subagent profile for this task.",
+      "Check and repair my three subagent profiles."
+    ]
+  }
+}

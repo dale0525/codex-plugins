@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/scripts/install_profiles.py\" --quiet",
+            "command_windows": "python \"%PLUGIN_ROOT%\\scripts\\install_profiles.py\" --quiet",
+            "timeout": 60,
+            "statusMessage": "Synchronizing native subagent profiles"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Agent$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/scripts/install_profiles.py\" --quiet",
+            "command_windows": "python \"%PLUGIN_ROOT%\\scripts\\install_profiles.py\" --quiet",
+            "timeout": 60,
+            "statusMessage": "Synchronizing native subagent profiles before spawn"
+          }
+        ]
+      }
+    ]
+  }
+}
