@@ -21,9 +21,9 @@ use crate::profiles::{
     synchronize_agent_profiles,
 };
 use crate::reconcile::{
-    add_local_marketplace, installed_plugins, marketplace_names, marketplace_roots, portable_name,
-    reconcile_marketplaces, reconcile_plugins, remove_marketplace, restore_installed_plugins,
-    validate_plugin_id, InstalledPlugin,
+    add_local_marketplace, installed_plugins, marketplace_names, marketplace_roots,
+    plugin_ids_to_remove, portable_name, reconcile_marketplaces, reconcile_plugins,
+    remove_marketplace, restore_installed_plugins, validate_plugin_id, InstalledPlugin,
 };
 use crate::storage::{
     acquire_lock, atomic_write, copy_tree, ensure_data_dirs, load_state, read_json,
@@ -253,6 +253,20 @@ fn build_plan(
         read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
     validate_desired_state(&marketplace_file, &plugin_file)?;
     let installed = installed_plugins()?;
+    let managed_marketplaces: BTreeSet<_> = marketplace_file
+        .marketplaces
+        .iter()
+        .map(|marketplace| marketplace.name().to_owned())
+        .collect();
+    for plugin_id in plugin_ids_to_remove(&installed, &plugin_file.plugins, &managed_marketplaces)?
+    {
+        changes.push(PlannedChange {
+            risk: Risk::High,
+            kind: "plugin".to_owned(),
+            target: plugin_id,
+            summary: "remove plugin no longer declared by synchronized state".to_owned(),
+        });
+    }
     for plugin in &plugin_file.plugins {
         let current = installed.iter().find(|value| value.plugin_id == plugin.id);
         let differs = if plugin.enabled {
@@ -401,7 +415,12 @@ fn apply_transaction(
         println!("{message}");
     }
     let plugins: PluginFile = read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
-    for message in reconcile_plugins(&plugins.plugins)? {
+    let managed_marketplaces: BTreeSet<_> = marketplaces
+        .marketplaces
+        .iter()
+        .map(|marketplace| marketplace.name().to_owned())
+        .collect();
+    for message in reconcile_plugins(&plugins.plugins, &managed_marketplaces)? {
         println!("{message}");
     }
     state.last_applied_commit = Some(plan.commit.clone());

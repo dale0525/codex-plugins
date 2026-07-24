@@ -155,13 +155,39 @@ fn validate_marketplace_snapshot(expected_name: &str, root: &Path) -> Result<()>
     Ok(())
 }
 
-pub fn reconcile_plugins(specs: &[PluginSpec]) -> Result<Vec<String>> {
+pub fn plugin_ids_to_remove(
+    installed: &[InstalledPlugin],
+    specs: &[PluginSpec],
+    managed_marketplaces: &BTreeSet<String>,
+) -> Result<Vec<String>> {
+    let desired_ids: BTreeSet<_> = specs.iter().map(|spec| spec.id.as_str()).collect();
+    let mut removals = Vec::new();
+    for plugin in installed.iter().filter(|plugin| plugin.installed) {
+        let marketplace = plugin_marketplace(&plugin.plugin_id)?;
+        if managed_marketplaces.contains(marketplace)
+            && !is_openai_managed_marketplace(marketplace)
+            && !desired_ids.contains(plugin.plugin_id.as_str())
+        {
+            removals.push(plugin.plugin_id.clone());
+        }
+    }
+    Ok(removals)
+}
+
+pub fn reconcile_plugins(
+    specs: &[PluginSpec],
+    managed_marketplaces: &BTreeSet<String>,
+) -> Result<Vec<String>> {
     let installed = installed_plugins()?;
     let by_id: BTreeMap<_, _> = installed
         .iter()
         .map(|plugin| (plugin.plugin_id.as_str(), plugin))
         .collect();
     let mut messages = Vec::new();
+    for plugin_id in plugin_ids_to_remove(&installed, specs, managed_marketplaces)? {
+        codex_output(&["plugin", "remove", &plugin_id])?;
+        messages.push(format!("removed plugin {plugin_id}"));
+    }
     for spec in specs {
         validate_plugin_id(&spec.id)?;
         let current = by_id.get(spec.id.as_str());
@@ -283,5 +309,42 @@ mod tests {
         assert!(is_openai_managed_marketplace("openai-curated-remote"));
         assert!(!is_openai_managed_marketplace("dale0525-codex-plugins"));
         assert!(!is_openai_managed_marketplace("personal"));
+    }
+
+    #[test]
+    fn plugin_removals_are_scoped_to_declared_non_openai_marketplaces() {
+        let installed = [
+            InstalledPlugin {
+                plugin_id: "retired@managed-market".to_owned(),
+                installed: true,
+                enabled: true,
+            },
+            InstalledPlugin {
+                plugin_id: "current@managed-market".to_owned(),
+                installed: true,
+                enabled: true,
+            },
+            InstalledPlugin {
+                plugin_id: "local@personal".to_owned(),
+                installed: true,
+                enabled: true,
+            },
+            InstalledPlugin {
+                plugin_id: "browser@openai-bundled".to_owned(),
+                installed: true,
+                enabled: true,
+            },
+        ];
+        let specs = [PluginSpec {
+            id: "current@managed-market".to_owned(),
+            enabled: true,
+        }];
+        let managed_marketplaces =
+            BTreeSet::from(["managed-market".to_owned(), "openai-bundled".to_owned()]);
+
+        assert_eq!(
+            plugin_ids_to_remove(&installed, &specs, &managed_marketplaces).unwrap(),
+            ["retired@managed-market"]
+        );
     }
 }

@@ -138,6 +138,7 @@ enabled = true
 ```
 
 Plugin IDs must use `plugin@marketplace` syntax. `enabled = false` means the plugin should be absent on synchronized devices.
+For each non-OpenAI marketplace declared in `marketplaces.toml`, `plugins.toml` is the complete synchronized plugin set. Removing an installed plugin's entry schedules a high-risk uninstall through `codex plugin remove`, which removes its local configuration and cache. Plugins from undeclared marketplaces are preserved.
 
 ## Ownership behavior
 
