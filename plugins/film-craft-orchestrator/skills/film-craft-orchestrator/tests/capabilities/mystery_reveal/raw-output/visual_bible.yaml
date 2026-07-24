@@ -1,0 +1,23 @@
+project_id: mystery_reveal
+aspect_ratio: "16:9"
+palette: slate blue shadows, tungsten practical over table, red thread accent
+characters:
+  detective_lin:
+    id: detective_lin_v1
+    silhouette: charcoal raincoat, short dark hair, narrow metal watch
+    must_not_drift: watch on left wrist; coat remains buttoned until final reaction
+  mara:
+    id: mara_v1
+    silhouette: cream knit sweater, rust wool coat draped on chair, loose braid
+    must_not_drift: small silver ear cuff on right ear; rust coat carries red thread at hem
+location:
+  id: kitchen_apt_v1
+  layout: table center, window screen right, kettle screen left, hallway rear left
+  axis: camera stays on kitchen side of table; window remains screen right
+props:
+  tea_cup: white ceramic cup, blue rim, half-full amber tea; state cooling
+  red_thread: 20cm crimson cotton strand; states under_saucer, trailing_to_latch, caught_on_coat
+  window_latch: brass latch cracked at hinge; state loose then thread-caught
+lighting: 4300K moon fill from window right; 3000K practical over table; police red/blue pulses only final 8s
+camera: 35mm equivalent wides, 65mm inserts, eye height 1.55m, shallow focus only for clue inserts
+motif: red thread migrates from hidden clue to visible causal link

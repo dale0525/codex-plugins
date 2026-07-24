@@ -1,0 +1,235 @@
+{
+  "id": "visual-comedy-retest.prompt-pack",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [],
+  "assumptions": [],
+  "constraints": {},
+  "open_questions": [],
+  "status": "qc_pending",
+  "change_log": [],
+  "prompts": [
+    {
+      "prompt_id": "PROMPT-C-S01-01",
+      "clip_id": "C-S01-01",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": [
+          "CHAR-WORKER"
+        ],
+        "action": {
+          "start": "ready",
+          "motion": "single umbrella gag",
+          "end": "reaction"
+        },
+        "environment": "cafe",
+        "camera": {
+          "movement": "locked"
+        },
+        "lighting": "warm",
+        "temporal_constraints": {
+          "duration_sec": 5
+        },
+        "continuity_invariants": [
+          "PROP-UMBRELLA"
+        ]
+      },
+      "rendered_prompt": "Wordless cafe entry; worker places red umbrella on rack.",
+      "rendered_prompt_hash": "73af2f40e02a2d1f8d62753baa70f23393de10835270eb4c4f00608f80637d9f",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-02",
+      "clip_id": "C-S01-02",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": [
+          "CHAR-WORKER"
+        ],
+        "action": {
+          "start": "ready",
+          "motion": "single umbrella gag",
+          "end": "reaction"
+        },
+        "environment": "cafe",
+        "camera": {
+          "movement": "locked"
+        },
+        "lighting": "warm",
+        "temporal_constraints": {
+          "duration_sec": 5
+        },
+        "continuity_invariants": [
+          "PROP-UMBRELLA"
+        ]
+      },
+      "rendered_prompt": "Wordless cafe gag; customer gets shoe mist and hops.",
+      "rendered_prompt_hash": "c2f3f9bc2a4674722d7e1622249294528c145fe523c317700acd716a39d470c4",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-03",
+      "clip_id": "C-S01-03",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": [
+          "CHAR-WORKER"
+        ],
+        "action": {
+          "start": "ready",
+          "motion": "single umbrella gag",
+          "end": "reaction"
+        },
+        "environment": "cafe",
+        "camera": {
+          "movement": "push"
+        },
+        "lighting": "warm",
+        "temporal_constraints": {
+          "duration_sec": 5
+        },
+        "continuity_invariants": [
+          "PROP-UMBRELLA"
+        ]
+      },
+      "rendered_prompt": "Wordless gag; side jet spins orange-scarf customer.",
+      "rendered_prompt_hash": "012f8efddcb70dc1c65cc4b61c1fb5f1da1e55f9bc055ed7e57b831d046b9484",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-04",
+      "clip_id": "C-S01-04",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": [
+          "CHAR-WORKER"
+        ],
+        "action": {
+          "start": "ready",
+          "motion": "single umbrella gag",
+          "end": "reaction"
+        },
+        "environment": "cafe",
+        "camera": {
+          "movement": "locked"
+        },
+        "lighting": "warm",
+        "temporal_constraints": {
+          "duration_sec": 5
+        },
+        "continuity_invariants": [
+          "PROP-UMBRELLA"
+        ]
+      },
+      "rendered_prompt": "Wordless gag; upward burst makes customer applaud.",
+      "rendered_prompt_hash": "342aa09fe636735c8d5977fcec4667e0ce69c200945944203079ba17629289c5",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-05",
+      "clip_id": "C-S01-05",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": [
+          "CHAR-WORKER"
+        ],
+        "action": {
+          "start": "ready",
+          "motion": "single umbrella gag",
+          "end": "reaction"
+        },
+        "environment": "cafe",
+        "camera": {
+          "movement": "push"
+        },
+        "lighting": "warm",
+        "temporal_constraints": {
+          "duration_sec": 5
+        },
+        "continuity_invariants": [
+          "PROP-UMBRELLA"
+        ]
+      },
+      "rendered_prompt": "Deadpan worker grips umbrella; warning drip.",
+      "rendered_prompt_hash": "ead853b2214c79b3619fd235900f262a18b500c2ae624ad2389dfd143047e234",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-06",
+      "clip_id": "C-S01-06",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": [
+          "CHAR-WORKER"
+        ],
+        "action": {
+          "start": "ready",
+          "motion": "single umbrella gag",
+          "end": "reaction"
+        },
+        "environment": "cafe",
+        "camera": {
+          "movement": "locked"
+        },
+        "lighting": "warm",
+        "temporal_constraints": {
+          "duration_sec": 5
+        },
+        "continuity_invariants": [
+          "PROP-UMBRELLA"
+        ]
+      },
+      "rendered_prompt": "Final wordless payoff; worker drenched by umbrella.",
+      "rendered_prompt_hash": "a0858c6320e3dd39067e901a69047a54dfb84740c5c6d9f07d2077139581e0c8",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+id: action-multi.edit-plan
+version: 1.0.0
+owner_role: editor
+source_inputs: [action-multi.clip-qc@1.0.0]
+assumptions: ["所有clip尚未生成，时间线为planned"]
+constraints: {runtime_target_sec: 45, aspect_ratio: "16:9"}
+open_questions: ["实际可用in/out与handles待QC"]
+status: pending
+change_log: []
+timeline:
+  - {clip_id: C-S01-01, contribution_sec: 5, must_beat_ids: [S01-B01], edit_trigger: "door opens"}
+  - {clip_id: C-S01-02, contribution_sec: 5, must_beat_ids: [S01-B02], edit_trigger: "B blocks"}
+  - {clip_id: C-S01-03, contribution_sec: 5, must_beat_ids: [S01-B03], edit_trigger: "rope lands"}
+  - {clip_id: C-S01-04, contribution_sec: 5, must_beat_ids: [S01-B04], edit_trigger: "A recoils"}
+  - {clip_id: C-S01-05, contribution_sec: 5, must_beat_ids: [S01-B05], edit_trigger: "stop hand"}
+  - {clip_id: C-S01-06, contribution_sec: 5, must_beat_ids: [S01-B06], edit_trigger: "signal visible"}
+  - {clip_id: C-S01-07, contribution_sec: 5, must_beat_ids: [S01-B07], edit_trigger: "route turn"}
+  - {clip_id: C-S01-08, contribution_sec: 5, must_beat_ids: [S01-B08], edit_trigger: "hands contact"}
+  - {clip_id: C-S01-09, contribution_sec: 5, must_beat_ids: [S01-B09], edit_trigger: "arms lower"}
+runtime_reconciliation: pending

@@ -1,0 +1,12 @@
+project_id: mystery_reveal
+viewer_knowledge:
+  - Viewer sees red thread under saucer at 8s; Lin must not see it until 38s.
+  - Viewer hears window latch rattle before it is shown, creating an offscreen bridge.
+attention_order: cup temperature -> red thread -> Mara's alibi -> latch -> footprints -> thread on coat
+misdirection: Hold Mara's phone-call explanation in foreground; her hands stay visible and calm.
+blocking: Lin enters screen left and tracks clockwise from cup to window; Mara remains screen right between Lin and latch.
+performance: Lin clipped and procedural; Mara answers half a beat too quickly, then stills when latch is touched.
+camera_language: Locked wides for geography, restrained slider push for clue inserts, handheld micro-wobble only at reveal.
+coverage: Audience clue insert, alibi two-shot, cup/latch match action, footprints insert, coat-thread reveal, reaction close-up.
+sound_strategy: Steam hiss and refrigerator hum bridge kitchen shots; latch rattle starts offscreen and resolves on visible latch; police-light hum enters before reveal.
+no_explanatory_subtitles: true

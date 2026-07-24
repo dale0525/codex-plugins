@@ -1,0 +1,34 @@
+id: radio-montage.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [radio-montage.story-scene-map@1.0.0]
+assumptions: []
+constraints: {aspect_ratio: "16:9", runtime_target_sec: 40}
+open_questions: []
+status: frozen
+change_log: []
+audience_knowledge: "The audience tracks restoration progress through texture, hand action and sound, not labels."
+attention_path: [radio_face, restorer_hands, debris_or_solder, dial_lamp_and_speaker]
+blocking:
+  axis: "workbench horizontal axis"
+  screen_direction: "radio faces camera three-quarter left; hands enter from right in every stage"
+  power_change: "object gains agency as its surfaces clean and speaker begins moving"
+coverage_strategy: "repeat a locked medium-wide master, with brief inserts that preserve the same radio position"
+sound_intent: "one tuning-hum motif evolves from absent to noisy carrier to resolved human voice"
+non_negotiables: ["no explanatory subtitles", "same composition and radio orientation in all stages", "16:9"]
+scenes:
+  - scene_id: S01
+    audience_knowledge: "Progress is inferred from material and sound change."
+    audience_misunderstanding: "The radio may remain dead until the final carrier resolves."
+    attention_path: [radio_face, restorer_hands, repair_detail, dial_lamp, speaker]
+    axis: "workbench horizontal axis"
+    screen_direction: {radio: "three-quarter left", hands: "enter from right"}
+    performance_beats: []
+    blocking_beats: []
+    coverage_strategy: "locked repeated master with inserts"
+    base_clip_purpose: "show one restoration action and visible state change"
+    required_coverage: []
+    sound_intent: "tuning-hum motif evolves into clear voice"
+    non_negotiables: ["no subtitles", "same composition"]
+    generation_risks: []
+    fallbacks: []

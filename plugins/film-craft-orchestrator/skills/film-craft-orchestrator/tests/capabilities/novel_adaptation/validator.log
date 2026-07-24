@@ -1,0 +1,63 @@
+OK: 7 model adapters with official sources
+ERROR: root: prompts must be a non-empty list
+ERROR: root: clips must be a non-empty ordered list
+ERROR: brief: missing id
+ERROR: brief: missing version
+ERROR: brief: missing owner_role
+ERROR: brief: missing constraints
+ERROR: brief: constraints.runtime_target_sec must be positive
+ERROR: story-and-scene-map: missing id
+ERROR: story-and-scene-map: missing version
+ERROR: story-and-scene-map: missing status
+ERROR: story-and-scene-map: missing scenes
+ERROR: story-and-scene-map: missing must_beat_ids
+ERROR: story-and-scene-map: missing runtime_reconciliation
+ERROR: director-intent: missing id
+ERROR: director-intent: missing version
+ERROR: director-intent: missing scenes
+ERROR: director-intent.scenes: must be a list
+ERROR: visual-bible: missing id
+ERROR: visual-bible: missing version
+ERROR: visual-bible: missing aspect_ratio
+ERROR: visual-bible: missing lighting_rules
+ERROR: visual-bible: missing locations
+ERROR: visual-bible.characters: must be a list
+ERROR: visual-bible.locations: must be a list
+ERROR: visual-bible.props: must be a list
+ERROR: clip-plan.csv row 2: unknown scene_id
+ERROR: clip-plan.csv row 2: unknown location_id
+ERROR: clip-plan.csv row 3: unknown scene_id
+ERROR: clip-plan.csv row 3: unknown location_id
+ERROR: clip-plan.csv row 4: unknown scene_id
+ERROR: clip-plan.csv row 4: unknown location_id
+ERROR: clip-plan.csv row 5: unknown scene_id
+ERROR: clip-plan.csv row 5: unknown location_id
+ERROR: clip-plan.csv row 6: unknown scene_id
+ERROR: clip-plan.csv row 6: unknown location_id
+ERROR: clip-plan.csv row 7: unknown scene_id
+ERROR: clip-plan.csv row 7: unknown location_id
+ERROR: clip-plan.csv row 8: unknown scene_id
+ERROR: clip-plan.csv row 8: unknown location_id
+ERROR: clip-plan.csv row 9: unknown scene_id
+ERROR: clip-plan.csv row 9: unknown location_id
+ERROR: reference-asset-manifest: missing id
+ERROR: reference-asset-manifest: missing version
+ERROR: reference-asset-manifest: missing assets
+ERROR: generation-prompt-pack.prompts: must be a list
+ERROR: generation-prompt-pack.prompts: missing IDs ['C01', 'C02', 'C03', 'C04', 'C05', 'C06', 'C07', 'C08']
+ERROR: continuity-state.clips: must be a list
+ERROR: continuity-state.clips: missing IDs ['C01', 'C02', 'C03', 'C04', 'C05', 'C06', 'C07', 'C08']
+ERROR: generation-log.jsonl record 1: missing run_id
+ERROR: generation-log.jsonl record 1: missing clip_id
+ERROR: generation-log.jsonl record 1: missing attempt
+ERROR: generation-log.jsonl record 1: missing primary_variable
+ERROR: generation-log.jsonl record 1: missing adapter_id
+ERROR: generation-log.jsonl record 1: unknown clip_id
+ERROR: generation-log.jsonl record 1: attempt must be a positive integer
+ERROR: generation-log.jsonl: missing IDs ['C01', 'C02', 'C03', 'C04', 'C05', 'C06', 'C07', 'C08']
+ERROR: generation-log.jsonl: unknown IDs ['']
+ERROR: clip-qc-report.clips: must be a list
+ERROR: clip-qc-report.clips: missing IDs ['C01', 'C02', 'C03', 'C04', 'C05', 'C06', 'C07', 'C08']
+ERROR: edit-plan.timeline: must be a non-empty list
+ERROR: validate_prompt_pack.py: exit 1
+ERROR: validate_continuity_state.py: exit 1

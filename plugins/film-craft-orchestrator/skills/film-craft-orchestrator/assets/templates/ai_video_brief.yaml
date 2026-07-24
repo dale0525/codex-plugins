@@ -1,0 +1,22 @@
+id: project.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints:
+  runtime_target_sec: 60
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: []
+status: draft
+change_log: []
+format: short
+audience: ""
+genre_tone: ""
+rights_status: unknown
+creative_goal: ""
+must_beats: []
+generation_constraints:
+  available_models: []
+  dialogue_strategy: separate_audio_then_lipsync

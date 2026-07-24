@@ -1,0 +1,306 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-23",
+  "definition": "只有具备可定位字幕/人工复核 ASR/画面证据，并同时提供适用条件、输入、步骤、产物、失败信号、验收测试和完成示例的单元，才称为可执行蒸馏程序。",
+  "source_quality_note": "video_claim 只表示视频中的创作者或作者这样主张；程序是本 skill 对该主张的工程化转译，不是行业定律。",
+  "procedures": [
+    {
+      "id": "adapt-source-lift-and-return",
+      "domain": "adaptation",
+      "title": "原作提取—离源初稿—回源补漏",
+      "source": {
+        "video_id": "pN7KIxUXPwo",
+        "title": "She Said Writer on Turning Novels into Scripts | BAFTA Screenwriters' Lecture Series",
+        "channel": "BAFTA",
+        "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo",
+        "speaker_context": "编剧 Rebecca Lenkiewicz 讲述个人改编流程",
+        "evidence_type": "asr_reviewed",
+        "evidence_level": "E2"
+      },
+      "claim_refs": [
+        {
+          "start_sec": 67.4,
+          "end_sec": 131.88,
+          "kind": "video_claim",
+          "paraphrase": "她先反复阅读并在实体书上划线，再把事件与必需对白提成要点。"
+        },
+        {
+          "start_sec": 131.88,
+          "end_sec": 145.76,
+          "kind": "video_claim",
+          "paraphrase": "她很快进入实际改编，暂时离开原作，以免被材料压住。"
+        },
+        {
+          "start_sec": 123.64,
+          "end_sec": 145.76,
+          "kind": "video_claim",
+          "paraphrase": "初稿建立信心后再回到原材料，检查遗漏并补回必要内容。"
+        }
+      ],
+      "applicability": {
+        "use_when": ["有明确原作版本", "原作篇幅大到逐段忠实会阻碍起稿", "需要保留重要事件或对白"],
+        "do_not_use_when": ["尚未拿到源文本", "法律或事实核验要求逐字比对", "用户要求纯原创而非改编"]
+      },
+      "inputs": ["带稳定段落/页码的源文本", "目标片长或页数", "不可妥协项", "权利与虚构许可状态"],
+      "steps": [
+        {"step": 1, "action": "完成一次不中断通读，只标事件、关系变化、关键原句和无法直接影视化的内在材料。", "check": "每条笔记带 source_locator，不写改编方案。"},
+        {"step": 2, "action": "把标记压成 source lift：每条只写发生了什么、为什么重要、必须保留的原句。", "check": "单条不超过三行，事件与解释分开。"},
+        {"step": 3, "action": "暂时关闭原作，仅凭 source lift 写第一版 beat sheet 和场景卡。", "check": "每个 beat 有可见行动、选择或信息变化。"},
+        {"step": 4, "action": "完成离源草稿后回到原作，逐条标 covered、transformed、missed、intentionally_omitted。", "check": "每个 missed 项要么补入，要么写明舍弃理由。"},
+        {"step": 5, "action": "冻结 source-to-screen coverage 表，才进入对白润色。", "check": "下游场景均能追溯到 source lift 或明确 invent。"}
+      ],
+      "outputs": ["source_lift.yaml", "离源 beat sheet", "source-to-screen coverage 表", "遗漏与有意舍弃日志"],
+      "failure_signals": ["边读边逐句改写，导致场景只是原文缩写", "离源草稿出现大量无 source_locator 的原作事实", "回源检查只补情节，不检查人物关系与叙事视角"],
+      "acceptance_tests": [
+        {"test": "覆盖追溯", "pass_criteria": "100% must_preserve 项有 screen_unit；100% invent 项明确标注。"},
+        {"test": "媒介转换", "pass_criteria": "每个 screen_unit 至少包含一个可见行动、声音线索或空间变化。"},
+        {"test": "独立可读", "pass_criteria": "未读原作的审阅者能用一句话复述主角目标、阻碍和结尾选择。"}
+      ],
+      "worked_example": {
+        "source": "小说写：女孩在十页内反复猜测父亲是否读过她的信。",
+        "source_lift": "事件：父亲拿到信却不表态；功能：不确定性使女孩不敢离家；必保留原句：‘明早我就走。’",
+        "screen_translation": "女孩把车票压在早餐盘下；父亲端走盘子却把车票留在桌上；她删掉手机里的出租车订单。",
+        "coverage_result": "内心猜测被转成道具、反应缺席和可见选择。"
+      }
+    },
+    {
+      "id": "adapt-compression-stress-test",
+      "domain": "adaptation",
+      "title": "极限压缩与有证据回补",
+      "source": {
+        "video_id": "pN7KIxUXPwo",
+        "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo&t=229s",
+        "evidence_type": "asr_reviewed",
+        "evidence_level": "E2"
+      },
+      "claim_refs": [
+        {"start_sec": 229.0, "end_sec": 247.28, "kind": "video_claim", "paraphrase": "她与合作者一度把约 90 页剧本压到约 17 页，以寻找他们认定的本质。"},
+        {"start_sec": 237.88, "end_sec": 247.28, "kind": "video_claim", "paraphrase": "收到反馈认为删得过头后，他们重新恢复了一些材料。"}
+      ],
+      "applicability": {
+        "use_when": ["草稿臃肿", "无法说清核心体验", "目标片长远小于源材料"],
+        "do_not_use_when": ["尚无完整草稿", "事实链或法律措辞不可压缩", "删减会造成安全或伦理信息缺失"]
+      },
+      "inputs": ["完整草稿", "目标片长", "核心承诺一句话", "必须保留项"],
+      "steps": [
+        {"step": 1, "action": "复制一份 stress-cut，不在主稿上直接删。", "check": "版本号和恢复点已记录。"},
+        {"step": 2, "action": "只保留支撑核心承诺、主角因果链和结尾选择的场景。", "check": "每场写一句 retained_because。"},
+        {"step": 3, "action": "把 stress-cut 读成连续故事，记录断裂而不是立即补回。", "check": "断裂分为理解、情感、事实、节奏四类。"},
+        {"step": 4, "action": "按断裂证据最小回补，优先恢复功能而非原场景原貌。", "check": "每次回补只解决一个已记录断裂。"},
+        {"step": 5, "action": "对比原稿、极限稿、回补稿，冻结最短仍成立版本。", "check": "没有因‘喜欢’而无功能恢复的场景。"}
+      ],
+      "outputs": ["stress-cut 版本", "断裂日志", "回补决策表", "片长对比"],
+      "failure_signals": ["删的是细节但解释性场景仍完整保留", "回补没有对应盲测或因果断裂", "用压缩掩盖人物目标本来就不清楚"],
+      "acceptance_tests": [
+        {"test": "目标时长", "pass_criteria": "估算片长在目标值 ±10% 内。"},
+        {"test": "因果完整", "pass_criteria": "每个转折都能回答‘谁的什么选择造成’。"},
+        {"test": "回补纪律", "pass_criteria": "每个恢复单元都有唯一断裂编号；无编号则不回补。"}
+      ],
+      "worked_example": {
+        "before": "四场分别表现母亲阻止女儿离家。",
+        "stress_cut": "只留车站送别一场。",
+        "observed_break": "观众不理解女儿为何害怕母亲发现。",
+        "minimal_restore": "在送别前加入 12 秒：母亲收走女儿证件；无需恢复前三场。"
+      }
+    },
+    {
+      "id": "adapt-lived-world-research",
+      "domain": "adaptation",
+      "title": "用生活内部差异打破资料刻板印象",
+      "source": {
+        "video_id": "pN7KIxUXPwo",
+        "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo&t=171s",
+        "evidence_type": "asr_reviewed",
+        "evidence_level": "E2"
+      },
+      "claim_refs": [
+        {"start_sec": 171.68, "end_sec": 205.56, "kind": "video_claim", "paraphrase": "与具体社群成员交流让编剧看到所谓规则并非人人同样遵循，并形成纠错支持网。"},
+        {"start_sec": 278.2, "end_sec": 303.04, "kind": "video_claim", "paraphrase": "若无法亲临现场，也要用同时代影像等材料建立对地方与年代的具体感。"},
+        {"start_sec": 303.04, "end_sec": 352.28, "kind": "video_claim", "paraphrase": "她优先阅读身处当时者的一手见证，并进入那个年代的音乐与日常材料。"}
+      ],
+      "applicability": {
+        "use_when": ["改编特定社群、职业、年代或地域", "创作者不属于被呈现群体", "规则列表可能造成扁平人物"],
+        "do_not_use_when": ["把个体受访者当整个群体代表", "用研究替代当事人同意或法律审查", "涉及敏感创伤却没有保护方案"]
+      },
+      "inputs": ["世界规则假设表", "一手材料清单", "顾问/当事人反馈计划", "隐私与同意边界"],
+      "steps": [
+        {"step": 1, "action": "把每条世界规则写成可证伪假设，注明来源年代和来源身份。", "check": "禁止写‘他们都……’。"},
+        {"step": 2, "action": "为每条规则至少寻找一个遵守例、一个例外和一个情境变量。", "check": "例外来自一手材料或明确顾问反馈。"},
+        {"step": 3, "action": "把研究转成会改变人物行动的压力，而不是百科对白。", "check": "删掉规则说明后，场景仍能由行为看懂。"},
+        {"step": 4, "action": "由相关经验者审阅具体场景，记录错误、分歧和不确定项。", "check": "分歧并列，不用一次访谈投票定真相。"},
+        {"step": 5, "action": "修改后回访，只验证被指出的问题，不要求顾问为整部作品背书。", "check": "审阅范围写清。"}
+      ],
+      "outputs": ["世界规则—例外矩阵", "一手材料时间线", "顾问问题清单", "场景修改日志"],
+      "failure_signals": ["所有角色以同一种方式遵守文化规则", "资料只改变服装与称呼，不改变选择", "把顾问意见写成全体社群共识"],
+      "acceptance_tests": [
+        {"test": "差异性", "pass_criteria": "每条关键规则至少有一个情境化例外。"},
+        {"test": "行动化", "pass_criteria": "世界设定至少改变一项角色策略、风险或关系。"},
+        {"test": "来源纪律", "pass_criteria": "高风险事实有一手来源或保持未核验标记。"}
+      ],
+      "worked_example": {
+        "bad": "对白解释‘这个村所有女性都不能独自外出’。",
+        "researched_variation": "规则在正式场合严格执行，但急诊、夜班和家庭地位会改变执行方式。",
+        "screen_translation": "护士独自骑车穿过广场；守门人没有拦她，却在她回家时通知了姐姐。"
+      }
+    },
+    {
+      "id": "adapt-viewpoint-cut-filter",
+      "domain": "adaptation",
+      "title": "用视角与作者立场筛选超量材料",
+      "source": {
+        "video_id": "pN7KIxUXPwo",
+        "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo&t=549s",
+        "evidence_type": "asr_reviewed",
+        "evidence_level": "E2"
+      },
+      "claim_refs": [
+        {"start_sec": 549.64, "end_sec": 575.0, "kind": "video_claim", "paraphrase": "原书材料足够支撑约九小时；她选择紧跟记者视角和女性层次，因此舍弃偏离该集中点的大量信息。"},
+        {"start_sec": 935.36, "end_sec": 975.72, "kind": "video_claim", "paraphrase": "她从一开始决定不展示被调查者本人，也不展示侵害；电影关注的是调查与幸存者声音。"}
+      ],
+      "applicability": {
+        "use_when": ["源材料远超目标片长", "多人物真实事件", "必须明确谁获得叙事主体性"],
+        "do_not_use_when": ["视角尚未决定", "删除会歪曲关键事实", "用户要求全景式群像且片长允许"]
+      },
+      "inputs": ["全部 source units", "目标 POV 规则", "作者立场声明", "事实不可删项", "目标片长"],
+      "steps": [
+        {"step": 1, "action": "写一句 POV 规则：观众主要跟谁知道、跟谁承担后果。", "check": "不能只写‘女性视角’等主题标签。"},
+        {"step": 2, "action": "写一句作者立场：作品把注意力给谁，不愿把何种行为再次变成奇观。", "check": "立场与事实核验分开。"},
+        {"step": 3, "action": "逐个 source unit 打分：POV 必要、因果必要、事实必要、主题必要。", "check": "四项皆否则删；事实必要但不属 POV 时寻找间接呈现。"},
+        {"step": 4, "action": "把删除产生的信息缺口转成证据、反应、声音或后果。", "check": "不是用旁白把删掉内容全部讲回来。"},
+        {"step": 5, "action": "做主体性审计：谁行动、谁只被谈论、谁承担代价、谁获得最后解释权。", "check": "统计与创作意图一致。"}
+      ],
+      "outputs": ["POV rule", "作者立场声明", "四项筛选表", "排除项清单", "主体性审计"],
+      "failure_signals": ["删减只按篇幅，不按叙事主体", "声称聚焦某群体但关键选择仍由旁人完成", "排除画面后又用猎奇音效复制同一奇观"],
+      "acceptance_tests": [
+        {"test": "POV 一致", "pass_criteria": "至少 80% 关键转折由目标 POV 角色发现、选择或承受。"},
+        {"test": "事实完整", "pass_criteria": "所有事实不可删项仍可被观众正确理解。"},
+        {"test": "主体性", "pass_criteria": "被聚焦人物拥有可见目标、至少一次有效策略和一次改变结果的选择。"}
+      ],
+      "worked_example": {
+        "source_overload": "调查书有 42 名证人、企业史和嫌疑人传记。",
+        "pov_rule": "观众只随两名调查者获得可发表证据。",
+        "cut": "删去嫌疑人童年传记；把企业结构压成律师拒绝确认文件来源的一场对抗。",
+        "agency_check": "证人不是信息容器，她主动决定是否署名，决定报道能否发表。"
+      }
+    },
+    {
+      "id": "adapt-repeated-contact-to-set-piece",
+      "domain": "adaptation",
+      "title": "把重复现实过程压成一次有转折的影视事件",
+      "source": {
+        "video_id": "pN7KIxUXPwo",
+        "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo&t=591s",
+        "evidence_type": "asr_reviewed",
+        "evidence_level": "E2"
+      },
+      "claim_refs": [
+        {"start_sec": 591.44, "end_sec": 605.64, "kind": "video_claim", "paraphrase": "现实中记者通过许多电话逐步获得信任，电影无法按原比例重复，因此改成一次重要访谈。"},
+        {"start_sec": 599.64, "end_sec": 615.72, "kind": "video_claim", "paraphrase": "她希望这些被压缩的访谈在电影中具有足够重量。"}
+      ],
+      "applicability": {
+        "use_when": ["现实过程高度重复", "连续联系功能相同", "目标片长无法保留全部步骤"],
+        "do_not_use_when": ["渐进变化本身就是主要戏剧", "合并会制造事实错误", "把多人经历合成一人需要未取得的许可"]
+      },
+      "inputs": ["重复事件列表", "每次事件带来的新增信任/信息/风险", "不可虚构边界", "目标场景时长"],
+      "steps": [
+        {"step": 1, "action": "为每次现实接触列 before/after：信任、信息、承诺、风险。", "check": "没有变化的接触标为可删。"},
+        {"step": 2, "action": "选出必须保留的三个功能节点：建立条件、测试边界、作出承诺。", "check": "节点可来自多次过程，但事实来源分别保留。"},
+        {"step": 3, "action": "把三个节点组织成单场策略升级，而不是信息摘要。", "check": "每一拍由对方反应迫使策略改变。"},
+        {"step": 4, "action": "把被压缩的时间留痕放在环境、准备程度或已有关系上。", "check": "观众不会误以为信任凭空建立。"},
+        {"step": 5, "action": "做事实审查，标明 exact、compressed、invented connective tissue。", "check": "合成不改变责任主体和关键事实。"}
+      ],
+      "outputs": ["重复过程功能表", "压缩场景 beat sheet", "事实压缩标注", "信任变化曲线"],
+      "failure_signals": ["一次谈话无代价地获得全部信息", "合并后角色动机变成编剧方便", "删掉累积过程却没有建立既往关系的迹象"],
+      "acceptance_tests": [
+        {"test": "功能保留", "pass_criteria": "源过程中每个不可删功能在压缩场景有对应 beat。"},
+        {"test": "策略升级", "pass_criteria": "场景至少出现两次由对方反应引起的策略变化。"},
+        {"test": "事实边界", "pass_criteria": "所有 invented connective tissue 不改变可核验责任、时间或引语归属。"}
+      ],
+      "worked_example": {
+        "source": "记者与证人六次通话：三次未接、两次拒绝、最后同意见面。",
+        "compressed_scene": "记者在咖啡馆只获准问一个问题；她先保证匿名，被指出报道仍会暴露身份；她改为让证人先审阅事实表，证人才交出日期。",
+        "time_trace": "桌上已有前五次联系留下的退回信封和时间表。"
+      }
+    },
+    {
+      "id": "adapt-visual-fact-chronology",
+      "domain": "adaptation",
+      "title": "只有当画面承担不可替代事实时才打乱时间",
+      "source": {
+        "video_id": "pN7KIxUXPwo",
+        "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo&t=605s",
+        "evidence_type": "asr_reviewed",
+        "evidence_level": "E2"
+      },
+      "claim_refs": [
+        {"start_sec": 605.64, "end_sec": 640.36, "kind": "video_claim", "paraphrase": "她通常不偏爱闪回，但为了让观众直接看见幸存者当年非常年轻，选择调整时间顺序。"},
+        {"start_sec": 631.8, "end_sec": 647.84, "kind": "video_claim", "paraphrase": "她认为画面显示年龄与台词说‘我当时二十一岁’产生不同效果。"}
+      ],
+      "applicability": {
+        "use_when": ["过去状态的可见事实会改变观众伦理或情感判断", "当下叙述不足以传递该事实", "时间跳转有明确返回点"],
+        "do_not_use_when": ["只为增加神秘感", "过去信息用一个道具或反应即可完成", "观众无法判断当前时间层"]
+      },
+      "inputs": ["需要传达的过去事实", "线性版本", "时间层进入与退出触发", "观众必须保留的当前问题"],
+      "steps": [
+        {"step": 1, "action": "先写线性版本，并明确它传达失败的具体事实。", "check": "失败不能只写‘不够电影感’。"},
+        {"step": 2, "action": "定义时间跳转的视觉任务和观众返回后应重新解释的内容。", "check": "任务只允许一个主要答案。"},
+        {"step": 3, "action": "选择可读的进入/退出锚点：声音、动作、空间或物件。", "check": "锚点不是字幕唯一依赖。"},
+        {"step": 4, "action": "删除闪回中的重复说明，只保留不可替代的可见证据和选择。", "check": "闪回有自己的进入状态与退出状态。"},
+        {"step": 5, "action": "与线性版盲测：比较事实理解、时间定位和情感判断。", "check": "若无显著收益则保留线性版。"}
+      ],
+      "outputs": ["线性基线", "时间跳转任务句", "进入/退出锚点", "盲测对比"],
+      "failure_signals": ["闪回只重复角色刚说过的话", "观众先忙于辨认时间而错过人物选择", "删掉闪回后剧情、判断和情绪都不变"],
+      "acceptance_tests": [
+        {"test": "时间可读", "pass_criteria": "至少 80% 盲测观众能在首次观看正确区分时间层。"},
+        {"test": "事实增益", "pass_criteria": "闪回版对目标事实的正确理解率比线性说明版高至少 20 个百分点。"},
+        {"test": "重解释", "pass_criteria": "返回当下后至少一个角色选择或观众判断获得新含义。"}
+      ],
+      "worked_example": {
+        "failed_dialogue": "老人说：‘那年我才十四岁。’",
+        "visual_task": "让观众意识到承担决定的人在身体上仍是孩子。",
+        "chronology": "老人把过大的工作手套递给采访者；切到十四岁的手在同一手套里滑动；机器启动声把画面拉回当下。"
+      }
+    },
+    {
+      "id": "adapt-creative-pass-accuracy-pass",
+      "domain": "adaptation",
+      "title": "创作推进与专业准确性分轨审查",
+      "source": {
+        "video_id": "pN7KIxUXPwo",
+        "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo&t=475s",
+        "evidence_type": "asr_reviewed",
+        "evidence_level": "E2"
+      },
+      "claim_refs": [
+        {"start_sec": 475.72, "end_sec": 499.56, "kind": "video_claim", "paraphrase": "她建议改编初期先按节奏、人物和自己的写作推进，再在后续处理责任压力。"},
+        {"start_sec": 499.56, "end_sec": 541.84, "kind": "video_claim", "paraphrase": "对自己陌生的新闻职业规范，她依靠记者与纽约时报人员指出用语、立场和伦理错误。"},
+        {"start_sec": 647.84, "end_sec": 668.6, "kind": "video_claim", "paraphrase": "片中相关当事人对台词和呈现有实际输入，制作方为反馈留出空间。"}
+      ],
+      "applicability": {
+        "use_when": ["改编真实事件、职业或在世人物", "过早自我审查导致无法起稿", "专业准确性需要外部审阅"],
+        "do_not_use_when": ["把后审当成可以先造谣或伤害的许可", "没有能力获得必要事实审查", "涉及不可逆公开传播且事实仍未知"]
+      },
+      "inputs": ["创作 brief", "事实清单", "高风险未知项", "专业审阅者范围", "修改权限与截止点"],
+      "steps": [
+        {"step": 1, "action": "创作 pass 只解决节奏、人物、场景目标和作者立场；未知事实用占位符，不自行填真。", "check": "每个占位符有 risk_id。"},
+        {"step": 2, "action": "冻结可审阅草稿，生成事实/职业/当事人三类问题单。", "check": "问题具体到场景、台词和动作。"},
+        {"step": 3, "action": "把相应问题发给相应审阅者，只请求其专长范围内判断。", "check": "不让单一审阅者替所有群体背书。"},
+        {"step": 4, "action": "逐条记录 accepted、rejected_with_reason、unresolved；高风险 unresolved 不进入定稿。", "check": "不静默覆盖反馈。"},
+        {"step": 5, "action": "修改后做回归检查：节奏/人物改进是否被准确性修正破坏。", "check": "若破坏则重做创作方案，不恢复错误。"}
+      ],
+      "outputs": ["创作版草稿", "risk register", "专业审阅问题单", "反馈决策日志", "回归检查"],
+      "failure_signals": ["顾问只在最后一天看到成片", "把‘真实感’当事实正确", "为保留漂亮台词而拒绝明确的职业错误", "当事人反馈被当成营销背书"],
+      "acceptance_tests": [
+        {"test": "风险闭环", "pass_criteria": "所有高风险 risk_id 已 resolved 或从成稿移除。"},
+        {"test": "审阅匹配", "pass_criteria": "每条专业结论能追溯到具相应经验的审阅来源。"},
+        {"test": "创作回归", "pass_criteria": "修正后场景目标、转折和退出状态仍成立。"}
+      ],
+      "worked_example": {
+        "creative_pass": "记者用激将法逼律师承认文件存在。",
+        "accuracy_feedback": "现实职业伦理不允许记者作出该威胁。",
+        "revision": "记者把已知事实逐条放桌上，沉默等待；律师没有承认，却停止否认其中一项。",
+        "regression_result": "对抗仍升级，但不依赖错误职业行为。"
+      }
+    }
+  ]
+}

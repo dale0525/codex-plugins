@@ -1,0 +1,33 @@
+id: night-shift-handoff.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions:
+  - "原创场景；无外部源材料。"
+  - "无实际参考图、音频或视频生成输出，所有生成与QC保持诊断预览/待定。"
+constraints:
+  runtime_target_sec: 45
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions:
+  - "最终视频模型、分辨率与帧率尚未指定。"
+status: draft
+change_log: []
+format: scene
+audience: "喜欢现实主义夜班悬疑的成年观众"
+genre_tone: "现实主义悬疑；冷静、克制、逐步失衡"
+rights_status: user-owned
+creative_goal: "在45秒内让观众看见阿岚发现小周带走钥匙，双方以不可说目的谈判，并在一次策略反转后留下道德悬念。"
+must_beats:
+  - id: S01-B01
+    description: "阿岚发现小周把旧仓库钥匙带走。"
+  - id: S01-B02
+    description: "两人以加班与交接为表层理由试探，真实目的不说破。"
+  - id: S01-B03
+    description: "阿岚先以规章施压，小周反以监控盲区/证据施压，策略改变。"
+  - id: S01-B04
+    description: "小周提出交换，阿岚选择放他离开但留下后果。"
+generation_constraints:
+  available_models: []
+  dialogue_strategy: separate_audio_then_lipsync

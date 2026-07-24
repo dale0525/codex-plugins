@@ -1,0 +1,18 @@
+id: red-envelope.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [red-envelope.generation-log@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: [等待实际生成结果和 entry/mid/exit 证据帧]
+status: qc_pending
+change_log: []
+clips:
+  - {clip_id: C-S01-01, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}
+  - {clip_id: C-S01-02, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}
+  - {clip_id: C-S01-03, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}
+  - {clip_id: C-S01-04, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}
+  - {clip_id: C-S01-05, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}
+  - {clip_id: C-S01-06, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}
+  - {clip_id: C-S01-07, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}
+  - {clip_id: C-S01-08, status: pending, narrative: pending, identity_state: pending, space_time: pending, editability: pending, surface: pending, evidence_frames: []}

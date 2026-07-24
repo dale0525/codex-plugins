@@ -1,0 +1,43 @@
+{
+  "id": "project.prompt-pack",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [],
+  "assumptions": [],
+  "constraints": {},
+  "open_questions": [],
+  "status": "draft",
+  "change_log": [],
+  "prompts": [
+    {
+      "prompt_id": "PROMPT-C-S01-01",
+      "clip_id": "C-S01-01",
+      "adapter_id": "",
+      "prompt_ir": {
+        "subject": {"ids": ["CHAR-PROTAGONIST"], "visible_traits": []},
+        "narrative_character_ids": ["CHAR-PROTAGONIST"],
+        "narrative_prop_ids": [],
+        "visible_character_ids": ["CHAR-PROTAGONIST"],
+        "action": {"start": "", "motion": "", "end": ""},
+        "action_steps": [{"step_id": "A01", "action": "", "end_state": ""}],
+        "environment": {"location_id": "LOC-01", "time": ""},
+        "camera": {"framing": "", "behavior": ""},
+        "lighting": "",
+        "temporal_constraints": {"duration_sec": 5, "event_order": ["A01"]},
+        "continuity_invariants": [],
+        "negative_constraints": []
+      },
+      "delivery_requirement_ids": ["DR-S01-B01-01"],
+      "information_carriers": [
+        {"requirement_id": "DR-S01-B01-01", "carrier": "visual_action", "content": "", "fallback": ""}
+      ],
+      "rendered_prompt": "",
+      "rendered_prompt_hash": "",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {"duration_sec": 5, "aspect_ratio": "16:9", "resolution": ""},
+      "production_status": "diagnostic_preview"
+    }
+  ]
+}

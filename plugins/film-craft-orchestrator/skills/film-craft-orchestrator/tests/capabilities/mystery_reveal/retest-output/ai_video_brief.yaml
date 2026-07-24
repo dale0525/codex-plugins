@@ -1,0 +1,22 @@
+id: cold-cup.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: ["无真实参考图或生成输出，所有 clips 保持 diagnostic_preview/pending"]
+constraints:
+  runtime_target_sec: 60
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: []
+status: frozen
+change_log: []
+format: short
+audience: "悬疑短片观众"
+genre_tone: "冷峻、写实、克制的室内悬疑"
+rights_status: unknown
+creative_goal: "让观众先于侦探看见杯底的融水环和杯垫纤维，经历嫌疑人一次误导，最终用动作揭示真相且不使用解释字幕。"
+must_beats: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05]
+generation_constraints:
+  available_models: [openai-sora-2-videos-api-2026-07]
+  dialogue_strategy: separate_audio_then_lipsync

@@ -1,0 +1,38 @@
+id: project.semantic-reviews
+version: 1.0.0
+owner_role: semantic_reviewer
+source_inputs: []
+assumptions: []
+constraints:
+  independent_review_required: true
+open_questions: []
+status: draft
+change_log: []
+reviews:
+  - review_id: SR-STORY-001
+    stage: story
+    reviewer_id: ""
+    independent_from_authors: true
+    expected_answer_visible: false
+    review_scope: source_and_frozen_artifacts_only
+    artifacts:
+      - path: ai_video_brief.yaml
+        sha256: ""
+      - path: story_and_scene_map.yaml
+        sha256: ""
+    verdict: pending
+    claims:
+      - claim_id: CL-001
+        source_unit_ids: []
+        screen_unit_ids: [S01-B01]
+        delivery_requirement_ids: [DR-S01-B01-01]
+        source_claim: ""
+        proposed_screen_claim: ""
+        entailment: preserved
+        source_location: ""
+        screen_location: ""
+        temporal_relation: ""
+        responsible_character_ids: []
+        choice_result_polarity: ""
+        evidence: ""
+        verdict: pending

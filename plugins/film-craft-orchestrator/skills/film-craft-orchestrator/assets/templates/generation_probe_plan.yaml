@@ -1,0 +1,20 @@
+id: project.generation-probe-plan
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints:
+  minimum_risk_categories: 4
+open_questions: []
+status: planned
+change_log: []
+producibility_status: hypothesis
+probes: []
+uncovered_categories: []
+promotion_gate:
+  required_status: verified_for_sampled_clips
+  requirements:
+    - actual generated output with SHA-256
+    - entry midpoint and exit evidence frames
+    - semantic continuity and editability QC pass
+    - failure and repair history retained

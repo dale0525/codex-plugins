@@ -1,0 +1,236 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-07-24",
+  "method": {
+    "audio": "Authorized low-bandwidth YouTube audio collected with yt-dlp.",
+    "asr_engine": "whisper.cpp 1.8.3",
+    "model": "ggml-small.en.bin",
+    "review": "Full chronological ASR review by research agents; the main agent independently spot-checked procedure-bearing time windows against raw ASR.",
+    "evidence_boundary": "Paraphrases preserve speaker or commentator scope. Static frame evidence can verify only visible sampled states, not movement, edit causality, sound, lens values or creator intent."
+  },
+  "items": [
+    {
+      "video_id": "o-4rk3T8PbQ",
+      "title": "How Kubrick, Spielberg, and Inarritu Stage their Scenes",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=o-4rk3T8PbQ",
+      "duration_sec": 786,
+      "audio_sha256": "544b095a75fd225c8fac75d9fd581e22d6587b364de1b5f6162eb68a9dab4e24",
+      "asr_sha256": "9b9b18564893283ce047dfceb7f7d779437842fd1bde01c8990e5cd4fd0f4fbc",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id":"O4K-C01","start_sec":137.2,"end_sec":166.4,"paraphrase":"The analysis places Witwer and the pre-crime team on opposite sides of the room and interprets their bodies as opposing positions.","uncertainty":"Positions are frame-checkable; symbolic opposition is interpretation."},
+        {"id":"O4K-C02","start_sec":166.4,"end_sec":213.48,"paraphrase":"Anderton enters and the staging/cuts redistribute the two sides before a neutral Fletcher shot.","uncertainty":"Entry and screen-side sequence require moving footage; balance is analysis."},
+        {"id":"O4K-C03","start_sec":236.34,"end_sec":311.32,"paraphrase":"A warrant beat changes Anderton from a comfortable seated position to a visibly pressured posture while Witwer takes control of the exchange.","uncertainty":"Posture is visible; control is interpretive."},
+        {"id":"O4K-C04","start_sec":375.2,"end_sec":417.78,"paraphrase":"The Clockwork Orange example arranges the droogs in a triangle and uses bodies, cane and railing as directional lines.","uncertainty":"Geometry and props need frame evidence; intention remains commentary."},
+        {"id":"O4K-C05","start_sec":417.78,"end_sec":445.4,"paraphrase":"Shared eyelines and a background shadow are described as routing attention toward Georgie.","uncertainty":"A frame can show alignment but not prove audience eye trace."},
+        {"id":"O4K-C06","start_sec":473.48,"end_sec":480.88,"paraphrase":"A cane tip points toward Dim in a wide composition while shadow continues the directional cue.","uncertainty":"Visible direction is checkable; intimidation is interpretation."},
+        {"id":"O4K-C07","start_sec":560.68,"end_sec":587.2,"paraphrase":"In Birdman, Sam's movement carries the camera to Larry and a mirror extends the visible space.","uncertainty":"A static frame proves mirror layout, not the camera move."},
+        {"id":"O4K-C08","start_sec":587.2,"end_sec":605.0,"paraphrase":"Larry, Mike and Sam's reflection occupy foreground, middle and deep background layers.","uncertainty":"Directly sampled in frames; mirror depth can mislead physical position."},
+        {"id":"O4K-C09","start_sec":605.0,"end_sec":619.0,"paraphrase":"Larry is moved out of view as Leslie enters, creating visible room for the new character.","uncertainty":"Sequence requires moving footage; sampled frames show only endpoint states."},
+        {"id":"O4K-C10","start_sec":660.56,"end_sec":685.28,"paraphrase":"The mirror keeps Sam available before a reveal and the edit later uses Leslie's reaction.","uncertainty":"Static evidence cannot prove reveal timing or edit effect."}
+      ]
+    },
+    {
+      "video_id": "EqTn6lfRNow",
+      "title": "How Back to the Future Uses Perfect Blocking to Tell the Story",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=EqTn6lfRNow",
+      "duration_sec": 622,
+      "audio_sha256": "f1acac7729d8c5bd8b26ecec04aee545860adc1fe74fe7bd660b89336be4b679",
+      "asr_sha256": "3e356ca01bbfe0dd778d02516bdc7aad21a59b9a6d0995cf75f6db65352deeb1",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id":"EQT-C01","start_sec":83.36,"end_sec":98.96,"paraphrase":"Marty and Jennifer, the clock tower and a foreground donation object distribute story information across depth planes.","uncertainty":"Plane placement is visible; narrative importance is commentary."},
+        {"id":"EQT-C02","start_sec":114.8,"end_sec":137.76,"paraphrase":"The example coordinates horizontal, vertical and depth-axis changes to cross a car and meet Doc.","uncertainty":"Motion order requires continuous footage."},
+        {"id":"EQT-C03","start_sec":148.72,"end_sec":167.84,"paraphrase":"A character shifts into background while another occupies foreground, with a reflection creating an additional visual layer.","uncertainty":"Sampled frames show states, not the transition."},
+        {"id":"EQT-C04","start_sec":169.52,"end_sec":188.72,"paraphrase":"A moving truck carrying plot information is described as guiding attention toward Marty and Jennifer.","uncertainty":"Audience eye trace is an interpretation requiring testing."},
+        {"id":"EQT-C05","start_sec":201.68,"end_sec":230.64,"paraphrase":"Vehicle and pedestrian motion sequentially redirect attention to the preservation booth and then Marty.","uncertainty":"Requires clip verification; the approximate shot length is not a rule."},
+        {"id":"EQT-C06","start_sec":240.08,"end_sec":256.0,"paraphrase":"Moving characters toward or away from camera can preserve activity and reduce the need for coverage cuts.","uncertainty":"A teaching generalization, not a universal prohibition on cutting."},
+        {"id":"EQT-C07","start_sec":258.4,"end_sec":283.68,"paraphrase":"A stationary camera and six depth-axis blocking positions are described as performing editorial reframing inside one take.","uncertainty":"The number and continuity require clip inspection."},
+        {"id":"EQT-C08","start_sec":308.32,"end_sec":361.12,"paraphrase":"Doc circles Marty, re-enters an over-shoulder, crosses foreground toward a poster and later resolves into a tighter two-shot.","uncertainty":"Full sequence requires moving evidence."},
+        {"id":"EQT-C09","start_sec":368.8,"end_sec":385.6,"paraphrase":"The analysis maps each blocking shift to the character's changing thought process.","uncertainty":"Psychological correspondence is interpretation."},
+        {"id":"EQT-C10","start_sec":559.92,"end_sec":580.4,"paraphrase":"The summary recommends maximizing story information per frame, designing eye trace and using blocking to create multiple compositions inside a long take.","uncertainty":"Course summary; each project must test readability."}
+      ]
+    },
+    {
+      "video_id": "ZGNUqNFfD8M",
+      "title": "Depth of Field Explained: Ultimate Guide to Camera Focus [Shot List Ep. 4]",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=ZGNUqNFfD8M",
+      "duration_sec": 894,
+      "audio_sha256": "cd9cd520975079202158236bb73d8ca9068bb6587957481cd58b538cd1d3ae23",
+      "asr_sha256": "86eaa6820356a4000afe273eb4afc98b7a5a0a02b5b6ed8a8c53356de5734cce",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id":"ZGN-C01","start_sec":100.0,"end_sec":127.0,"paraphrase":"Deep focus keeps subject and background detailed when multiple distances or background information must be read.","uncertainty":"Static examples show appearance, not lens settings."},
+        {"id":"ZGN-C02","start_sec":127.0,"end_sec":212.0,"paraphrase":"Deep focus can allow scanning and simultaneous action across several planes.","uncertainty":"Actual attention order must be tested with viewers."},
+        {"id":"ZGN-C03","start_sec":217.0,"end_sec":243.0,"paraphrase":"Shallow focus retains one sharp plane while foreground or background softens.","uncertainty":"No universal depth threshold."},
+        {"id":"ZGN-C04","start_sec":243.0,"end_sec":265.0,"paraphrase":"Shallow depth can isolate a subject and turn out-of-focus point lights into visible bokeh.","uncertainty":"Bokeh requires appropriate background lights and cannot replace composition."},
+        {"id":"ZGN-C05","start_sec":268.0,"end_sec":321.0,"paraphrase":"The video interprets shallow focus and point of view as amplifying emotional pressure in Moonlight.","uncertainty":"Emotional causality is commentary."},
+        {"id":"ZGN-C06","start_sec":366.0,"end_sec":457.0,"paraphrase":"Soft focus leaves no region fully crisp and may sustain dream, flashback or unreal atmosphere.","uncertainty":"A style choice; accidental defocus can look similar."},
+        {"id":"ZGN-C07","start_sec":477.0,"end_sec":504.0,"paraphrase":"Rack focus transfers a shallow focus plane between subjects within one shot and guides attention without a cut.","uncertainty":"Static frames prove only endpoints, not the transition."},
+        {"id":"ZGN-C08","start_sec":536.0,"end_sec":565.0,"paraphrase":"The Host example uses a fast focus return that the commentary associates with shock and panic.","uncertainty":"Speed and emotional effect require clip evidence."},
+        {"id":"ZGN-C09","start_sec":605.0,"end_sec":645.0,"paraphrase":"A split diopter can render near and far zones sharp while leaving an intermediate seam or soft region.","uncertainty":"The unnatural transition is a visible limitation, not an error in every context."},
+        {"id":"ZGN-C10","start_sec":737.0,"end_sec":770.0,"paraphrase":"Tilt-shift focus can create a narrow sharp band and a miniature-like appearance.","uncertainty":"Special-purpose effect; sampled blur does not prove a tilt-shift lens."}
+      ]
+    },
+    {
+      "video_id": "K9w8I_YD29E",
+      "title": "Roger Deakins on \"Learning to Light\" — Cinematography Techniques Ep. 1",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=K9w8I_YD29E",
+      "duration_sec": 513,
+      "audio_sha256": "fa3fe9a5c7257f43fdaba9a1294f625812fed3b105d4ec6cfd97c0654834f524",
+      "asr_sha256": "3cb0653b603cadbe575e1a8c13ff17c264d420c7fcef0aca64d120f773b96de8",
+      "review_status": "full_asr_read",
+      "evidence_level": "E2",
+      "claims": [
+        {"id":"K9W-C01","start_sec":61.0,"end_sec":103.0,"paraphrase":"Deakins describes observing weather and ambient light for distinct sparkling or ominous feelings before choosing technique.","uncertainty":"First-person aesthetic judgment."},
+        {"id":"K9W-C02","start_sec":143.0,"end_sec":179.0,"paraphrase":"He recalls using color and light relationships to create melancholy in a specific domestic setting.","uncertainty":"Project example, not a transferable palette recipe."},
+        {"id":"K9W-C03","start_sec":207.0,"end_sec":234.0,"paraphrase":"Exposure judgment includes deciding what may fall toward black while keeping useful detail and preventing hotspots from becoming unusable.","uncertainty":"Tolerance depends on narrative and delivery medium."},
+        {"id":"K9W-C04","start_sec":249.0,"end_sec":282.0,"paraphrase":"He recommends an overall reading and visual judgment rather than measuring every local variation.","uncertainty":"Experienced workflow, not permission to skip critical range checks."},
+        {"id":"K9W-C05","start_sec":295.0,"end_sec":315.0,"paraphrase":"A quoted James Wong Howe anecdote frames simplicity as reducing lighting to one significant, pure dominant idea.","uncertainty":"Second-hand quotation; one light is an aesthetic goal, not a fixture count."},
+        {"id":"K9W-C06","start_sec":324.0,"end_sec":372.0,"paraphrase":"When the overall light decision is wrong, Deakins favors admitting it and restarting instead of adding patches.","uncertainty":"First-person workflow; requires a comparable alternative."},
+        {"id":"K9W-C07","start_sec":383.0,"end_sec":397.0,"paraphrase":"A small selected image can sometimes communicate more than an all-inclusive wide view.","uncertainty":"Not appropriate when spatial geography is the story purpose."},
+        {"id":"K9W-C08","start_sec":426.0,"end_sec":437.0,"paraphrase":"Evaluate light by its visible direction, softness and contrast on faces and objects.","uncertainty":"Result-oriented principle, not a fixture instruction."},
+        {"id":"K9W-C09","start_sec":443.0,"end_sec":453.0,"paraphrase":"Differences in light and color, or black and white, contribute to a cinematographer's individual way of seeing.","uncertainty":"Do not convert another cinematographer's signature into a style-copying template."},
+        {"id":"K9W-C10","start_sec":471.0,"end_sec":489.0,"paraphrase":"Learning light depends on noticing subtle real-world changes and building a visual vocabulary through experience.","uncertainty":"Training advice; does not prove numerical camera settings."}
+      ]
+    },
+    {
+      "video_id": "gebNTySOXbY",
+      "title": "Editors on Editing: Downsizing - Kevin Tent, ACE",
+      "channel": "American Cinema Editors",
+      "url": "https://www.youtube.com/watch?v=gebNTySOXbY",
+      "duration_sec": 1501,
+      "audio_sha256": "bba22ddc6dcd4a7580a409b2241a8a062550ab8977186b03bd82cc9360453000",
+      "asr_sha256": "f12cb20c973acd82b8c79c10ea57923a8ec3d98d0682d0ba65f2921537dabcfa",
+      "review_status": "full_asr_read",
+      "evidence_level": "E2",
+      "claims": [
+        {"id":"GEB-C01","start_sec":663.2,"end_sec":671.0,"paraphrase":"Kevin Tent says the team chose performances first and let those choices drive most cutting decisions.","uncertainty":"First-hand principle, not a guarantee for every scene."},
+        {"id":"GEB-C02","start_sec":675.44,"end_sec":679.24,"paraphrase":"A strong performance was retained even when the source angle was not designed as the target over-shoulder, with VFX used to solve the image.","uncertainty":"Depends on available compositing quality and cost."},
+        {"id":"GEB-C03","start_sec":980.3,"end_sec":994.86,"paraphrase":"A letter-reading performance is held rather than immediately cut away; the editor recalls the first take already carrying the scene.","uncertainty":"First-hand recollection plus selected excerpt."},
+        {"id":"GEB-C04","start_sec":1028.86,"end_sec":1037.9,"paraphrase":"Holding the primary performance before a longer group reaction is described as making the reactions more powerful.","uncertainty":"Causal effect still needs an A/B edit test."},
+        {"id":"GEB-C05","start_sec":769.3,"end_sec":779.88,"paraphrase":"A telephone-comedy scene went through repeated timing revisions before the preferred rhythm emerged.","uncertainty":"No universal timing value is given."},
+        {"id":"GEB-C06","start_sec":1274.1,"end_sec":1284.82,"paraphrase":"A cave decision scene was repeatedly recut and extended to sustain uncertainty.","uncertainty":"Overextension can become drag."},
+        {"id":"GEB-C07","start_sec":1303.5,"end_sec":1323.34,"paraphrase":"Character-theme music helped maintain tension and psychological direction during the extended decision beat.","uncertainty":"Music must not obscure dialogue or replace missing story information."},
+        {"id":"GEB-C08","start_sec":1335.3,"end_sec":1346.22,"paraphrase":"To resist long-project fatigue, the editor returns to the performance that first attracted attention.","uncertainty":"Personal intuition can be biased and needs external checking."},
+        {"id":"GEB-C09","start_sec":1362.34,"end_sec":1374.78,"paraphrase":"Audience screenings are used to identify confusion or lost attention before deleting material.","uncertainty":"Audience cards are evidence, not automatic edit instructions."},
+        {"id":"GEB-C10","start_sec":1385.22,"end_sec":1427.18,"paraphrase":"Live audience response helps locate where attention drops; comments such as too fast or too slow require diagnosing character investment first.","uncertainty":"Test audience and context are limited."},
+        {"id":"GEB-C11","start_sec":1194.02,"end_sec":1216.62,"paraphrase":"The edit removed a line that made Lon excessively harsh and later restored emotional balance with a crying shot.","uncertainty":"Character calibration is project-specific and should not erase complexity."},
+        {"id":"GEB-C12","start_sec":178.04,"end_sec":192.4,"paraphrase":"Reviewing previously unseen dailies recovered a scene that helped the film make structural sense.","uncertainty":"Only applies when usable material exists."},
+        {"id":"GEB-C13","start_sec":1083.86,"end_sec":1094.82,"paraphrase":"The edit removed return-to-room and chat actions while preserving a call, doorbell and opening as the causal bridge.","uncertainty":"Spatial and motivational clarity must be rechecked."},
+        {"id":"GEB-C14","start_sec":1173.58,"end_sec":1190.46,"paraphrase":"Jump cuts and shortened walking compressed several seconds without confusing the tested audience.","uncertainty":"A single audience response does not prove invisibility in another sequence."}
+      ]
+    },
+    {
+      "video_id": "hIdZEZ2rCo4",
+      "title": "Writing for Television: Creating a TV Show From the Ground Up",
+      "channel": "Writers Guild Foundation",
+      "url": "https://www.youtube.com/watch?v=hIdZEZ2rCo4",
+      "duration_sec": 5895,
+      "audio_sha256": "f067171614aba55a8be8b69e9363f1632af03b1b4e01cc0c29c9aeee2111f2c8",
+      "asr_sha256": "2162a67ae4e924fdce1bb47a79a05e46a358b677419b0cc24dff3b739e3d612b",
+      "review_status": "full_asr_read",
+      "evidence_level": "E2",
+      "claims": [
+        {"id":"HID-C01","start_sec":52.16,"end_sec":121.12,"paraphrase":"A panelist tests whether a series can still produce fresh relational or genre complications around episodes 60 or 90.","uncertainty":"Experience-based stress question, not an episode-count requirement."},
+        {"id":"HID-C02","start_sec":126.44,"end_sec":148.0,"paraphrase":"Closed feature concepts can exhaust themselves at a predetermined ending and may need a different expansion engine for television.","uncertainty":"Not all limited series require open-ended expansion."},
+        {"id":"HID-C03","start_sec":341.0,"end_sec":380.0,"paraphrase":"A Boardwalk Empire writer describes long continuous storytelling while still needing each episode to offer a compelling local hook.","uncertainty":"First-hand case within a multi-speaker panel."},
+        {"id":"HID-C04","start_sec":380.0,"end_sec":398.0,"paraphrase":"The world of Atlantic City, Prohibition and emerging organized crime is treated as a renewable story engine.","uncertainty":"Derived from one series context."},
+        {"id":"HID-C05","start_sec":1245.0,"end_sec":1322.0,"paraphrase":"One panelist checks personal urgency, current cultural relevance and an unfilled market space when choosing a series idea.","uncertainty":"Personal selection process."},
+        {"id":"HID-C06","start_sec":1984.0,"end_sec":2083.0,"paraphrase":"The panel discusses introducing roughly seven or eight regular characters while ensuring the pilot gives the protagonist a meaningful local outcome.","uncertainty":"Character count is an example, not a platform limit."},
+        {"id":"HID-C07","start_sec":2917.0,"end_sec":2965.0,"paraphrase":"One writer keeps a one-hour drama outline to roughly six or seven pages and describes each scene's conflict rather than drafting pseudo-dialogue.","uncertainty":"Individual workflow, not a required page count."},
+        {"id":"HID-C08","start_sec":3071.0,"end_sec":3144.0,"paraphrase":"An outline can communicate what happens to and is felt by the character, answering why and where rather than listing plot only.","uncertainty":"Panel advice; speaker labels are uncertain in ASR."},
+        {"id":"HID-C09","start_sec":5065.0,"end_sec":5120.0,"paraphrase":"A sample pilot should reveal an individual voice and end with a strong reason to continue reading.","uncertainty":"Career advice, not a universal cliffhanger mandate."}
+      ]
+    },
+    {
+      "video_id": "21FS7CVClxo",
+      "title": "Showrunner Tony Gilroy Dives Deep on ANDOR | Creating Cultures, Enriching Cannon, & a Hopeful Ending",
+      "channel": "IndieWire",
+      "url": "https://www.youtube.com/watch?v=21FS7CVClxo",
+      "duration_sec": 2767,
+      "audio_sha256": "d55fa2d42f8b35690947eaaf90e327399e8fc9e020363b52dc78466bca98ffb2",
+      "asr_sha256": "cd93e3d9447e3a5bae26ca58f6a8d0c9525393b5b0be1beed97c52f13b013079",
+      "review_status": "full_asr_read",
+      "evidence_level": "E2",
+      "claims": [
+        {"id":"21F-C01","start_sec":122.92,"end_sec":197.36,"paraphrase":"Gilroy says a five-season plan became impractical because of actor aging, legacy-character chronology and at least two-and-a-half years per season, leading to a two-season ending.","uncertainty":"First-hand Andor decision, not a general production schedule."},
+        {"id":"21F-C02","start_sec":248.68,"end_sec":370.92,"paraphrase":"He describes compressing twelve episodes by skipping a year and returning for three days four times, relying on established trajectories and negative space instead of clumsy recap.","uncertainty":"Project-specific structure with around thirty established characters."},
+        {"id":"21F-C03","start_sec":390.0,"end_sec":504.0,"paraphrase":"Three-episode blocks came from a European production model and required extensive preparation, with directors assigned across blocks.","uncertainty":"Production organization is context, not required for AI video."},
+        {"id":"21F-C04","start_sec":510.92,"end_sec":589.12,"paraphrase":"With roughly thirty continuing characters, Gilroy describes taking attendance and planning absences, returns and convergence events early.","uncertainty":"The attendance ledger is a derived operationalization of his first-hand account."},
+        {"id":"21F-C05","start_sec":750.0,"end_sec":858.0,"paraphrase":"Season-opening interactions and a leadership speech carry evidence of off-screen growth and sacrifice across the time jump.","uncertainty":"Narrative intention described by the creator."},
+        {"id":"21F-C06","start_sec":940.0,"end_sec":978.0,"paraphrase":"The season maps each major character to unavoidable moral or sacrifice choices as awakening becomes material cost.","uncertainty":"Project-specific thematic frame."},
+        {"id":"21F-C07","start_sec":1416.0,"end_sec":1520.0,"paraphrase":"Backstory is designed early, revealed later and used to constrain current choices without reducing everyone to revenge.","uncertainty":"First-hand craft approach, not a ban on revenge stories."},
+        {"id":"21F-C08","start_sec":1764.0,"end_sec":1849.0,"paraphrase":"Community, language and cultural rules become plot levers when institutional propaganda exploits them.","uncertainty":"Specific Ghorman example; the general procedure is derived."},
+        {"id":"21F-C09","start_sec":1991.0,"end_sec":2060.0,"paraphrase":"A character's need for order and romance is interpreted as driving choices while institutions block the possible relationship.","uncertainty":"Creator character analysis."},
+        {"id":"21F-C10","start_sec":2708.0,"end_sec":2752.0,"paraphrase":"The final episode deliberately chooses a quiet emotional release after sustained pressure while carrying the responsibility of ending the series.","uncertainty":"First-hand pacing decision, not an ending formula."}
+      ]
+    },
+    {
+      "video_id": "FCopBMqWu44",
+      "title": "Interview with Novelist and Screenwriter Gillian Flynn",
+      "channel": "ScreenCraft",
+      "url": "https://www.youtube.com/watch?v=FCopBMqWu44",
+      "duration_sec": 2442,
+      "audio_sha256": "7d0f09d08f4c24ade84941038553748dd24c7cb926d9af556cb260da39bfb201",
+      "asr_sha256": "2f1547dfc05940b74a9386d6c01dea591cc8527ffd5fccb3752c7c40373d3460",
+      "review_status": "full_asr_read",
+      "evidence_level": "E2",
+      "claims": [
+        {"id":"FCO-C01","start_sec":498.72,"end_sec":541.24,"paraphrase":"Flynn recalls an editor identifying Gone Girl's mid-book reveal, two unlikeable narrators and unresolved ending; she kept them because they were the intended core.","uncertainty":"Specific publishing case, not a market rule."},
+        {"id":"FCO-C02","start_sec":572.96,"end_sec":604.44,"paraphrase":"She contrasts screen adaptation with publishing as a more multi-party process involving producers, agents and studios.","uncertainty":"General industry observation, not contract advice."},
+        {"id":"FCO-C03","start_sec":649.76,"end_sec":660.4,"paraphrase":"She recommends finding collaborators who understand and will support the intended work.","uncertainty":"Cannot guarantee creative control."},
+        {"id":"FCO-C04","start_sec":1356.24,"end_sec":1462.0,"paraphrase":"For notes, Flynn chooses battles, articulates functional reasons and may concede when a defense is only personal attachment to a scene.","uncertainty":"First-person collaboration practice."},
+        {"id":"FCO-C05","start_sec":1490.2,"end_sec":1520.2,"paraphrase":"She warns against collaborators who reduce the work to unrelated parts and favors partners who can champion the vision.","uncertainty":"Selection heuristic, not a legal safeguard."},
+        {"id":"FCO-C06","start_sec":1523.56,"end_sec":1565.6,"paraphrase":"Flynn says she rejected offers that treated Sharp Objects as generic horror while discarding female narration and intergenerational violence, waiting years for another version.","uncertainty":"Her negotiating position and waiting cost were project-specific."},
+        {"id":"FCO-C07","start_sec":1673.04,"end_sec":1686.32,"paraphrase":"She and David Fincher discussed the book and visual direction before he supported her writing the screenplay.","uncertainty":"Specific Gone Girl collaboration."},
+        {"id":"FCO-C08","start_sec":1701.76,"end_sec":1726.84,"paraphrase":"Flynn recalls the studio first reading her draft despite a common fear that novelist adapters are replaced after one draft.","uncertainty":"The broader industry claim is anecdotal."},
+        {"id":"FCO-C09","start_sec":1735.88,"end_sec":1755.44,"paraphrase":"She compressed the first draft to exactly 120 pages after warnings that novelists tend to include everything.","uncertainty":"Gone Girl example; 120 pages and two hours are not universal thresholds."},
+        {"id":"FCO-C10","start_sec":1759.52,"end_sec":1777.92,"paraphrase":"After reaching a shared direction with Fincher, material was restored and the finished film expanded to about two hours forty minutes.","uncertainty":"Flynn explicitly calls the situation lucky and exceptional."},
+        {"id":"FCO-C11","start_sec":1793.28,"end_sec":1828.28,"paraphrase":"She credits the Fincher collaboration with unusual protection and contrasts it with later work outside that relationship.","uncertainty":"Retrospective personal account."},
+        {"id":"FCO-C12","start_sec":1848.28,"end_sec":1912.96,"paraphrase":"Because release timing and market response are uncontrollable, she checks whether the work matches the intended film and remains something she can stand behind.","uncertainty":"Creative acceptance mindset, not a commercial metric."},
+        {"id":"FCO-C13","start_sec":1937.12,"end_sec":1999.84,"paraphrase":"Adaptation is described as practical collaboration in which budget, casting or lost locations may force rewrites.","uncertainty":"General observation; AI-video use keeps the creative translation and removes physical production management."},
+        {"id":"FCO-C14","start_sec":1173.48,"end_sec":1330.36,"paraphrase":"In Dark Places, Flynn removed and rebuilt a mismatched Libby point-of-view line rather than creating a patched voice, because the other viewpoints were sufficiently independent.","uncertainty":"Novel revision case transferred only as a POV diagnostic."}
+      ]
+    },
+    {
+      "video_id": "21RVyKcrbYU",
+      "title": "The Dark Knight - Joker Crashes The Party + Screenplay Download | Script to Screen | Screenplayed",
+      "channel": "Outstanding Screenplays",
+      "url": "https://www.youtube.com/watch?v=21RVyKcrbYU",
+      "duration_sec": 256,
+      "audio_sha256": "122a30ccc46984b683db63867ccf3db408ed12bfed0b496fa75a2cfde2534da9",
+      "asr_sha256": "aea8227d2a853076240af3188930c8855b82c1b9d87359f67b8b57a79d78943d",
+      "review_status": "full_asr_read_dialogue_only",
+      "evidence_level": "E1",
+      "claims": [
+        {"id":"21R-C01","start_sec":0.0,"end_sec":16.14,"paraphrase":"The audio begins directly with Joker's party dialogue and a search for Harvey Dent.","uncertainty":"No explanatory narrator or screenplay comparison is audible."},
+        {"id":"21R-C02","start_sec":29.2,"end_sec":48.2,"paraphrase":"The recorded material continues as scene dialogue and reactions.","uncertainty":"Dialogue alone does not establish a script-to-screen transformation claim."},
+        {"id":"21R-C03","start_sec":54.2,"end_sec":63.2,"paraphrase":"The scene continues without an instructional thesis or analytical transition in the sampled ASR.","uncertainty":"Visual script pages may exist, but the audio provides no procedure-bearing argument."}
+      ]
+    },
+    {
+      "video_id": "77bmdVXZ38E",
+      "title": "Marriage Story - Argument Scene + Screenplay Download | Script to Screen | Screenplayed",
+      "channel": "Outstanding Screenplays",
+      "url": "https://www.youtube.com/watch?v=77bmdVXZ38E",
+      "duration_sec": 183,
+      "audio_sha256": "5a7304b461c1693e50282228bc9af653db5abc7f5361194ac33567e569ff0d6f",
+      "asr_sha256": "4701dfdae1b40b7814825694e456cf90610b3bef01030065c5084197dbbb9af9",
+      "review_status": "full_asr_read_dialogue_only",
+      "evidence_level": "E1",
+      "claims": [
+        {"id":"77B-C01","start_sec":0.0,"end_sec":19.56,"paraphrase":"The audio begins with the couple's argument dialogue and accusations.","uncertainty":"No explanatory narration is present."},
+        {"id":"77B-C02","start_sec":19.56,"end_sec":42.7,"paraphrase":"The recorded material continues as escalating dialogue between the two characters.","uncertainty":"Escalation is observable dialogue content, not a distilled screenplay comparison."},
+        {"id":"77B-C03","start_sec":42.7,"end_sec":62.06,"paraphrase":"The scene continues without an audible analytical thesis or comparison method.","uncertainty":"Visual script pages alone would still require explanatory or independent comparison work."}
+      ]
+    }
+  ]
+}

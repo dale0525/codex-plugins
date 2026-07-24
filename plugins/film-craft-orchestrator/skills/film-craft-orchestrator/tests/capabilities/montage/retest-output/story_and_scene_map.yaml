@@ -1,0 +1,25 @@
+id: radio-montage.story-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: []
+assumptions: []
+constraints: {aspect_ratio: "16:9", runtime_target_sec: 40}
+open_questions: []
+status: frozen
+change_log: []
+logline: "In one locked workshop composition, a restorer turns a rusted silent radio into a warm, singing receiver."
+theme_question: "Can patient attention bring a neglected object back into relationship with the world?"
+scenes:
+  - scene_id: S01
+    purpose: "Four time stages shown by material change and a recurring tuning-hum motif, never by subtitles."
+    entry_state: "Radio is rusted, dusty, missing knob, silent."
+    exit_state: "Radio is cleaned, repaired, powered and audibly receiving a voice."
+    runtime_budget_sec: 40
+    location_id: LOC-WORKBENCH
+    beats:
+      - {beat_id: S01-B01, event: "Reveal rusted radio and test its dead dial", visible_change: "dust trembles; no response", exit_state: "restorer commits to opening it"}
+      - {beat_id: S01-B02, event: "Disassemble and clean chassis", visible_change: "rust flakes fall; brass and Bakelite emerge", exit_state: "components exposed and cleaner"}
+      - {beat_id: S01-B03, event: "Repair wiring and replace knob", visible_change: "solder glows; new knob turns", exit_state: "radio assembled and ready"}
+      - {beat_id: S01-B04, event: "Power on and tune", visible_change: "dial lamp warms; speaker cone moves; voice resolves", exit_state: "radio plays clearly"}
+must_beat_ids: [S01-B01, S01-B02, S01-B03, S01-B04]
+runtime_reconciliation: {scene_budget_sum_sec: 40, result: pending}

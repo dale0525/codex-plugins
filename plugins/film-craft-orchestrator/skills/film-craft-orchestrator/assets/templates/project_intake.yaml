@@ -1,0 +1,18 @@
+project_id: example-project
+format: short
+audience: ""
+runtime: ""
+genre_tone: ""
+source_material: none
+rights_status: not-applicable
+creative_goal: ""
+constraints:
+  budget: ""
+  locations: []
+  cast: []
+  rating: ""
+  language: zh-CN
+  deadline: ""
+deliverable: ""
+assumptions: []
+open_questions: []

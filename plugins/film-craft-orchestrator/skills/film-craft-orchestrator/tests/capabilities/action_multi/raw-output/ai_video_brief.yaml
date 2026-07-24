@@ -1,0 +1,30 @@
+project_id: action_multi_45s
+format: short
+audience: general cinematic AI-video viewers
+runtime_sec: 45
+aspect_ratio: "16:9"
+genre_tone: 紧张、清晰、非致命动作惊悚
+source_material: none
+rights_status: not-applicable
+creative_goal: 三人在仓库围绕包裹和绳索展开一次可逆误判与交接，最终安全改道。
+must_beats:
+  - 甲持包裹从左门进入
+  - 乙阻拦甲
+  - 丙从高台扔下绳索改变路线
+  - 至少一次包裹交接
+  - 一次可逆误判且被澄清
+  - 不展示致命伤
+model_access: []
+reference_assets: []
+dialogue_strategy: separate_audio_then_lipsync
+generation_constraints:
+  iteration_limit_per_clip: 4
+  credit_budget: unknown
+delivery_constraints: 16:9, 24fps, Mandarin dialogue, final 45s
+assumptions:
+  - 仓库为单层主通道加左门与高台，绳索为软质安全道具。
+  - 误判是乙把包裹识别为危险品，随后由标签和动作澄清，可逆且无人受伤。
+  - 参考图和生成权限尚未提供，因此只能诊断预览。
+open_questions:
+  - 角色外观、仓库美术和模型版本待锁定。
+status: diagnostic_preview

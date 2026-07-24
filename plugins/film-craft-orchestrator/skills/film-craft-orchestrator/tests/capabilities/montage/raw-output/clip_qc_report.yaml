@@ -1,0 +1,11 @@
+project_id: old_radio_montage
+version: 1
+status: pending
+reference_gate: diagnostic_preview
+clips:
+  - {clip_id: c01, status: pending}
+  - {clip_id: c02, status: pending}
+  - {clip_id: c03, status: pending}
+  - {clip_id: c04, status: pending}
+  - {clip_id: c05, status: pending}
+checks: [narrative_purpose, identity, state, space, environment, editability, sound]

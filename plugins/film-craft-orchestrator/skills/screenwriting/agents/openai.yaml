@@ -1,0 +1,6 @@
+interface:
+  display_name: "Screenwriting"
+  short_description: "创作可拍的故事、场景、对白与剧本"
+  default_prompt: "Use $screenwriting to write or revise this story as a visual, shootable screenplay."
+policy:
+  allow_implicit_invocation: true

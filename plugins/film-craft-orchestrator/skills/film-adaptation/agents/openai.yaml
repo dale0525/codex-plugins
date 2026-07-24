@@ -1,0 +1,6 @@
+interface:
+  display_name: "Film Adaptation"
+  short_description: "把小说与来源材料转译为可拍叙事"
+  default_prompt: "Use $film-adaptation to build a source-traceable screen adaptation from this material."
+policy:
+  allow_implicit_invocation: true

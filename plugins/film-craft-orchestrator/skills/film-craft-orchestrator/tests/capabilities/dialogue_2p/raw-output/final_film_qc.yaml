@@ -1,0 +1,17 @@
+id: night-shift-handoff.final-film-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [night-shift-handoff.edit-plan@1.0.0, night-shift-handoff.clip-qc@1.0.0, night-shift-handoff.reference-assets@1.0.0]
+assumptions: ["未提供实际参考图、生成输出、音频hash或模型版本。"]
+constraints: {runtime_target_sec: 45, aspect_ratio: "16:9", max_iterations_per_clip: 4}
+open_questions: ["实际参考图与生成输出待补；对白录音与口型结果待验；模型/版本与分辨率待定。"]
+status: qc_pending
+change_log: []
+runtime: {target_sec: 45, measured_sec: null, reconciliation: pending}
+must_beat_coverage: {S01-B01: planned, S01-B02: planned, S01-B03: planned, S01-B04: planned}
+continuity: pending
+dialogue_lipsync: pending
+sound: pending
+rights_and_provenance: pending
+blocking_conflicts: []
+final_result: diagnostic_preview_pending

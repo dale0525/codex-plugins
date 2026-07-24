@@ -1,0 +1,8 @@
+project_id: umbrella_rack_prank_30s
+runtime_target_sec: 30
+ordered_clips: [c01, c02, c03, c04, c05]
+edit_rhythm: 4s setup, 6s first hit, 7s escalation, 7s novelty, 6s callback
+transitions: hard cuts on spray clicks; hold final applause tableau 1 second within c05
+must_beat_coverage: {b01: c01, b02: c02, b03: c03, b04: c04, b05: c05}
+handles_not_counted_sec: 0.5 per clip
+status: pending

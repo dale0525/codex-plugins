@@ -1,0 +1,41 @@
+id: project.scene-01.blocking
+version: 1.0.0
+owner_role: director
+source_inputs: [project.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+scene_id: S01
+location_id: LOC-01
+layout_anchors: []
+axis: ""
+screen_direction: {}
+starting_positions:
+  CHAR-PROTAGONIST:
+    world_position: ""
+    frame_position: ""
+    eye_line: ""
+movement_beats:
+  - beat_id: S01-B01
+    before_state: {}
+    trigger: ""
+    character_objective: ""
+    playable_action: ""
+    world_from: ""
+    world_to: ""
+    frame_from: ""
+    frame_to: ""
+    eye_line: ""
+    screen_direction_effect: ""
+    attention_change: ""
+    camera_handoff: ""
+    light_sound_effect: ""
+    after_state: {}
+    generation_risks: []
+    fallback: ""
+storyboard_test:
+  evidence_frames: []
+  intended_turn_beat: S01-B01
+  observer_result: pending

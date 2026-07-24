@@ -1,0 +1,85 @@
+id: tide-station.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs:
+- tide-station.visual-bible@1.0.0
+assumptions:
+- No real reference files supplied
+constraints: {}
+open_questions:
+- Attach character, location and prop masters before production
+status: qc_pending
+change_log: []
+assets:
+- asset_id: CHARREF-SHENLAN-01
+  role: character_master
+  entity_ids:
+  - CHAR-SHENLAN
+  path_or_uri: null
+  sha256: ''
+  dimensions: pending
+  rights_status: user-owned
+  source: expected_only
+  version: 1.0.0
+  status: pending
+  reference_transport: none
+- asset_id: CHARREF-SHENYU-01
+  role: character_master
+  entity_ids:
+  - CHAR-SHENYU
+  path_or_uri: null
+  sha256: ''
+  dimensions: pending
+  rights_status: user-owned
+  source: expected_only
+  version: 1.0.0
+  status: pending
+  reference_transport: none
+- asset_id: LOCREF-TIDE-STATION-01
+  role: scene_master
+  entity_ids:
+  - LOC-TIDE-STATION
+  path_or_uri: null
+  sha256: ''
+  dimensions: pending
+  rights_status: user-owned
+  source: expected_only
+  version: 1.0.0
+  status: pending
+  reference_transport: none
+- asset_id: PROPREF-TAPE-01
+  role: prop_master
+  entity_ids:
+  - PROP-TAPE
+  path_or_uri: null
+  sha256: ''
+  dimensions: pending
+  rights_status: user-owned
+  source: expected_only
+  version: 1.0.0
+  status: pending
+  reference_transport: none
+- asset_id: PROPREF-PLAYER-01
+  role: prop_master
+  entity_ids:
+  - PROP-PLAYER
+  path_or_uri: null
+  sha256: ''
+  dimensions: pending
+  rights_status: user-owned
+  source: expected_only
+  version: 1.0.0
+  status: pending
+  reference_transport: none
+- asset_id: PROPREF-CLOCK-01
+  role: prop_master
+  entity_ids:
+  - PROP-CLOCK
+  path_or_uri: null
+  sha256: ''
+  dimensions: pending
+  rights_status: user-owned
+  source: expected_only
+  version: 1.0.0
+  status: pending
+  reference_transport: none

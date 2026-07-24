@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-07-24",
+  "method": "Low-resolution local videos were sampled at ASR claim windows; every frame was inspected at original resolution and hashed. Public screenplay PDFs were rendered locally for page checks, but page images are not distributed with the skill.",
+  "global_limit": "Frames verify visible pages, subtitles, film compositions or explanatory graphics only. They cannot independently prove motion, sound overlap, edit sequence, cut counts, causal effect or filmmaker intent.",
+  "items": [
+    {
+      "video_id": "QTxvzkwVsQE",
+      "channel": "Lessons from the Screenplay",
+      "title": "Arrival — Examining an Adaptation",
+      "url": "https://www.youtube.com/watch?v=QTxvzkwVsQE",
+      "frame_status": "partial",
+      "script_page_anchors": [
+        {"pdf_physical_page":1,"printed_page":"title","render_sha256":"411c21207d60164563f2f45aeacd0b4d9e3051d842d3953b2f146daf418b33bf","short_locator":"Final Shooting Draft / August 20, 2015","distributed":false},
+        {"pdf_physical_page":20,"printed_page":"18 / scenes 28-30","render_sha256":"f88e0c6601fb023f3caab9b2cb87030e27b370e4d52cfe36282d6698a2320ac5","short_locator":"Montana landing site and alien ship","distributed":false},
+        {"pdf_physical_page":60,"printed_page":"53 / 63","render_sha256":"97de90be09016da2d98fb674eb40b5c894e7421d17df691ea66fd7d139b40826","short_locator":"offer/weapon; Hannah V.O.","distributed":false},
+        {"pdf_physical_page":70,"printed_page":"63","render_sha256":"e4983ec3019694c1a7798fe7f7c135bc20a541af722cead7e73c3753caa8a4f0","short_locator":"logogram and learn-more sentence","distributed":false},
+        {"pdf_physical_page":80,"printed_page":"72","render_sha256":"fefd5cb6f2c8f03b70de6d636d48c8e4b201b94222d88b3df858980b4e1120f5","short_locator":"Weber, Sapir-Whorf and dreams","distributed":false},
+        {"pdf_physical_page":100,"printed_page":"91 / 98","render_sha256":"a39b83c6db149e44fdaf5787a018464676a187c9ef52854fb6b17bdc10fadd9f","short_locator":"flashback and Hannah age 12","distributed":false},
+        {"pdf_physical_page":110,"printed_page":"100 / scenes 105-108","render_sha256":"11edc2b67d213eeb5a7a311d6f020a0e61efceab81427934ad4677de46886049","short_locator":"cylinder, portal and shell","distributed":false}
+      ],
+      "frames": [
+        {"timestamp_sec":88,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-88s.jpg","frame_sha256":"b82c52a86d58904923efae7fe2928a26478086209f5450ffbc566deddfb2f4a1","observation":"The word perspective appears over the host, marking the analysis section.","supports_claims":["ARR-C02"],"limit":"Does not show the flash-forward order."},
+        {"timestamp_sec":143,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-143s.jpg","frame_sha256":"05c240859d45f0c5da1b24bd9c46b6b6dd2f463fa9bc38d053c57dd2dc147d27","observation":"An adult and child stand at a cold lakeshore in a film frame.","supports_claims":["ARR-C02","ARR-C05","ARR-C06"],"limit":"Does not establish time direction, death cause or choice."},
+        {"timestamp_sec":168,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-168s.jpg","frame_sha256":"44b00278dabd545c4f9a594f760de99f644158e733c909dd564131a0df46ff55","observation":"A screenplay-page image includes the phrase acted as two-way communication devices and discussion of ships.","supports_claims":["ARR-C03"],"limit":"Does not show the film's arrival staging."},
+        {"timestamp_sec":205,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-205s.jpg","frame_sha256":"e5dde94f690773aad5e827ae5c5c7b325d460f36462bb48be83181758f9a12cb","observation":"A dark close-up shows a person in a breathing/protective mask.","supports_claims":["ARR-C04"],"limit":"Does not identify the person or prove the threat mechanism."},
+        {"timestamp_sec":250,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-250s.jpg","frame_sha256":"9553f4b7fb33b06c32c74a54243931c7632f154a412e10bdfa17e311346366ef","observation":"A screenplay-page image shows short daughter/age dialogue including You will be twenty-five then.","supports_claims":["ARR-C05","ARR-C06"],"limit":"Does not show the full death-cause passage."},
+        {"timestamp_sec":377,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-377s.jpg","frame_sha256":"3fde85eee0f288b37d07229c88147de99c46e853cc766c6e011e99ecc5985b36","observation":"A human silhouette crosses mist with a large indistinct form behind.","supports_claims":["ARR-C08"],"limit":"One still cannot prove montage or voiceover transfer."},
+        {"timestamp_sec":455,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-455s.jpg","frame_sha256":"8026c64a37cabe9a8d0e500f4361f71391e1d6dc0acc560c6f56d1df3054600b","observation":"A screenplay-page image visibly contains Louise, Colonel Weber and Ian dialogue about managing the room.","supports_claims":["ARR-C09","ARR-C11"],"limit":"Does not prove which lines were removed or reassigned."},
+        {"timestamp_sec":500,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-500s.jpg","frame_sha256":"05be956d45f84bd53478d61d71bfd548a7de5d2e79384332acb79607c4ab5dfe","observation":"A male interview/featurette speaker appears with an Arrival Blu-ray source label.","supports_claims":["ARR-C07","ARR-C10"],"limit":"The still does not contain the spoken explanation."},
+        {"timestamp_sec":532,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-532s.jpg","frame_sha256":"19614e78c80ae82981e6aee59fa70738f1787b3a28b4b97c009196dbca30a8ce","observation":"Louise appears in a warm dark bedroom film frame.","supports_claims":["ARR-C10","ARR-C11","ARR-C12"],"limit":"Does not prove dream structure or dialogue source."},
+        {"timestamp_sec":563,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-563s.jpg","frame_sha256":"14fea4b04ad2927b667a63bcc25d66fdc1b8af482c418b7a23d334dca5ef294c","observation":"A behind-the-scenes camera rig and performers are visible against a white set.","supports_claims":["ARR-C11"],"limit":"Does not prove the final VFX replacement or edit."},
+        {"timestamp_sec":630,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-630s.jpg","frame_sha256":"c8944d93af8b9bbcdcd1a26604a7410567ee0a3230297884e530f89f68a5a0ed","observation":"Louise faces a circular heptapod logogram with misty figures behind.","supports_claims":["ARR-C08","ARR-C11","ARR-C13"],"limit":"Does not prove language theory or sound order."},
+        {"timestamp_sec":690,"path":"frame-samples/script-screen/arrival/QTxvzkwVsQE-690s.jpg","frame_sha256":"b9dc3a7f6d1eb8d0fcfdaf650cf8e4dcb3ec9ac54480a1f5b207c195b81af90a","observation":"A film frame carries a script-style Agent Halpern subtitle about finding out what this means.","supports_claims":["ARR-C09","ARR-C14"],"limit":"Subtitle text is visibly truncated and cannot prove surrounding dialogue or edit order."}
+      ]
+    },
+    {
+      "video_id": "8IAGH6k17nw",
+      "channel": "Lessons from the Screenplay",
+      "title": "The Social Network — Sorkin, Structure, and Collaboration",
+      "url": "https://www.youtube.com/watch?v=8IAGH6k17nw",
+      "frame_status": "partial",
+      "script_page_anchors": [
+        {"pdf_physical_page":1,"printed_page":"title","render_sha256":"596d29470f0528e7fa9416f11a01e032cf9707455a349cf75d76e92b0823f0ef","short_locator":"screenplay by Aaron Sorkin","distributed":false},
+        {"pdf_physical_page":2,"printed_page":"opening","render_sha256":"6f16c098e4f472548ddf14862d0127c13ac8ba1e06684231b07964a504e19389","short_locator":"from black; China/IQ opening","distributed":false},
+        {"pdf_physical_page":23,"printed_page":"22","render_sha256":"bba6c993c3d46ecfe73f43e699ab82846c594487cf6249e5696ce422085f2f65","short_locator":"cut to deposition three years later","distributed":false},
+        {"pdf_physical_page":24,"printed_page":"23","render_sha256":"d4f8964dd76fe01151fffcc66316459a8c0da653d7bfc959c551af4f0da1d56e","short_locator":"deposition dialogue and beat","distributed":false},
+        {"pdf_physical_page":51,"printed_page":"50","render_sha256":"cb850bce0bff81587dc8182834878d00f50eeecf02118dc82272af1180c0bac3","short_locator":"code/Facebook deposition exchange","distributed":false},
+        {"pdf_physical_page":75,"printed_page":"74","render_sha256":"99ea94e389aaa53fe455e20f2d824fc34b28d9ee1491f262d5db967f154fedb5","short_locator":"rain deposition and beat","distributed":false},
+        {"pdf_physical_page":123,"printed_page":"122","render_sha256":"fe0d22ae6b852374cdb9fe9e7608851cd7ad7478b587e1c00029f07b9d85fe56","short_locator":"Sean/Mark repeated thesis passage","distributed":false}
+      ],
+      "frames": [
+        {"timestamp_sec":117,"path":"frame-samples/script-screen/social/8IAGH6k17nw-117s.jpg","frame_sha256":"2a354cb6d2498ae531d245af42a202c95c3143992a8b847e5f9d286b79e80728","observation":"A graphic explicitly labels overlapping dialogue over a dark film background.","supports_claims":["SOC-C05"],"limit":"Does not prove actual sound overlap."},
+        {"timestamp_sec":144,"path":"frame-samples/script-screen/social/8IAGH6k17nw-144s.jpg","frame_sha256":"aa66dcda446e9d4e20f208a17065648c1b5289f65d28f9c7d484e30e93929ee2","observation":"Mark appears at a deposition table with a subtitle matching the code question.","supports_claims":["SOC-C06"],"limit":"Does not prove several speakers overlap."},
+        {"timestamp_sec":220,"path":"frame-samples/script-screen/social/8IAGH6k17nw-220s.jpg","frame_sha256":"e9d108f39a1f3e688eb4824306c4e46a6575513b49629ff1399fd7ba6fcc2035","observation":"A Columbia opening frame is paired with a script display containing from-the-black and China/IQ dialogue.","supports_claims":["SOC-C09","SOC-C13"],"limit":"Does not prove audio lead-in timing."},
+        {"timestamp_sec":330,"path":"frame-samples/script-screen/social/8IAGH6k17nw-330s.jpg","frame_sha256":"d048949d60fe19d15da5be38d76da7eaa0158d22caa1bf6f37f3f63013895c56","observation":"Erica's film close-up is paired with highlighted a cappella and row-crew dialogue.","supports_claims":["SOC-C07","SOC-C08","SOC-C09","SOC-C10"],"limit":"Does not show the complete misunderstanding chain."},
+        {"timestamp_sec":450,"path":"frame-samples/script-screen/social/8IAGH6k17nw-450s.jpg","frame_sha256":"46fa963fc2eb04471aa7c196e26c1d4a4493034d2dbb15ebe7f9c43d809eb248","observation":"A script display visibly says cut to second deposition room and notes returning between deposition rooms.","supports_claims":["SOC-C12","SOC-C13","SOC-C14"],"limit":"Does not prove the film's complete order."},
+        {"timestamp_sec":490,"path":"frame-samples/script-screen/social/8IAGH6k17nw-490s.jpg","frame_sha256":"f87ceec215a308126bcd9b76bc49a075f98f875a8ac05d5fe84f7b89bcdd1714","observation":"Eduardo appears in a restaurant frame with a visible cut-back-to script subtitle.","supports_claims":["SOC-C13","SOC-C14"],"limit":"Does not prove preceding/following shots."},
+        {"timestamp_sec":585,"path":"frame-samples/script-screen/social/8IAGH6k17nw-585s.jpg","frame_sha256":"22be05275dfbce42013c12f908f7f7b2a58aad187cdb5da1e089f904a492e76f","observation":"Aaron Sorkin appears in a labeled Charlie Rose interview frame.","supports_claims":["SOC-C15","SOC-C16"],"limit":"Does not contain Fincher or prove editing decisions."},
+        {"timestamp_sec":660,"path":"frame-samples/script-screen/social/8IAGH6k17nw-660s.jpg","frame_sha256":"6605e2f07c91871ede0650b1834c5c9b5446a26d2055916b7cf6baabc977f394","observation":"Mark appears in a close film frame during the deposition sequence.","supports_claims":["SOC-C17","SOC-C18","SOC-C19"],"limit":"Does not prove shot duration or cut rate."},
+        {"timestamp_sec":674,"path":"frame-samples/script-screen/social/8IAGH6k17nw-674s.jpg","frame_sha256":"32e3b82790641a6aa91220fcbd66fc6f28aae446722bfaeb4469f6ebe7ce2931","observation":"Mark is soft in foreground while lawyers at the deposition table are clearer behind.","supports_claims":["SOC-C17","SOC-C18"],"limit":"Does not prove its relationship to adjacent shots."},
+        {"timestamp_sec":690,"path":"frame-samples/script-screen/social/8IAGH6k17nw-690s.jpg","frame_sha256":"5c15629ee8074ec2bd0698b777fd060456d64e8170ad535b80f0b43385e133e2","observation":"A roughly four-by-four collage shows many deposition compositions.","supports_claims":["SOC-C18"],"limit":"The collage cannot independently verify exactly 16 angles or 33 cuts."},
+        {"timestamp_sec":720,"path":"frame-samples/script-screen/social/8IAGH6k17nw-720s.jpg","frame_sha256":"7ba57a22912098c52f4924d185fe9b62fbc7b17f6e884080a5a1692fa71c5d0a","observation":"A deposition frame is paired with visible Mark (beat) hesitation text and a Sorkin speaker graphic.","supports_claims":["SOC-C04","SOC-C19","SOC-C20"],"limit":"Does not prove spoken timing or performance naturalness."},
+        {"timestamp_sec":780,"path":"frame-samples/script-screen/social/8IAGH6k17nw-780s.jpg","frame_sha256":"937930c3d5aa56285a9595a7a57bfe41c6bf9667a048c9618c2d0e73e36d4e5f","observation":"Mark appears among a party crowd with computers and bottles in foreground.","supports_claims":["SOC-C20"],"limit":"Closing illustration only; no causal claim follows from the still."}
+      ]
+    }
+  ]
+}

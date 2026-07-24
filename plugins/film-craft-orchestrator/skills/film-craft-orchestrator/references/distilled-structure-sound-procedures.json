@@ -1,0 +1,144 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-23",
+  "sources": [
+    {"video_id": "bLMpNwOIfSY", "title": "8 Sequence Approach To Writing A Screenplay — Paul Joseph Gulino", "channel": "Film Courage", "url": "https://www.youtube.com/watch?v=bLMpNwOIfSY", "evidence_type": "asr_reviewed", "evidence_level": "E2", "speaker_context": "Paul Joseph Gulino 讲解序列方法"},
+    {"video_id": "_AQkQ4a1yJ8", "title": "Why The Batman's Sound is Different", "channel": "Thomas Flight", "url": "https://www.youtube.com/watch?v=_AQkQ4a1yJ8", "evidence_type": "asr_reviewed", "evidence_level": "E4"}
+  ],
+  "procedures": [
+    {
+      "id": "sequence-local-problem-chain",
+      "domain": "writer",
+      "title": "局部问题驱动的序列链",
+      "claim_refs": [
+        {"start_sec": 158.48, "end_sec": 227.98, "kind": "video_claim", "paraphrase": "序列方法把令人生畏的长中段拆成约十五分钟的局部脚本，每段建立在上一段结果上。"},
+        {"start_sec": 239.8, "end_sec": 302.44, "kind": "video_claim", "paraphrase": "角色先尝试最容易的办法，遭遇失败后换策略；每个序列有新情境、目标、问题和通常不完全有利的结果，通向下一段。"},
+        {"start_sec": 309.8, "end_sec": 368.76, "kind": "video_claim", "paraphrase": "行动幕、序列和场景都可用目标—障碍—答案的嵌套结构维持观众的希望与担忧。"}
+      ],
+      "applicability": {"use_when": ["长片/剧集中段松散", "场景很多但没有局部推进", "改编需要压缩为若干可验收单元"], "do_not_use_when": ["把八段或十五分钟当硬页码", "短片不需要多序列", "非线性作品却未先建立因果顺序"]},
+      "inputs": ["主角总目标", "核心障碍", "可用策略", "终局选择", "目标片长", "已有场景"],
+      "steps": [
+        {"step": 1, "action": "按局部问题而非页码聚类场景；每组写 sequence question。", "check": "问题能以结果回答。"},
+        {"step": 2, "action": "为序列写 start circumstance、local want、easiest tactic 和 obstacle。", "check": "easiest tactic 符合人物当下认知。"},
+        {"step": 3, "action": "设计至少一次策略变化，并让结果产生新问题或提高代价。", "check": "下一序列由结果而非作者巧合启动。"},
+        {"step": 4, "action": "把每个场景挂到序列目标；无贡献场景删、并或重新定义。", "check": "每场至少改变局部信息、资源、关系或路线。"},
+        {"step": 5, "action": "从后往前检查：最终选择需要哪些序列结果，删掉只填长度的单元。", "check": "序列数量由故事决定。"}
+      ],
+      "outputs": ["sequence questions", "局部目标/策略/结果链", "场景归属表", "删并清单"],
+      "failure_signals": ["按固定十五分钟机械切段", "每段结尾都只是更大爆炸", "下一段与上一段结果无因果", "角色每段重复同一策略"],
+      "acceptance_tests": [
+        {"test": "因果链接", "pass_criteria": "每个序列开端可追溯到上一序列结果或明确初始条件。"},
+        {"test": "策略变化", "pass_criteria": "每序列至少一次因障碍导致的策略变化。"},
+        {"test": "场景归属", "pass_criteria": "100% 保留场景服务某个 sequence question 或终局必需 setup。"}
+      ],
+      "worked_example": {"Q1": "阿遥能否在父亲发现前离家？", "easy_tactic": "偷偷叫车", "failure": "信被父亲移动", "result": "她确认父亲知道计划", "Q2": "她能否逼父亲表态而不先承认害怕？"}
+    },
+    {
+      "id": "tension-release-contrast-map",
+      "domain": "writer",
+      "title": "张力—释放—对比地图",
+      "claim_refs": [
+        {"start_sec": 315.4, "end_sec": 368.76, "kind": "video_claim", "paraphrase": "张力来自观众对角色能否得到目标的希望与担忧，答案在不同叙事层级持续更新。"},
+        {"start_sec": 433.8, "end_sec": 488.6, "kind": "video_claim", "paraphrase": "视频主张光暗、强弱、快慢及张力/释放的变化能重置注意；持续紧张过久会疲劳，释放后可重新建立。"},
+        {"start_sec": 494.84, "end_sec": 526.96, "kind": "video_claim", "paraphrase": "受访者把三到五分钟注意窗口作为谨慎假设，并强调用新发展/进入/切换重置；不是精确法规。"}
+      ],
+      "applicability": {"use_when": ["连续高压变得麻木", "序列缺少节奏对比", "需要设计观众问题的暂时答案"], "do_not_use_when": ["把三到五分钟当生理定律", "释放段与主线无关", "只用音乐强弱替代叙事变化"]},
+      "inputs": ["sequence/scene map", "观众当前希望与担忧", "每拍张力值", "声音/光线/速度对比", "暂时答案"],
+      "steps": [
+        {"step": 1, "action": "每场写 hope/fear question 和本场提供的 partial answer。", "check": "问题与角色目标相连。"},
+        {"step": 2, "action": "按 1–5 记录张力，不追求一直上升；标出连续高压长度。", "check": "评分附具体风险变化。"},
+        {"step": 3, "action": "在高压段后设计功能性释放：暂时成功、关系停顿、空间/声音对比或信息重框。", "check": "释放仍改变人物或观众理解。"},
+        {"step": 4, "action": "释放后用新问题重建张力，不能原样重复旧风险。", "check": "新问题提高代价或改变意义。"},
+        {"step": 5, "action": "用 table read/animatic 测观众何处走神，再调整；不按固定分钟自动插事件。", "check": "调整有观察记录。"}
+      ],
+      "outputs": ["hope/fear map", "张力曲线", "释放功能", "注意力测试记录"],
+      "failure_signals": ["张力值连续满格却风险不变", "喜剧插曲可完全删除且不影响人物", "释放后回到同一个问题", "用固定分钟数代替测试"],
+      "acceptance_tests": [
+        {"test": "问题更新", "pass_criteria": "每次释放后，观众问题或代价至少一项改变。"},
+        {"test": "释放功能", "pass_criteria": "释放段至少改变关系、信息或策略之一。"},
+        {"test": "注意力", "pass_criteria": "盲测中 4/5 观众能复述各序列局部问题与暂时答案。"}
+      ],
+      "worked_example": {"tension": "阿遥发现信被移动，连续三拍试探父亲。", "release": "父亲平静询问煎蛋要不要盐，短暂恢复日常。", "new_question": "他是在允许她走，还是逼她先承认？", "effect": "风险从是否被发现转为谁先表态。"}
+    },
+    {
+      "id": "subjective-ambient-mix",
+      "domain": "sound",
+      "title": "主观注意力环境声混音",
+      "claim_refs": [
+        {"start_sec": 89.12, "end_sec": 171.48, "kind": "video_claim", "paraphrase": "同一雨声在不同场景被设计成不同质感，并非只复制环境，而是强化场景情绪。"},
+        {"start_sec": 187.2, "end_sec": 290.86, "kind": "video_claim", "paraphrase": "环境雨声在人物紧张时下降又回归，混音以相对音量模拟角色注意力而非物理恒定现实。"},
+        {"start_sec": 292.86, "end_sec": 335.68, "kind": "video_claim", "paraphrase": "闪光声的回响/混响被用作解离式主观听觉，声音与现实关系可被有意放松。"}
+      ],
+      "applicability": {"use_when": ["场景 POV 明确", "环境声可充当注意力基线", "要表现专注、解离或心理变化"], "do_not_use_when": ["对白清晰度/无障碍要求未保证", "把主观效果当现实录音错误", "每场都使用同一滤镜"]},
+      "inputs": ["POV 角色", "客观环境基线", "attention shifts", "对白/关键音", "room tone", "可用混响/滤波/音量自动化"],
+      "steps": [
+        {"step": 1, "action": "先做可理解的客观基线 mix，记录各层相对响度。", "check": "对白、关键动作与环境均可识别。"},
+        {"step": 2, "action": "在时间线上标角色注意力进入、峰值和退出。", "check": "标记由表演/信息触发。"},
+        {"step": 3, "action": "每段只选一个主观变量：环境下降、特定声音突出、混响增加或频谱收窄。", "check": "不同时改四项导致效果含混。"},
+        {"step": 4, "action": "保留足够环境连续性或返回点，让观众知道物理空间未消失。", "check": "主观段结束后基线有可听回归。"},
+        {"step": 5, "action": "与客观版盲听，询问注意目标和心理状态，不先告诉效果。", "check": "若只听到‘音量怪’，重做触发与幅度。"}
+      ],
+      "outputs": ["客观基线", "attention shift map", "主观自动化版", "A/B 盲听记录"],
+      "failure_signals": ["环境突然消失但无 POV 触发", "效果遮挡关键对白", "观众误以为地点改变", "主观效果不回归导致整场失去层次"],
+      "acceptance_tests": [
+        {"test": "注意目标", "pass_criteria": "至少 4/5 听众指出预设关注对象。"},
+        {"test": "空间连续", "pass_criteria": "至少 4/5 听众仍判断在同一物理空间。"},
+        {"test": "可懂度", "pass_criteria": "关键对白/信息通过项目响度与可懂度标准。"}
+      ],
+      "worked_example": {"baseline": "厨房冰箱、煎蛋、水龙头持续。", "shift": "父亲留下信时，冰箱和煎蛋下降，只剩盘底摩擦；阿遥确认后水龙头逐渐回归。", "purpose": "把观众放进阿遥只听见‘回答’的主观瞬间。"}
+    },
+    {
+      "id": "relative-loudness-subtraction-test",
+      "domain": "sound",
+      "title": "用减法塑造相对响度",
+      "claim_refs": [
+        {"start_sec": 556.6, "end_sec": 650.44, "kind": "video_claim", "paraphrase": "案例把打击声做得更安静，反而使俱乐部音乐显得更压倒；保留雨声会让未改变的枪声显得更弱。"},
+        {"start_sec": 661.04, "end_sec": 687.2, "kind": "video_claim", "paraphrase": "视频强调电影声音的目标常是正确印象而非逐项物理准确。"}
+      ],
+      "applicability": {"use_when": ["关键声音缺乏重量", "所有层都很响导致扁平", "想加强事件却已接近响度上限"], "do_not_use_when": ["未经混音师/交付规范检查", "牺牲对白/安全警示可懂度", "把动态压缩问题误当素材问题"]},
+      "inputs": ["分轨 stems", "关键声音", "背景/音乐/环境层", "交付响度/峰值规范", "监听校准"],
+      "steps": [
+        {"step": 1, "action": "做基线并记录关键声前后各层峰值与主观关系。", "check": "使用固定监听电平。"},
+        {"step": 2, "action": "复制 A/B：A 提高关键声；B 保持关键声、降低竞争层。", "check": "两版整体响度匹配后比较。"},
+        {"step": 3, "action": "若要表现压倒性环境，允许局部动作声低于现实预期；若要突出动作，短暂抽走环境。", "check": "选择对应 POV/叙事目的。"},
+        {"step": 4, "action": "检查事件前后动态回归，避免持续抽空。", "check": "环境返回点自然。"},
+        {"step": 5, "action": "在小音箱/耳机/标准监听盲听，并做响度合规检查。", "check": "不只在一个系统有效。"}
+      ],
+      "outputs": ["基线响度记录", "加法版", "减法版", "多系统盲听", "交付合规结果"],
+      "failure_signals": ["每个关键点都加响", "整体峰值更高但冲击更小", "环境抽走后再不回来", "小音箱上关键线索消失"],
+      "acceptance_tests": [
+        {"test": "相对冲击", "pass_criteria": "响度匹配后至少 4/5 听众认为目标版更突出。"},
+        {"test": "合规", "pass_criteria": "峰值、响度和对白可懂度符合交付规范。"},
+        {"test": "多系统", "pass_criteria": "标准监听、耳机和小音箱中至少两类保持目标关系。"}
+      ],
+      "worked_example": {"problem": "盘子落桌不够有决定感，继续加响显得夸张。", "A": "盘声 +4dB。", "B": "盘声不变，落点前 300ms 将冰箱/雨声降 5dB，随后 1 秒回归。", "result": "B 在匹配响度后更突出且不失真。"}
+    },
+    {
+      "id": "sonic-belief-motif",
+      "domain": "sound",
+      "title": "用声音母题标记角色相信什么",
+      "claim_refs": [
+        {"start_sec": 354.68, "end_sec": 398.72, "kind": "video_claim", "paraphrase": "配乐母题可表达角色主观判断而非客观事实：某主题出现表示角色以为某人出现。"},
+        {"start_sec": 406.12, "end_sec": 458.44, "kind": "video_claim", "paraphrase": "片内音乐与含混声音把观众放入角色的偏执与不确定，而不是直接确认对象。"},
+        {"start_sec": 470.16, "end_sec": 545.96, "kind": "video_claim", "paraphrase": "介于环境与配乐的声床被用来标记角色对某人的情绪反应；认知改变后，该声床缺席。"}
+      ],
+      "applicability": {"use_when": ["角色判断可能错误", "需要区分客观出现与主观联想", "人物认知弧可由声音规则变化表现"], "do_not_use_when": ["母题尚未建立就要求观众识别", "每次角色出现都机械播放", "声音会误导关键安全/事实信息"]},
+      "inputs": ["角色 belief states", "目标对象/概念", "声音母题或声床", "首次建立场景", "变化/缺席时机"],
+      "steps": [
+        {"step": 1, "action": "定义母题不是‘谁出现’，而是 POV 角色此刻相信/害怕什么。", "check": "写成 belief sentence。"},
+        {"step": 2, "action": "先在事实与信念一致的场景建立关联。", "check": "至少两次可辨出现，强度不过度。"},
+        {"step": 3, "action": "在信念可能错误的场景只给部分母题、变形或片内来源，保持歧义。", "check": "画面不同时客观确认。"},
+        {"step": 4, "action": "人物认知改变后，删除、改调性或转给新对象。", "check": "变化点与剧情选择一致。"},
+        {"step": 5, "action": "盲听/看片询问观众‘角色以为什么’与‘事实是什么’，两题分开。", "check": "观众能区分主观与客观。"}
+      ],
+      "outputs": ["belief motif rule", "建立/变形/缺席地图", "声音版本", "主客观理解测试"],
+      "failure_signals": ["母题等于角色标签", "第一次出现就承担误导", "认知改变后规则不变", "观众把主观线索当客观事实且影片不纠正"],
+      "acceptance_tests": [
+        {"test": "规则学习", "pass_criteria": "建立后至少 4/5 观众把母题与目标 belief 相连。"},
+        {"test": "主客观区分", "pass_criteria": "歧义场景中至少 4/5 能说出角色怀疑，但不把对象出现当确定事实。"},
+        {"test": "弧光变化", "pass_criteria": "母题缺席/变形与认知转折在同一 beat±1。"}
+      ],
+      "worked_example": {"belief": "阿遥相信瓷盘摩擦代表父亲拒绝交流。", "establish": "前两场父亲沉默时都有盘声。", "ambiguity": "早餐末盘声出现，但父亲同时把信留给她。", "change": "结尾她主动推动盘子，同一声音从拒绝变成挑战。"}
+    }
+  ]
+}

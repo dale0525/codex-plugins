@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "retrieved_at": "2026-07-23",
+  "method": {
+    "media": "authorized low-resolution YouTube research copy",
+    "extractor": "ffmpeg exact-time still extraction, scale=1280:-2",
+    "review": "21/21 frames individually inspected with view_image by an independent image-profile reviewer",
+    "distribution": "Only hashes, timestamps and transformative visual observations are distributed; frames remain in work/ and are not bundled with the skill."
+  },
+  "global_limits": [
+    "静态帧不能证明摄影机运动、剪辑因果、焦段、精确曝光或创作者意图。",
+    "画面内教学标签只能证明标签可见，不能单独验证技术结论。",
+    "人物视线方向可以记录，但视线目标和故事含义需要连续画面或其他证据。"
+  ],
+  "items": [
+    {
+      "video_id": "3FOzD4Sfgag",
+      "title": "Edgar Wright - How to Do Visual Comedy",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=3FOzD4Sfgag",
+      "video_sha256": "5f6b7e86e6ac332796a05b62ce91f07efba2fb325b8cee8a29c20c12614001cd",
+      "frame_status": "sampled_reviewed",
+      "frames": [
+        {
+          "timestamp_sec": 126,
+          "frame_sha256": "83f86da49299efc1b778f09b3b9c77e4077efdac574fa54760c5a29fb2a08fae",
+          "observation": "近距离金属菱形纹表面，巨大深色英文字母被画框裁切；无人物；整体低调暖灰棕。",
+          "uncertainty": "字母不完整，不能恢复完整词语。"
+        },
+        {
+          "timestamp_sec": 135,
+          "frame_sha256": "bfb524184a230c835e7ba87ccc7250015f81ef447bf2c10c67127f5e6aecb9de",
+          "observation": "车站月台远景；人物坐在左前景并朝右下，轨道、月台边和灯柱向中右远处汇聚；环境灰绿，灯具暖黄。"
+        },
+        {
+          "timestamp_sec": 225,
+          "frame_sha256": "1e04ea2237f510276ef76c052e49076d5c65f4c4497f3f4e378c8dd5b9b766f3",
+          "observation": "几乎全幅为暗橄榄黑色的模糊竖向带，左缘略亮；无可辨识人物或物体。",
+          "uncertainty": "不能识别物体、光源或空间。"
+        },
+        {
+          "timestamp_sec": 260,
+          "frame_sha256": "12d04a7c64c874fa80127a51c3119c508f75eefa93fa183541c346f2fca6bd86",
+          "observation": "戴细框眼镜男性面部特写居中偏左，眼睛朝画面左侧；脸一侧较冷暗、另一侧较暖亮，背景有绿米色散景。"
+        }
+      ],
+      "cross_frame_observation": "四个样本的场景、景别、可见主体与色温差异很大；只能把它们用作单帧构图复习入口，不能据此重建笑点或剪辑链。"
+    },
+    {
+      "video_id": "8q4X2vDRfRk",
+      "title": "The Spielberg Oner",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=8q4X2vDRfRk",
+      "video_sha256": "02a4dc6f6ca5ad1f0120fbf0713ce3be5e0d8b09583d3622c588006cc29556ed",
+      "frame_status": "sampled_reviewed",
+      "frames": [
+        {
+          "timestamp_sec": 77,
+          "frame_sha256": "70c5b66113a69b44d712ec55cd7c1180f86fdebe12fea15fd26499d6a7c6467f",
+          "observation": "暖棕低照度群像，中左男性举小玻璃杯，周围人物落入暗部；下方可见“1 min 26 sec”叠字。"
+        },
+        {
+          "timestamp_sec": 84,
+          "frame_sha256": "b458f3dd4846dfdc34c58f253ccd554862b0c4ab86e8e0e32e548dca6e9537cb",
+          "observation": "女性居中偏右举杯闭眼，左侧女性朝她，后方多人处于暗部；暖光集中于脸和手。"
+        },
+        {
+          "timestamp_sec": 90,
+          "frame_sha256": "aedfd0aeb2f85e16250f1b081a3126633ba85c9c85c4d3c881d1b1d42973e928",
+          "observation": "前景手臂自右伸向左，手和小玻璃杯被暖光集中照亮，背景人物近黑。"
+        },
+        {
+          "timestamp_sec": 330,
+          "frame_sha256": "d772fd6fe31b233188f2d1504e92a285f9c9579c21892476e0f55c286ceaef2a",
+          "observation": "男性背影位于近对称室内中央，两扇高拱窗强逆光，使人物成为深色剪影。"
+        }
+      ],
+      "cross_frame_observation": "77–90 秒三个样本可见主体从群像举杯转为女性举杯再到手和杯的近景；330 秒样本是中央背影与拱窗。静帧不能证明这些构图是在一次连续运动中完成。"
+    },
+    {
+      "video_id": "wLfZL9PZI9k",
+      "title": "Ultimate Guide to Camera Angles: Every Camera Shot Explained",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=wLfZL9PZI9k",
+      "video_sha256": "75b27112d1e85a3950aa2e4aecaf1ae3a9a5e8c386ee8047f4c10dcb9921dbee",
+      "frame_status": "sampled_reviewed",
+      "frames": [
+        {
+          "timestamp_sec": 90,
+          "frame_sha256": "8fdbc827eda4f70a8db8dd868799fbc8c66a8e215285d9630bdd0a5db01b4d85",
+          "observation": "深紫黑教学图包含相机图标、灰色平面、白色虚线和紫色轴线；右上可读“LOW ANGLE (LA)”。"
+        },
+        {
+          "timestamp_sec": 170,
+          "frame_sha256": "37ad05479bad0273cd1958a2af008184651bb33dc804db16e6b394d47f1e55a6",
+          "observation": "黑衣男性位于左侧并朝右下；左下可读“HIGH ANGLE (HA)”，右下标“GOODFELLAS (1990)”。"
+        },
+        {
+          "timestamp_sec": 330,
+          "frame_sha256": "5ff36125d8c78b0a12c31ea9fcece3a03f1b9a1c2e0d52955626f0ba19fc6ada",
+          "observation": "双人近景中中央男性看向右前景人物，拱门轮廓呈斜向；左下可读“DUTCH ANGLE”，右下标“12 MONKEYS (1995)”。"
+        },
+        {
+          "timestamp_sec": 420,
+          "frame_sha256": "666f243c5e461742ef638380642a3ef973fe877c8a99e01a27a32077bfdda7fb",
+          "observation": "男性居中正面，暖红橙低调酒吧背景；左下可读“EYE LEVEL”，右下标“PULP FICTION (1994)”。"
+        }
+      ],
+      "cross_frame_observation": "样本显示课程用图示和电影例图分别标注 LOW ANGLE、HIGH ANGLE、DUTCH ANGLE、EYE LEVEL；标签支持分类入口，但不能替代单变量实拍测试。"
+    },
+    {
+      "video_id": "RXD97Rc5P_s",
+      "title": "4 Unique Setups for Daylight | Add Style to Your Lighting",
+      "channel": "Aputure",
+      "url": "https://www.youtube.com/watch?v=RXD97Rc5P_s",
+      "video_sha256": "562c1c36d3415b2e513eae683c1a98fe84b5b36d199d676d883dc025d17a77e4",
+      "frame_status": "sampled_reviewed",
+      "frames": [
+        {
+          "timestamp_sec": 70,
+          "frame_sha256": "aff86160114ea4779f90822f43b119c4019084fe054388f099cff5ff9bd6c0d1",
+          "observation": "暖窗卧室宽景，人物坐床前低头；画面叠字提示小房间墙面反射会削弱对比。"
+        },
+        {
+          "timestamp_sec": 150,
+          "frame_sha256": "220ca3937a5614061b4783851a02710b625c6ba23ab67cc78ec9c3a57a72b7b6",
+          "observation": "户外幕后设备近景，人物扶矩形灯具/面板；右上可读“NOVA P600C (5600K)”。"
+        },
+        {
+          "timestamp_sec": 210,
+          "frame_sha256": "528adcfd9c75f69b2e2065267f9c8615976174c28dabac5842809843cdcc840b",
+          "observation": "灰雾低对比卧室，人物坐床沿朝左下，右窗柔亮、人物前侧和左墙较暗。"
+        },
+        {
+          "timestamp_sec": 300,
+          "frame_sha256": "1b3f2776a960ae65acc022cf8b30dbc1fb790cc475e81cd5f93c3ad10fb67cf1",
+          "observation": "冷蓝低调卧室，百叶形成横向条纹；左下可读“NOVA P600C (5600K, ULTRA BOUNCE)”。"
+        },
+        {
+          "timestamp_sec": 340,
+          "frame_sha256": "96c1ae84a7a8cd4c0f309f672e82996d97667cb5c4ecd3122c5c29bd85409eb8",
+          "observation": "冷蓝卧室加入两处暖黄实用灯，冷暖并置；左下标“2 X 3 BOUNCE BOARD”。"
+        }
+      ],
+      "cross_frame_observation": "样本可见卧室由暖、灰中性到冷蓝/冷暖并置的外观变化，也可见灯具与 bounce 标签；单帧无法证明标注设备是变化的唯一原因。"
+    },
+    {
+      "video_id": "fdVAM-R8cTI",
+      "title": "Cinematography Case Study — Lighting The Face",
+      "channel": "Wandering DP",
+      "url": "https://www.youtube.com/watch?v=fdVAM-R8cTI",
+      "video_sha256": "e87972cb7eb02a076c28d068337214363102e4629cf4da176f9b1d3b5241826b",
+      "frame_status": "sampled_reviewed",
+      "frames": [
+        {
+          "timestamp_sec": 250,
+          "frame_sha256": "ca339c00939486dbecd658788356360630007d1d0149daaae2bbf2000ad34b5b",
+          "observation": "暖色四人围桌宽景，右窗较亮；底部播放器 UI 与右下讲解者画中画清晰可见。"
+        },
+        {
+          "timestamp_sec": 330,
+          "frame_sha256": "3fa2fa6dce1e11149919bfce73ff24a9f2e409fd05e61839ced3b170ec6ac21b",
+          "observation": "红马甲男性居中近景，身后窗形成中轴，脸一侧较暗；右下保留讲解者画中画。"
+        },
+        {
+          "timestamp_sec": 380,
+          "frame_sha256": "661c8389a646d3b49c63f7e6487aca52e86cd37674de3bb625101af3a69202f0",
+          "observation": "女性居中偏左，右窗暖亮，左侧较暗；底部播放器 UI 与右下画中画可见。"
+        },
+        {
+          "timestamp_sec": 470,
+          "frame_sha256": "ac17f03ca8fad3d5a51a8b4131b0da765606dea9051e9bb016c1b32ece1949d8",
+          "observation": "黑底左右对比布局，女性和男性局部被洋红手绘线标记；右下仍有讲解者画中画。"
+        }
+      ],
+      "cross_frame_observation": "样本覆盖群像宽景、男性近景、女性中景和带手绘批注的对比画面；播放器、画中画和洋红线属于界面/后期覆盖，不能当场景内实体。"
+    }
+  ]
+}

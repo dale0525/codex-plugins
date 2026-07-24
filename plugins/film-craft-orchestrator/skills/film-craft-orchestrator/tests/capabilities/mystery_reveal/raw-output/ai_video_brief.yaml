@@ -1,0 +1,28 @@
+project_id: mystery_reveal
+format: short
+audience: general thriller audience
+runtime_sec: 60
+aspect_ratio: "16:9"
+genre_tone: contained domestic mystery; cool blue night, restrained tension
+source_material: none
+rights_status: not-applicable
+creative_goal: Let viewers spot the decisive physical clue before the detective, survive one deliberate misdirection, and understand the reveal through action rather than explanatory text.
+must_beats:
+  - A cooling cup of tea establishes a recent unseen presence.
+  - Viewer sees a red thread caught under the saucer before detective notices it.
+  - Suspect Mara misdirects by claiming the cup was untouched all night.
+  - Detective follows the thread to a broken window latch and hidden wet footprints.
+  - Final reveal: Mara is framed by the thread on her coat as police lights arrive; no explanatory subtitle.
+model_access: []
+reference_assets: []
+dialogue_strategy: separate_audio_then_lipsync
+generation_constraints:
+  iteration_limit_per_clip: 4
+  credit_budget: unknown
+delivery_constraints: 16:9, 24fps, final runtime exactly 60 seconds
+assumptions:
+  - One apartment kitchen and hallway can be generated as a continuous geography.
+  - Detective Lin and suspect Mara remain visually distinct and consistent.
+  - No external reference images or generation outputs are available at authoring time.
+open_questions:
+  - Final video model and voice provider remain unselected.

@@ -1,0 +1,22 @@
+id: tide-station.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [tide-station.adaptation-matrix@1.0.0]
+assumptions: ["90秒为成片目标；无真实参考资产，所有生成先作诊断预览", "对白采用先录音后口型/画外声"]
+constraints:
+  runtime_target_sec: 90
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: ["最终视频模型与官方参数待项目方确认", "录音带内容及声音演员授权待补"]
+status: frozen
+change_log: ["1.0.0: initial novel adaptation package"]
+format: novel-adaptation
+audience: "成人悬疑/超自然短片观众"
+genre_tone: "台风前的海岸悬疑，克制写实，潮湿冷蓝与磁带暖棕对照"
+rights_status: user-owned
+creative_goal: "在90秒内让沈岚从寻找母亲线索转为主动穿过防波堤，完成一次关于带路者身份的信息反转。"
+must_beats: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05, S01-B06, S01-B07]
+generation_constraints:
+  available_models: []
+  dialogue_strategy: separate_audio_then_lipsync

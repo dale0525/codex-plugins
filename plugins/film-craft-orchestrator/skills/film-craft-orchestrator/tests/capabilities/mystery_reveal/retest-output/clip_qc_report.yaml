@@ -1,0 +1,18 @@
+id: cold-cup.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [cold-cup.generation-log@1.0.0]
+assumptions: ["无输出文件，所有门 pending"]
+constraints: {}
+open_questions: []
+status: pending
+change_log: []
+clips:
+  - {clip_id: C-S01-01, status: pending, technical: {status: pending, evidence: none}, semantic: {status: pending, evidence: none}, continuity: {status: pending, evidence: none}, editability: {status: pending, evidence: none}, sound_lipsync: {status: pending, evidence: none}, provenance: {status: pending, evidence: none}, repair: "attach first-frame reference"}
+  - {clip_id: C-S01-02, status: pending, technical: {status: pending}, semantic: {status: pending}, continuity: {status: pending}, editability: {status: pending}, sound_lipsync: {status: pending}, provenance: {status: pending}, repair: "attach first-frame reference"}
+  - {clip_id: C-S01-03, status: pending, technical: {status: pending}, semantic: {status: pending}, continuity: {status: pending}, editability: {status: pending}, sound_lipsync: {status: pending}, provenance: {status: pending}, repair: "attach first-frame reference"}
+  - {clip_id: C-S01-04, status: pending, technical: {status: pending}, semantic: {status: pending}, continuity: {status: pending}, editability: {status: pending}, sound_lipsync: {status: pending}, provenance: {status: pending}, repair: "split two-shot if identity drifts"}
+  - {clip_id: C-S01-05, status: pending, technical: {status: pending}, semantic: {status: pending}, continuity: {status: pending}, editability: {status: pending}, sound_lipsync: {status: pending}, provenance: {status: pending}, repair: "use prop insert"}
+  - {clip_id: C-S01-06, status: pending, technical: {status: pending}, semantic: {status: pending}, continuity: {status: pending}, editability: {status: pending}, sound_lipsync: {status: pending}, provenance: {status: pending}, repair: "shorten pour action"}
+  - {clip_id: C-S01-07, status: pending, technical: {status: pending}, semantic: {status: pending}, continuity: {status: pending}, editability: {status: pending}, sound_lipsync: {status: pending}, provenance: {status: pending}, repair: "macro insert"}
+  - {clip_id: C-S01-08, status: pending, technical: {status: pending}, semantic: {status: pending}, continuity: {status: pending}, editability: {status: pending}, sound_lipsync: {status: pending}, provenance: {status: pending}, repair: "遮挡交接+反应镜头"}

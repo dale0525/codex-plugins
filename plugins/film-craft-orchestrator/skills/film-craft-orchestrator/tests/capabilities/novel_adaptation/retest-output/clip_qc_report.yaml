@@ -1,0 +1,19 @@
+id: tide-station.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [tide-station.clip-plan@1.0.0]
+assumptions: ["No rendered outputs exist"]
+constraints: {}
+open_questions: []
+status: qc_pending
+change_log: []
+clips:
+  - {clip_id: C-S01-01, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "attach references and render diagnostic", status: pending}
+  - {clip_id: C-S01-02, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "attach references and render diagnostic", status: pending}
+  - {clip_id: C-S01-03, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "composite tape label; attach prop master", status: pending}
+  - {clip_id: C-S01-04, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "split two-character coverage", status: pending}
+  - {clip_id: C-S01-05, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "button insert", status: pending}
+  - {clip_id: C-S01-06, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "voiceover reaction", status: pending}
+  - {clip_id: C-S01-07, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "warning VO plus hand insert", status: pending}
+  - {clip_id: C-S01-08, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "split walk/reaction", status: pending}
+  - {clip_id: C-S01-09, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "door insert and surf cutaway", status: pending}

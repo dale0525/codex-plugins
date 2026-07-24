@@ -1,0 +1,18 @@
+project_id: mystery_reveal
+status: pending
+final: pending
+runtime_target_sec: 60
+edit_contribution_sec: pending
+must_beats_covered: pending
+reference_inputs_verified: false
+approved_clips_verified: false
+generation_logs_complete: false
+continuity_conflicts: pending
+dialogue_lipsync: pending
+sound_stems: pending
+rights_and_consent: not-applicable
+model_version_provenance: pending
+known_deviations:
+  - No actual references, generated clips, hashes, or evidence frames supplied.
+  - Provider/model adapter remains unselected.
+promotion_gate: diagnostic_preview_only

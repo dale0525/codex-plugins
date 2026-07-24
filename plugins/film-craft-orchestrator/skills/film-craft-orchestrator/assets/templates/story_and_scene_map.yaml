@@ -1,0 +1,58 @@
+id: project.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [project.ai-video-brief@1.0.0]
+assumptions: []
+constraints:
+  runtime_target_sec: 60
+open_questions: []
+status: draft
+change_log: []
+logline: ""
+dramatic_question: ""
+theme_question: ""
+protagonist:
+  character_id: CHAR-PROTAGONIST
+  want: ""
+  need: ""
+  fear: ""
+  contradiction: ""
+antagonistic_force: ""
+ending_choice: ""
+sequences: []
+temporal_state_changes: []
+delivery_requirements:
+  - requirement_id: DR-S01-B01-01
+    content: ""
+    exactness: semantic
+    approved_carriers: [visual_action]
+    required_character_ids: [CHAR-PROTAGONIST]
+    visible_character_ids: [CHAR-PROTAGONIST]
+    required_prop_ids: []
+    location_ids: [LOC-01]
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 60
+    location_id: LOC-01
+    time: ""
+    entry_state: ""
+    objective: ""
+    obstacle: ""
+    turn: ""
+    exit_state: ""
+    beats:
+      - beat_id: S01-B01
+        narrative_function: ""
+        visible_start: ""
+        trigger: ""
+        character_tactic: ""
+        visible_end: ""
+        runtime_budget_sec: 5
+        delivery_requirement_ids: [DR-S01-B01-01]
+        preferred_carrier: visual_action
+        generation_risks: []
+        fallback: ""
+must_beat_ids: [S01-B01]
+runtime_reconciliation:
+  scene_budget_sum_sec: 60
+  result: pending

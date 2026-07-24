@@ -1,0 +1,17 @@
+id: project.edit-plan
+version: 1.0.0
+owner_role: editor
+source_inputs: []
+assumptions: []
+constraints:
+  runtime_target_sec: 60
+open_questions: []
+status: draft
+change_log: []
+timeline:
+  - clip_id: C-S01-01
+    contribution_sec: 5
+    must_beat_ids: [S01-B01]
+    delivery_requirement_ids: [DR-S01-B01-01]
+    cut_purpose: ""
+runtime_reconciliation: pending

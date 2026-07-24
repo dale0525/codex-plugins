@@ -1,0 +1,23 @@
+id: radio-montage.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions:
+  - No real reference images or generation access are available; all clips remain diagnostic_preview/pending.
+constraints:
+  runtime_target_sec: 40
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: []
+status: frozen
+change_log: []
+format: short
+audience: "viewers who enjoy tactile restoration stories"
+genre_tone: "observational workshop documentary, tactile and hopeful"
+rights_status: not-applicable
+creative_goal: "Restore one rusted tabletop radio from silent wreck to warm, singing receiver in a 40-second montage."
+must_beats: [S01-B01, S01-B02, S01-B03, S01-B04]
+generation_constraints:
+  available_models: []
+  dialogue_strategy: separate_audio_then_lipsync

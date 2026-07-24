@@ -1,0 +1,45 @@
+id: cold-cup.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [cold-cup.ai-video-brief@1.0.0]
+assumptions: []
+constraints: {runtime_target_sec: 60}
+open_questions: []
+status: frozen
+change_log: []
+logline: "一名侦探在封闭茶室调查失窃案，观众先看见冷却杯底留下的融水环和被挪动的杯垫；嫌疑人把注意力引向窗边，最终侦探用热水复现水环，揭出嫌疑人曾在案发后移动杯子。"
+dramatic_question: "谁在案发后移动了杯子，为什么要伪造窗边的时间线？"
+theme_question: "当物证比口供更诚实时，人会选择相信哪一种叙事？"
+protagonist:
+  character_id: CHAR-DETECTIVE
+  want: "在不惊动嫌疑人的情况下锁定移动杯子的人"
+  need: "接受微小物证足以推翻看似完整的口供"
+  fear: "线索被污染而无法成立"
+  contradiction: "冷静记录细节，却习惯先相信最顺滑的解释"
+antagonistic_force: "嫌疑人林岚用自洽口供和窗边脚印制造错误时间线"
+ending_choice: "侦探不争辩口供，现场加热杯底复现融水环并扣留林岚"
+sequences:
+  - sequence_id: SQ01
+    purpose: "观众先获得物证，侦探后进入并接受误导"
+    beats: [S01-B01, S01-B02, S01-B03]
+  - sequence_id: SQ02
+    purpose: "侦探用可重复实验揭示杯子被移动"
+    beats: [S01-B04, S01-B05]
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 60
+    location_id: LOC-TEAHOUSE
+    time: "凌晨，停电后恢复供电的茶室"
+    entry_state: "茶室封锁，玻璃杯在桌中央，杯底有一圈将干未干的水痕"
+    objective: "确认失窃文件离开桌面的路径"
+    obstacle: "林岚提供看似完整的窗边脚印叙事"
+    turn: "热水复现水环，杯垫背面粘着文件纤维"
+    exit_state: "林岚被扣留，杯子和杯垫封存"
+    beats:
+      - {beat_id: S01-B01, narrative_function: "观众先看见关键线索", visible_start: "空桌上的玻璃杯底水环和偏移杯垫", trigger: "冷凝水沿杯壁滑落", character_tactic: "无", visible_end: "水环与杯垫纤维可见", runtime_budget_sec: 10, preferred_carrier: visual_insert, generation_risks: [condensation_detail], fallback: "静态道具insert加水滴声音"}
+      - {beat_id: S01-B02, narrative_function: "侦探建立空间", visible_start: "侦探推门进入", trigger: "手电扫过桌面", character_tactic: "逐项记录", visible_end: "侦探注意杯子但未看见杯垫背面", runtime_budget_sec: 10, preferred_carrier: blocking, generation_risks: [single_actor], fallback: "侦探手部与桌面反打"}
+      - {beat_id: S01-B03, narrative_function: "嫌疑人误导", visible_start: "林岚指向窗边湿脚印", trigger: "她把杯垫压回杯下", character_tactic: "转移注意力并封存线索", visible_end: "侦探暂信窗边叙事，杯垫被压住", runtime_budget_sec: 12, preferred_carrier: performance_and_prop, generation_risks: [two_characters, prop_contact], fallback: "指向窗边+杯垫insert+侦探反应"}
+      - {beat_id: S01-B04, narrative_function: "侦探选择验证", visible_start: "侦探回看记录，手指停在水环", trigger: "从保温壶倒入热水", character_tactic: "用实验替代争辩", visible_end: "新水环与旧环重合，杯垫背面露出纤维", runtime_budget_sec: 14, preferred_carrier: action_insert, generation_risks: [pouring_liquid, hand_prop_contact], fallback: "热水倒入insert+杯垫背面macro"}
+      - {beat_id: S01-B05, narrative_function: "动作揭示真相", visible_start: "林岚伸手要夺杯子", trigger: "侦探用证物袋挡住并翻转杯垫", character_tactic: "扣留并封存", visible_end: "纤维与水环同框，林岚停止挣扎", runtime_budget_sec: 14, preferred_carrier: reveal_and_reaction, generation_risks: [two_characters, hand_contact], fallback: "证物袋遮挡交接+纤维macro+林岚反应"}
+must_beat_ids: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05]
+runtime_reconciliation: {scene_budget_sum_sec: 60, result: pending}

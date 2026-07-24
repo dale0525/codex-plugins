@@ -1,0 +1,22 @@
+id: action-multi.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints:
+  runtime_target_sec: 45
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: []
+status: draft
+change_log: []
+format: short
+audience: "面向普通观众的动作悬疑短片"
+genre_tone: "仓库追逐；紧张但不致命，清晰的空间因果"
+rights_status: unknown
+creative_goal: "三人在仓库围绕包裹发生阻拦、绳索改道、交接与可逆误判，45秒内保持动作因果可剪辑。"
+must_beats: [S01-B01,S01-B02,S01-B03,S01-B04,S01-B05,S01-B06,S01-B07,S01-B08,S01-B09]
+generation_constraints:
+  available_models: [luma-ray-2-api-2026-07]
+  dialogue_strategy: separate_audio_then_lipsync

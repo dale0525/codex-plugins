@@ -1,0 +1,26 @@
+id: night-shift-handoff.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [night-shift-handoff.director-intent@1.0.0]
+assumptions: ["无实际参考图；以下为待附加的描述性主参考。"]
+constraints: {}
+open_questions: []
+status: frozen
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: ["冷荧光绿", "雨夜蓝", "钥匙暖金"]
+camera_language: {allowed_framing: ["medium-wide", "medium_close", "insert"], lens_or_fov_range: "35-50mm equivalent", height_rules: ["eye-level", "door threshold low insert"], movement_rules: ["locked", "slow lateral reveal"], axis_rules: ["desk-to-door axis; no unmotivated crossing"]}
+lighting_rules: ["室内顶灯冷绿；门外雨反光蓝；钥匙仅接受局部暖反光。"]
+characters:
+  - {character_id: CHAR-ALAN, name: "阿岚", role: "night guard", wardrobe_version: WARD-ALAN-01, anchors: ["短黑发", "左眉小疤", "深蓝制服", "旧对讲机在右肩"], must_not_drift: ["年龄约35", "制服徽章位置", "无胡须"]}
+  - {character_id: CHAR-XIAOZHOU, name: "小周", role: "relief guard", wardrobe_version: WARD-XIAOZHOU-01, anchors: ["瘦高", "灰色连帽衫外搭反光背心", "钥匙圈在右手", "湿发贴额"], must_not_drift: ["年龄约28", "不携带第二串钥匙"]}
+locations:
+  - {location_id: LOC-GATEHOUSE, layout: "桌在左、出口门在右、摄像头位于门上方偏左", fixed_objects: ["交接簿", "荧光灯", "旧显示器"], direction: "门外为画面右", time: "02:17雨夜", weather: "持续小雨", reference_ids: [REF-LOC-MASTER]}
+props:
+  - {prop_id: PROP-KEY, appearance: "三齿黄铜旧钥匙，红色塑料牌", state_machine: ["in_XIAOZHOU_hand", "in_pocket", "not_visible"], initial_holder: CHAR-XIAOZHOU, reference_ids: [REF-KEY-MASTER]}
+  - {prop_id: PROP-LOGBOOK, appearance: "黑色硬壳交接簿，最后一页空白", state_machine: ["closed", "open_blank", "pen_touch"], initial_holder: none, reference_ids: [REF-LOG-MASTER]}
+motifs: [{motif_id: MOTIF-THRESHOLD, appearance: "门框", change: "由拦截边界变成放行边界", payoff: "小周离开而责任留在簿上"}]
+reference_assets: [REF-LOC-MASTER, REF-KEY-MASTER, REF-LOG-MASTER]
+must_preserve: ["两人身份与服装", "钥匙只在小周手中/口袋", "门—桌轴线", "冷绿室内/蓝雨夜对比"]
+must_not: ["仓库内部", "第三人物", "可读长段文字", "两人同时长段说话"]

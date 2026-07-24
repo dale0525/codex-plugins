@@ -1,0 +1,7 @@
+source_unit,source_anchor,source_function,screen_unit,delivery_requirement_ids,invent_ids,preservation,new_visual_or_sound_device,character_changes,structural_change,reason,risks,verification,rights_status
+U01,storm arrival,world_rule|causal,S01-B01,DR-B01,INV-01,must_preserve,rain J-cut and door,none,compressed arrival,establish countdown,weather drift,three anchors,user-owned
+U02,stopped clock,world_rule|information,S01-B02,DR-B02,,must_preserve,clock insert plus tide broadcast,none,none,make station active,text drift,composite clock,user-owned
+U03,named tape,causal|information,S01-B03,DR-B03,INV-02,must_preserve,tape prop insert,none,none,visible clue,text failure,approved label asset,user-owned
+U04,brother blocks exit,character|information,S01-B04,DR-B04,INV-03,must_preserve,brother blocks exit,Shenyu gets spatial control,combined entrance/dialogue,show strategy,identity drift,single coverage,user-owned
+U05,do not trust,reversal|theme,S01-B05/S01-B06,DR-B05-A|DR-B05-B|DR-B06,,must_preserve,child voice to mother VO,none,split audio beats,protect lip-sync,audio continuity,voice IDs,user-owned
+U06,breakwater door,choice|payoff,S01-B07,DR-B07-A|DR-B07-B,INV-04,must_preserve,door threshold and surf,Shenlan chooses unknown,expanded blocking,visible agency,door geometry,door insert,user-owned

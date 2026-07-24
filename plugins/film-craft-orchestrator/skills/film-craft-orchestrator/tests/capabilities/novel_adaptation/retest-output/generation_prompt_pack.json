@@ -1,0 +1,543 @@
+{
+  "id": "tide-station.prompt-pack",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [
+    "tide-station.visual-bible@1.0.0"
+  ],
+  "assumptions": [
+    "No references attached; diagnostic only"
+  ],
+  "constraints": {
+    "aspect_ratio": "16:9"
+  },
+  "open_questions": [
+    "adapter pending"
+  ],
+  "status": "qc_pending",
+  "change_log": [],
+  "prompts": [
+    {
+      "clip_id": "C-S01-01",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN"
+          ],
+          "state": "wet dark olive raincoat"
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN"],
+        "narrative_prop_ids": [],
+        "visible_character_ids": ["CHAR-SHENLAN"],
+        "action": {
+          "start": "hand on rusted door",
+          "motion": "push door inward",
+          "end": "stands in empty station"
+        },
+        "action_steps": [{"step_id": "A01", "action": "push the rusted door inward", "end_state": "Shenlan stands inside the empty station"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "wide to medium",
+          "movement": "slow_push"
+        },
+        "lighting": "cool overcast left",
+        "temporal_constraints": {
+          "duration_sec": 12
+        },
+        "continuity_invariants": [
+          "door right",
+          "no extra people"
+        ],
+        "negative_constraints": [
+          "no modern devices"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B01"],
+      "information_carriers": [{"requirement_id": "DR-B01", "carrier": "visual_action", "content": "Shenlan actively pushes into the abandoned station during the storm", "fallback": "door-handle insert with rain J-cut"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-01: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "LOCREF-TIDE-STATION-01",
+        "CHARREF-SHENLAN-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-01",
+      "rendered_prompt_hash": "8060d116190fc0e8e39bfdda3fa82e946fd0f0e494cf2215a09cf6103245fca2",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-02",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "PROP-CLOCK",
+            "PROP-PLAYER"
+          ]
+        },
+        "narrative_character_ids": [],
+        "narrative_prop_ids": ["PROP-CLOCK", "PROP-PLAYER"],
+        "visible_character_ids": [],
+        "action": {
+          "start": "frozen clock",
+          "motion": "lateral reveal",
+          "end": "speaker emits tide sound"
+        },
+        "action_steps": [{"step_id": "A01", "action": "reveal the frozen clock and rusted speaker", "end_state": "tide sound is active in the empty station"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "insert",
+          "movement": "lateral_reveal"
+        },
+        "lighting": "cool blue with amber LED",
+        "temporal_constraints": {
+          "duration_sec": 12
+        },
+        "continuity_invariants": [
+          "clock fixed",
+          "speaker rusted"
+        ],
+        "negative_constraints": [
+          "no readable modern text"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B02"],
+      "information_carriers": [{"requirement_id": "DR-B02", "carrier": "separate_audio", "content": "tide broadcast begins over a composited frozen station clock", "fallback": "locked clock insert plus independent tide track"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-02: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "LOCREF-TIDE-STATION-01",
+        "PROPREF-CLOCK-01",
+        "PROPREF-PLAYER-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-02",
+      "rendered_prompt_hash": "653b5ed18a56036232e1e6a8e8fc1336f5acb57da1b09e75ae032e31f080625f",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-03",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN",
+            "PROP-TAPE"
+          ]
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN"],
+        "narrative_prop_ids": ["PROP-TAPE"],
+        "visible_character_ids": ["CHAR-SHENLAN"],
+        "action": {
+          "start": "box behind ticket grille",
+          "motion": "retrieve box",
+          "end": "holds it to eyes"
+        },
+        "action_steps": [{"step_id": "A01", "action": "retrieve the tape box from behind the grille", "end_state": "the labeled box is held at eye level"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "prop_insert",
+          "movement": "locked"
+        },
+        "lighting": "cool with tape amber",
+        "temporal_constraints": {
+          "duration_sec": 12
+        },
+        "continuity_invariants": [
+          "cream box",
+          "name label composited"
+        ],
+        "negative_constraints": [
+          "garbled text"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B03"],
+      "information_carriers": [{"requirement_id": "DR-B03", "carrier": "prop_composite", "content": "the cassette box visibly carries Shenlan's exact name", "fallback": "approved label composite on a locked prop insert"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-03: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "PROPREF-TAPE-01",
+        "CHARREF-SHENLAN-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-03",
+      "rendered_prompt_hash": "b88017834146e0de0f83bae9e4b695f2f5d34cab0c88e1765e2a79e2804286b2",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-04",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN",
+            "CHAR-SHENYU"
+          ]
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN", "CHAR-SHENYU"],
+        "narrative_prop_ids": [],
+        "visible_character_ids": ["CHAR-SHENLAN", "CHAR-SHENYU"],
+        "action": {
+          "start": "Shenyu in darkness",
+          "motion": "steps into frame",
+          "end": "blocks route"
+        },
+        "action_steps": [{"step_id": "A01", "action": "Shenyu steps from darkness into Shenlan's route", "end_state": "the route to the exit is blocked"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "medium_two_layer",
+          "movement": "locked"
+        },
+        "lighting": "cool backlight",
+        "temporal_constraints": {
+          "duration_sec": 12
+        },
+        "continuity_invariants": [
+          "Shenyu right",
+          "Shenlan left"
+        ],
+        "negative_constraints": [
+          "identity swap"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B04"],
+      "information_carriers": [{"requirement_id": "DR-B04", "carrier": "visual_action", "content": "Shenyu appears and physically blocks Shenlan's route", "fallback": "Shenyu offscreen voice followed by two single-character reactions"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-04: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "CHARREF-SHENLAN-01",
+        "CHARREF-SHENYU-01",
+        "LOCREF-TIDE-STATION-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-04",
+      "rendered_prompt_hash": "61422594c563f7893376940a4102ece842d77894631a5444030e894d1ec6203d",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-05",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN",
+            "PROP-PLAYER"
+          ]
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN"],
+        "narrative_prop_ids": ["PROP-TAPE", "PROP-PLAYER"],
+        "visible_character_ids": ["CHAR-SHENLAN"],
+        "action": {
+          "start": "finger above play",
+          "motion": "presses button",
+          "end": "reels spin"
+        },
+        "action_steps": [{"step_id": "A01", "action": "press the cassette player's play button", "end_state": "the tape reels spin"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "insert",
+          "movement": "locked"
+        },
+        "lighting": "amber practical",
+        "temporal_constraints": {
+          "duration_sec": 12
+        },
+        "continuity_invariants": [
+          "tape in player"
+        ],
+        "negative_constraints": [
+          "extra fingers"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B05-A"],
+      "information_carriers": [{"requirement_id": "DR-B05-A", "carrier": "visual_action", "content": "Shenlan chooses to press play and the tape reels begin spinning", "fallback": "button insert followed by spinning reel insert"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-05: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "PROPREF-PLAYER-01",
+        "PROPREF-TAPE-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-05",
+      "rendered_prompt_hash": "6bac88221a51631548a85d00512c6d1548291f9190f82e18d2b6f99baaa05e9c",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-06",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN"
+          ]
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN"],
+        "narrative_prop_ids": ["PROP-PLAYER"],
+        "visible_character_ids": ["CHAR-SHENLAN"],
+        "action": {
+          "start": "listening",
+          "motion": "eyes track unseen voice",
+          "end": "holds breath"
+        },
+        "action_steps": [{"step_id": "A01", "action": "listen as the childhood recording begins", "end_state": "Shenlan holds her breath"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "close_reaction",
+          "movement": "slow_push"
+        },
+        "lighting": "cool face, amber rim",
+        "temporal_constraints": {
+          "duration_sec": 8
+        },
+        "continuity_invariants": [
+          "no lip movement"
+        ],
+        "negative_constraints": [
+          "mother on screen"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B05-B"],
+      "information_carriers": [{"requirement_id": "DR-B05-B", "carrier": "separate_audio", "content": "a childhood recording of Shenlan recites the tide table", "fallback": "dry child voice over Shenlan's locked reaction"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-06: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "CHARREF-SHENLAN-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-06",
+      "rendered_prompt_hash": "eb828b2502ba6c8c1c79e45f5d0ffef0ca41479fbc850a7184ca84c2aaa705e7",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-07",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN",
+            "CHAR-SHENYU",
+            "PROP-PLAYER"
+          ]
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN", "CHAR-SHENYU"],
+        "narrative_prop_ids": ["PROP-PLAYER"],
+        "visible_character_ids": ["CHAR-SHENLAN", "CHAR-SHENYU"],
+        "action": {
+          "start": "warning plays",
+          "motion": "Shenyu presses stop",
+          "end": "Shenlan looks to door"
+        },
+        "action_steps": [{"step_id": "A01", "action": "Shenyu presses stop during the warning", "end_state": "the player is silent and Shenlan looks toward the door"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "coverage",
+          "movement": "locked"
+        },
+        "lighting": "fill drops after warning",
+        "temporal_constraints": {
+          "duration_sec": 10
+        },
+        "continuity_invariants": [
+          "player fixed",
+          "Shenyu right"
+        ],
+        "negative_constraints": [
+          "visible mother"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B06"],
+      "information_carriers": [{"requirement_id": "DR-B06", "carrier": "separate_audio", "content": "the mother's exact warning plays and Shenyu immediately stops the machine", "fallback": "mother voice track plus stop-button insert and Shenlan reaction"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-07: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "CHARREF-SHENLAN-01",
+        "CHARREF-SHENYU-01",
+        "PROPREF-PLAYER-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-07",
+      "rendered_prompt_hash": "42a6c53528b05c8d8c84803fcab90a960fd5636641a24bdfe24afdef5fa15580",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-08",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN",
+            "CHAR-SHENYU"
+          ]
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN", "CHAR-SHENYU"],
+        "narrative_prop_ids": ["PROP-TAPE", "PROP-PLAYER"],
+        "visible_character_ids": ["CHAR-SHENLAN", "CHAR-SHENYU"],
+        "action": {
+          "start": "Shenlan releases tape",
+          "motion": "walks around brother",
+          "end": "reaches door"
+        },
+        "action_steps": [{"step_id": "A01", "action": "release the tape and walk around Shenyu", "end_state": "Shenlan reaches the seawall door"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "medium_tracking",
+          "movement": "short_tracking"
+        },
+        "lighting": "storm blue",
+        "temporal_constraints": {
+          "duration_sec": 12
+        },
+        "continuity_invariants": [
+          "tape left on player",
+          "left-to-right path"
+        ],
+        "negative_constraints": [
+          "collision"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B07-A"],
+      "information_carriers": [{"requirement_id": "DR-B07-A", "carrier": "visual_action", "content": "Shenlan releases the tape and walks around Shenyu rather than fighting for it", "fallback": "split tape release insert and single-character walk"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-08: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "CHARREF-SHENLAN-01",
+        "CHARREF-SHENYU-01",
+        "PROPREF-TAPE-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-08",
+      "rendered_prompt_hash": "d8552006a6c804fa4e1071b2b0012d4fe345e189aac65595802d872927a8321c",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "clip_id": "C-S01-09",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-SHENLAN"
+          ]
+        },
+        "narrative_character_ids": ["CHAR-SHENLAN"],
+        "narrative_prop_ids": [],
+        "visible_character_ids": ["CHAR-SHENLAN"],
+        "action": {
+          "start": "hand on seawall door",
+          "motion": "opens door against wind",
+          "end": "silhouette enters white surf"
+        },
+        "action_steps": [{"step_id": "A01", "action": "open the seawall door against the wind", "end_state": "Shenlan enters the white surf while Shenyu remains inside"}],
+        "environment": {"location_id": "LOC-TIDE-STATION", "time": "typhoon dusk"},
+        "camera": {
+          "framing": "back_figure",
+          "movement": "slow_push"
+        },
+        "lighting": "white storm light",
+        "temporal_constraints": {
+          "duration_sec": 10
+        },
+        "continuity_invariants": [
+          "door right",
+          "coat unchanged"
+        ],
+        "negative_constraints": [
+          "extra people"
+        ]
+      },
+      "delivery_requirement_ids": ["DR-B07-B"],
+      "information_carriers": [{"requirement_id": "DR-B07-B", "carrier": "visual_action", "content": "Shenlan opens the seawall door and enters the storm while Shenyu remains inside", "fallback": "door insert plus exterior back-figure cutaway"}],
+      "rendered_prompt": "Photorealistic 16:9 diagnostic preview for C-S01-09: grounded typhoon-dusk realism at the abandoned Tide Station; preserve frozen spatial continuity, cool storm light, restrained camera behavior, and no extra people. Execute only the specified start-to-end action; no readable generated text, no identity drift.",
+      "rendered_prompt_sha256": "pending",
+      "reference_inputs_expected": [
+        "CHARREF-SHENLAN-01",
+        "LOCREF-TIDE-STATION-01"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "prompt_id": "PROMPT-C-S01-09",
+      "rendered_prompt_hash": "e389d82c1bb61c2a0ebe8b9755bb73de57d68f8687c0e4a3406b00514c8b3fe8",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    }
+  ]
+}

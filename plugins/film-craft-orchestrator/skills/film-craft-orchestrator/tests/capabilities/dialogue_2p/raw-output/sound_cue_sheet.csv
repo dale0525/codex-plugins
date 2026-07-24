@@ -1,0 +1,9 @@
+cue_id,scene_id,clip_id,timeline_start_sec,timeline_end_sec,category,diegetic,source,rights_status,audio_hash,sync_target,entry,exit,status
+DIA-ALAN-01,S01,C-S01-03,12,18,dialogue,true,recorded_separate,user-owned,,CHAR-ALAN lipsync,fade_in,cut,pending
+DIA-XIAOZHOU-01,S01,C-S01-04,18,23,dialogue,true,recorded_separate,user-owned,,CHAR-XIAOZHOU lipsync,cut,cut,pending
+DIA-XIAOZHOU-02,S01,C-S01-05,23,31,dialogue,true,recorded_separate,user-owned,,CHAR-XIAOZHOU lipsync,duck_ambience,cut,pending
+DIA-XIAOZHOU-03,S01,C-S01-07,35,40,dialogue,true,recorded_separate,user-owned,,CHAR-XIAOZHOU lipsync,cut,fade_out,pending
+AMB-RAIN,S01,C-S01-01,0,45,ambience,true,generated_or_recorded,user-owned,,LOC-GATEHOUSE,fade_in,fade_out,pending
+SFX-KEY-JINGLE,S01,C-S01-01,0,7,spot_effects,true,foley,user-owned,,PROP-KEY,hit,decay,pending
+SFX-DOOR-LATCH,S01,C-S01-02,7,12,spot_effects,true,foley,user-owned,,door,hit,decay,pending
+SFX-PEN,S01,C-S01-08,40,45,foley,true,foley,user-owned,,PROP-LOGBOOK,hit,tail,pending

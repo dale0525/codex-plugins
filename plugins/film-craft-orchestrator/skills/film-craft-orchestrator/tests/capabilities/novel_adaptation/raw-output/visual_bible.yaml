@@ -1,0 +1,24 @@
+format: 16:9
+palette: 冷青灰雨景，室内锈褐与失真钠灯，录音指示灯唯一饱和红
+camera_language: 受限主观近景与静止客观中远景交替；手持仅在门与台风段加剧
+characters:
+  shen_lan:
+    age: 30
+    silhouette: 深色防水夹克、湿发贴颊、右手旧银戒
+    must_not_drift: 银戒在全片右手；夹克不换色
+  shen_yu:
+    age: 26
+    silhouette: 灰色连帽衫、潮湿袖口、逆光时脸半隐
+    must_not_drift: 始终从沈岚画面后侧进入，不突然出现在门外
+  mother_voice:
+    representation: 仅录音，不生成可见母亲
+location:
+  station: 七年停用海潮站，售票窗在候车室右侧，防波堤门在画面深处左后
+  continuity: 钟指同一失踪日期时刻；广播喇叭固定在候车室上方
+props:
+  tape:
+    description: 米白塑料盒、蓝墨水“沈岚”、透明磁带卷
+    state_sequence: 售票窗后→沈岚掌心→录音机内→沈屿触碰关机键
+  clock: 停止，玻璃有盐渍，不得走动
+lighting: 台风前冷散射天光从左侧窗入；室内一盏间歇钠灯；门开时白色闪电反差
+status: diagnostic_preview

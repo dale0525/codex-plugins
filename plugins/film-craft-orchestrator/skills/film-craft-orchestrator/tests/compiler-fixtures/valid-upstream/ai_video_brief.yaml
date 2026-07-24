@@ -1,0 +1,22 @@
+id: compiler-smoke.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints:
+  runtime_target_sec: 20
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: []
+status: frozen
+change_log: []
+format: short
+audience: adult general audience
+genre_tone: restrained suspense
+rights_status: user-owned
+creative_goal: A courier chooses to return a sealed key instead of using it.
+must_beats: [S01-B01, S01-B02]
+generation_constraints:
+  available_models: [google-veo-3-1-gemini-api-2026-07]
+  dialogue_strategy: separate_audio_then_lipsync

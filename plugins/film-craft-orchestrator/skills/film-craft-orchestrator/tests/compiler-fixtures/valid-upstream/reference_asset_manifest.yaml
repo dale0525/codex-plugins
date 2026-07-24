@@ -1,0 +1,10 @@
+id: compiler-smoke.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [compiler-smoke.visual-bible@1.0.0]
+assumptions: [Pure text-to-video diagnostic compilation uses no image references.]
+constraints: {}
+open_questions: []
+status: frozen
+change_log: []
+assets: []

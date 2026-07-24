@@ -1,0 +1,203 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-23",
+  "sources": [
+    {"video_id": "he3x5flTFPg", "title": "Parasite — The Power of Symbols", "channel": "Lessons from the Screenplay", "url": "https://www.youtube.com/watch?v=he3x5flTFPg", "evidence_type": "asr_reviewed", "evidence_level": "E4"},
+    {"video_id": "wLfZL9PZI9k", "title": "Ultimate Guide to Camera Angles: Every Camera Shot Explained", "channel": "StudioBinder", "url": "https://www.youtube.com/watch?v=wLfZL9PZI9k", "evidence_type": "asr_reviewed", "evidence_level": "E4"},
+    {"video_id": "kDzUx6t09tg", "title": "How to Direct Actors — Directing Advice from the Greats", "channel": "StudioBinder", "url": "https://www.youtube.com/watch?v=kDzUx6t09tg", "evidence_type": "asr_reviewed", "evidence_level": "E4", "bias": "多位导演访谈片段的聚合剪辑，限定语可能缺失"}
+  ],
+  "procedures": [
+    {
+      "id": "motif-meaning-trajectory",
+      "domain": "writer",
+      "title": "符号到母题的意义轨迹",
+      "claim_refs": [
+        {"start_sec": 86.44, "end_sec": 109.96, "kind": "video_claim", "paraphrase": "视频把符号定义为代表其他意义的具体事物，并以石头与气味为案例。"},
+        {"start_sec": 256.52, "end_sec": 315.8, "kind": "video_claim", "paraphrase": "符号经重复形成母题，但价值在于每次回归发生于不同人物/情节状态。"},
+        {"start_sec": 324.0, "end_sec": 428.76, "kind": "video_claim", "paraphrase": "石头从愿望、似乎成功、到在洪水中被紧抱，逐次外化人物对财富的变化。"},
+        {"start_sec": 632.76, "end_sec": 679.2, "kind": "video_claim", "paraphrase": "高潮中石头由脱贫希望反转为毁灭工具，完成意义变形。"}
+      ],
+      "applicability": {"use_when": ["抽象主题需要可见载体", "物件/声音已反复出现但意义不变", "人物内在变化难以直接拍"], "do_not_use_when": ["为显得深刻而硬塞符号", "对象不进入人物行动", "每次出现只做彩蛋"]},
+      "inputs": ["主题问题", "人物 belief", "具体物件/气味/声音/空间", "关键状态节点", "高潮选择"],
+      "steps": [
+        {"step": 1, "action": "选一个人物会实际触碰、回避或被其影响的具体载体。", "check": "删掉载体会改变至少一次行动。"},
+        {"step": 2, "action": "写首次赋义：谁把什么 belief 投射给它，场景如何让观众读到。", "check": "意义来自人物与情境，不靠旁白定义。"},
+        {"step": 3, "action": "安排至少三次回归，每次填写 plot_state、character_state、action 和 meaning_delta。", "check": "每次意义有新增、矛盾或反转。"},
+        {"step": 4, "action": "让高潮中的载体参与选择或代价，而非只摆在画面里。", "check": "其意义由因果完成。"},
+        {"step": 5, "action": "做删除测试和观众释义测试；观众可有不同措辞，但须指向同一变化轨迹。", "check": "不向观众先解释象征答案。"}
+      ],
+      "outputs": ["首次赋义场景", "三次以上 motif trajectory", "高潮因果", "删除/释义测试"],
+      "failure_signals": ["物件重复但人物关系不变", "符号只由美术放置", "高潮突然反转却无前置轨迹", "只有作者能解释意义"],
+      "acceptance_tests": [
+        {"test": "意义增量", "pass_criteria": "至少三次出现各有不同 meaning_delta。"},
+        {"test": "因果参与", "pass_criteria": "载体至少两次改变行动、信息或代价。"},
+        {"test": "观众轨迹", "pass_criteria": "至少 4/5 观众能描述从初始意义到高潮意义的变化。"}
+      ],
+      "worked_example": {"carrier": "早餐瓷盘", "appearances": ["父亲每天把盘子摆正＝秩序", "盘子压住女儿的信＝秩序压制离家", "父亲端走盘子却留信＝秩序第一次让位", "女儿主动推动盘子＝她把沉默规则变成挑战"], "climax": "盘子碎裂不是装饰，而是父亲终于打断自己的早餐流程。"}
+    },
+    {
+      "id": "motif-theme-convergence",
+      "domain": "writer",
+      "title": "双母题汇聚主题",
+      "claim_refs": [
+        {"start_sec": 499.08, "end_sec": 575.6, "kind": "video_claim", "paraphrase": "视频区分具体可指认的 motif 与抽象 theme，主题需由文本证据支持。"},
+        {"start_sec": 581.02, "end_sec": 679.2, "kind": "video_claim", "paraphrase": "案例让气味与石头两条母题分别累积，再在高潮共同作用以表达阶级主题。"}
+      ],
+      "applicability": {"use_when": ["主题只有口号", "两条意象线互不相干", "高潮需要把人物两种 belief 同时逼到选择"], "do_not_use_when": ["作品只需一条清晰母题", "多母题会造成理解负担", "用主题预设扭曲人物因果"]},
+      "inputs": ["抽象主题问题", "motif_A trajectory", "motif_B trajectory", "人物选择", "高潮事件"],
+      "steps": [
+        {"step": 1, "action": "把主题写成可争论问题，不写答案口号。", "check": "至少有两种人物可实践立场。"},
+        {"step": 2, "action": "给 A/B 各分配不同 belief 或压力，一个吸引人物，一个暴露其限制。", "check": "两者功能不重复。"},
+        {"step": 3, "action": "分别建立轨迹，中段至少一次交叉但不提前给结论。", "check": "交叉改变行动。"},
+        {"step": 4, "action": "高潮让两条母题同时限制同一选择，人物不能兼得。", "check": "主题由代价显现。"},
+        {"step": 5, "action": "删掉任一母题重读高潮；若主题理解不变，合并或强化功能差。", "check": "不保留冗余意象。"}
+      ],
+      "outputs": ["主题问题", "A/B 功能差", "交叉点", "高潮选择矩阵", "删除测试"],
+      "failure_signals": ["两条母题都只代表同一句话", "角色在高潮用台词解释主题", "母题汇聚但不改变选择", "主题答案从一开始就没有反方"],
+      "acceptance_tests": [
+        {"test": "功能差", "pass_criteria": "A/B 分别承担不同 belief/pressure，删除任一会损失特定因果。"},
+        {"test": "汇聚", "pass_criteria": "两条母题在同一高潮选择中同时产生约束或代价。"},
+        {"test": "主题证据", "pass_criteria": "观众能指出至少三个具体场景支持其主题理解。"}
+      ],
+      "worked_example": {"theme_question": "爱是否需要先说出口才算承担？", "A": "信件＝女儿对明确表态的渴望", "B": "瓷盘声＝父亲以日常行动代替语言", "climax": "父亲必须选择读出信或继续端走盘子；女儿必须选择离开或留下逼问。"}
+    },
+    {
+      "id": "camera-angle-single-variable-test",
+      "domain": "cinematography",
+      "title": "机位角度单变量观感测试",
+      "claim_refs": [
+        {"start_sec": 52.06, "end_sec": 64.66, "kind": "video_claim", "paraphrase": "视频把 framing/shot size 与 camera angle 区分，角度被用于影响观众如何感知主体。"},
+        {"start_sec": 83.5, "end_sec": 194.5, "kind": "video_claim", "paraphrase": "低角/高角常被教学性地与力量、脆弱和主体间权力不平衡关联。"},
+        {"start_sec": 409.36, "end_sec": 472.72, "kind": "video_claim", "paraphrase": "平视被描述为较自然、不主动施加高低判断，但仍可因直视镜头等上下文产生强连接。"},
+        {"start_sec": 729.96, "end_sec": 762.96, "kind": "video_claim", "paraphrase": "视频最终建议把角度与景别、构图混合测试，而非只记名称。"}
+      ],
+      "applicability": {"use_when": ["不确定角度是否支持权力/距离", "shot list 只写角度名", "需要比较细微高低差"], "do_not_use_when": ["把低角=强、高角=弱当固定字典", "同时更改焦段、距离、表演和光线"]},
+      "inputs": ["同一 beat", "目标观众判断", "锁定焦段/距离/表演/光线", "三个机位高度", "盲测问题"],
+      "steps": [
+        {"step": 1, "action": "写角度假设：改变高度/俯仰预计让观众如何判断主体关系。", "check": "用可回答问题，不用‘更电影感’。"},
+        {"step": 2, "action": "固定焦段、主体距离、构图宽度、表演和光线，拍低/平/高三版。", "check": "画面变量记录齐全。"},
+        {"step": 3, "action": "让观察者分别判断权力、亲近、威胁或信息可读性。", "check": "问题不告诉角度名称。"},
+        {"step": 4, "action": "若结果不显著，检查背景线、视线和主体动作是否抵消角度，不自动加大倾斜。", "check": "先解释冲突变量。"},
+        {"step": 5, "action": "选择最小足够角度，并在 shot list 写 purpose 与 fallback。", "check": "意义来自本场上下文。"}
+      ],
+      "outputs": ["角度假设", "三版测试", "观众判断数据", "shot purpose/fallback"],
+      "failure_signals": ["一次同时换焦段和机位", "观察者只说‘好看’", "角度效果被背景透视主导却未记录", "选择极端角度但人物关系读法不变"],
+      "acceptance_tests": [
+        {"test": "单变量", "pass_criteria": "三版只有相机高度/俯仰变化。"},
+        {"test": "目标读法", "pass_criteria": "至少 4/5 观察者在目标版给出预期关系判断。"},
+        {"test": "最小足够", "pass_criteria": "更极端角度未显著提高理解时不采用。"}
+      ],
+      "worked_example": {"beat": "员工公开掌握证据。", "versions": "膝高、肩高、平视，均 50mm 同距离。", "result": "低机位被背景天花线放大成威胁，平视更像冷静掌控；目标是可信而非恐吓，因此选平视。"}
+    },
+    {
+      "id": "camera-angle-progression-map",
+      "domain": "cinematography",
+      "title": "角度递进与关系变化图",
+      "claim_refs": [
+        {"start_sec": 169.16, "end_sec": 194.5, "kind": "video_claim", "paraphrase": "高低角可在同场配对，以加强主体之间的权力不平衡。"},
+        {"start_sec": 310.8, "end_sec": 375.68, "kind": "video_claim", "paraphrase": "倾斜地平线可制造失衡；案例随冲突升高而增加倾角。"},
+        {"start_sec": 480.88, "end_sec": 532.36, "kind": "video_claim", "paraphrase": "肩高/过肩角度可细微表现身高与连接/隔离，语义比极端高低角弱。"}
+      ],
+      "applicability": {"use_when": ["关系在同一场逐步改变", "需要角度变化而不破坏连续性", "想用细微递进代替一次极端角度"], "do_not_use_when": ["角度变化没有 beat 触发", "Dutch tilt 造成无意地理/垂直线错误", "轴线与视线尚未冻结"]},
+      "inputs": ["power/info beat map", "基准眼平", "轴线", "可用高度/倾角", "背景垂直线", "编辑顺序"],
+      "steps": [
+        {"step": 1, "action": "给每 beat 写 power_holder 与关系距离，先设中性基准。", "check": "状态来自人物行动。"},
+        {"step": 2, "action": "只在权力/认知变化 beat 调整高度、俯仰或倾角。", "check": "每次变化有 trigger。"},
+        {"step": 3, "action": "优先 5–15cm 或轻微倾角测试，再决定是否极端。", "check": "递进能在剪辑中被感知但不跳轴。"},
+        {"step": 4, "action": "把变化表与 blocking/镜头顺序对齐，检查相邻镜头地平线和眼线。", "check": "无意跳变标出。"},
+        {"step": 5, "action": "剪 neutral 版与 progression 版盲测，询问何时权力变化。", "check": "若角度先于表演被读到，延后或减弱。"}
+      ],
+      "outputs": ["angle progression map", "每 beat trigger", "连续性检查", "A/B 剪辑"],
+      "failure_signals": ["所有对手镜头都固定仰拍", "倾角一直增加但人物状态未变", "角度先宣布反转", "不同 coverage 的眼线/地平线无法匹配"],
+      "acceptance_tests": [
+        {"test": "触发对齐", "pass_criteria": "100% 角度变化对应 power/info beat。"},
+        {"test": "反转识别", "pass_criteria": "至少 4/5 观众在目标 beat±1 指出关系变化。"},
+        {"test": "连续性", "pass_criteria": "轴线、眼线和地平线跳变均为有意并有记录。"}
+      ],
+      "worked_example": {"progression": ["双方肩高平视", "老板锁系统时略低于老板眼线", "员工抄送邮件后回到双方平视", "老板退到门口时机位不再仰拍他"], "purpose": "角度恢复平视表示权力从职位符号回到证据对等。"}
+    },
+    {
+      "id": "rehearsal-purpose-matrix",
+      "domain": "director",
+      "title": "按场景风险选择排练目的",
+      "claim_refs": [
+        {"start_sec": 410.8, "end_sec": 498.88, "kind": "video_claim", "paraphrase": "一些导演把排练用于安全实验与深化人物，因为片场主要受排程驱动。"},
+        {"start_sec": 508.88, "end_sec": 560.4, "kind": "video_claim", "paraphrase": "另一些导演对高情绪场只排调度/摄影/拍摄顺序，以保留正式拍摄的新鲜反应。"},
+        {"start_sec": 540.96, "end_sec": 560.4, "kind": "video_claim", "paraphrase": "也有导演避免完整排演，因为首次互动的效果可能难以复现。"},
+        {"start_sec": 562.8, "end_sec": 590.88, "kind": "video_claim", "paraphrase": "视频明确不存在单一演员指导公式，方法取决于题材、导演与演员。"}
+      ],
+      "applicability": {"use_when": ["决定排练深度", "情绪新鲜度与技术复杂度冲突", "演员方法不同"], "do_not_use_when": ["用‘保留新鲜’跳过安全/亲密/动作排练", "默认所有演员同一种方法"]},
+      "inputs": ["场景情绪风险", "blocking/技术复杂度", "安全与同意要求", "演员偏好", "片场时间", "必须冻结事实"],
+      "steps": [
+        {"step": 1, "action": "给场景按 emotional freshness、blocking、camera/focus、safety、continuity 五项打 0–2 风险。", "check": "与演员和部门共同确认。"},
+        {"step": 2, "action": "选择 rehearsal mode：discovery、relationship、logistics-only 或 first-take-preservation。", "check": "安全项非零时不得完全不排。"},
+        {"step": 3, "action": "写排练目标和明确不做事项，例如只锁走位、不完整跑情绪。", "check": "演员知道边界。"},
+        {"step": 4, "action": "排练后冻结事实、道具、轴线、安全和关键台词；开放项另列。", "check": "新鲜度不等于连续性失控。"},
+        {"step": 5, "action": "正式拍摄前复核演员是否仍接受模式，并给出 fallback。", "check": "同意可更新。"}
+      ],
+      "outputs": ["五项风险表", "rehearsal mode", "锁定/开放清单", "演员确认", "fallback"],
+      "failure_signals": ["排练耗尽表演却没有技术收获", "零排练导致安全/焦点/走位失败", "导演单方面决定演员方法", "所有场景都套同一排练强度"],
+      "acceptance_tests": [
+        {"test": "模式匹配", "pass_criteria": "模式选择对应最高风险项并获演员/部门确认。"},
+        {"test": "安全完整", "pass_criteria": "所有安全/亲密/动作 beat 均完成必要排练。"},
+        {"test": "开放可控", "pass_criteria": "开放变化不会破坏关键事实、道具、轴线和连续性。"}
+      ],
+      "worked_example": {"scene": "父女早餐沉默对峙。", "risk": "情绪新鲜 2、blocking 1、焦点 1、安全 0、连续性 1。", "mode": "logistics-only：排盘子、信、相机与声音，不完整跑最后眼神。", "open": "父亲在水槽前停顿时长。"}
+    },
+    {
+      "id": "actor-note-one-variable-loop",
+      "domain": "director",
+      "title": "演员笔记的单变量闭环",
+      "claim_refs": [
+        {"start_sec": 600.0, "end_sec": 670.08, "kind": "video_claim", "paraphrase": "有效笔记依赖信任与诚实协作，演员需要相信自己处于可靠环境。"},
+        {"start_sec": 760.56, "end_sec": 807.92, "kind": "video_claim", "paraphrase": "视频强调笔记应清楚、具体、不过载；任意和含糊会让演员无从寻找。"},
+        {"start_sec": 798.32, "end_sec": 838.4, "kind": "video_claim", "paraphrase": "知道何时不下笔记同样重要，过度指导会损害已有工作。"}
+      ],
+      "applicability": {"use_when": ["take 未满足场景需要", "导演习惯给情绪形容词", "演员被多条修正压住"], "do_not_use_when": ["把演员当按钮", "未先观察具体问题", "笔记涉及羞辱、操控或越过同意边界"]},
+      "inputs": ["上一 take 观察", "场景 objective", "不可妥协事实", "演员自我感受", "一个可玩行动变量"],
+      "steps": [
+        {"step": 1, "action": "先说出上一 take 中已经成立的一项具体行为。", "check": "不是空泛夸奖。"},
+        {"step": 2, "action": "描述需要改变的可观察差异，不诊断演员情绪。", "check": "例如‘答案前给了对方退路’，不是‘不够害怕’。"},
+        {"step": 3, "action": "询问演员对目标/障碍的理解，确认问题不是信息不一致。", "check": "允许演员指出剧本/调度矛盾。"},
+        {"step": 4, "action": "只给一个 playable action 或关系调整，保留其余。", "check": "能用动词执行。"},
+        {"step": 5, "action": "拍一条并立即按同一观察点评估；若成立则停止下笔记。", "check": "不因不安全感继续过度调整。"}
+      ],
+      "outputs": ["take observation", "单变量 note", "actor response", "下一 take 结果", "停止/继续决策"],
+      "failure_signals": ["一条笔记同时改目标、节奏、走位和情绪", "只说‘再强一点’", "演员不知道为什么要变", "已经成立仍不断加笔记"],
+      "acceptance_tests": [
+        {"test": "可执行", "pass_criteria": "演员能用自己的话复述一个行动目标。"},
+        {"test": "单变量", "pass_criteria": "下一 take 只要求一个主要变化。"},
+        {"test": "结果观察", "pass_criteria": "导演能指出变化是否发生及对场景结果的影响。"}
+      ],
+      "worked_example": {"bad_note": "更悲伤、更压抑，节奏快一点。", "observation": "你看信后立刻删订单，观众没有看到决定过程。", "playable_note": "下一条，先让父亲以为你会把信撕掉；到最后一刻才把手机拿出来。", "result": "只改变隐瞒策略，情绪由行为出现。"}
+    },
+    {
+      "id": "bounded-spontaneity-continuity",
+      "domain": "director",
+      "title": "有边界的即兴与连续性",
+      "claim_refs": [
+        {"start_sec": 854.96, "end_sec": 912.4, "kind": "video_claim", "paraphrase": "现场不可避免出现意外，导演可对演员、天气和环境作出反应。"},
+        {"start_sec": 940.72, "end_sec": 1027.76, "kind": "video_claim", "paraphrase": "即兴可带来自然反应或喜剧替代素材，但需要深刻理解人物并被视为现场重写。"},
+        {"start_sec": 1041.68, "end_sec": 1065.68, "kind": "video_claim", "paraphrase": "无结构改词可能碰撞剧本其他部分的词语/观念，尤其在复杂故事中造成问题。"},
+        {"start_sec": 1089.2, "end_sec": 1148.16, "kind": "video_claim", "paraphrase": "自发性也可来自语气、移动等小选择，不必等同整场自由改词。"}
+      ],
+      "applicability": {"use_when": ["需要真实反应/喜剧备选", "演员已理解人物", "剪辑需要替代选择"], "do_not_use_when": ["复杂悬疑的事实/伏笔未锁定", "安全、亲密、法律措辞", "即兴会改变后续连续性却无人记录"]},
+      "inputs": ["locked facts/lines/props/safety", "open variables", "后续依赖", "场记记录方式", "即兴时间/take 上限"],
+      "steps": [
+        {"step": 1, "action": "把场景分成 locked、flexible、forbidden 三栏。", "check": "事实、伏笔、安全和同意默认为 locked/forbidden。"},
+        {"step": 2, "action": "优先开放一个低风险变量：停顿、语气、移动、反应或替代笑点。", "check": "不先开放整场对白。"},
+        {"step": 3, "action": "先拍一条基线可用 take，再拍限定即兴。", "check": "剪辑永远有连续性版本。"},
+        {"step": 4, "action": "场记逐条记录改词/动作及其后续影响；碰到 locked 项立即停止。", "check": "不是靠回看记忆补。"},
+        {"step": 5, "action": "现场或收工前决定 adopt、alternate、discard，并回写后续场景。", "check": "采用项完成连续性传播。"}
+      ],
+      "outputs": ["locked/flexible/forbidden 表", "基线 take", "限定即兴 take", "场记变化日志", "采用与回写决策"],
+      "failure_signals": ["没有基线就开始自由发挥", "改词提前泄露后续信息", "即兴动作破坏道具/轴线/安全", "替代素材很多但没有标记可用性"],
+      "acceptance_tests": [
+        {"test": "基线保险", "pass_criteria": "至少一条完整基线 take 通过。"},
+        {"test": "边界遵守", "pass_criteria": "即兴未改变 locked/forbidden 项。"},
+        {"test": "连续性传播", "pass_criteria": "所有 adopt 变化已回写受影响的后续场景/镜头。"}
+      ],
+      "worked_example": {"locked": ["信已被读", "出租车 06:10", "父亲不说信"], "flexible": ["父亲停顿", "阿遥推糖罐方式", "水槽动作"], "forbidden": ["摔盘", "堵门", "改‘车站’关键词"], "adopt": "父亲冲盘前先把水开小；声音更像回避，且不改事实。"}
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+id: radio-montage.edit-plan
+version: 1.0.0
+owner_role: editor_sound
+source_inputs: [radio-montage.clip-plan@1.0.0, radio-montage.clip-qc@1.0.0]
+assumptions: ["All clips pending; timeline is a diagnostic assembly." ]
+constraints: {runtime_target_sec: 40, aspect_ratio: "16:9"}
+open_questions: ["Generate and attach approved clip outputs before final lock."]
+status: qc_pending
+change_log: []
+timeline:
+  - {edit_id: E01, clip_id: C-S01-01, in_sec: 0, out_sec: 5, contribution_sec: 5, must_beat_ids: [S01-B01], status: pending}
+  - {edit_id: E02, clip_id: C-S01-02, in_sec: 5, out_sec: 10, contribution_sec: 5, must_beat_ids: [S01-B01], status: pending}
+  - {edit_id: E03, clip_id: C-S01-03, in_sec: 10, out_sec: 15, contribution_sec: 5, must_beat_ids: [S01-B02], status: pending}
+  - {edit_id: E04, clip_id: C-S01-04, in_sec: 15, out_sec: 20, contribution_sec: 5, must_beat_ids: [S01-B02], status: pending}
+  - {edit_id: E05, clip_id: C-S01-05, in_sec: 20, out_sec: 25, contribution_sec: 5, must_beat_ids: [S01-B03], status: pending}
+  - {edit_id: E06, clip_id: C-S01-06, in_sec: 25, out_sec: 30, contribution_sec: 5, must_beat_ids: [S01-B03], status: pending}
+  - {edit_id: E07, clip_id: C-S01-07, in_sec: 30, out_sec: 35, contribution_sec: 5, must_beat_ids: [S01-B04], status: pending}
+  - {edit_id: E08, clip_id: C-S01-08, in_sec: 35, out_sec: 40, contribution_sec: 5, must_beat_ids: [S01-B04], status: pending}
+runtime_reconciliation: {target_sec: 40, planned_edit_contribution_sec: 40, status: pending}

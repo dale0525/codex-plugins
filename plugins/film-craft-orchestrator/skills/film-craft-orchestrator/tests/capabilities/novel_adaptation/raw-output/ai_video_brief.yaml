@@ -1,0 +1,31 @@
+project_id: haichaozhan_tai_feng
+format: novel-adaptation
+audience: 适合移动端与短片节展的悬疑惊悚观众
+runtime_sec: 90
+aspect_ratio: "16:9"
+genre_tone: 台风前悬疑、家庭秘密、潮湿冷峻
+source_material: user-provided
+rights_status: user-owned
+creative_goal: 在台风登陆前一小时，以录音带揭示母亲警告并反转兄弟关系。
+must_beats:
+  - 沈岚回到停用七年的海潮站
+  - 停在母亲失踪日的钟与持续潮声
+  - 售票窗后发现写有自己名字的录音带
+  - 沈屿出现并声称是母亲的道歉
+  - 录音先是童年潮汐表，后是“不要相信带你来这里的人”
+  - 沈屿试图关机，沈岚改为打开防波堤门
+model_access: []
+reference_assets: []
+dialogue_strategy: separate_audio_then_lipsync
+generation_constraints:
+  iteration_limit_per_clip: 4
+  credit_budget: unknown
+delivery_constraints: 90秒，16:9，中文对白，24fps建议
+assumptions:
+  - 台风登陆前一小时为连续实时叙事
+  - 沈屿年龄约26岁，沈岚约30岁；母亲只以录音出现
+  - 录音带为关键道具，外壳米白、蓝墨水写名
+open_questions:
+  - 模型与分辨率待定
+  - 声音演员与台风音效来源待定
+status: diagnostic_preview

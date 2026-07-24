@@ -1,0 +1,121 @@
+id: red-envelope.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [red-envelope.ai-video-brief@1.0.0]
+assumptions: []
+constraints:
+  runtime_target_sec: 60
+open_questions: []
+status: frozen
+change_log: []
+logline: 为了藏起伪造报表的回执，林欺骗审计员；当他准备替她顶罪，她必须决定是否接受这份牺牲。
+dramatic_question: 林会让博替她承担后果，还是主动结束谎言？
+theme_question: 保护一个人，是否可以建立在替他承担选择的代价上？
+protagonist:
+  character_id: CHAR-LIN
+  want: 藏起红色回执并让博离开
+  need: 承担自己的选择
+  fear: 失去工作与身份
+  contradiction: 她害怕负责，却不愿让无辜的人替她受罚
+antagonistic_force: 审计时间压力、可见证据和林自己的逃避策略
+ending_choice: 林拿走博的辞职卡，把自己的门禁牌放入信封并投入审计口。
+sequences:
+  - sequence_id: SQ01
+    purpose: 隐藏证据失败后，把外部追查转成道德选择。
+    entry_state: 林以为只要藏好信封就能保住工作。
+    exit_state: 林主动交出身份凭证并承担调查。
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 60
+    location_id: LOC-COPY-ROOM
+    time: night
+    entry_state: 林独自掌握回执，博尚未看见证据。
+    objective: 林要在博发现前藏起红色信封。
+    obstacle: 博来找报表，并持续观察她的手和打印机。
+    turn: 博承认签名是他伪造的，并拿出辞职卡准备顶罪。
+    exit_state: 林把自己的门禁牌放进信封并投入审计口，博让开。
+    beats:
+      - beat_id: S01-B01
+        narrative_function: 建立林、罪证和即时代价。
+        visible_start: 林独自在打印机旁拆信。
+        trigger: 她看见审计回执。
+        character_tactic: 先藏证据。
+        visible_end: 她听见门响并握紧信封。
+        runtime_budget_sec: 7
+        preferred_carrier: prop reveal + facial reaction
+        generation_risks: [single_character, readable_prop_state]
+        fallback: 信封 insert 加林的反应近景。
+      - beat_id: S01-B02
+        narrative_function: 让林把谎言变成可见动作。
+        visible_start: 信封还在林手里。
+        trigger: 博的脚步接近。
+        character_tactic: 把信封塞进打印机托盘下。
+        visible_end: 只露出一个红角。
+        runtime_budget_sec: 6
+        preferred_carrier: hand-prop insert
+        generation_risks: [hand_prop_contact]
+        fallback: 托盘前后两个 insert，以声音桥连接。
+      - beat_id: S01-B03
+        narrative_function: 建立两人目标冲突和空间轴线。
+        visible_start: 博从画面右侧进入。
+        trigger: 他问报表在哪里。
+        character_tactic: 林用身体挡住打印机。
+        visible_end: 两人隔着房间对视。
+        runtime_budget_sec: 7
+        preferred_carrier: locked two-shot + off-screen line
+        generation_risks: [two_characters, dialogue]
+        fallback: 博入场、林反应和双人静态镜头分开。
+      - beat_id: S01-B04
+        narrative_function: 让博从听台词转为观察行为。
+        visible_start: 林声称打印机卡纸。
+        trigger: 她反复敲托盘。
+        character_tactic: 用故障拖延。
+        visible_end: 博的视线落到红角，林发现他看见了。
+        runtime_budget_sec: 7
+        preferred_carrier: attention shift
+        generation_risks: [two_characters, eye_line, prop_visibility]
+        fallback: 手部 insert、博 eyeline、红角 insert、林反应。
+      - beat_id: S01-B05
+        narrative_function: 让谎言因物理事件失败。
+        visible_start: 打印机仍在运转。
+        trigger: 短暂断电。
+        character_tactic: 无；环境夺走她的控制。
+        visible_end: 信封完全滑出。
+        runtime_budget_sec: 6
+        preferred_carrier: prop insert + light change
+        generation_risks: [machine_motion, lighting_change]
+        fallback: 黑场声音、停机 insert、信封暴露 insert。
+      - beat_id: S01-B06
+        narrative_function: 反转责任归属并提高道德代价。
+        visible_start: 博看着信封。
+        trigger: 他拿出辞职卡。
+        character_tactic: 主动替林承担后果。
+        visible_end: 辞职卡放在信封旁，他收回手。
+        runtime_budget_sec: 8
+        preferred_carrier: single performance + one prop action
+        generation_risks: [hand_prop_contact, dialogue]
+        fallback: 博近景、辞职卡 insert、画外台词。
+      - beat_id: S01-B07
+        narrative_function: 让林做出不可逆选择。
+        visible_start: 林面对信封和辞职卡。
+        trigger: 她意识到博准备顶罪。
+        character_tactic: 拒绝他的替代方案。
+        visible_end: 她抽出辞职卡，把自己的门禁牌放进信封。
+        runtime_budget_sec: 8
+        preferred_carrier: reaction + two simple inserts
+        generation_risks: [hand_prop_contact, small_object_identity]
+        fallback: 林反应、拿走卡、放入门禁牌分成三个 clips。
+      - beat_id: S01-B08
+        narrative_function: 完成自首并改变两人关系。
+        visible_start: 林手中是封好的红色信封。
+        trigger: 她走向审计投递口。
+        character_tactic: 主动交出证据和身份。
+        visible_end: 信封进入投递口，博让开，两人之间留下空位。
+        runtime_budget_sec: 11
+        preferred_carrier: two-shot + final prop action
+        generation_risks: [two_characters, walking, prop_slot_contact, camera_move]
+        fallback: 林走近、信封 insert、博让路、空位结尾分开。
+must_beat_ids: [S01-B01, S01-B03, S01-B05, S01-B06, S01-B07, S01-B08]
+runtime_reconciliation:
+  scene_budget_sum_sec: 60
+  result: pass

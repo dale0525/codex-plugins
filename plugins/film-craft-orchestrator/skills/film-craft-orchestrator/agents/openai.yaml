@@ -1,0 +1,6 @@
+interface:
+  display_name: "Film Craft Orchestrator"
+  short_description: "端到端统筹叙事 AI 视频生产流水线"
+  default_prompt: "Use $film-craft-orchestrator to turn this source or concept into a staged, reviewable AI-video production package."
+policy:
+  allow_implicit_invocation: true

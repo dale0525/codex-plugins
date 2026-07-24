@@ -1,0 +1,74 @@
+id: compiler-smoke.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [compiler-smoke.ai-video-brief@1.0.0]
+assumptions: []
+constraints: {runtime_target_sec: 20}
+open_questions: []
+status: frozen
+change_log: []
+logline: A courier finds the key to a locked archive and returns it after seeing who would be harmed.
+dramatic_question: Will the courier use the key or return it?
+theme_question: Is access still freedom when it depends on another person's loss?
+protagonist:
+  character_id: CHAR-COURIER
+  want: Enter the archive before closing.
+  need: Refuse access purchased with another person's loss.
+  fear: Remaining excluded forever.
+  contradiction: The courier resents exclusion but will not transfer it to someone else.
+antagonistic_force: Closing time and the tempting key.
+ending_choice: The courier places the key in the return slot.
+sequences: [{sequence_id: SQ01, purpose: temptation becomes a visible refusal}]
+temporal_state_changes: []
+delivery_requirements:
+  - requirement_id: DR-B01
+    content: The courier discovers the brass archive key.
+    exactness: semantic
+    approved_carriers: [visual_action]
+    required_character_ids: [CHAR-COURIER]
+    visible_character_ids: [CHAR-COURIER]
+    required_prop_ids: [PROP-KEY]
+    location_ids: [LOC-ARCHIVE-HALL]
+  - requirement_id: DR-B02
+    content: The courier returns the key without opening the archive.
+    exactness: semantic
+    approved_carriers: [visual_action]
+    required_character_ids: [CHAR-COURIER]
+    visible_character_ids: [CHAR-COURIER]
+    required_prop_ids: [PROP-KEY]
+    location_ids: [LOC-ARCHIVE-HALL]
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 20
+    location_id: LOC-ARCHIVE-HALL
+    time: blue hour before closing
+    entry_state: The courier enters focused on the locked archive door.
+    objective: Open the archive before closing.
+    obstacle: A lost badge beside the key identifies who would be blamed.
+    turn: The courier sees the badge portrait and stops at the lock.
+    exit_state: The key rests inside the return slot and the archive remains closed.
+    beats:
+      - beat_id: S01-B01
+        narrative_function: temptation
+        visible_start: The courier approaches the locked archive door empty-handed.
+        trigger: A brass key glints beside a dropped badge.
+        character_tactic: Pick up only the key and conceal it in one palm.
+        visible_end: The courier stands one step from the lock holding the key.
+        runtime_budget_sec: 10
+        delivery_requirement_ids: [DR-B01]
+        preferred_carrier: visual_action
+        generation_risks: [hand_prop_contact, small_object_identity]
+        fallback: Separate the key insert from the reaction.
+      - beat_id: S01-B02
+        narrative_function: choice
+        visible_start: The key is raised near the lock while the archive remains closed.
+        trigger: The courier notices the portrait on the dropped badge.
+        character_tactic: Lower the key and cross to the return slot.
+        visible_end: The key falls into the slot and the courier walks away from the closed door.
+        runtime_budget_sec: 10
+        delivery_requirement_ids: [DR-B02]
+        preferred_carrier: visual_action
+        generation_risks: [hand_prop_contact, prop_continuity]
+        fallback: Use a reaction close-up followed by a locked key insert.
+must_beat_ids: [S01-B01, S01-B02]
+runtime_reconciliation: {scene_budget_sum_sec: 20, result: pass}

@@ -1,0 +1,6 @@
+clip_id,scene_id,beat_id,duration_sec,narrative_purpose,entry_state,primary_action,camera_behavior,exit_state,handles_sec,fallback
+c01,s01,b01,4,arm and hide gag,worker holds umbrella beside rack,presses trigger and slots umbrella,locked medium wide,shoe misted; umbrella armed,0.5,split trigger and hide into two clips
+c02,s01,b02,6,first customer establishes rule,customer_B enters dry,confident pull triggers face mist,short push-in,customer_B recoils; worker fakes polishing,0.5,hold wide and add reaction insert
+c03,s01,b03,7,escalate via workaround,customer_C raises blue tote, nudges handle; spray fills coat sleeves,lateral pan 15 degrees,coat sleeves dripping; rack remains fixed,0.5,remove pan and keep static axis
+c04,s01,b04,7,novel visual consequence,customer_D leans with phone,umbrella spins halo around phone,slow arc right,phone halo; customer_D freezes,0.5,replace spin with two-step spray and reaction
+c05,s01,b05,6,callback and reversal,worker reaches for reset,confident pull repeats c02 framing; delayed spray hits worker,brief push-in then hold,worker soaked; customers applaud silently,0.5,split final spray into insert if needed

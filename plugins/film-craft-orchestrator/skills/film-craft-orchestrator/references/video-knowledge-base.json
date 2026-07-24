@@ -1,0 +1,1392 @@
+{
+  "schema_version": "2.0",
+  "last_updated": "2026-07-23",
+  "purpose": "来源与证据队列。旧版 knowledge 不能自动视为已蒸馏程序；只有满足 distillation_definition 且列入 procedure_refs 的视频才计为 deep_distilled。",
+  "corpus_stats": {
+    "video_entries": 29,
+    "deep_distilled": 17,
+    "claim_evidence_only": 0,
+    "chapter_hypothesis_only": 10,
+    "candidate": 2,
+    "asr_reviewed": 17,
+    "transcript_verified": 0,
+    "chapter_verified": 10,
+    "metadata_only": 2,
+    "legacy_claim_summaries": 15,
+    "legacy_chapter_hypotheses": 25,
+    "executable_procedure_units": 45,
+    "confidence_rule": "只有 deep_distilled 才能提供视频驱动程序；其余状态只能提供线索。"
+  },
+  "evidence_status_legend": {
+    "asr_reviewed": "本地 ASR 已由研究者完整阅读，并保留音频 hash 与时间码；仍可能有识别误差。",
+    "transcript_verified": "读取了带时间码的 Transcript 片段；只支持相应视频主张。",
+    "chapter_verified": "只取得创作者章节标题和时间码；内容仅是待核验假设。",
+    "metadata_only": "只核验标题、频道、描述或链接；是候选，不是已观看视频。"
+  },
+  "entries": [
+    {
+      "id": "lfts-dark-knight-antagonist",
+      "video_id": "pFUKeD3FJm8",
+      "channel": "Lessons from the Screenplay",
+      "title": "The Dark Knight — Creating the Ultimate Antagonist",
+      "url": "https://www.youtube.com/watch?v=pFUKeD3FJm8",
+      "domains": [
+        "writer",
+        "director",
+        "character"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "chapters": [
+        {
+          "start_sec": 56,
+          "label": "attacking the hero's greatest weakness"
+        },
+        {
+          "start_sec": 177,
+          "label": "pressuring the protagonist into difficult choices"
+        },
+        {
+          "start_sec": 335,
+          "label": "competing for the same goal"
+        }
+      ],
+      "bias": "LFTS 的作者化事后分析；以该片为例，不是反派写作定律。",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#pFUKeD3FJm8",
+      "procedure_refs": [
+        "antagonist-weakness-pressure-ladder",
+        "antagonist-shared-goal-personal-stakes"
+      ],
+      "claim_summaries": [
+        {
+          "claim": "有效反派不是单纯更强，而是精准攻击主角最脆弱的优势或信念。",
+          "use": "把反派策略写成主角能力的反转，而非随机升级武力。",
+          "practice": "列出主角三项优势，为每项设计一次让优势变成代价的行动。",
+          "failure_signal": "反派换成任何主角都一样有效。",
+          "provenance": "video:56-177"
+        },
+        {
+          "claim": "反派应逐轮施压，让主角在越来越昂贵的选择中暴露真实价值观。",
+          "use": "将压力写成选择树，并确保每个选择关闭一条退路。",
+          "practice": "写三轮二选一：每轮必须改变关系、资源或身份。",
+          "failure_signal": "压力只增加伤亡，没有改变主角能做什么。",
+          "provenance": "video:177-335"
+        },
+        {
+          "claim": "英雄和对手争夺同一个更高层目标时，冲突会反复发生而不靠巧合。",
+          "use": "先定义共同目标，再定义对目标的相反价值解释。",
+          "practice": "写一行双方都想要的目标，再各写一句不同的价值主张。",
+          "failure_signal": "反派只想毁灭，无法与主角形成持续竞争。",
+          "provenance": "video:335-660"
+        },
+        {
+          "claim": "反派的累积作用是迫使主角重新定义自己，而不是只负责制造障碍。",
+          "use": "在结尾核对主角是否因对手改变了选择规则。",
+          "practice": "删掉反派后检查主角弧光；若弧光不变，重新设计对抗。",
+          "failure_signal": "反派退场后主角仍能按原策略完成故事。",
+          "provenance": "video:~478-590"
+        }
+      ],
+      "deep_distillation_note": "完整 ASR 已按顺序阅读；新程序包含适用条件、步骤检查、修复、验收、示例和边界。"
+    },
+    {
+      "id": "lfts-gone-girl-screenwriter",
+      "video_id": "CF3lFPW4E1o",
+      "channel": "Lessons from the Screenplay",
+      "title": "Gone Girl — Don't Underestimate the Screenwriter",
+      "url": "https://www.youtube.com/watch?v=CF3lFPW4E1o",
+      "domains": [
+        "writer",
+        "adaptation",
+        "scene"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "chapters": [
+        {
+          "start_sec": 49,
+          "label": "efficient action lines"
+        },
+        {
+          "start_sec": 152,
+          "label": "point of the scene"
+        },
+        {
+          "start_sec": 262,
+          "label": "subplot character"
+        }
+      ],
+      "bias": "以《消失的爱人》为例的二手解读；动作行规范仍需结合目标地区格式。",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#CF3lFPW4E1o",
+      "procedure_refs": [
+        "screenplay-action-line-tone-lock",
+        "scene-funnel-last-line",
+        "subplot-comparison-warning"
+      ],
+      "claim_summaries": [
+        {
+          "claim": "动作行应简洁、可拍并带有语气；它给导演和演员留下选择空间，同时锁定场景意图。",
+          "use": "用可观察动作替代心理解释，保留少量能决定节奏的形容。",
+          "practice": "把一段 150 字动作压到 60 字，再拍读两版比较语气。",
+          "failure_signal": "动作行写成小说内心，演员没有可玩的行动。",
+          "provenance": "video:49-141"
+        },
+        {
+          "claim": "场景末行可以把前面的信息收束成一个新决定或新问题。",
+          "use": "让最后一句/最后一个动作改变退出状态，而不是总结主题。",
+          "practice": "给同一场戏写三个不同末点，只保留能推动下一场的版本。",
+          "failure_signal": "删掉最后一句后故事没有任何变化。",
+          "provenance": "video:152-262"
+        },
+        {
+          "claim": "subplot character 可以处理与主角相同的问题，但用另一种策略展示可能后果。",
+          "use": "用短暂出场的角色提供对照、警告或可行路径。",
+          "practice": "为主角的选择设计一个单场景对照角色，并写出三条新信息。",
+          "failure_signal": "支线角色拥有独立故事，却没有改变主线选择。",
+          "provenance": "video:262-427"
+        },
+        {
+          "claim": "小说改编时，原作的风格功能要转成可执行的动作、节奏和信息顺序。",
+          "use": "先标注原段落功能，再决定删、并、换视角或新增画面。",
+          "practice": "把一段内心叙述改写为三个可拍动作和一个声音线索。",
+          "failure_signal": "改编只保留情节摘要，失去原作的叙事合同。",
+          "provenance": "video:24-42"
+        }
+      ],
+      "deep_distillation_note": "完整 ASR 已按顺序阅读；新程序面向 action line、场景收束与对照配角。"
+    },
+    {
+      "id": "studiobinder-story-circle",
+      "video_id": "-XGUVkOmPTA",
+      "channel": "StudioBinder",
+      "title": "Dan Harmon Story Circle: 8 Proven Steps to Better Stories",
+      "url": "https://www.youtube.com/watch?v=-XGUVkOmPTA",
+      "domains": [
+        "writer",
+        "structure",
+        "director"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "chapters": [],
+      "visual_evidence": {
+        "frame_status": "sampled",
+        "timestamp_sec": 389,
+        "path": "work/yt_probe/story_circle_389.jpg",
+        "note": "单帧可见深色背景、彩色圆环局部、节点 8 和箭头；播放器叠加不可当作视频内容。"
+      },
+      "bias": "StudioBinder 的商业教学模型，适合练习起点，不代表所有叙事结构。",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#-XGUVkOmPTA",
+      "procedure_refs": [
+        "story-circle-visible-change"
+      ],
+      "claim_summaries": [
+        {
+          "claim": "故事圈的八个检查点是 You、Need、Go、Search、Find、Take、Return、Change。",
+          "use": "把复杂大纲压缩成角色状态、进入未知、策略、代价和回到新状态。",
+          "practice": "用八行写完自己的短片，再为每行补一个可见事件。",
+          "failure_signal": "某一步只能写成抽象情绪，不能写成角色行动。",
+          "provenance": "video:64-459"
+        },
+        {
+          "claim": "Change 必须被视觉化，结尾应让观众看见角色已不同。",
+          "use": "用重复构图、道具、动作或空间关系显示变化。",
+          "practice": "把开场和结尾放在同一空间，设计一个可比较的动作差异。",
+          "failure_signal": "角色说自己改变了，但行为和镜头没有差异。",
+          "provenance": "video:389-454"
+        },
+        {
+          "claim": "结构模型是诊断镜头，不是页码法规；模型无法解释的留白可能是作品的主动选择。",
+          "use": "先套模型发现缺口，再做反模型检查。",
+          "practice": "用故事圈和非线性重排各写一版，比较信息释放和情绪曲线。",
+          "failure_signal": "为填满八步而加入没有因果功能的事件。",
+          "provenance": "video:52-537"
+        }
+      ],
+      "deep_distillation_note": "完整 ASR 已按顺序阅读；故事圈只作可见变化诊断，不作页码定律。"
+    },
+    {
+      "id": "lfts-whiplash-black-swan",
+      "video_id": "ba-CB6wVuvQ",
+      "channel": "Lessons from the Screenplay",
+      "title": "Whiplash vs. Black Swan — The Anatomy of the Obsessed Artist",
+      "url": "https://www.youtube.com/watch?v=ba-CB6wVuvQ",
+      "domains": [
+        "writer",
+        "character",
+        "structure",
+        "theme"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "chapters": [
+        {
+          "start_sec": 75,
+          "label": "inciting incident, desire, dramatic question"
+        },
+        {
+          "start_sec": 300,
+          "label": "struggle and sacrifice"
+        },
+        {
+          "start_sec": 328,
+          "label": "threat of replacement"
+        },
+        {
+          "start_sec": 564,
+          "label": "transformation and perfection"
+        },
+        {
+          "start_sec": 912,
+          "label": "sacrificing for your art"
+        }
+      ],
+      "bias": "比较性 essay；关于艺术牺牲的价值判断需要用户自行决定。",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#ba-CB6wVuvQ",
+      "procedure_refs": [
+        "obsession-pressure-warning-branch"
+      ],
+      "claim_summaries": [
+        {
+          "claim": "触发事件不是背景说明，而是让主角无法维持现状并形成具体欲望。",
+          "use": "在前段让一次注意、机会或损失改变主角的行动方向。",
+          "practice": "写一个能在第一场戏内改变欲望的触发事件。",
+          "failure_signal": "触发事件发生后主角仍按原计划生活。",
+          "provenance": "video:75-140"
+        },
+        {
+          "claim": "第二幕的障碍要迫使旧自我失效；欲望越清晰，牺牲越能形成因果。",
+          "use": "让每次胜利扩大欲望，同时提高身体、关系或身份代价。",
+          "practice": "列出三次胜利和三次代价，检查代价是否来自主角选择。",
+          "failure_signal": "受苦只是蒙太奇，未改变策略或关系。",
+          "provenance": "video:300-324"
+        },
+        {
+          "claim": "替代者/竞争者把抽象的卓越欲望变成可见的关系压力。",
+          "use": "用一个新来者、镜像或候补者让主角的地位不稳定。",
+          "practice": "设计一个比主角更接近理想的对照角色。",
+          "failure_signal": "竞争者只负责激怒主角，没有改变机会结构。",
+          "provenance": "video:328-411"
+        },
+        {
+          "claim": "相似结构可以产生不同主题；比较两部作品能区分共同骨架和独特选择。",
+          "use": "对同一 beat 做两个版本，不把模型等同于意义。",
+          "practice": "用同一触发—牺牲结构写一版悲剧和一版成长剧。",
+          "failure_signal": "把结构相似误读为人物或主题相同。",
+          "provenance": "video:912-963"
+        }
+      ],
+      "deep_distillation_note": "完整 ASR 已按顺序阅读并与 132 段浏览器转录交叉核对；不把虐待式训练当现实建议。"
+    },
+    {
+      "id": "lfts-parasite-symbols",
+      "video_id": "he3x5flTFPg",
+      "channel": "Lessons from the Screenplay",
+      "title": "Parasite — The Power of Symbols",
+      "url": "https://www.youtube.com/watch?v=he3x5flTFPg",
+      "domains": [
+        "writer",
+        "theme",
+        "visual"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 502,
+          "label": "Theme"
+        },
+        {
+          "start_sec": 538,
+          "label": "How Is Theme Different from Motif"
+        },
+        {
+          "start_sec": 545,
+          "label": "Motif and Theme"
+        }
+      ],
+      "bias": "章节只验证主题/motif 主题范围；具体片段论证尚未完成 Transcript 核验。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "motif-meaning-trajectory",
+        "motif-theme-convergence"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#he3x5flTFPg",
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "用画面抽帧复核示例构图和切点；当前程序仅把口述主张工程化。"
+    },
+    {
+      "id": "studiobinder-camera-angles",
+      "video_id": "wLfZL9PZI9k",
+      "channel": "StudioBinder",
+      "title": "Ultimate Guide to Camera Angles: Every Camera Shot Explained",
+      "url": "https://www.youtube.com/watch?v=wLfZL9PZI9k",
+      "domains": [
+        "cinematography",
+        "director",
+        "visual"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 75,
+          "label": "low angle"
+        },
+        {
+          "start_sec": 148,
+          "label": "high angle"
+        },
+        {
+          "start_sec": 245,
+          "label": "overhead"
+        },
+        {
+          "start_sec": 306,
+          "label": "Dutch angle"
+        },
+        {
+          "start_sec": 401,
+          "label": "eye level"
+        },
+        {
+          "start_sec": 472,
+          "label": "shoulder level"
+        },
+        {
+          "start_sec": 536,
+          "label": "hip/knee/ground level"
+        }
+      ],
+      "bias": "StudioBinder 的分类式教学；不应把角度当作普适符号。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "camera-angle-single-variable-test",
+        "camera-angle-progression-map"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#wLfZL9PZI9k",
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "已有代表帧人工视觉核验；若要证明运动或剪辑因果，仍需连续片段分析。",
+      "frame_artifact": "references/video-frame-evidence.json#wLfZL9PZI9k"
+    },
+    {
+      "id": "studiobinder-direct-actors",
+      "video_id": "kDzUx6t09tg",
+      "channel": "StudioBinder",
+      "title": "How to Direct Actors — Directing Advice from the Greats",
+      "url": "https://www.youtube.com/watch?v=kDzUx6t09tg",
+      "domains": [
+        "director",
+        "performance",
+        "casting"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 54,
+          "label": "director's approach to actors"
+        },
+        {
+          "start_sec": 159,
+          "label": "casting and rehearsing"
+        },
+        {
+          "start_sec": 588,
+          "label": "giving notes"
+        },
+        {
+          "start_sec": 854,
+          "label": "spontaneity"
+        }
+      ],
+      "bias": "聚合式二手建议；具体演员/片场协议仍需由导演与演员共同建立。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "rehearsal-purpose-matrix",
+        "actor-note-one-variable-loop",
+        "bounded-spontaneity-continuity"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#kDzUx6t09tg",
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "用画面抽帧复核示例构图和切点；当前程序仅把口述主张工程化。"
+    },
+    {
+      "id": "every-frame-editor-feel",
+      "video_id": "3Q3eITC01Fg",
+      "channel": "Every Frame a Painting",
+      "title": "How Does an Editor Think and Feel?",
+      "url": "https://www.youtube.com/watch?v=3Q3eITC01Fg",
+      "domains": [
+        "editor",
+        "director",
+        "performance"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "用画面抽帧复核示例构图和切点；当前程序仅把口述主张工程化。",
+      "bias": "作者自述和评论性 essay；不能当成工程化剪辑规范。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "edit-emotion-hold-test",
+        "edit-build-peak-recovery-curve"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#3Q3eITC01Fg"
+    },
+    {
+      "id": "every-frame-spielberg-oner",
+      "video_id": "8q4X2vDRfRk",
+      "channel": "Every Frame a Painting",
+      "title": "The Spielberg Oner",
+      "url": "https://www.youtube.com/watch?v=8q4X2vDRfRk",
+      "domains": [
+        "director",
+        "blocking",
+        "camera-movement"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "已有代表帧人工视觉核验；若要证明运动或剪辑因果，仍需连续片段分析。",
+      "bias": "高质量作者化分析；长镜头可复制性受场地、演员和安全限制。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "moving-master-composition-chain",
+        "long-take-insurance-and-time-cap"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#8q4X2vDRfRk",
+      "frame_artifact": "references/video-frame-evidence.json#8q4X2vDRfRk"
+    },
+    {
+      "id": "wandering-dp-lighting-face",
+      "video_id": "fdVAM-R8cTI",
+      "channel": "Wandering DP",
+      "title": "Cinematography Case Study — Lighting The Face",
+      "url": "https://www.youtube.com/watch?v=fdVAM-R8cTI",
+      "domains": [
+        "cinematography",
+        "lighting"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "已有代表帧人工视觉核验；若要证明运动或剪辑因果，仍需连续片段分析。",
+      "bias": "DP 案例和 Patreon 导向；设备/预算偏高。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "coverage-lighting-complexity-budget",
+        "hardest-angle-first-preflight"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#fdVAM-R8cTI",
+      "frame_artifact": "references/video-frame-evidence.json#fdVAM-R8cTI"
+    },
+    {
+      "id": "film-courage-eight-sequence",
+      "video_id": "bLMpNwOIfSY",
+      "channel": "Film Courage",
+      "title": "8 Sequence Approach To Writing A Screenplay — Paul Joseph Gulino",
+      "url": "https://www.youtube.com/watch?v=bLMpNwOIfSY",
+      "domains": [
+        "writer",
+        "structure",
+        "feature"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 0,
+          "label": "8 sequence template"
+        },
+        {
+          "start_sec": 62,
+          "label": "origin of sequences"
+        },
+        {
+          "start_sec": 123,
+          "label": "sequence approach"
+        },
+        {
+          "start_sec": 246,
+          "label": "character"
+        },
+        {
+          "start_sec": 325,
+          "label": "tension"
+        },
+        {
+          "start_sec": 422,
+          "label": "contrasts"
+        }
+      ],
+      "bias": "美国商业长片语境；视频标题/章节已核验，具体论证尚未完整转录。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "sequence-local-problem-chain",
+        "tension-release-contrast-map"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#bLMpNwOIfSY",
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "用画面抽帧复核示例构图和切点；当前程序仅把口述主张工程化。"
+    },
+    {
+      "id": "outstanding-sorkin-20-tips",
+      "video_id": "mbHD6GQUgu0",
+      "channel": "Outstanding Screenplays",
+      "title": "20 Screenwriting Tips from Aaron Sorkin",
+      "url": "https://www.youtube.com/watch?v=mbHD6GQUgu0",
+      "domains": [
+        "writer",
+        "dialogue",
+        "character"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 81,
+          "label": "empathize with villains"
+        },
+        {
+          "start_sec": 152,
+          "label": "dialogue as music"
+        },
+        {
+          "start_sec": 257,
+          "label": "parachute into a moving story"
+        },
+        {
+          "start_sec": 353,
+          "label": "intention and obstacle"
+        },
+        {
+          "start_sec": 726,
+          "label": "revise after discovering the movie"
+        },
+        {
+          "start_sec": 1121,
+          "label": "speak dialogue aloud"
+        },
+        {
+          "start_sec": 1187,
+          "label": "show what the character wants"
+        }
+      ],
+      "bias": "剪辑访谈片段，脱离上下文；建议与完整访谈和实际剧本对读。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "intention-obstacle-tactic-character",
+        "dialogue-rhythm-speakability-pass",
+        "second-draft-discovered-movie",
+        "true-story-compressed-container"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#mbHD6GQUgu0",
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "用画面抽帧复核示例构图和切点；当前程序仅把口述主张工程化。"
+    },
+    {
+      "id": "bafta-she-said-adaptation",
+      "video_id": "pN7KIxUXPwo",
+      "channel": "BAFTA",
+      "title": "She Said Writer on Turning Novels into Scripts | BAFTA Screenwriters' Lecture Series",
+      "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo",
+      "domains": [
+        "adaptation",
+        "writer",
+        "true-story"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "抽查专名并与人工字幕交叉核对；当前程序只引用清晰可辨的片段。",
+      "bias": "BAFTA 讲座与宣传语境；不替代版权/事实核查。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "adapt-source-lift-and-return",
+        "adapt-compression-stress-test",
+        "adapt-lived-world-research",
+        "adapt-viewpoint-cut-filter",
+        "adapt-repeated-contact-to-set-piece",
+        "adapt-visual-fact-chronology",
+        "adapt-creative-pass-accuracy-pass"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#pN7KIxUXPwo"
+    },
+    {
+      "id": "thomas-flight-batman-sound",
+      "video_id": "_AQkQ4a1yJ8",
+      "channel": "Thomas Flight",
+      "title": "Why The Batman's Sound is Different",
+      "url": "https://www.youtube.com/watch?v=_AQkQ4a1yJ8",
+      "domains": [
+        "sound",
+        "director",
+        "editing"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "用画面抽帧复核示例构图和切点；当前程序仅把口述主张工程化。",
+      "bias": "评论性 essay；描述引用了 Dolby 访谈，应回到声音团队一手来源。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "subjective-ambient-mix",
+        "relative-loudness-subtraction-test",
+        "sonic-belief-motif"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#_AQkQ4a1yJ8"
+    },
+    {
+      "id": "film-riot-apocalyptic-world",
+      "video_id": "95LGDKfvv-4",
+      "channel": "Film Riot",
+      "title": "Low-Budget Filmmaking: Creating an Apocalyptic World",
+      "url": "https://www.youtube.com/watch?v=95LGDKfvv-4",
+      "domains": [
+        "director",
+        "production-design",
+        "low-budget"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 113,
+          "label": "the script"
+        },
+        {
+          "start_sec": 173,
+          "label": "the shot list"
+        },
+        {
+          "start_sec": 215,
+          "label": "mood boards"
+        },
+        {
+          "start_sec": 249,
+          "label": "storyboards"
+        },
+        {
+          "start_sec": 285,
+          "label": "get creative"
+        },
+        {
+          "start_sec": 326,
+          "label": "be open"
+        }
+      ],
+      "bias": "独立创作案例和器材导流并存；需按用户预算重做测试。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "低预算不是只删设备，而是把脚本、镜头表、美术参考和故事板提前对齐。",
+          "use": "先锁定不可替代的叙事镜头，再为其寻找廉价实现。",
+          "practice": "给一场戏做 must/should/optional 镜头和一页 mood board。",
+          "failure_signal": "现场才发现空间、道具和镜头互相冲突。",
+          "provenance": "chapter:113-249"
+        },
+        {
+          "claim": "创意限制可以产生世界观，但需要保持对替代方案的开放。",
+          "use": "把预算限制转成形式规则，而不是降低因果清晰度。",
+          "practice": "只用一个地点和一个光源完成同一情绪目标。",
+          "failure_signal": "所谓低预算只是画面贫乏，主题没有得到形式支持。",
+          "provenance": "chapter:285-326"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "sorkin-trial-structure",
+      "video_id": "79uD00NCBSw",
+      "channel": "Outstanding Screenplays",
+      "title": "Aaron Sorkin Screenwriting Tips from The Trial of the Chicago 7",
+      "url": "https://www.youtube.com/watch?v=79uD00NCBSw",
+      "domains": [
+        "writer",
+        "structure",
+        "production-design",
+        "sound"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 187,
+          "label": "story structure"
+        },
+        {
+          "start_sec": 216,
+          "label": "production design"
+        },
+        {
+          "start_sec": 289,
+          "label": "empathy"
+        },
+        {
+          "start_sec": 440,
+          "label": "mirror events"
+        },
+        {
+          "start_sec": 549,
+          "label": "sound"
+        },
+        {
+          "start_sec": 879,
+          "label": "second drafts"
+        }
+      ],
+      "bias": "剪辑访谈合集；章节标题和视频剪辑可能省略上下文。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "结构、场景设计、声音和人物同理心可以共同承担历史/政治材料的主观性。",
+          "use": "改编真实事件时同时检查事件顺序、空间、声层和人物立场。",
+          "practice": "为一段史实写一张事件—空间—声音—人物选择矩阵。",
+          "failure_signal": "作品像 Wikipedia 的漂亮插图，没有作者视角。",
+          "provenance": "chapter:187-549"
+        },
+        {
+          "claim": "镜像事件可以让观众比较人物在不同压力下的选择。",
+          "use": "重复情境但改变角色状态，形成可见的弧光。",
+          "practice": "设计一场开头/结尾的同构场景，改一个关键选择。",
+          "failure_signal": "重复只是彩蛋，没有重新解释人物。",
+          "provenance": "chapter:440"
+        },
+        {
+          "claim": "第二稿应从已发现的电影核心回头重排开头和细节。",
+          "use": "在冻结剧本前做主题一致性删改。",
+          "practice": "写完结尾后回读前十页，删掉无关承诺。",
+          "failure_signal": "开头承诺与结尾兑现不在同一部电影里。",
+          "provenance": "chapter:879"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "thomas-flight-editing-nominations",
+      "video_id": "8Ak7skwYdqs",
+      "channel": "Thomas Flight",
+      "title": "How To Get Nominated for Best Editing",
+      "url": "https://www.youtube.com/watch?v=8Ak7skwYdqs",
+      "domains": [
+        "editing",
+        "sound",
+        "visual"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 0,
+          "label": "four types of shot relationships"
+        },
+        {
+          "start_sec": 121,
+          "label": "seamless jump in time"
+        },
+        {
+          "start_sec": 271,
+          "label": "graphically similar shots"
+        },
+        {
+          "start_sec": 465,
+          "label": "Sound of Metal"
+        },
+        {
+          "start_sec": 1240,
+          "label": "editing for YouTube"
+        }
+      ],
+      "bias": "评论型案例分析；奖项判断不能替代剪辑目标。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "剪辑连续性不仅是动作接上，还包括视线、图形、声音和时间的关系。",
+          "use": "分析 cut 前后至少一个视觉关系和一个声音/时间关系。",
+          "practice": "用图形相似镜头完成一次时间跳跃，再写出观众如何读懂。",
+          "failure_signal": "连续性靠解释字幕补救。",
+          "provenance": "chapter:0-271"
+        },
+        {
+          "claim": "同一剪辑技法在剧情片、纪录片和 YouTube 视频中有不同验收目标。",
+          "use": "先定义观众任务，再选择节奏和信息密度。",
+          "practice": "同一 30 秒素材剪成叙事片版和教学版。",
+          "failure_signal": "把平台节奏直接套进人物戏。",
+          "provenance": "chapter:465-1240"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "bafta-writing-roundtable",
+      "video_id": "qH4YSmw8UpQ",
+      "channel": "BAFTA Guru",
+      "title": "Taika Waititi, Noah Baumbach, Alfonso Cuarón and More on Writing",
+      "url": "https://www.youtube.com/watch?v=qH4YSmw8UpQ",
+      "domains": [
+        "writer",
+        "inspiration",
+        "career"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 253,
+          "label": "Noah Baumbach on inspiration"
+        },
+        {
+          "start_sec": 569,
+          "label": "finding material"
+        },
+        {
+          "start_sec": 903,
+          "label": "big budget movies"
+        },
+        {
+          "start_sec": 1116,
+          "label": "advice for a 24-year-old"
+        }
+      ],
+      "bias": "奖项机构/嘉宾选择偏精英；视频剪辑可能省略异议。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "创作素材可以从持续观察、关系和个人问题中寻找，不必等灵感降临。",
+          "use": "建立素材日志，把观察转成冲突、人物和具体场景。",
+          "practice": "每周把三个现实观察改写成一个可拍欲望。",
+          "failure_signal": "素材只有主题词，没有人物行动。",
+          "provenance": "chapter:253-569"
+        },
+        {
+          "claim": "职业经验是嘉宾语境中的策略，不应当作普遍成功公式。",
+          "use": "把访谈建议转成低风险实验，再决定是否纳入个人流程。",
+          "practice": "对一条建议设计一周测试和复盘指标。",
+          "failure_signal": "因为名人说过就跳过本地验证。",
+          "provenance": "chapter:569-1116"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "curtis-judd-gain-trim-fader",
+      "video_id": "ouHYEURqsf4",
+      "channel": "Curtis Judd",
+      "title": "Gain vs Trim vs Fader on Audio Recorders for Video & What is Mixing?",
+      "url": "https://www.youtube.com/watch?v=ouHYEURqsf4",
+      "domains": [
+        "sound",
+        "production",
+        "post"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 10,
+          "label": "what is mixing"
+        },
+        {
+          "start_sec": 40,
+          "label": "gain/trim"
+        },
+        {
+          "start_sec": 205,
+          "label": "faders"
+        },
+        {
+          "start_sec": 394,
+          "label": "production versus post"
+        },
+        {
+          "start_sec": 507,
+          "label": "32-bit float"
+        }
+      ],
+      "bias": "独立创作者/设备工作流；片场安全与具体设备需由录音师确认。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "现场增益、轨道推子和后期混音是不同层级的控制，不能用一个旋钮替代另一个。",
+          "use": "在声音计划中分开记录录音电平、监听、混音和后期余量。",
+          "practice": "同一对白记录不同增益并在后期做两版 mix。",
+          "failure_signal": "现场削波或噪声无法在后期恢复。",
+          "provenance": "chapter:40-394"
+        },
+        {
+          "claim": "技术设置要服务对白清晰度和剪辑余量，而不是只追求仪表数字。",
+          "use": "把声源距离、环境噪声、room tone 和备份轨一起写进 shot/sound list。",
+          "practice": "用机顶、吊杆、领夹记录同一段台词并做盲听。",
+          "failure_signal": "画面完成但声音只能靠音乐掩盖。",
+          "provenance": "chapter:394-553"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "curtis-judd-32bit-float",
+      "video_id": "mxWH8V5BaYk",
+      "channel": "Curtis Judd",
+      "title": "32-bit float recorders & differences in audio quality",
+      "url": "https://www.youtube.com/watch?v=mxWH8V5BaYk",
+      "domains": [
+        "sound",
+        "production"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 7,
+          "label": "what is 32-bit float"
+        },
+        {
+          "start_sec": 41,
+          "label": "24/16-bit recorder"
+        },
+        {
+          "start_sec": 105,
+          "label": "32-bit float recorder"
+        },
+        {
+          "start_sec": 225,
+          "label": "recovering clipped audio"
+        },
+        {
+          "start_sec": 374,
+          "label": "not noise-free"
+        }
+      ],
+      "bias": "器材教育视频；不替代完整现场录音培训。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "32-bit float 提供更大后期电平调整空间，但不能修复麦克风、前置放大器或环境噪声问题。",
+          "use": "把它当作风险缓冲，不当作不需要监听和正确摆位的借口。",
+          "practice": "故意改变声源距离，比较电平恢复与噪声底。",
+          "failure_signal": "设备参数变好但对白仍远、混响重或噪声大。",
+          "provenance": "chapter:7-374"
+        },
+        {
+          "claim": "硬件质量、麦克风和声源关系仍决定最终可用性。",
+          "use": "购买/租赁前先按实际场景做录音测试。",
+          "practice": "对同一场景测试不同录音机和麦克风，记录可剪辑余量。",
+          "failure_signal": "只看位深参数，没有听现场文件。",
+          "provenance": "chapter:260-508"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "film-riot-what-is-low-budget",
+      "video_id": "AEOo2MzdxyA",
+      "channel": "Film Riot",
+      "title": "What is Low Budget?",
+      "url": "https://www.youtube.com/watch?v=AEOo2MzdxyA",
+      "domains": [
+        "production",
+        "budget",
+        "producer"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 34,
+          "label": "five ranges of budgets"
+        },
+        {
+          "start_sec": 74,
+          "label": "independent versus Hollywood level films"
+        },
+        {
+          "start_sec": 400,
+          "label": "Sentinel"
+        },
+        {
+          "start_sec": 617,
+          "label": "Movie Magic"
+        }
+      ],
+      "bias": "独立创作者教育和产品导向并存；数字需结合本地市场。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "‘低预算’不是单一数字，而是资金、规模、工期、风险和发行目标的组合。",
+          "use": "在 brief 中同时写现金预算、资源、时间和不可妥协项。",
+          "practice": "为同一项目做极低、独立和中等三档方案。",
+          "failure_signal": "只砍器材，不改场景、演员或工期。",
+          "provenance": "chapter:34-400"
+        },
+        {
+          "claim": "预算分类应改变创作策略和验收方式，而不是给作品贴价值标签。",
+          "use": "先锁必须讲清的冲突，再决定哪些视觉复杂度值得投入。",
+          "practice": "把一个场景拆成 must/should/optional 成本表。",
+          "failure_signal": "为了规模感牺牲对白、声音或连续性。",
+          "provenance": "chapter:74-617"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "film-courage-sequence-full",
+      "video_id": "wqK4jb1l5vQ",
+      "channel": "Film Courage",
+      "title": "Screenwriting: The Sequence Approach — Paul Joseph Gulino [FULL INTERVIEW]",
+      "url": "https://www.youtube.com/watch?v=wqK4jb1l5vQ",
+      "domains": [
+        "writer",
+        "structure",
+        "career"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 203,
+          "label": "selling a screenplay"
+        },
+        {
+          "start_sec": 939,
+          "label": "constructivist psychology"
+        },
+        {
+          "start_sec": 1380,
+          "label": "eight sequence template"
+        },
+        {
+          "start_sec": 1754,
+          "label": "main character"
+        },
+        {
+          "start_sec": 1995,
+          "label": "information dump"
+        },
+        {
+          "start_sec": 2964,
+          "label": "dramatic tension and rules"
+        }
+      ],
+      "bias": "长访谈和商业写作语境；节目标题/章节不能替代整段论证。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "序列方法可以同时讨论局部目标、角色连接、信息倾倒和戏剧张力。",
+          "use": "把资料性内容分配到行动和选择中，而不是集中说明。",
+          "practice": "把一段背景信息改成三次角色想得到/隐藏的信息。",
+          "failure_signal": "信息段落不改变任何人的行动。",
+          "provenance": "chapter:1380-2456"
+        },
+        {
+          "claim": "规则是可检验的指南；知道规则后才有意识地打破它。",
+          "use": "记录每次偏离结构规则的叙事收益和成本。",
+          "practice": "同一序列写遵守版和打破版，盲测观众理解。",
+          "failure_signal": "把随机性称为创新，却无法解释观众如何跟随。",
+          "provenance": "chapter:2964"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "studiobinder-great-scenes",
+      "video_id": "3TukzX6R57Y",
+      "channel": "StudioBinder",
+      "title": "How to Write Great Scenes — 4 Elements Every Scene Should Have",
+      "url": "https://www.youtube.com/watch?v=3TukzX6R57Y",
+      "domains": [
+        "writer",
+        "scene"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "抽查电影专名并与人工字幕交叉核对。",
+      "bias": "标题线索，不把标题当完整课程内容。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "scene-four-function-gate",
+        "scene-conflict-escalation-grid",
+        "scene-turning-point-four-effects",
+        "blocking-power-transfer-map",
+        "long-take-attention-routing"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#3TukzX6R57Y"
+    },
+    {
+      "id": "meet-gaffer-ballroom",
+      "video_id": "iA6vAbBuXFA",
+      "channel": "Meet The Gaffer",
+      "title": "Meet The Gaffer #130: Spicing Up A Ballroom Interview",
+      "url": "https://www.youtube.com/watch?v=iA6vAbBuXFA",
+      "domains": [
+        "lighting",
+        "gaffer",
+        "interview"
+      ],
+      "evidence_status": "metadata_only",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [
+        "采访布光要在人物肤色、背景层次、走位和器材限制间平衡"
+      ],
+      "next_action": "取得灯位图或逐帧画面后补低预算替代方案。",
+      "bias": "现场器材和专业剧组语境。",
+      "distillation_status": "candidate",
+      "warning": "仅来源候选；不得声称已观看或已蒸馏。"
+    },
+    {
+      "id": "film-independent-screenplay-roundtable",
+      "video_id": "9xZnjTALp9w",
+      "channel": "Film Independent",
+      "title": "BEST FIRST SCREENPLAY Nominee Roundtable",
+      "url": "https://www.youtube.com/watch?v=9xZnjTALp9w",
+      "domains": [
+        "writer",
+        "career",
+        "development"
+      ],
+      "evidence_status": "metadata_only",
+      "evidence_level": "E5",
+      "chapters": [],
+      "knowledge": [],
+      "topic_hypotheses": [
+        "首部长片开发可从个人材料、修改过程和制作现实观察"
+      ],
+      "next_action": "取得嘉宾姓名与 Transcript 后拆分一手经验和行业语境。",
+      "bias": "奖项/宣传期圆桌，可能回避失败细节。",
+      "distillation_status": "candidate",
+      "warning": "仅来源候选；不得声称已观看或已蒸馏。"
+    },
+    {
+      "id": "aputure-daylight-looks",
+      "video_id": "RXD97Rc5P_s",
+      "channel": "Aputure",
+      "title": "4 Unique Setups for Daylight | Add Style to Your Lighting",
+      "url": "https://www.youtube.com/watch?v=RXD97Rc5P_s",
+      "domains": [
+        "cinematography",
+        "lighting",
+        "production-design"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 33,
+          "label": "sunset look"
+        },
+        {
+          "start_sec": 60,
+          "label": "controlling light bounce"
+        },
+        {
+          "start_sec": 78,
+          "label": "cutting the light"
+        },
+        {
+          "start_sec": 148,
+          "label": "hard light to soft light"
+        },
+        {
+          "start_sec": 212,
+          "label": "book light"
+        },
+        {
+          "start_sec": 302,
+          "label": "dialing the hue"
+        },
+        {
+          "start_sec": 325,
+          "label": "exposing the subject"
+        }
+      ],
+      "bias": "Aputure 厂商教学，器材示范带品牌偏差；先用现有灯具复现。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "daylight-look-variable-matrix",
+        "location-lighting-formula"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#RXD97Rc5P_s",
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "已有代表帧人工视觉核验；若要证明运动或剪辑因果，仍需连续片段分析。",
+      "frame_artifact": "references/video-frame-evidence.json#RXD97Rc5P_s"
+    },
+    {
+      "id": "aputure-lighting-101",
+      "video_id": "nqMQZG68Wkc",
+      "channel": "Aputure",
+      "title": "Lighting 101: Intro to Light Placement",
+      "url": "https://www.youtube.com/watch?v=nqMQZG68Wkc",
+      "domains": [
+        "cinematography",
+        "lighting"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 53,
+          "label": "three-point lighting"
+        },
+        {
+          "start_sec": 138,
+          "label": "combinations"
+        }
+      ],
+      "bias": "入门厂商教程；适合术语与基础实验，不替代 gaffer 现场判断。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "三点光是沟通起点，不是必须照搬的审美；关键是主光、补光、轮廓/背景的功能。",
+          "use": "在灯位图里标光源动机和观众注意力，而非只列灯具名称。",
+          "practice": "用一盏灯+反光板完成三点光的功能替代。",
+          "failure_signal": "灯位齐全但人物关系和背景层次没有目标。",
+          "provenance": "chapter:53-138"
+        },
+        {
+          "claim": "组合灯位应由空间、演员走位和曝光风险决定。",
+          "use": "每次只改一个光源，保留连续性和演员行动。",
+          "practice": "为一场双人戏设计三种光源组合并标注 fallback。",
+          "failure_signal": "演员一走位就脱光或影子方向断裂。",
+          "provenance": "chapter:138-235"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "this-guy-edits-top-editors",
+      "video_id": "Ehvh5adVqMo",
+      "channel": "This Guy Edits",
+      "title": "Lessons from the Top Film Editors",
+      "url": "https://www.youtube.com/watch?v=Ehvh5adVqMo",
+      "domains": [
+        "editing",
+        "career",
+        "story"
+      ],
+      "evidence_status": "chapter_verified",
+      "evidence_level": "E2",
+      "chapters": [
+        {
+          "start_sec": 0,
+          "label": "know when to cut"
+        },
+        {
+          "start_sec": 56,
+          "label": "keep your ego in check"
+        },
+        {
+          "start_sec": 180,
+          "label": "trust the process"
+        },
+        {
+          "start_sec": 279,
+          "label": "bad ideas lead to good ideas"
+        },
+        {
+          "start_sec": 603,
+          "label": "storytelling is a muscle"
+        },
+        {
+          "start_sec": 712,
+          "label": "beware of reactions"
+        }
+      ],
+      "bias": "剪辑师个人经验与访谈合集；需结合素材和具体项目目标。",
+      "distillation_status": "chapter_hypothesis_only",
+      "chapter_hypotheses": [
+        {
+          "claim": "知道何时切不是固定秒数，而是观察表演、信息和观众注意力是否完成。",
+          "use": "为每个 cut 写触发器：动作、视线、信息、声音或情绪。",
+          "practice": "同一场戏做早切/晚切两版，说明每次改变了什么。",
+          "failure_signal": "剪辑靠节拍器或覆盖量，人物选择被切断。",
+          "provenance": "chapter:0-180"
+        },
+        {
+          "claim": "剪辑过程需要降低自我证明欲，允许坏想法暴露问题并产生新解。",
+          "use": "把版本和实验记录下来，不把一次失败等同于能力。",
+          "practice": "保留三版粗剪，写每版发现的叙事问题。",
+          "failure_signal": "因为舍不得镜头而拒绝重排结构。",
+          "provenance": "chapter:56-407"
+        },
+        {
+          "claim": "反应镜头不自动等于情绪；先问观众此刻需要看谁、知道什么。",
+          "use": "把反应当作信息和权力的选择，不作默认 coverage。",
+          "practice": "删掉一半反应镜头，观察场景是否更主观/更含蓄。",
+          "failure_signal": "每句台词都配反应，节奏和信息没有层次。",
+          "provenance": "chapter:712-854"
+        }
+      ],
+      "warning": "以下内容由章节标题推测，未读取论证正文，不得当作视频结论。"
+    },
+    {
+      "id": "every-frame-edgar-wright-visual-comedy",
+      "video_id": "3FOzD4Sfgag",
+      "channel": "Every Frame a Painting",
+      "title": "Edgar Wright - How to Do Visual Comedy",
+      "url": "https://www.youtube.com/watch?v=3FOzD4Sfgag",
+      "domains": [
+        "director",
+        "visual-comedy",
+        "editing",
+        "sound"
+      ],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "bias": "作者化案例分析；喜剧反应受文化、表演与观众差异影响。",
+      "distillation_status": "deep_distilled",
+      "procedure_refs": [
+        "visual-carrier-substitution",
+        "visual-joke-frame-reveal"
+      ],
+      "asr_artifact": "references/video-asr-evidence.json#3FOzD4Sfgag",
+      "knowledge": [],
+      "topic_hypotheses": [],
+      "next_action": "已有代表帧人工视觉核验；若要证明运动或剪辑因果，仍需连续片段分析。",
+      "frame_artifact": "references/video-frame-evidence.json#3FOzD4Sfgag"
+    }
+  ],
+  "distillation_definition": {
+    "required_evidence": "人工字幕、人工复核 ASR 或可定位画面证据",
+    "minimum_claims_per_video": 3,
+    "required_unit_fields": [
+      "claim_refs",
+      "applicability",
+      "inputs",
+      "steps",
+      "outputs",
+      "failure_signals",
+      "acceptance_tests",
+      "worked_example"
+    ],
+    "forbidden_shortcuts": [
+      "章节标题不能升级为视频主张",
+      "元数据不能升级为已观看",
+      "practice 一句话不能冒充逐步程序"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+cue_id,scene_id,clip_id,timeline_start_sec,timeline_end_sec,category,diegetic,source,rights_status,audio_hash,sync_target,entry,exit,status
+SND-001,S01,C-S01-01,0,6,spot_effect,true,generated,unknown,,condensation_drop,fade_in,continue,pending
+SND-002,S01,C-S01-02,6,12,ambience,true,generated,unknown,,mat_fiber,continue,continue,pending
+SND-003,S01,C-S01-03,12,20,foley,true,generated,unknown,,door_and_steps,fade_in,continue,pending
+SND-004,S01,C-S01-04,20,28,dialogue,false,recorded,unknown,,Lin_point_window,continue,continue,pending
+SND-005,S01,C-S01-05,28,35,foley,true,generated,unknown,,mat_press,continue,continue,pending
+SND-006,S01,C-S01-06,35,43,spot_effect,true,generated,unknown,,hot_water_pour,fade_in,continue,pending
+SND-007,S01,C-S01-07,43,49,silence,true,generated,unknown,,reveal_pause,duck,continue,pending
+SND-008,S01,C-S01-08,49,60,foley,true,generated,unknown,,evidence_bag,fade_in,fade_out,pending

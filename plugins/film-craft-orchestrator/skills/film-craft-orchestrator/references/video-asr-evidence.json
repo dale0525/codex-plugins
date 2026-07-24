@@ -1,0 +1,243 @@
+{
+  "schema_version": "1.0",
+  "retrieved_at": "2026-07-23",
+  "note": "只保存与程序直接相关的短释义和时间码，不分发完整 ASR。ASR 已完整人工阅读，但专名仍可能识别错误。",
+  "engine": {
+    "name": "whisper.cpp",
+    "version": "1.8.3",
+    "model": "ggml-small.en.bin",
+    "model_sha256": "c6138d6d58ecc8322097e0f987c32f1be8bb0a18532a3f88f734d1bbf9c41e5d"
+  },
+  "items": [
+    {
+      "video_id": "pN7KIxUXPwo",
+      "title": "She Said Writer on Turning Novels into Scripts | BAFTA Screenwriters' Lecture Series",
+      "channel": "BAFTA",
+      "url": "https://www.youtube.com/watch?v=pN7KIxUXPwo",
+      "duration_sec": 820.965,
+      "audio_sha256": "7c76fd9fc98db3a8943d904b17bf5b096767ae13e041e4d94c4881de2f4674e1",
+      "asr_sha256": "840cad6a12be5392658a9aa67e4289a0045f066fd9a1afdae8de963272feb4d7",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 67.4, "end_sec": 145.76, "paraphrase": "反复阅读并提取事件/必要对白，很快离开原作起稿，建立草稿后再回源补漏。"},
+        {"start_sec": 171.68, "end_sec": 205.56, "paraphrase": "进入具体社群并与成员交流，让创作者看到规则的实际差异并获得纠错网络。"},
+        {"start_sec": 229.0, "end_sec": 247.28, "paraphrase": "曾把约九十页极限压到约十七页寻找本质，收到过度压缩反馈后再恢复材料。"},
+        {"start_sec": 278.2, "end_sec": 352.28, "paraphrase": "无法亲临时用同时代影像、一手见证、音乐和日常材料建立年代与地方感。"},
+        {"start_sec": 475.72, "end_sec": 541.84, "paraphrase": "先推进节奏、人物和个人写作，再由记者/机构人员纠正职业语言、伦理与中立性错误。"},
+        {"start_sec": 549.64, "end_sec": 605.64, "paraphrase": "从可支撑多小时的材料中选择记者 POV 和女性/幸存者主体，并把多次建立信任压成有重量的访谈。"},
+        {"start_sec": 605.64, "end_sec": 647.84, "paraphrase": "为让观众直接看见当事人当年很年轻而使用时间跳转，认为画面与一句年龄说明效果不同。"},
+        {"start_sec": 647.84, "end_sec": 668.6, "paraphrase": "相关当事人对台词和呈现有实际输入，制作方为反馈留出空间。"},
+        {"start_sec": 935.36, "end_sec": 986.28, "paraphrase": "从结构上不展示施害者本人或侵害画面，把影片中心放在调查和幸存者声音。"}
+      ]
+    },
+    {
+      "video_id": "3TukzX6R57Y",
+      "title": "How to Write Great Scenes — 4 Elements Every Scene Should Have",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=3TukzX6R57Y",
+      "duration_sec": 1572.328,
+      "audio_sha256": "bdc52c018250623339776238caff88532a360e111742893202950aab6319b953",
+      "asr_sha256": "86e3a42963d70826eaba39aaa313d367150aefd3600dae3cb6ea5834d92ba3b3",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 68.66, "end_sec": 81.66, "paraphrase": "视频引用场景定义：时空统一的单一行动，以涉及故事和人物的变化结束。"},
+        {"start_sec": 184.66, "end_sec": 416.66, "paraphrase": "场景冲突由目标和障碍构成，来源可以是身体、言语、环境或人物内部。"},
+        {"start_sec": 416.66, "end_sec": 482.66, "paraphrase": "冲突需要服务更大的故事弧，并明确失败后会损失什么。"},
+        {"start_sec": 747.66, "end_sec": 845.66, "paraphrase": "若场景不影响人物则可能可删；场景还需在全片语境中影响更大情节线。"},
+        {"start_sec": 933.66, "end_sec": 967.66, "paraphrase": "转折的四项效果被概括为惊讶、好奇增加、获得洞见和进入新方向。"},
+        {"start_sec": 987.66, "end_sec": 1081.66, "paraphrase": "区分演员 blocking 与摄影机 staging，并以站坐、高度和推近呈现权力转移。"},
+        {"start_sec": 1127.66, "end_sec": 1207.66, "paraphrase": "较长镜头可通过演员/相机运动连续转移注意力，宽景保留空间，关键时刻才推近。"},
+        {"start_sec": 1395.66, "end_sec": 1464.66, "paraphrase": "接近、站坐、转身和最终同框被用来承载控制、拒绝和伙伴关系变化。"}
+      ]
+    },
+    {
+      "video_id": "3Q3eITC01Fg",
+      "title": "How Does an Editor Think and Feel?",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=3Q3eITC01Fg",
+      "duration_sec": 564.198,
+      "audio_sha256": "c1471d6c155f91050e7bd0b19403eb2b89008774d88512f4cd1cda205fb7222e",
+      "asr_sha256": "320ddaa271a364cd7f8364ae7def63e16b49e510086e57abb3eecfd228d3855c",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 51.08, "end_sec": 119.8, "paraphrase": "剪辑可寻找演员眼神中的决定变化，并把眼神与所见对象连接成无对白思想。"},
+        {"start_sec": 123.92, "end_sec": 182.64, "paraphrase": "情绪需要在说话前后获得观看时间，数秒时长差异可能改变观众感受。"},
+        {"start_sec": 184.48, "end_sec": 254.24, "paraphrase": "有些情绪适合连续镜头，有些适合多镜头；案例在峰值前压缩、峰值后延长回落。"},
+        {"start_sec": 323.32, "end_sec": 405.92, "paraphrase": "具体素材的动作、走路和场所活动形成可感知节奏，切点需从反复观看中发现。"},
+        {"start_sec": 422.28, "end_sec": 478.56, "paraphrase": "剪辑不必总隐形；提前切、突兀切或略长停留都应服务明确观众反应。"}
+      ]
+    },
+    {
+      "video_id": "8q4X2vDRfRk",
+      "title": "The Spielberg Oner",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=8q4X2vDRfRk",
+      "duration_sec": 478.61,
+      "audio_sha256": "50c643a39a9df7cfc58b61f0493103e29f8c2f362b99aff703e2469e924c3c00",
+      "asr_sha256": "91c95506768748a14d4ef7ccbd8e2346e9e0e4fa54af6a159ae4eb36b4541e0d",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 36.84, "end_sec": 49.92, "paraphrase": "视频观察的案例多处在约一到两分钟，足以覆盖场景并保持节奏。"},
+        {"start_sec": 74.6, "end_sec": 92.84, "paraphrase": "一个移动 master 可把推近、单人、插入等多个功能构图串在同一 take。"},
+        {"start_sec": 107.48, "end_sec": 152.08, "paraphrase": "镜头运动由动作推动，演员调度与背景活动持续改变注意目标。"},
+        {"start_sec": 318.92, "end_sec": 361.36, "paraphrase": "先移动演员，再响应相机，并把长镜头拆成多个相连构图。"},
+        {"start_sec": 384.96, "end_sec": 426.88, "paraphrase": "即使主镜头完整，也拍 insert/cutaway 作为收紧、拼接和困难标记保险，并设长度/时间止损。"}
+      ]
+    },
+    {
+      "video_id": "3FOzD4Sfgag",
+      "title": "Edgar Wright - How to Do Visual Comedy",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=3FOzD4Sfgag",
+      "duration_sec": 479.271,
+      "audio_sha256": "36d385a07760c90c1ff2acac2234a1642a8932e421d0cf6f4d1e4820125829a1",
+      "asr_sha256": "fd27b7795c57251761aded546ba5d302384d0d0bec8b9cef1c9cbd66fb0b1ac4",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 39.6, "end_sec": 56.28, "paraphrase": "只靠静态近景对白只使用了电影视听范围的一小部分。"},
+        {"start_sec": 118.2, "end_sec": 143.5, "paraphrase": "过场可同时利用地点、银幕方向和音乐/音效反差完成信息与笑点。"},
+        {"start_sec": 215.32, "end_sec": 292.26, "paraphrase": "笑点可来自调度、入画/出画、变焦、升降和摇镜，以及画框包含/排除什么。"},
+        {"start_sec": 299.8, "end_sec": 441.8, "paraphrase": "列举匹配转场、定时音效、动作对音乐等视听喜剧工具。"}
+      ]
+    },
+    {
+      "video_id": "RXD97Rc5P_s",
+      "title": "4 Unique Setups for Daylight | Add Style to Your Lighting",
+      "channel": "Aputure",
+      "url": "https://www.youtube.com/watch?v=RXD97Rc5P_s",
+      "duration_sec": 434.236,
+      "audio_sha256": "cca1bdbb3b560970ab5291cc75bbd5b3991e89994bdaf1913dea59df924507ff",
+      "asr_sha256": "4fc07ac2925b6b3eff26e04a45b46afc030ddc436e2171203806250abf0e88f8",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 47.32, "end_sec": 102.88, "paraphrase": "夕阳 look 控制暖窗、白顶环境反射、方向性硬源、旗板与雾中背光。"},
+        {"start_sec": 126.04, "end_sec": 178.8, "paraphrase": "高日 look 去暖、增加窗源和柔化，并调整相机 ISO 控整体环境。"},
+        {"start_sec": 183.2, "end_sec": 274.0, "paraphrase": "阴天 look 改窗户开闭并使用大面积反弹/扩散控制软光与窗外。"},
+        {"start_sec": 287.28, "end_sec": 347.84, "paraphrase": "蓝调时刻用冷环境、暖实用灯和面部回光形成分离。"},
+        {"start_sec": 394.0, "end_sec": 417.56, "paraphrase": "旅行紧排程应简化并复用照明主题/公式，不在每个地点重新发明。"}
+      ]
+    },
+    {
+      "video_id": "fdVAM-R8cTI",
+      "title": "Cinematography Case Study — Lighting The Face",
+      "channel": "Wandering DP",
+      "url": "https://www.youtube.com/watch?v=fdVAM-R8cTI",
+      "duration_sec": 571.925,
+      "audio_sha256": "0cc3fdb661a18a615e80d5db13b5635deb81fde51fab2860199addac57cbc8af",
+      "asr_sha256": "f5ea99c1484a72c8dee078359222a8ec87361542c72b5666aa9fa34a98899ee2",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 12.44, "end_sec": 45.16, "paraphrase": "先照亮空间再让人物移动是一种提高灵活性、减少逐镜重布的方法。"},
+        {"start_sec": 69.84, "end_sec": 152.42, "paraphrase": "小空间、多人物和多视线会迅速增加逐脸布光、错误风险和现场时间。"},
+        {"start_sec": 240.0, "end_sec": 291.16, "paraphrase": "案例先识别需要平衡窗与面部 wrap 的最难反打，其他角度可沿用既有光。"},
+        {"start_sec": 310.72, "end_sec": 405.64, "paraphrase": "移动 coverage 同时涉及窗、眼神光、负补、背景层次、演员朝向与更多规划。"},
+        {"start_sec": 520.08, "end_sec": 568.36, "paraphrase": "复杂角度可以完成，但需要能力和时间；时间不足时应减少出错机会。"}
+      ]
+    },
+    {
+      "video_id": "bLMpNwOIfSY",
+      "title": "8 Sequence Approach To Writing A Screenplay — Paul Joseph Gulino",
+      "channel": "Film Courage",
+      "url": "https://www.youtube.com/watch?v=bLMpNwOIfSY",
+      "duration_sec": 626.474,
+      "audio_sha256": "e1f60cc321f05a5e0793dff507da1ae5ba6b65eee13fb0eef4ee63076fb40a24",
+      "asr_sha256": "d60b5624f8a95f0d15e6b5c710a1d4ba25d7b6dd80a7f5485c5be83f34928d45",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 158.48, "end_sec": 227.98, "paraphrase": "把长中段拆成约十五分钟的局部脚本，每段建立在上一段结果上。"},
+        {"start_sec": 239.8, "end_sec": 302.44, "paraphrase": "角色先试最容易办法，失败后换策略；局部结果通向下一序列。"},
+        {"start_sec": 309.8, "end_sec": 368.76, "paraphrase": "幕、序列和场景都可用目标—障碍—答案维持希望与担忧。"},
+        {"start_sec": 433.8, "end_sec": 488.6, "paraphrase": "张力/释放和光暗、强弱、快慢变化可重置注意，持续高压会疲劳。"},
+        {"start_sec": 494.84, "end_sec": 526.96, "paraphrase": "三到五分钟注意窗口只被受访者作为谨慎理解，不应当硬法规。"}
+      ]
+    },
+    {
+      "video_id": "_AQkQ4a1yJ8",
+      "title": "Why The Batman's Sound is Different",
+      "channel": "Thomas Flight",
+      "url": "https://www.youtube.com/watch?v=_AQkQ4a1yJ8",
+      "duration_sec": 854.378,
+      "audio_sha256": "0a1f4ec501ad0f73e0c384c57120b00853a31f21432c0117dc0a82e7b215bdac",
+      "asr_sha256": "d01de018182596f85b7a442b73433b622abce4c0e4f017549024df21ce745574",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 89.12, "end_sec": 171.48, "paraphrase": "同一雨声被设计成多种质感以强化不同场景，而非只复制环境。"},
+        {"start_sec": 187.2, "end_sec": 335.68, "paraphrase": "环境音量、混响与频谱变化可模拟角色注意力和解离式主观听觉。"},
+        {"start_sec": 354.68, "end_sec": 545.96, "paraphrase": "母题/声床可以标记角色相信或害怕什么，并在认知改变后变形或缺席。"},
+        {"start_sec": 556.6, "end_sec": 650.44, "paraphrase": "降低打击或环境等竞争层可改变相对响度，使音乐/枪声显得更强。"},
+        {"start_sec": 661.04, "end_sec": 756.72, "paraphrase": "声音目标可为正确印象而非物理复刻，真实声源也可经拉伸/叠加塑造新对象。"}
+      ]
+    },
+    {
+      "video_id": "he3x5flTFPg",
+      "title": "Parasite — The Power of Symbols",
+      "channel": "Lessons from the Screenplay",
+      "url": "https://www.youtube.com/watch?v=he3x5flTFPg",
+      "duration_sec": 822.497,
+      "audio_sha256": "04c92f51ccb9711a58b2fc5aecdd2dfd16a98bf51f8eef06f0fb67dbc5fb727d",
+      "asr_sha256": "25d54880b6cd436a9e002ba6a104db62f8613c85c49578f43dbbab23d6e6e721",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 86.44, "end_sec": 109.96, "paraphrase": "符号是承载其他意义的具体对象，案例跟踪石头与气味。"},
+        {"start_sec": 256.52, "end_sec": 428.76, "paraphrase": "符号在不同人物/情节状态重复与修改，形成外化内在变化的母题轨迹。"},
+        {"start_sec": 499.08, "end_sec": 575.6, "paraphrase": "motif 是可指认的具体重复，theme 是由文本证据支持的抽象意义。"},
+        {"start_sec": 581.02, "end_sec": 679.2, "paraphrase": "两条母题在高潮共同参与人物选择与毁灭，以表达阶级主题。"}
+      ]
+    },
+    {
+      "video_id": "wLfZL9PZI9k",
+      "title": "Ultimate Guide to Camera Angles: Every Camera Shot Explained",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=wLfZL9PZI9k",
+      "duration_sec": 811.944,
+      "audio_sha256": "4ae4f2f4595246ea625e62fe5e376596cf9193e0f23ea7affec38b1b5cf84f58",
+      "asr_sha256": "fe12c91ed6b4e7c143d3363f5729ed0084e924a41ce2c4b0ecde186cbdd63373",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 52.06, "end_sec": 64.66, "paraphrase": "角度与景别/构图分开，教学上用于影响观众如何感知主体。"},
+        {"start_sec": 83.5, "end_sec": 194.5, "paraphrase": "低角/高角常与力量、脆弱和主体权力不平衡关联。"},
+        {"start_sec": 310.8, "end_sec": 375.68, "paraphrase": "倾斜地平线可制造失衡，案例随冲突增加倾角。"},
+        {"start_sec": 409.36, "end_sec": 532.36, "paraphrase": "平视/肩高语义较弱，可依直视镜头、身高与过肩关系形成连接或隔离。"},
+        {"start_sec": 729.96, "end_sec": 762.96, "paraphrase": "建议把角度与景别、构图组合测试，而非只记名称。"}
+      ]
+    },
+    {
+      "video_id": "kDzUx6t09tg",
+      "title": "How to Direct Actors — Directing Advice from the Greats",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=kDzUx6t09tg",
+      "duration_sec": 1264.686,
+      "audio_sha256": "c16e908856d7a9c8ab5e4f893ab35daa674888fd4a6ab58dca3e6e9ba0870ec2",
+      "asr_sha256": "2f12577cc10e40351d63012773c43df583d3d76af407ebd69271900e8cbdd24d",
+      "review_status": "full_asr_read",
+      "segments": [
+        {"start_sec": 410.8, "end_sec": 560.4, "paraphrase": "排练可用于探索/深化，也可只锁技术以保存情绪新鲜，方法取决于导演与演员。"},
+        {"start_sec": 600.0, "end_sec": 670.08, "paraphrase": "有效演员笔记依赖信任、诚实和协作关系。"},
+        {"start_sec": 760.56, "end_sec": 838.4, "paraphrase": "笔记要清楚具体、避免过载，并知道何时不再下笔记。"},
+        {"start_sec": 854.96, "end_sec": 912.4, "paraphrase": "导演需要对演员、天气与现场意外作出反应。"},
+        {"start_sec": 940.72, "end_sec": 1148.16, "paraphrase": "即兴可提供真实反应/替代素材，但无结构改词会碰撞后续；小幅语气/运动变化也是自发性。"}
+      ]
+    },
+    {
+      "video_id": "mbHD6GQUgu0",
+      "title": "20 Screenwriting Tips from Aaron Sorkin",
+      "channel": "Outstanding Screenplays",
+      "url": "https://www.youtube.com/watch?v=mbHD6GQUgu0",
+      "duration_sec": 1306.448,
+      "audio_sha256": "6f75721fa23b0980d2889920d945c892ad96989490755fd7778e820e20133327",
+      "asr_sha256": "3a61dff25439d46a7c6b1ee4dddecb0e594f96c8ae85a7f649a6574547aa0f3f",
+      "review_status": "full_asr_read",
+      "audio_track": "YouTube format 140-11, English original",
+      "failed_attempt": "首次下载到法语配音轨，已判定无效且不用于任何主张或计数。",
+      "segments": [
+        {"start_sec": 80.3, "end_sec": 152.5, "paraphrase": "写对手时先理解其自我辩护与被接纳的理由，不由作者预先用反派标签代替人物逻辑。"},
+        {"start_sec": 156.5, "end_sec": 243.5, "paraphrase": "对白具有节奏、拍点、重音和停顿；口头卡顿也可成为被设计的声音。"},
+        {"start_sec": 353.8, "end_sec": 420.8, "paraphrase": "戏剧核心可用重要意图、真实障碍和克服障碍的策略描述；策略使人物价值排序可见。"},
+        {"start_sec": 424.8, "end_sec": 585.8, "paraphrase": "真实事件可被组织进有限时间与空间容器，但人物现实、戏剧角色和构造边界需要分开。"},
+        {"start_sec": 738.8, "end_sec": 820.8, "paraphrase": "初稿写到结尾才可能发现影片真正关于什么；第二稿应从开头重建、删除偏航并补强第一幕 setup。"},
+        {"start_sec": 1130.8, "end_sec": 1187.8, "paraphrase": "作者出声扮演所有角色，可以暴露演员难以自然说出的句子。"},
+        {"start_sec": 1214.8, "end_sec": 1253.8, "paraphrase": "与其用履历告诉观众人物是谁，不如显示其强烈欲望、 formidable obstacle 和采取的策略。"}
+      ]
+    }
+  ]
+}

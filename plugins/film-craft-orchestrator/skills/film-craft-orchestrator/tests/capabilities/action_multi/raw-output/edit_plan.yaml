@@ -1,0 +1,12 @@
+project_id: action_multi_45s
+runtime_target_sec: 45
+sequence: [C01,C02,C03,C04,C05,C06,C07,C08,C09]
+cut_logic:
+  - C01->C02 on B's palm entering frame
+  - C03->C04 on C's rope-release sound
+  - C05->C06 on B's route-pointing hand
+  - C06->C07 on parcel contact thump
+  - C07->C08 on label read completion
+  - C08->C09 on rope tension release
+handles_not_counted: true
+status: pending

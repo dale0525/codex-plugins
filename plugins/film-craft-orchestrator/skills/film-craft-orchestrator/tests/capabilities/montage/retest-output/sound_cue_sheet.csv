@@ -1,0 +1,9 @@
+cue_id,clip_id,time_in_sec,time_out_sec,stem,type,description,source,status
+SC01,C-S01-01,0,5,foley,foley,finger tap and dry dust with no hum,generated_pending,pending
+SC02,C-S01-02,5,10,foley,foley,screw turns and panel creak,generated_pending,pending
+SC03,C-S01-03,10,15,foley,foley,brush rasp; first faint tuning hum enters,generated_pending,pending
+SC04,C-S01-04,15,20,foley,foley,cloth wipe; hum gains a soft carrier wobble,generated_pending,pending
+SC05,C-S01-05,20,25,foley,foley,solder sizzle synced to carrier pulse,generated_pending,pending
+SC06,C-S01-06,25,30,foley,foley,brass knob click and case latch,generated_pending,pending
+SC07,C-S01-07,30,35,ambience,ambience,"switch click, transformer buzz, carrier narrows",generated_pending,pending
+SC08,C-S01-08,35,40,voice,radio_voice,clear warm spoken phrase emerges; speaker cone flutter,generated_pending,pending

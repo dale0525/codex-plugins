@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-07-24",
+  "method": "Twenty authorized low-resolution video frames were extracted with ffmpeg 8.1.2, reviewed at original sample resolution in two independent visual sessions, and hash-checked against the extraction manifest.",
+  "evidence_boundary": "complete_for_sampled_claims means the sampled UI, reference asset, composition or timeline is directly visible. A still frame cannot prove motion, audio, temporal continuity, prompt causality, an operation succeeding, or model quality.",
+  "items": [
+    {
+      "video_id": "31GR1pXlB1g",
+      "title": "My AI Filmmaking Workflow: Kling, Veo & Nano Banana",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=31GR1pXlB1g",
+      "video_sha256": "0a39952478968f59b6082bcb018fd552154c0d33c20666665712057cf4ee7df3",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 100, "path": "frame-samples/ai-video/31GR1pXlB1g-100s.jpg", "frame_sha256": "08729640ca0c2699512a2c9f41b8d74ea806def5fd7411b40531b0dbabad05ef", "observation": "A white multi-view reference sheet shows the same mechanical woman from front, profile, back and face close-up; the visible label reads 'Multiple Angles of the Same Character'.", "supports_claims": ["31G-C01"], "not_supported": "Cross-shot motion, identity success rate and model causality."},
+        {"timestamp_sec": 365, "path": "frame-samples/ai-video/31GR1pXlB1g-365s.jpg", "frame_sha256": "5f6998785d3e0ae7451adc5a787d0703f88b97bfe404b41db7f7c9a6cfefa8f5", "observation": "A generated landfill shot shows the mechanical woman climbing; a small 'Veo' label is visible.", "supports_claims": ["31G-C02", "31G-C03"], "not_supported": "The seam, rain continuity, motion or exact number of trimmed frames."}
+      ]
+    },
+    {
+      "video_id": "8FD8M7jhX20",
+      "title": "Complete AI Filmmaking Workflow - From Concept to Film",
+      "channel": "FRMWRKD-EXPLAINED",
+      "url": "https://www.youtube.com/watch?v=8FD8M7jhX20",
+      "video_sha256": "551872b2b655151878893bdca819cb2536d386095a7c0aa12cad095ec82fbe18",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 750, "path": "frame-samples/ai-video/8FD8M7jhX20-750s.jpg", "frame_sha256": "c8aebef8e14672be2b66c96bafa0f6c4d01d0bdd4ccbe62f77aab84d4b19ad26", "observation": "An Artlist interface displays a grid of visual samples while the presenter appears in a picture-in-picture window.", "supports_claims": ["8FD-C04"], "not_supported": "Database-field behavior, prompt compilation or generation provenance."},
+        {"timestamp_sec": 1800, "path": "frame-samples/ai-video/8FD8M7jhX20-1800s.jpg", "frame_sha256": "8e27303541bbd8b4d6ae7c6666680dd8985b7d9bf6a1b4a9bfed29a8c946dbb2", "observation": "Four panels show a similar black-haired woman in a field, lake, forest and canyon inside the tutorial interface.", "supports_claims": ["8FD-C03", "8FD-C05"], "not_supported": "Dynamic identity continuity, exact model or prompt effectiveness."}
+      ]
+    },
+    {
+      "video_id": "6UFFR2BLr5U",
+      "title": "How I Made a Time Travel Movie with Kling, Runway Act-One, ElevenLabs, & Suno | AI Workflow Tutorial",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=6UFFR2BLr5U",
+      "video_sha256": "d9a47404f8cab9188937e1a1344adcb638fbddd511fb869fbc81d68fe7313960",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 350, "path": "frame-samples/ai-video/6UFFR2BLr5U-350s.jpg", "frame_sha256": "3685afd0e24d0d01c5edec0f5eec712d5bb048268e78396b981695f186de757d", "observation": "A side-by-side presenter/performance example carries the visible caption 'Big expressions appear subtle'.", "supports_claims": ["6UF-C03"], "not_supported": "Transfer causality, audience response or optimal acting intensity."},
+        {"timestamp_sec": 740, "path": "frame-samples/ai-video/6UFFR2BLr5U-740s.jpg", "frame_sha256": "3253742e37429bdf4eb8130d8b60b1565bd9fb00d32f77de31f03484a0719d33", "observation": "The ElevenLabs Sound Effects interface contains a prompt for heavy boots in an underground tunnel with metallic echo and reverberation.", "supports_claims": ["6UF-C06", "6UF-C07"], "not_supported": "Generated sound quality, licensing or synchronization."}
+      ]
+    },
+    {
+      "video_id": "BBFNgQ1EQgY",
+      "title": "How I Made an AI Short Film (Seedream 4.5 + Kling 3.0)",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=BBFNgQ1EQgY",
+      "video_sha256": "7fa60904bfb3aa4ed515472d04ba8cf5ab1a826178193226c6d89ad25b7ac478",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 140, "path": "frame-samples/ai-video/BBFNgQ1EQgY-140s.jpg", "frame_sha256": "ed1a228416c74b480a3c264e17e75146651b45051b3b5c3ef98ae77bc8db8491", "observation": "A generation interface shows a full-body multi-view character sheet plus head angles; visible actions include Recreate image, Upscale, Image to video and Reference.", "supports_claims": ["BBF-C01", "BBF-C02"], "not_supported": "Long-horizon identity consistency."},
+        {"timestamp_sec": 420, "path": "frame-samples/ai-video/BBFNgQ1EQgY-420s.jpg", "frame_sha256": "c5b20c67142b8933b3a541ba99d8ba69de2d963fe14e67e6d723914fe5db07b1", "observation": "A generated coffee-shop shot shows a red car entering through the window beside a visible prompt panel and Modify Video control.", "supports_claims": ["BBF-C06"], "not_supported": "Crash physics, action timing or generation success across the whole clip."}
+      ]
+    },
+    {
+      "video_id": "WvtBCvxsNkw",
+      "title": "Finally, Consistent Locations for AI Filmmaking (Seedance 2.0 & Kling 3 Omni)",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=WvtBCvxsNkw",
+      "video_sha256": "aaa33656bac2b3db4b53270a10655dc93f0c8fd73d3de1195f33e48ff86921f3",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 340, "path": "frame-samples/ai-video/WvtBCvxsNkw-340s.jpg", "frame_sha256": "dd346f46d92799d592ae25ab4e3a305502447f9a79035154561c218b1bc3328d", "observation": "A dock composition uses a defocused green foreground figure and a woman below; the visible caption says 'Remember these are references, not start frames!'.", "supports_claims": ["WVT-C03", "WVT-C04", "WVT-C06"], "not_supported": "Subsequent motion or exact shot/reverse-shot continuity."},
+        {"timestamp_sec": 500, "path": "frame-samples/ai-video/WvtBCvxsNkw-500s.jpg", "frame_sha256": "6ed8cfd1a077476e3cde2ea4982945b78e49679adc52b87ba6ec3e7e99806191", "observation": "A six-cell storyboard is shown with green time windows and shot descriptions on a black background.", "supports_claims": ["WVT-C07", "WVT-C08"], "not_supported": "Actual duration, audio or whether all timed events were generated."}
+      ]
+    },
+    {
+      "video_id": "Lp8ZAdGopDw",
+      "title": "How To Create AI Film Storyboards & Maintain Character Consistency",
+      "channel": "Helyz Space",
+      "url": "https://www.youtube.com/watch?v=Lp8ZAdGopDw",
+      "video_sha256": "a3dacf387bc9e185d950592c56269fb87194a0284882f0a8fa7a8cb6b02c1d96",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 430, "path": "frame-samples/ai-video/Lp8ZAdGopDw-430s.jpg", "frame_sha256": "2251294b6c27eaf92d7fbc8462206bd05f13f29f3ded308b631b614dac018cf1", "observation": "A Google Flow page displays a control-room environment, two multi-view character references and a prompt area with Task and Character References labels.", "supports_claims": ["LP8-C03", "LP8-C04", "LP8-C05"], "not_supported": "Generation success or full prompt semantics."},
+        {"timestamp_sec": 560, "path": "frame-samples/ai-video/Lp8ZAdGopDw-560s.jpg", "frame_sha256": "9f97230e5939127a3cee8b401404f16da945d7b5b4aa9ea83ec8d172890fbcfc", "observation": "The Flow page shows a six-cell storyboard labeled KF1/KF2/etc., character references and text mentioning Frame Source, Extract frame and KF1.", "supports_claims": ["LP8-C05", "LP8-C06", "LP8-C07"], "not_supported": "That frame extraction executed successfully or preserved identity."}
+      ]
+    },
+    {
+      "video_id": "o7iUGdeSUPE",
+      "title": "How to Lip Sync TWO characters in ONE scene with AI [Tutorial]",
+      "channel": "Bozek Media",
+      "url": "https://www.youtube.com/watch?v=o7iUGdeSUPE",
+      "video_sha256": "65ad7a5a087987271d12c661f2d743d686e302502857c457040548339e58d88e",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 300, "path": "frame-samples/ai-video/o7iUGdeSUPE-300s.jpg", "frame_sha256": "949daeee8f9a93336796c743460f9a39dfe593db30803fd89392a5a3221ce5d2", "observation": "Adobe Premiere Pro shows a warm two-person bar scene, a context menu over the timeline and Lumetri Color controls.", "supports_claims": ["O7I-C04", "O7I-C05"], "not_supported": "That a frame hold or mask succeeded, or that audio is synchronized."},
+        {"timestamp_sec": 325, "path": "frame-samples/ai-video/o7iUGdeSUPE-325s.jpg", "frame_sha256": "2002e95521fb0b0917c70b952ca73296426e4e6ee2506385d870fc34ebbd2c93", "observation": "Premiere displays a closer angle of the hat-wearing man facing a foreground partner above an active timeline.", "supports_claims": ["O7I-C05"], "not_supported": "Speaker identity, lip-sync accuracy, duplicated-audio removal or dynamic compositing."}
+      ]
+    },
+    {
+      "video_id": "PswcbMbJ37c",
+      "title": "Stop Making Cheap AI Videos - Use This $10M Workflow Instead | AI Filmmaking Sound Design",
+      "channel": "Motion Lab",
+      "url": "https://www.youtube.com/watch?v=PswcbMbJ37c",
+      "video_sha256": "941a6e20c2fa7154531192c31e11648332873f35b76ccab145487802b831c470",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 160, "path": "frame-samples/ai-video/PswcbMbJ37c-160s.jpg", "frame_sha256": "08ba8121dfadcae1306d9113f9367f2df81829f8121ec51b2d279fb665260a70", "observation": "A dark, symmetrical wide parking-garage composition isolates one distant person under a strong overhead light.", "supports_claims": ["PSW-C03", "PSW-C04"], "not_supported": "The planned shot sequence, action or sound design."},
+        {"timestamp_sec": 280, "path": "frame-samples/ai-video/PswcbMbJ37c-280s.jpg", "frame_sha256": "c8d9f4f7d4bf262371d3f045ad47b8297b66b16f6258765b3d9c2e85ac8a5ec8", "observation": "A Premiere project titled THE WIRE shows a black title card, a complex multi-track timeline and a media bin.", "supports_claims": ["PSW-C05", "PSW-C06", "PSW-C07"], "not_supported": "Specific audible ticks, heartbeat, reverb, silence or their emotional effect."}
+      ]
+    },
+    {
+      "video_id": "3MQn-A1q9vo",
+      "title": "The Reality of Making Cinematic AI Videos (My Workflow, Mistakes & Lessons) - Behind The Scenes",
+      "channel": "AI for Real Life: Redefining Filmmaking",
+      "url": "https://www.youtube.com/watch?v=3MQn-A1q9vo",
+      "video_sha256": "d1f00ba16eee9734f5b2c20394b7ce47e036b619a8dbfd2090b511f89bd5399d",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 520, "path": "frame-samples/ai-video/3MQn-A1q9vo-520s.jpg", "frame_sha256": "048dfced13598d8332a0b19cc26cb1eab8f401ef6bace62315783f8a8f17c20c", "observation": "A generation UI shows close and full-body views of a Black male basketball character plus Recreate, Video, Edit and Upscale controls.", "supports_claims": ["3MQ-C01", "3MQ-C02"], "not_supported": "The amount or cause of character drift."},
+        {"timestamp_sec": 800, "path": "frame-samples/ai-video/3MQn-A1q9vo-800s.jpg", "frame_sha256": "c5de55661a05c6987d96841ee4face716da425bd277b781af7c808c30eb78246", "observation": "A nine-cell filmstrip-style storyboard shows the male character across sand, forest, snow and rain environments.", "supports_claims": ["3MQ-C03"], "not_supported": "That the grid came from one prompt or that refined clips remain continuous."}
+      ]
+    },
+    {
+      "video_id": "f5BYj6XHGwg",
+      "title": "I Stopped Prompting AI Videos Like Everyone Else",
+      "channel": "AI for Real Life: Redefining Filmmaking",
+      "url": "https://www.youtube.com/watch?v=f5BYj6XHGwg",
+      "video_sha256": "c1f9fd7c42a7d3c47dd60bcd2e98fe60d95fe78183de62be6525c67221a57a3e",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec": 690, "path": "frame-samples/ai-video/f5BYj6XHGwg-690s.jpg", "frame_sha256": "a2ba1bc079ad2dcc1953de009a0d984adc97cad7bb38c32eb7d6764a22032d32", "observation": "A generation page shows a tropical bicycle POV and a structured prompt headed 18-SECOND CINEMATIC MEMORY with visible MAIN CHARACTER, LOCATION and SOUND DESIGN sections.", "supports_claims": ["F5B-C03", "F5B-C04"], "not_supported": "Exact timing, audio or whether all prompt beats were honored."},
+        {"timestamp_sec": 850, "path": "frame-samples/ai-video/f5BYj6XHGwg-850s.jpg", "frame_sha256": "ddd077550a4f69768e4f51261938c5da9374da996528f31feac0c86e28dc654a", "observation": "A preview partly hides a blue/yellow surfboard and bicycle behind a tree; several reference thumbnails are attached above the prompt panel.", "supports_claims": ["F5B-C04", "F5B-C05", "F5B-C06"], "not_supported": "That a word caused the color error, fin geometry or the final crop repair."}
+      ]
+    }
+  ]
+}

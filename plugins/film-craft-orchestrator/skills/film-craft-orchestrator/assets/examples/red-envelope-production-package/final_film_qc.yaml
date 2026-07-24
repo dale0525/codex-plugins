@@ -1,0 +1,23 @@
+id: red-envelope.final-film-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [red-envelope.clip-qc@1.0.0, red-envelope.edit-plan@1.0.0]
+assumptions: []
+constraints:
+  runtime_target_sec: 60
+open_questions:
+  - 所有实际参考、生成输出、声音和权利 provenance 尚未完成。
+status: qc_pending
+change_log: []
+runtime: pending
+must_beat_coverage: pending
+continuity: pending
+dialogue_lipsync: pending
+sound: pending
+rights_and_provenance: pending
+blocking_conflicts:
+  - issue_id: REF-GATE-001
+    severity: blocking
+    description: expected reference images exist only as descriptor hashes and are not attached
+    resolved: false
+final_result: pending

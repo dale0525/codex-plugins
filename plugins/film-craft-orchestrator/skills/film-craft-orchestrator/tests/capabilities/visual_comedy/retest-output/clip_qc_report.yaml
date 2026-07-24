@@ -1,0 +1,74 @@
+id: visual-comedy-retest.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs:
+- visual-comedy-retest.continuity-state@1.0.0
+- visual-comedy-retest.generation-log@1.0.0
+assumptions:
+- No rendered clips to inspect.
+constraints: {}
+open_questions:
+- Attach references and run a supported adapter.
+status: qc_pending
+change_log: []
+clips:
+- clip_id: C-S01-01
+  technical: pending
+  semantic: pending
+  continuity: pending
+  editability: pending
+  sound_lipsync: pass
+  provenance: pending
+  evidence: No output
+  repair: Generate diagnostic preview
+  status: pending
+- clip_id: C-S01-02
+  technical: pending
+  semantic: pending
+  continuity: pending
+  editability: pending
+  sound_lipsync: pass
+  provenance: pending
+  evidence: No output
+  repair: Generate diagnostic preview
+  status: pending
+- clip_id: C-S01-03
+  technical: pending
+  semantic: pending
+  continuity: pending
+  editability: pending
+  sound_lipsync: pass
+  provenance: pending
+  evidence: No output
+  repair: Generate diagnostic preview
+  status: pending
+- clip_id: C-S01-04
+  technical: pending
+  semantic: pending
+  continuity: pending
+  editability: pending
+  sound_lipsync: pass
+  provenance: pending
+  evidence: No output
+  repair: Generate diagnostic preview
+  status: pending
+- clip_id: C-S01-05
+  technical: pending
+  semantic: pending
+  continuity: pending
+  editability: pending
+  sound_lipsync: pass
+  provenance: pending
+  evidence: No output
+  repair: Generate diagnostic preview
+  status: pending
+- clip_id: C-S01-06
+  technical: pending
+  semantic: pending
+  continuity: pending
+  editability: pending
+  sound_lipsync: pass
+  provenance: pending
+  evidence: No output
+  repair: Generate diagnostic preview
+  status: pending

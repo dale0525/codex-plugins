@@ -1,0 +1,18 @@
+project_id: old_radio_montage
+version: 1
+status: pending
+frame_status: diagnostic_preview
+checks:
+  runtime: {target_sec: 40, measured_sec: null, status: pending}
+  aspect_ratio: {target: "16:9", measured: null, status: pending}
+  must_beats_coverage: {required: 5, covered: null, status: pending}
+  repeated_composition_with_visible_change: {status: pending}
+  sound_motif_without_time_text: {status: pending}
+  reference_inputs: {expected: 0, attached: 0, status: pending}
+  clip_hashes: {present: false, status: pending}
+  rights_and_provenance: {status: pending}
+blocking_issues:
+  - no actual reference images
+  - no generated clips or evidence frames
+  - model, version, and audio provenance unspecified
+final: pending

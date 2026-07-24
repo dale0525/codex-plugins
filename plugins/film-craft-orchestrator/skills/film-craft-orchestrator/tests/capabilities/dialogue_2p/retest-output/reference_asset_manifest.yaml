@@ -1,0 +1,12 @@
+id: project.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints: {}
+open_questions: []
+status: pending
+change_log: []
+assets: []
+reference_gate: diagnostic_preview_pending
+note: "用户未提供实际参考图；不生成哈希，不标记 approved。"

@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-24",
+  "purpose": "Executable script-to-screen analysis procedures requiring a screenplay page, explanatory timecode and film/frame anchor. They classify evidence and competing explanations rather than pretending to know filmmaker intent.",
+  "procedures": [
+    {
+      "id": "page-scene-timecode-alignment",
+      "domain": "evidence",
+      "title": "剧本页—场景—视频时间码三向对齐",
+      "source_refs": ["QTxvzkwVsQE", "8IAGH6k17nw"],
+      "claim_refs": ["ARR-C03", "ARR-C05", "ARR-C09", "ARR-C11", "SOC-C06", "SOC-C09", "SOC-C13", "SOC-C18"],
+      "source_type": "secondary_script_to_screen_analysis_plus_public_script_and_frames",
+      "stability": "stable",
+      "applicability": {"use_when": ["有公开可读剧本版本、完整解说和对应成片画面", "需要审计删改或功能转移"], "do_not_use_when": ["只有电影对白或片段", "剧本版本、页码和来源完全不可辨"]},
+      "non_applicability": ["第三方公开剧本不等于最终拍摄稿", "静帧不能证明声音、运动或剪辑顺序"],
+      "inputs": ["video claim IDs and timecodes", "screenplay URL/hash/version", "PDF physical page and printed screenplay page", "sampled video frames"],
+      "steps": [
+        {"step": 1, "action": "用不超过一句的短定位语在剧本中找到场景，并同时记录 PDF 物理页、印刷页码和 scene heading。", "check": "短定位可复现，且没有分发连续剧本文字。"},
+        {"step": 2, "action": "在视频 claim 时间码前后抽取剧本页、成片或解说图示帧。", "check": "帧 hash、时间码、可见类型和不可推断项齐全。"},
+        {"step": 3, "action": "建立 source unit → screenplay unit → visible/audible film carrier 三列。", "check": "每列分别标 direct fact、video claim 或 interpretation。"},
+        {"step": 4, "action": "发现页码或版本差异时保留多个候选，不强行合并。", "check": "版本不确定性出现在结论旁，而不是脚注中消失。"}
+      ],
+      "outputs": ["page/scene/timecode alignment table", "version note", "frame evidence links"],
+      "failure_signals": ["只找到对白找不到场景", "PDF 页与印刷页混淆", "帧只是无关 B-roll", "把视频字幕当剧本原页"],
+      "repair_actions": ["换用更可靠剧本版本", "扩大时间窗重新抽帧", "降级为 claim-only", "记录两个版本的差异"],
+      "acceptance_tests": [
+        {"test": "三向复现", "pass_criteria": "每个用于程序的 claim 至少有一个视频时间码、一个剧本页定位和一个成片/页面可见锚点，第三方能在允许误差内复现。"},
+        {"test": "版权最小化", "pass_criteria": "skill 不包含完整剧本或连续页面，只保存公开 URL、hash、页码和短定位。"}
+      ],
+      "worked_example": "The Social Network 的开场台词在公开剧本物理页 2 与视频 03:40/05:30 的页面—成片叠加中对齐；Arrival 的 Weber 质问段在公开剧本物理页 80 和视频 07:35 页面帧中对齐。",
+      "counterexample_or_limit": "一个页面和一个成片帧只证明两个状态存在，不自动证明中间删改的原因。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "script-screen-difference-classification",
+      "domain": "evidence",
+      "title": "剧本—成片差异分类",
+      "source_refs": ["QTxvzkwVsQE", "8IAGH6k17nw"],
+      "claim_refs": ["ARR-C07", "ARR-C08", "ARR-C09", "ARR-C10", "ARR-C11", "ARR-C12", "SOC-C13", "SOC-C16", "SOC-C18", "SOC-C19"],
+      "source_type": "secondary_script_to_screen_analysis_plus_public_script_and_frames",
+      "stability": "stable",
+      "applicability": {"use_when": ["剧本和成片存在可定位差异"], "do_not_use_when": ["只凭记忆比较", "没有版本或时间码"]},
+      "non_applicability": ["差异不自动等于改进", "镜头数、cut 数和声音重叠必须由连续证据测量"],
+      "inputs": ["aligned screenplay unit", "film interval", "dialogue/action/scene order", "audio and frame evidence", "draft/version metadata"],
+      "steps": [
+        {"step": 1, "action": "先逐事实记录页面和成片各有什么，不写为什么。", "check": "观察与解释分栏。"},
+        {"step": 2, "action": "将差异编码为 retain、omit、compress、reorder、split、combine、visualize、sound-transfer、performance-change 或 VFX-transfer。", "check": "每个差异只选一个主要类别，次要类别另记。"},
+        {"step": 3, "action": "为每项写保留/改变的叙事功能和付出的代价。", "check": "不是用更电影化之类结果词代替功能。"},
+        {"step": 4, "action": "对数量性主张用连续片段实测；没有测量时保留为 video_claim。", "check": "未把单张拼贴当镜头数或 cut 数证明。"}
+      ],
+      "outputs": ["difference matrix", "function-and-cost note", "measurement status"],
+      "failure_signals": ["类别互相重叠却无主次", "把删减一律解释为节奏", "忽略剧本版本", "把画面字幕当最终音轨"],
+      "repair_actions": ["重做事实层", "增加版本比较", "对动态主张测量连续片段", "降级归因置信度"],
+      "acceptance_tests": [
+        {"test": "差异可验证", "pass_criteria": "每个差异都能回到一个页面位置和一个成片区间；无法定位的条目不进入程序结论。"},
+        {"test": "功能与代价", "pass_criteria": "每项至少写一个保留/新增功能和一个可能损失或风险。"}
+      ],
+      "worked_example": "Arrival 将分散的解释场景归为 compress + voiceover/sound-transfer；The Social Network 将重复 thesis 语句归为 omit/compress，但是否为主题去重仍需竞争解释。",
+      "counterexample_or_limit": "最终成片可能来自不同剧本版本；没有 production draft 时应写 script-public-copy vs film，而非 production script vs film。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "carrier-function-transfer-map",
+      "domain": "evidence",
+      "title": "叙事功能载体转移图",
+      "source_refs": ["QTxvzkwVsQE", "8IAGH6k17nw"],
+      "claim_refs": ["ARR-C02", "ARR-C03", "ARR-C04", "ARR-C06", "ARR-C08", "ARR-C11", "SOC-C05", "SOC-C07", "SOC-C09", "SOC-C13", "SOC-C14", "SOC-C17", "SOC-C19"],
+      "source_type": "secondary_script_to_screen_analysis_plus_public_script_and_frames",
+      "stability": "stable",
+      "applicability": {"use_when": ["同一信息或情绪在原作、剧本和成片由不同载体承担"], "do_not_use_when": ["只能确认表面文字，无法说明功能"]},
+      "non_applicability": ["载体改变不等于功能完全保留", "观众反应必须另测"],
+      "inputs": ["source/screenplay function", "film image/dialogue/sound/edit/performance carriers", "audience knowledge state", "runtime contribution"],
+      "steps": [
+        {"step": 1, "action": "给源单元标 causal、character、information、theme、rhythm 或 world-rule 功能。", "check": "功能可以通过删掉后的断裂来说明。"},
+        {"step": 2, "action": "记录成片主要载体：动作、构图、表演、对白、VO、声音、剪辑顺序、VFX 或省略。", "check": "只选主要载体，避免所有项全选。"},
+        {"step": 3, "action": "比较观众在转移前后何时知道什么、感到什么压力、角色能做什么。", "check": "信息、情绪和行动后果不混成一个字段。"},
+        {"step": 4, "action": "若功能未保留，标 intentional departure 或 loss，不用视觉化成功掩盖。", "check": "损失项进入改编/导演复盘。"}
+      ],
+      "outputs": ["carrier transfer graph", "audience knowledge map", "retained/lost function ledger"],
+      "failure_signals": ["只列删了什么", "VO 重复画面已有信息", "非线性只增加复杂度", "快速剪辑掩盖角色目标不清"],
+      "repair_actions": ["恢复最小功能单元", "换成动作或声音载体", "重排信息", "删除重复载体"],
+      "acceptance_tests": [
+        {"test": "功能闭环", "pass_criteria": "每个 must-preserve 功能在成片中有唯一主要载体和可定位结果；没有载体的条目明确标 loss。"},
+        {"test": "观众状态", "pass_criteria": "未读剧本的审看者能在预定时刻复述关键事实、人物目标或转折，而不是依赖分析者解释。"}
+      ],
+      "worked_example": "Arrival 将语言学习说明从多场对白转成 montage + VO + logogram 图像；The Social Network 将开场 exposition 藏进两条错位思路和表演节拍。",
+      "counterexample_or_limit": "LFTS 对载体功能的解释是二手评论；本程序要求项目内盲测，而不是直接接受评论结论。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "competing-edit-explanation-test",
+      "domain": "evidence",
+      "title": "剪辑/改编归因的竞争解释与反证",
+      "source_refs": ["QTxvzkwVsQE", "8IAGH6k17nw"],
+      "claim_refs": ["ARR-C04", "ARR-C06", "ARR-C07", "ARR-C10", "ARR-C12", "ARR-C13", "ARR-C14", "SOC-C06", "SOC-C14", "SOC-C15", "SOC-C16", "SOC-C18", "SOC-C19", "SOC-C20"],
+      "source_type": "secondary_analysis_with_interview_excerpts_and_sampled_evidence",
+      "stability": "stable",
+      "applicability": {"use_when": ["分析者声称某删改、镜头或表演造成特定效果"], "do_not_use_when": ["只需记录直接可见事实"]},
+      "non_applicability": ["创作者访谈也可能是事后回忆", "相关性不证明单一部门因果"],
+      "inputs": ["primary interpretation", "screenplay and film evidence", "interview provenance", "at least two alternative explanations", "testable prediction"],
+      "steps": [
+        {"step": 1, "action": "把归因改写为可失败预测，例如删除某载体会使观众更晚理解某事实。", "check": "预测能通过版本比较或观众测试判定。"},
+        {"step": 2, "action": "至少提出两个竞争解释，例如节奏、版本差异、表演、coverage、预算或观众已知事实。", "check": "竞争解释不是同义改写。"},
+        {"step": 3, "action": "列出支持和反对每个解释的独立证据。", "check": "单一视频作者观点不重复计为多个来源。"},
+        {"step": 4, "action": "制作或设计 counterfactual：线性版、无重叠版、保留删句版或静态长镜版。", "check": "一次只改变一个主要变量。"},
+        {"step": 5, "action": "按结果保留、降级或拒绝归因。", "check": "失败的解释仍留在 revision log。"}
+      ],
+      "outputs": ["causal attribution matrix", "counterfactual test", "confidence revision log"],
+      "failure_signals": ["只有单一解释", "把导演/编剧名望当证据", "反证同时改了多个变量", "观众测试只问喜欢哪版"],
+      "repair_actions": ["降级为 interpretation", "补独立采访或版本", "重做单变量版本", "把问题改为可复述的信息/情绪指标"],
+      "acceptance_tests": [
+        {"test": "可失败归因", "pass_criteria": "每条高置信归因至少有一个明确可能推翻它的观察，并记录测试结果。"},
+        {"test": "证据分层", "pass_criteria": "直接页/帧事实、视频声称、创作者回忆和分析解释分别标记，不相互冒充。"}
+      ],
+      "worked_example": "The Social Network 的 33 cuts 可能来自对白节奏，也可能来自 coverage 选择；用同片等长对白场景比较 cut 行为。Arrival 的梦境重构可能来自叙事聚焦，也可能来自 runtime 或理解度；用保留撤职段的 counterfactual 比较。",
+      "counterexample_or_limit": "无法获得完整原始素材时只能设计反证而不能执行；此时必须保留 interpretation 状态。",
+      "last_verified_at": "2026-07-24"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+id: red-envelope.failure-repair-scenarios
+version: 1.0.0
+status: illustrative_not_generated
+evidence_boundary: These examples demonstrate the decision procedure; they are not observed model outputs or successful repairs.
+scenarios:
+  - example_id: FAIL-C-S01-04-TWO-PERSON-GAZE
+    clip_id: C-S01-04
+    baseline_risk: two identities, hand action, gaze transfer and lateral camera reveal compete in one clip
+    hypothetical_failure_signal: BO looks at the wrong object or LIN and BO exchange identity details
+    diagnosis_class: action_load_and_identity_drift
+    baseline_run_id: RUN-C-S01-04-001
+    single_primary_variable: action_scope
+    repair:
+      keep_fixed:
+        - adapter
+        - character and location references
+        - framing and light
+        - clip duration
+      change: Generate only BO's gaze transfer to the already-visible red corner; move LIN's noticing reaction to coverage.
+      acceptance: BO eye line lands on the envelope corner, both identities remain stable, and the cut can carry LIN's reaction.
+    fallback: Use locked BO reaction plus envelope insert instead of the lateral reveal.
+    result: not_run
+  - example_id: FAIL-C-S01-07-MULTI-PROP-HANDS
+    clip_id: C-S01-07
+    baseline_risk: one shot asks LIN to remove a card, remove a badge and insert the badge into an envelope
+    hypothetical_failure_signal: duplicated badge, fused fingers, disappearing resignation card or ambiguous final holder
+    diagnosis_class: hand_geometry_and_prop_state_overload
+    baseline_run_id: RUN-C-S01-07-001
+    single_primary_variable: action_scope
+    repair:
+      keep_fixed:
+        - adapter
+        - LIN identity and wardrobe
+        - camera position and light
+        - envelope and badge references
+      change: Restrict the base clip to LIN removing the resignation card; generate the badge insertion as a separate locked insert.
+      acceptance: Each prop appears once, the holder transition is visible, and the final continuity state places the badge inside the envelope.
+    fallback: Show LIN's decision in reaction, then cut from badge-before to envelope-after with a sound bridge.
+    result: not_run

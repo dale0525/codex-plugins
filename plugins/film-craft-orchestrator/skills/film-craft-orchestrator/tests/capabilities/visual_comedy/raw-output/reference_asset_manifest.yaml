@@ -1,0 +1,7 @@
+project_id: umbrella_rack_prank_30s
+status: pending
+reference_inputs_expected: []
+reference_inputs_attached: []
+reference_transport: none
+assets: []
+note: No real reference images supplied; package remains diagnostic_preview and must not be promoted to production-ready.

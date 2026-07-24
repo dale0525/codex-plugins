@@ -1,0 +1,46 @@
+logline: 台风前一小时，回到废弃海潮站的沈岚从一盒署名录音带听见母亲的警告，并在弟弟阻止时选择走向防波堤。
+theme_question: 面对亲人叙述与自己的记忆冲突时，谁有权定义真相？
+visual_pov: 沈岚受限主观视角；关键反转前保持客观遮挡，不让镜头替观众判断沈屿。
+beats:
+  - id: B1
+    sec: 0-12
+    purpose: 返回与时限
+    scene: 外部站房/候车室入口
+    visible_action: 沈岚穿雨幕推门
+    exit_state: 门在身后关闭，潮声起
+  - id: B2
+    sec: 12-24
+    purpose: 时间异常
+    scene: 候车室
+    visible_action: 她看见停钟，广播吐潮声
+    exit_state: 视线锁定售票窗
+  - id: B3
+    sec: 24-36
+    purpose: 道具发现
+    scene: 售票窗后
+    visible_action: 抽出写名录音带
+    exit_state: 磁带在掌心，背后黑暗有人呼吸
+  - id: B4
+    sec: 36-50
+    purpose: 关系冲突
+    scene: 售票窗与候车室
+    visible_action: 沈屿现身称“母亲的道歉”
+    exit_state: 沈岚按下播放
+  - id: B5
+    sec: 50-68
+    purpose: 记忆证据
+    scene: 录音机特写/闪回碎片
+    visible_action: 儿童潮汐表背诵
+    exit_state: 磁带切入母亲警告
+  - id: B6
+    sec: 68-78
+    purpose: 信息反转
+    scene: 录音机与两人手部
+    visible_action: 沈屿伸手关机，沈岚凝视他
+    exit_state: 她放开争抢，转向防波堤门
+  - id: B7
+    sec: 78-90
+    purpose: 选择与悬停结尾
+    scene: 防波堤门/海面
+    visible_action: 沈岚打开门迎向台风白光
+    exit_state: 沈屿停在门内，潮声覆盖切黑

@@ -1,0 +1,13 @@
+reviewed_at: 2026-07-24
+deterministic_result: pass
+creative_result: design_pass_render_pending
+strengths:
+  - 左门、中轴、高台和右出口形成可画出的空间。
+  - 投绳、改路线、交接、标签澄清和撤离均拆为单一主动作 clip。
+resolved_issues:
+  - 9 个 clips 的 scene/location/character/prop IDs、全链记录和 45 秒时间线通过 validator。
+  - 空文件参考占位已删除；generation provenance 与当前 prompt/adapter 一致。
+remaining_limits:
+  - 无实际多人运动输出，瞬移、轴线和包裹交接只在设计状态链中通过。
+failure_class: resolved_schema_routing
+new_video_research_required: false

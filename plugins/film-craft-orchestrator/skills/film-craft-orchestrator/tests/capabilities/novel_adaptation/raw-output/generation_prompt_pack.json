@@ -1,0 +1,17 @@
+{
+  "status": "diagnostic_preview",
+  "provider_neutral": {
+    "global": "16:9 cinematic suspense, typhoon one hour before landfall, cold cyan rain, fixed station geography, preserve character and prop continuity, no visible mother, no text artifacts",
+    "clips": [
+      {"clip_id":"C01","prompt":"Shen Lan in dark waterproof jacket and wet hair crosses a rain curtain toward an abandoned coastal station, wide establishing shot, slow push-in, sodium lamp flicker inside, realistic wind and spray."},
+      {"clip_id":"C02","prompt":"Inside deserted waiting room, salt-stained clock frozen on disappearance date, loudspeaker emits distorted tide wash, Shen Lan turns toward ticket window, locked-off medium shot."},
+      {"clip_id":"C03","prompt":"Subjective hand close-up behind ticket window: Shen Lan finds ivory cassette case labeled 沈岚 in blue ink, silver ring on right hand, shallow depth of field, no extra writing."},
+      {"clip_id":"C04","prompt":"Shen Yu emerges from darkness behind Shen Lan, gray hoodie half in backlight, controlled gentle expression, side dolly keeps station axis, he says this is mother's apology."},
+      {"clip_id":"C05","prompt":"Macro of cassette inserted into red-lit recorder, Shen Lan presses play, rain and tide vibration in frame, precise finger action, no warped hands."},
+      {"clip_id":"C06","prompt":"Hold on Shen Lan listening; childhood voice recites tide table then mother voice whispers warning, camera does not reveal mother, Shen Yu remains soft silhouette."},
+      {"clip_id":"C07","prompt":"Close-up of Shen Yu's hand reaching to stop recorder after warning, cut to Shen Lan's restrained realization, red light dies, preserve cassette in machine."},
+      {"clip_id":"C08","prompt":"Shen Lan releases the cassette, crosses to breakwater door and opens into white typhoon light, handheld follow, Shen Yu stops inside, sea spray floods lens, cut to black."}
+  ],
+  "negative": ["extra characters", "legible subtitles", "moving station clock", "sunny weather", "mother shown on screen", "prop label drift", "axis jump"]
+  }
+}

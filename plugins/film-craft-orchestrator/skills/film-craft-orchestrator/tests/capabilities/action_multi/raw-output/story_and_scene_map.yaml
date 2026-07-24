@@ -1,0 +1,17 @@
+story_id: action_multi_45s
+logline: 甲带包裹穿过左门，乙因误判拦截，丙从高台投绳把追逐路线导向安全出口；一次交接后误判被逆转。
+theme_question: 在不确定中，信任如何通过可见证据恢复？
+characters:
+  A: {role: courier, objective: deliver parcel, strategy: keep moving then explain, baseline: focused}
+  B: {role: gatekeeper, objective: stop suspected threat, strategy: block and demand proof, baseline: wary}
+  C: {role: overhead coordinator, objective: redirect both safely, strategy: deploy rope and call route, baseline: alert}
+sequence:
+  - id: S1
+    beats: [A enters left door with parcel, B blocks, B misreads parcel as dangerous]
+    exit: rope drops into frame; route still blocked
+  - id: S2
+    beats: [C throws rope from catwalk, B follows rope line, A hands parcel to B]
+    exit: parcel in B hands; path opens
+  - id: S3
+    beats: [label/contents clarify harmless purpose, B reverses misjudgment, C guides safe exit]
+    exit: trio exits along redirected route

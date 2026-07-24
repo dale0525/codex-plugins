@@ -1,0 +1,10 @@
+id: action-multi.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: ["未提供真实参考图；所有clip保持diagnostic_preview"]
+constraints: {reference_transport: none}
+open_questions: ["角色/地点/道具参考图待附加"]
+status: pending
+change_log: []
+assets: []

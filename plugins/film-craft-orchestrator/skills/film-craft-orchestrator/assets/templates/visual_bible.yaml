@@ -1,0 +1,35 @@
+id: project.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: []
+camera_language:
+  allowed_framing: []
+  lens_or_fov_range: ""
+  height_rules: []
+  movement_rules: []
+  axis_rules: []
+lighting_rules: []
+characters:
+  - character_id: CHAR-PROTAGONIST
+    identity_anchor: ""
+    state_versions:
+      - state_id: CHAR-PROTAGONIST.STATE-01
+        age: ""
+        time_context: ""
+        visible_state: ""
+        wardrobe_version: ""
+        must_not_drift: []
+locations: []
+props: []
+motifs: []
+reference_assets: []
+must_preserve: []
+must_not: []

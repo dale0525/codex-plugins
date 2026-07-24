@@ -1,0 +1,17 @@
+{
+  "project_id": "umbrella_rack_prank_30s",
+  "status": "diagnostic_preview",
+  "provider_neutral": {
+    "global": "16:9 bright contemporary cafe entrance, eye-level 35mm, soft morning daylight, mint cream palette, clean slapstick timing, no dialogue, no narration, no subtitles, no text or logos, safe water mist, preserve screen direction and wardrobe anchors",
+    "clips": {
+      "c01": "Worker in green apron and red beanie secretly arms matte black auto-spray umbrella and hides it in fixed rack screen-right; tiny mist hits shoe; locked medium-wide.",
+      "c02": "Yellow-raincoat customer confidently pulls umbrella; mist blasts face; worker pretends to polish counter; short push-in then reaction hold.",
+      "c03": "Navy-jacket customer shields with blue tote and nudges handle; spray ricochets into hanging coat sleeves; lateral pan only.",
+      "c04": "Beige-coat customer with purple scarf films on smartphone; umbrella spins and creates mist halo around phone; slow right arc.",
+      "c05": "Worker repeats yellow-raincoat customer's confident pull composition; delayed spray soaks worker; customers silently applaud; brief push-in, hold final tableau."
+    }
+  },
+  "model_adapters": [],
+  "references": {"expected": [], "attached": []},
+  "negative_prompt": "gibberish text, visible subtitles, extra limbs, duplicate umbrellas, wardrobe swaps, broken rack geography, dangerous force, frightened crying, dialogue"
+}

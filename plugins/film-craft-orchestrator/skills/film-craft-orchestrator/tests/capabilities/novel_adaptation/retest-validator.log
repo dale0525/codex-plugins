@@ -1,0 +1,6 @@
+OK: 6 adaptation rows; screen_units=7 delivery_requirements=9 invent_ids=4
+OK: 7 model adapters with official sources
+OK: 9 clips, edit contribution 90s
+OK: 9 prompts with valid adapters and reference gates
+OK: 9 ordered continuity states
+OK: AI video package <SKILL_ROOT>/tests/capabilities/novel_adaptation/retest-output

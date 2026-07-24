@@ -1,0 +1,28 @@
+id: radio-montage.visual-bible
+version: 1.0.0
+owner_role: visual_supervisor
+source_inputs: [radio-montage.director-intent@1.0.0]
+assumptions: ["Diagnostic preview without attached image references."]
+constraints: {aspect_ratio: "16:9", composition_lock: true}
+aspect_ratio: "16:9"
+open_questions: []
+status: frozen
+change_log: []
+characters:
+  - character_id: CHAR-RESTORER
+    description: "Adult restorer; only forearms and hands visible; indigo work shirt; brass wristwatch."
+    must_not_drift: ["no face reveal", "same watch and sleeve"]
+locations:
+  - location_id: LOC-WORKBENCH
+    description: "Walnut bench, pegboard tools, warm window light from upper left, dark neutral wall."
+props:
+  - prop_id: PROP-RADIO
+    description: "1950s tabletop Bakelite radio, rounded cream-and-brown case, left-facing grille, centered dial."
+    state_machine: [rusted_silent, opened_dirty, cleaned_repaired, powered_playing]
+camera_language: {framing: "locked medium-wide 16:9", lens_equiv_mm: 50, height: "bench level", movement: locked, axis: "radio front plane"}
+lighting_rules: {key_direction: "upper left", progression: "cool dusty start to warmer practical glow", forbidden: ["dramatic relighting that changes composition"]}
+palette: [oxidized_orange, bakelite_brown, cream, brass, warm_amber]
+motifs:
+  - {id: MOTIF-TUNING-HUM, appearance: "silence -> faint electrical hum -> oscillating carrier -> clear voice", payoff: "voice lands with speaker cone movement"}
+reference_assets: []
+must_not: ["subtitles or text overlays", "new radio model", "camera orbit", "floating tools", "visible modern logos"]

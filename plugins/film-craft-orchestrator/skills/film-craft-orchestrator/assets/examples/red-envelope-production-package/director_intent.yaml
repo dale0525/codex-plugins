@@ -1,0 +1,82 @@
+id: red-envelope.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [red-envelope.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: frozen
+change_log: []
+audience_experience: 先把博当作追查者，再发现他是准备替林承担代价的人；最后等待林是否接受。
+theme_form_answer: 画面从林用身体占满打印机前方，变化为她主动走向投递口并让两人之间出现空位。
+viewpoint_rule: 反转前不进入博的主观镜头；观众只比博早看见红角，不比林早知道辞职卡。
+performance_rules:
+  - 林的策略通过手的位置和遮挡变化表达，不用解释性独白。
+  - 博不逼近林；他的压力来自持续观察和最后的主动承担。
+space_and_blocking_rules:
+  - 林固定在画面左侧打印机区域，博从画面右侧门进入。
+  - 越轴仅在最终两人共同面向审计口后允许。
+  - 博递出辞职卡后立即收手，不发生复杂双手交接。
+camera_language_rules:
+  - 前五个 clips 以 locked 为主，反转后才允许缓慢 push-in。
+  - 关键道具动作优先独立 insert，不用 orbit。
+lighting_color_rules:
+  - cool window-left key 与 warm printer practical 在同场景保持方向。
+  - 断电只降低 practical，不改变窗侧光方向。
+editing_sound_rules:
+  - 打印机节奏是前半段时钟；断电后先留半拍静默再让博说话。
+  - 博的反转台词可画外进入辞职卡 insert。
+scenes:
+  - scene_id: S01
+    audience_knowledge: 观众知道红信封是林想藏的证据，但不知道签名真正由谁伪造。
+    audience_misunderstanding: 观众暂时把博看作即将揭穿林的人。
+    attention_path: [PROP-RED-ENVELOPE, CHAR-LIN.hand, CHAR-BO.eyeline, red_corner, PROP-BO-RESIGNATION, PROP-LIN-BADGE, audit_slot]
+    axis: printer-left to door-right
+    screen_direction:
+      CHAR-LIN: faces_right
+      CHAR-BO: enters_from_right_faces_left
+    performance_beats:
+      - beat_id: S01-B01
+        want_now: 藏起证据
+        obstacle: 门外脚步接近
+        tactic: 把反应压回动作
+        playable_action: 握紧信封并寻找藏处
+        reaction_trigger: 门把转动
+      - beat_id: S01-B06
+        want_now: 阻止林继续逃避，同时保护她
+        obstacle: 林不相信他的动机
+        tactic: 先交出自己的辞职卡
+        playable_action: 放下卡片后收回手
+        reaction_trigger: 林没有接过卡
+      - beat_id: S01-B07
+        want_now: 拒绝博替她顶罪
+        obstacle: 接受替代方案能保住工作
+        tactic: 用自己的门禁牌取代辞职卡
+        playable_action: 抽卡、放牌、合上信封
+        reaction_trigger: 博说签名是他写的
+    blocking_beats:
+      - beat_id: S01-B03
+        before_state: {CHAR-LIN: printer_left, CHAR-BO: outside_right}
+        trigger: CHAR-BO enters
+        action: CHAR-LIN blocks printer while CHAR-BO stops at door
+        world_position: {CHAR-LIN: printer_front, CHAR-BO: door_inside}
+        frame_position: {CHAR-LIN: left, CHAR-BO: right}
+        eye_line: horizontal across room
+        attention_change: door to LIN hand
+        after_state: {CHAR-LIN: printer_left, CHAR-BO: door_right}
+      - beat_id: S01-B08
+        before_state: {CHAR-LIN: printer_left, CHAR-BO: door_right}
+        trigger: CHAR-LIN seals envelope
+        action: CHAR-LIN approaches audit slot; CHAR-BO steps aside
+        world_position: {CHAR-LIN: audit_slot, CHAR-BO: door_clear}
+        frame_position: {CHAR-LIN: center_left, CHAR-BO: right_edge}
+        eye_line: both toward audit slot
+        attention_change: LIN face to envelope to empty space
+        after_state: {CHAR-LIN: audit_slot, CHAR-BO: door_clear}
+    coverage_strategy: locked base shots plus prop inserts and isolated reactions; no redundant beauty coverage
+    base_clip_purpose: preserve screen direction and moral pressure
+    required_coverage: [red_corner_insert, resignation_card_insert, LIN_choice_reaction, badge_insert, audit_slot_insert]
+    sound_intent: printer rhythm, power dip, half-beat silence, restrained dialogue, final slot clunk
+    non_negotiables: [no BO subjective before reveal, envelope remains matte red and unmarked, LIN makes final action herself]
+    generation_risks: [two_character_identity, hand_prop_contact, small_object_identity, lighting_transition]
+    fallbacks: [split hand actions, use off-screen dialogue, replace continuous walk with inserts and reaction]

@@ -1,0 +1,10 @@
+{
+  "project_id":"action_multi_45s",
+  "status":"pending",
+  "identity": {"A":"blue utility jacket","B":"orange safety vest","C":"yellow rain shell"},
+  "prop_state": {"parcel":"A right hand through C05; B hands C06-C08; A receives back C08","rope":"C catwalk coil before C04; red arc on yellow line through C09"},
+  "spatial_rules": {"entry":"screen-left","exit":"screen-right","axis":"warehouse center aisle","C":"elevated until throw"},
+  "approved_exits": [],
+  "blocking_conflicts": [],
+  "note":"No evidence frames or generated outputs supplied. All clip states require verification."
+}

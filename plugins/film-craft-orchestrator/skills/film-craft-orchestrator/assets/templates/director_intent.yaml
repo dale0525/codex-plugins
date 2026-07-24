@@ -1,0 +1,91 @@
+id: project.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [project.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+audience_experience: ""
+theme_form_answer: ""
+viewpoint_rule: ""
+performance_rules: []
+space_and_blocking_rules: []
+camera_language_rules: []
+lighting_color_rules: []
+editing_sound_rules: []
+scenes:
+  - scene_id: S01
+    audience_knowledge: ""
+    audience_misunderstanding: ""
+    attention_path: []
+    axis: ""
+    screen_direction: {}
+    performance_beats:
+      - beat_id: S01-B01
+        want_now: ""
+        obstacle: ""
+        tactic: ""
+        playable_action: ""
+        reaction_trigger: ""
+    blocking_beats:
+      - beat_id: S01-B01
+        before_state: {}
+        trigger: ""
+        action: ""
+        world_position: {}
+        frame_position: {}
+        eye_line: ""
+        attention_change: ""
+        after_state: {}
+    coverage_strategy: ""
+    base_clip_purpose: ""
+    required_coverage: []
+    sound_intent: ""
+    non_negotiables: []
+    generation_risks: []
+    fallbacks: []
+    clip_specs:
+      - clip_id: C-S01-01
+        beat_ids: [S01-B01]
+        priority: must
+        narrative_purpose: ""
+        target_duration_sec: 5
+        edit_contribution_sec: 4
+        handle_in_sec: 0.5
+        handle_out_sec: 0.5
+        visible_character_ids: [CHAR-PROTAGONIST]
+        narrative_character_ids: [CHAR-PROTAGONIST]
+        visible_prop_ids: []
+        narrative_prop_ids: []
+        location_id: LOC-01
+        entry_state:
+          characters:
+            CHAR-PROTAGONIST: {state_id: CHAR-PROTAGONIST.STATE-01, position: ""}
+          props: {}
+          environment: {location_id: LOC-01, time: "", light: ""}
+        exit_state:
+          characters:
+            CHAR-PROTAGONIST: {state_id: CHAR-PROTAGONIST.STATE-01, position: ""}
+          props: {}
+          environment: {location_id: LOC-01, time: "", light: ""}
+        action:
+          start: ""
+          motion: ""
+          end: ""
+          steps:
+            - {step_id: A01, action: "", end_state: ""}
+        attention_change: ""
+        camera: {framing: "", behavior: ""}
+        lighting: ""
+        temporal_constraints: {event_order: [A01]}
+        continuity_invariants: []
+        negative_constraints: []
+        generation_method: text_to_video
+        adapter_id: ""
+        reference_inputs_expected: []
+        information_carrier_overrides: []
+        generation_risks: []
+        fallback: ""
+        sound: {category: ambience, diegetic: true, source: generated, sync_target: LOC-01, entry: cut_in, exit: cut_out}

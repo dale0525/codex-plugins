@@ -1,0 +1,8 @@
+{
+  "status":"diagnostic_preview",
+  "approved_exits":[],
+  "characters":{"shen_lan":{"wardrobe":"dark waterproof jacket","screen_direction":"toward breakwater","prop":"none then tape"},"shen_yu":{"wardrobe":"gray hoodie","screen_direction":"behind/right of Shen Lan","prop":"none"}},
+  "props":{"tape":{"state":"behind ticket window","owner":"none","next":"Shen Lan"},"clock":{"state":"frozen","owner":"station"}},
+  "environment":{"time":"typhoon -1h","light":"cold cyan with intermittent sodium","sound":"tide wash and rain"},
+  "blocking_conflicts":"pending generation evidence"
+}

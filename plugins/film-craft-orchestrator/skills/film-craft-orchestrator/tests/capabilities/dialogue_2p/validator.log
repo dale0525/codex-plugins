@@ -1,0 +1,8 @@
+ERROR: invalid package data: while parsing a flow mapping
+  in "<unicode string>", line 36, column 9:
+          - {beat_id: S01-B04, narrative_fun ...
+            ^
+expected ',' or '}', but got '<scalar>'
+  in "<unicode string>", line 37, column 1:
+    must_beat_ids: [S01-B01, S01-B02 ...
+    ^

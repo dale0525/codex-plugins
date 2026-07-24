@@ -1,0 +1,110 @@
+id: project.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs:
+- project.ai-video-brief@1.0.0
+assumptions: []
+constraints:
+  runtime_target_sec: 45
+open_questions: []
+status: draft
+change_log: []
+logline: 夜班交接前，保安阿岚发现小周把钥匙带走；两人用借口谈判，谁也不说真正要开的门。
+dramatic_question: 阿岚能否在不暴露自己目的的情况下留下钥匙？
+theme_question: 当规则与私人保护冲突，谁有资格决定风险由谁承担？
+protagonist:
+  character_id: CHAR-ALAN
+  want: 让小周把钥匙留在岗亭并完成交接
+  need: 承认自己也在借规则保护一个秘密
+  fear: 小周打开地下储物间
+  contradiction: 嘴上坚持流程，手却替小周挡住摄像头
+antagonistic_force: 小周急于带钥匙离岗且拒绝解释
+ending_choice: 阿岚把备用钥匙推过去，换取小周留下原钥匙
+sequences: []
+scenes:
+- scene_id: S01
+  runtime_budget_sec: 45
+  location_id: LOC-NIGHT-DESK
+  time: 凌晨02:10
+  entry_state: 交接表摊开，阿岚独自在岗；小周将钥匙串收进外套。
+  objective: 阻止钥匙离开岗亭，同时不暴露双方真正要开的门。
+  obstacle: 小周声称只是去取私人物品，并用即将下班施压。
+  turn: 阿岚从盘问改为交换，承认自己也需要那扇门暂时不开。
+  exit_state: 小周留下原钥匙，拿走备用钥匙；两人的秘密都更接近暴露。
+  beats:
+  - beat_id: S01-B01
+    narrative_function: 发现钥匙被带走
+    visible_start: 小周扣上外套口袋
+    trigger: 钥匙碰响
+    character_tactic: 阿岚先观察不拦
+    visible_end: 阿岚看向钥匙串
+    runtime_budget_sec: 7
+    preferred_carrier: prop_action
+    generation_risks:
+    - hand_prop_contact
+    fallback: 钥匙特写接阿岚反应
+  - beat_id: S01-B02
+    narrative_function: 第一次试探
+    visible_start: 阿岚挡住交接表
+    trigger: 小周转身离岗
+    character_tactic: 用流程提问
+    visible_end: 小周说只是取东西
+    runtime_budget_sec: 8
+    preferred_carrier: dialogue_lipsync
+    generation_risks:
+    - two_characters
+    fallback: 小周画外回答，阿岚近景
+  - beat_id: S01-B03
+    narrative_function: 小周反制
+    visible_start: 小周指向打卡钟
+    trigger: 时间跳到02:15
+    character_tactic: 用下班时间施压
+    visible_end: 阿岚让开半步
+    runtime_budget_sec: 8
+    preferred_carrier: performance_reaction
+    generation_risks:
+    - two_characters
+    fallback: 过肩镜头分离说话者
+  - beat_id: S01-B04
+    narrative_function: 阿岚揭出代价
+    visible_start: 阿岚按住备用钥匙盒
+    trigger: 小周伸手拿盒
+    character_tactic: 从盘问改为交换
+    visible_end: 阿岚说地下门今晚别开
+    runtime_budget_sec: 8
+    preferred_carrier: dialogue_lipsync
+    generation_risks:
+    - lip_sync
+    fallback: 远景口型不可辨，后期对白
+  - beat_id: S01-B05
+    narrative_function: 策略改变并达成交换
+    visible_start: 两把钥匙并排
+    trigger: 阿岚推过备用钥匙
+    character_tactic: 以替代物换原钥匙
+    visible_end: 小周放下原钥匙
+    runtime_budget_sec: 7
+    preferred_carrier: prop_insert
+    generation_risks:
+    - hand_prop_contact
+    fallback: 分切手部before/after
+  - beat_id: S01-B06
+    narrative_function: 留下双重悬念
+    visible_start: 小周离开画面
+    trigger: 门禁灯变红
+    character_tactic: 双方各自保密
+    visible_end: 阿岚删除一条监控记录
+    runtime_budget_sec: 7
+    preferred_carrier: visual_action
+    generation_risks:
+    - screen_text
+    fallback: 无字屏幕+删除音效
+must_beat_ids:
+- S01-B01
+- S01-B02
+- S01-B03
+- S01-B04
+- S01-B05
+- S01-B06
+runtime_reconciliation:
+  scene_budget_sum_sec: 45
+  result: pending

@@ -1,0 +1,17 @@
+id: radio-montage.final-film-qc
+version: 1.0.0
+owner_role: editor_sound
+source_inputs: [radio-montage.edit-plan@1.0.0, radio-montage.clip-qc@1.0.0]
+assumptions: ["Diagnostic package; no rendered media, hashes or attached references exist."]
+constraints: {runtime_target_sec: 40, aspect_ratio: "16:9"}
+open_questions: ["Run generation and attach real audio/video outputs."]
+status: qc_pending
+change_log: []
+runtime: {target_sec: 40, measured_sec: pending, status: pending}
+must_beat_coverage: {required: 4, covered: pending, status: pending}
+continuity: pending
+dialogue_lipsync: pending
+sound: pending
+rights_and_provenance: pending
+blocking_conflicts: ["No approved clip outputs or evidence frames.", "No attached reference assets."]
+final_result: diagnostic_preview

@@ -1,0 +1,5 @@
+OK: 7 model adapters with official sources
+OK: 8 clips, edit contribution 60s
+OK: 8 prompts with valid adapters and reference gates
+OK: 8 ordered continuity states
+OK: AI video package <SKILL_ROOT>/tests/capabilities/mystery_reveal/retest-output

@@ -1,0 +1,186 @@
+{
+  "id": "project.prompt-pack",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [
+    "project.visual-bible@1.0.0"
+  ],
+  "assumptions": [],
+  "constraints": {
+    "aspect_ratio": "16:9",
+    "runtime_target_sec": 45
+  },
+  "open_questions": [],
+  "status": "diagnostic_preview",
+  "change_log": [],
+  "prompts": [
+    {
+      "prompt_id": "PROMPT-C-S01-01",
+      "clip_id": "C-S01-01",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "阿岚与小周在雨夜保安岗亭",
+        "action": "start小周扣外套；motion钥匙碰响并收入口袋；end阿岚视线锁定钥匙",
+        "environment": "桌左门右，交接表和监控屏",
+        "camera": {
+          "behavior": "locked medium two shot"
+        },
+        "lighting": "冷青荧光，右侧红色门禁灯",
+        "temporal_constraints": "7秒，动作按顺序",
+        "continuity_invariants": "原钥匙串由小周持有"
+      },
+      "rendered_prompt": "雨夜凌晨保安岗亭，阿岚与小周中景同框；小周将三把黄铜钥匙收入口袋，钥匙碰响，阿岚停止翻交接表并看向钥匙。冷青荧光，门禁灯红色，写实表演，locked camera。",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "production_status": "diagnostic_preview",
+      "rendered_prompt_hash": "e3e45664316da245283e8ed5674d2a1bf04c1021c0a212662de660d9eee38008",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-02",
+      "clip_id": "C-S01-02",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "阿岚面对小周",
+        "action": "start阿岚挡住交接表；motion发问；end小周回答取东西",
+        "environment": "岗亭桌边",
+        "camera": {
+          "behavior": "locked over shoulder"
+        },
+        "lighting": "冷青荧光",
+        "temporal_constraints": "8秒，单人轮流说话",
+        "continuity_invariants": "钥匙仍在小周口袋"
+      },
+      "rendered_prompt": "从阿岚肩后看小周，岗亭桌边；阿岚挡住交接表，问‘钥匙要带出岗亭？’小周短暂停顿后说‘取个东西就回来’。两人不同时张嘴，locked over-shoulder，冷青荧光，写实。",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "production_status": "diagnostic_preview",
+      "rendered_prompt_hash": "8c0d8d57a043dc7c54b381089212f5198a4f98547f7ed973030cfb1f06e58d47",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-03",
+      "clip_id": "C-S01-03",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "小周取得空间优势",
+        "action": "start小周指打卡钟；motion向出口迈一步；end阿岚让开半步",
+        "environment": "出口门在画面右侧",
+        "camera": {
+          "behavior": "slow push medium single"
+        },
+        "lighting": "荧光与红色门禁灯",
+        "temporal_constraints": "8秒，先指钟再迈步",
+        "continuity_invariants": "屏幕无可读文字，钥匙在小周口袋"
+      },
+      "rendered_prompt": "小周在岗亭出口侧中近景，先指向无字打卡钟说‘我下班了’，再向右迈一步；阿岚在背景让开半步。slow push camera only，红色门禁灯，真实压迫感。",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "production_status": "diagnostic_preview",
+      "rendered_prompt_hash": "99a636db4b7d7184ae11b93d9fa70ed8ef323650807f4cf2f9f3a8737fa402fa",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-04",
+      "clip_id": "C-S01-04",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "阿岚与钥匙盒",
+        "action": "start阿岚按住钥匙盒；motion抬眼说地下门今晚别开；end小周停步",
+        "environment": "桌左钥匙盒居中",
+        "camera": {
+          "behavior": "locked medium two shot"
+        },
+        "lighting": "冷青荧光，红灯反射",
+        "temporal_constraints": "8秒，阿岚先动作后说话",
+        "continuity_invariants": "备用钥匙仍在盒内"
+      },
+      "rendered_prompt": "阿岚按住桌上的钥匙盒，抬眼对停步的小周说‘地下门，今晚别开。’小周不说话，只看钥匙盒。locked medium two shot，冷青荧光，红灯反射，克制表演。",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "production_status": "diagnostic_preview",
+      "rendered_prompt_hash": "0837a7d60ac6d90527be570559294ad4541cc931b985df8c9f74db7ee9c67af1",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-05",
+      "clip_id": "C-S01-05",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "两只手与两把钥匙",
+        "action": "start备用钥匙在盒内；motion阿岚推银色备用钥匙，小周放下黄铜原钥匙；end两把钥匙分离",
+        "environment": "岗亭桌面",
+        "camera": {
+          "behavior": "locked insert"
+        },
+        "lighting": "冷青荧光",
+        "temporal_constraints": "7秒，手部动作清晰",
+        "continuity_invariants": "原钥匙从口袋到桌面，备用钥匙到小周手中"
+      },
+      "rendered_prompt": "桌面手部insert，阿岚将单把银色备用钥匙推向小周；小周从口袋取出三把黄铜钥匙放在桌上，再拿走备用钥匙。locked insert，动作不重叠，不复制钥匙，冷青荧光。",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "production_status": "diagnostic_preview",
+      "rendered_prompt_hash": "dfb8722a59432054c96e29a828de0381f3a42af19a37d3b35115d4c331be31cb",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-06",
+      "clip_id": "C-S01-06",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "阿岚与监控屏",
+        "action": "start小周离开画面；motion门禁灯变红，阿岚删除一条无字记录；end阿岚停手",
+        "environment": "岗亭后墙监控屏无可读文字",
+        "camera": {
+          "behavior": "locked close insert"
+        },
+        "lighting": "红色门禁灯持续",
+        "temporal_constraints": "7秒，先门声再删除动作",
+        "continuity_invariants": "阿岚独自留在岗亭，原钥匙在桌面"
+      },
+      "rendered_prompt": "小周脚步和门声离开后，岗亭门禁灯由绿变红；阿岚在无字监控界面按下删除，停手看向桌上原钥匙。locked close insert，禁止可读文字，红光压迫，写实。",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "production_status": "diagnostic_preview",
+      "rendered_prompt_hash": "90f3017c3b2853aa54c7ae3a31432abb93782b581946d009c63ba791220df46d",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    }
+  ]
+}

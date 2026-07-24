@@ -1,0 +1,485 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-24",
+  "purpose": "Executable traditional film-craft procedures selected for AI-video story, spatial, visual, edit and long-form control. Physical crew-management details are intentionally excluded.",
+  "procedures": [
+    {
+      "id": "three-plane-blocking-map",
+      "domain": "director",
+      "title": "前中后景多人调度图",
+      "source_refs": ["o-4rk3T8PbQ", "EqTn6lfRNow"],
+      "claim_refs": ["O4K-C08", "EQT-C01", "EQT-C03"],
+      "source_type": "secondary_scene_analysis_with_sampled_frames",
+      "stability": "stable",
+      "applicability": {"use_when": ["三人以上同框", "一个镜头需同时保留人物、地点和关键道具信息"], "do_not_use_when": ["叙事要求单点极强隔离", "模型无法稳定保持多主体"]},
+      "non_applicability": ["镜面中的人物不能自动当作独立实体位置", "三层构图不等于所有层都应同等清晰"],
+      "inputs": ["space_id 与简化平面图", "角色和道具 stable IDs", "每个 beat 的注意力顺序", "景深策略"],
+      "steps": [
+        {"step": 1, "action": "给每个叙事元素分配 foreground、midground 或 background，并写明该层承担的信息。", "check": "没有两个关键元素争夺同一遮挡区域，所有 stable ID 可追溯。"},
+        {"step": 2, "action": "冻结门、镜子、窗、桌和通道等 world anchors，再安排人物位置。", "check": "相邻 clip 的空间方向和固定物位置不冲突。"},
+        {"step": 3, "action": "为每次层级变化指定可见动机，例如新信息、回避、接近或让位。", "check": "删除走位后会损失明确叙事功能，而不只是画面活跃。"},
+        {"step": 4, "action": "将复杂移动拆成进入、稳定中点和退出三个证据状态。", "check": "三个状态都能单帧识别人物、道具和遮挡关系。"}
+      ],
+      "outputs": ["three-plane blocking map", "entry/mid/exit state list", "depth-aware clip coverage"],
+      "failure_signals": ["人物合并或消失", "前景长期遮脸", "镜中人与实体身份混淆", "层级变化无叙事动机"],
+      "repair_actions": ["增大深度或横向间隔", "减少同镜头主体数量", "把反射单独标记为 mirror_role", "拆成主镜头与反应镜头"],
+      "acceptance_tests": [
+        {"test": "三层可读", "pass_criteria": "进入、中点、退出帧中，目标人物和关键道具均能被唯一识别，且遮挡符合计划。"},
+        {"test": "状态连续", "pass_criteria": "上一 clip 的退出层级与下一 clip 的进入层级一致，或 change_log 明确记录变化。"}
+      ],
+      "worked_example": "CHAR-LARRY 在前景、CHAR-MIKE 在中景、CHAR-SAM 的镜中像在后景；新角色进入时先移动前景遮挡者，再给反应 coverage。",
+      "counterexample_or_limit": "多层深焦会分散注意力；若只有一个信息点，浅景深单主体镜头可能更清楚。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "z-axis-motivated-blocking",
+      "domain": "director",
+      "title": "按叙事节拍设计 Z 轴走位",
+      "source_refs": ["EqTn6lfRNow"],
+      "claim_refs": ["EQT-C06", "EQT-C07", "EQT-C08", "EQT-C09"],
+      "source_type": "secondary_scene_analysis",
+      "stability": "stable",
+      "applicability": {"use_when": ["双人或多人关系需要在一镜内变化", "需要减少依赖 coverage 的长镜头"], "do_not_use_when": ["空间纵深不足", "模型对复杂路径持续失败"]},
+      "non_applicability": ["走向摄影机不自动等于权力增强", "长镜头不是默认优于剪辑"],
+      "inputs": ["dialogue/beat map", "space axes", "角色 entry/exit state", "camera behavior"],
+      "steps": [
+        {"step": 1, "action": "为每个 beat 写人物关系变化，再决定靠近、远离、绕后或停留。", "check": "每次 Z 轴变化都对应新信息、策略或代价。"},
+        {"step": 2, "action": "只保留一个主要相机行为，让 blocking 承担构图变化。", "check": "prompt 没有同时要求复杂相机运动与多人物复杂路径。"},
+        {"step": 3, "action": "标出交叉、过肩重入和前景穿越时的 screen direction 与 eyeline。", "check": "轴线变化有可见中性过渡或明确有意越轴。"},
+        {"step": 4, "action": "若一次生成无法稳定完成全部位置，按状态点拆 clip 并保留 handles。", "check": "拆分后的接缝仍保留动作方向和人物相对位置。"}
+      ],
+      "outputs": ["z-axis blocking path", "beat-to-position map", "split/fallback clip plan"],
+      "failure_signals": ["走位与对白无关", "人物穿模或遮脸", "方向反转", "过多动作使模型重置空间"],
+      "repair_actions": ["删减位置变化", "固定相机", "分离人物动作", "以 OTS、反应或 insert 隐藏接缝"],
+      "acceptance_tests": [
+        {"test": "beat 对齐", "pass_criteria": "每次位置变化可指向唯一的故事 beat，并在画面中可见。"},
+        {"test": "空间可复述", "pass_criteria": "审看者能从成片复述主要人物前后关系和移动方向，无需旁白解释。"}
+      ],
+      "worked_example": "角色 A 绕过角色 B 后重入 OTS，再走向海报并与 B 收束为双人中景；失败时拆为绕后、海报、双人三个 clips。",
+      "counterexample_or_limit": "多人同时沿 Z 轴运动容易引发身份合并；优先一次只让一个主体改变深度。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "eye-trace-prop-routing",
+      "domain": "director",
+      "title": "用视线与运动道具串联注意力",
+      "source_refs": ["o-4rk3T8PbQ", "EqTn6lfRNow"],
+      "claim_refs": ["O4K-C04", "O4K-C05", "O4K-C06", "EQT-C04", "EQT-C05"],
+      "source_type": "secondary_scene_analysis",
+      "stability": "stable",
+      "applicability": {"use_when": ["道具、车辆或人物入场需要把注意力交给下一信息点"], "do_not_use_when": ["背景已有多个高显著运动", "道具方向无法保持"]},
+      "non_applicability": ["道具指向不能证明观众一定按预期观看", "阴影和镜面可能形成竞争路线"],
+      "inputs": ["attention order", "prop state and owner", "screen positions", "background motion budget"],
+      "steps": [
+        {"step": 1, "action": "写出注意力链：当前主体 → 运动/指向道具 → 目标人物或信息。", "check": "链中每个节点在相邻时间区间可见。"},
+        {"step": 2, "action": "冻结道具路径、持有人和交接状态。", "check": "continuity state 中没有瞬移、复制或换手未记录。"},
+        {"step": 3, "action": "压低非目标区域的运动、对比和高饱和元素。", "check": "目标链之外没有同等显著的竞争刺激。"},
+        {"step": 4, "action": "用无声正常速度回放检查注意力顺序；失败时拆分或延长目标停留。", "check": "审看者首先指出的节点顺序与计划一致。"}
+      ],
+      "outputs": ["eye-trace chain", "prop routing state", "attention QC notes"],
+      "failure_signals": ["观众先看错区域", "道具方向反转", "目标出现太短", "背景抢夺注意力"],
+      "repair_actions": ["降低背景运动", "改变构图对比", "延长目标可见区间", "增加单独 insert"],
+      "acceptance_tests": [
+        {"test": "注意力顺序", "pass_criteria": "至少一名未见过计划的审看者能按预定顺序指出链中节点；若不能，状态不得 approved。"},
+        {"test": "道具连续", "pass_criteria": "道具在每个状态的形状、方向、持有人和位置均与 continuity ledger 一致。"}
+      ],
+      "worked_example": "车辆运动先指向展台，再由角色视线和站位把注意力交给主角；若车辆生成不稳定，改为车灯/声音桥加展台 insert。",
+      "counterexample_or_limit": "对抽象或故意迷失方向的段落，单一路径可能破坏设计；此时需把偏离标成 intentional。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "occlusion-reveal-reaction",
+      "domain": "director",
+      "title": "遮挡—揭示—反应三段式 coverage",
+      "source_refs": ["o-4rk3T8PbQ"],
+      "claim_refs": ["O4K-C07", "O4K-C08", "O4K-C09", "O4K-C10"],
+      "source_type": "secondary_scene_analysis_with_sampled_frames",
+      "stability": "stable",
+      "applicability": {"use_when": ["角色入场、信息揭示或镜中提示需要延迟注意力"], "do_not_use_when": ["遮挡会隐藏必须动作", "模型无法保持镜面/遮挡几何"]},
+      "non_applicability": ["揭示后不一定必须切反应", "镜中持续可见会改变惊讶程度"],
+      "inputs": ["hidden target", "occluder", "reveal cue", "reaction subject", "mirror/door anchors"],
+      "steps": [
+        {"step": 1, "action": "定义遮挡前仍允许观众知道的线索量。", "check": "目标未被完全意外删除，或完全隐藏是明确意图。"},
+        {"step": 2, "action": "让遮挡者或相机只执行一个揭示动作。", "check": "揭示帧中目标身份和空间位置同时可读。"},
+        {"step": 3, "action": "在信息被确认后选择反应镜头或继续持镜。", "check": "反应增加选择、误解或情绪信息，而非重复说明。"},
+        {"step": 4, "action": "对遮挡前、揭示帧、反应帧做连续性比较。", "check": "人物、道具、光向和 screen direction 不漂移。"}
+      ],
+      "outputs": ["occlusion window", "reveal frame", "reaction coverage decision"],
+      "failure_signals": ["目标被遮太久", "揭示时人物变形或换位", "反应早于信息", "镜面产生重复身份"],
+      "repair_actions": ["缩短遮挡", "以门框或前景物替代人物遮挡", "改用硬切揭示", "把反应分成单人 clip"],
+      "acceptance_tests": [
+        {"test": "揭示归因", "pass_criteria": "审看者能指出目标何时、从哪里被揭示，并正确识别人物。"},
+        {"test": "反应价值", "pass_criteria": "删除反应镜头会损失明确的新信息；否则不增加该 coverage。"}
+      ],
+      "worked_example": "前景人物让出空间后新角色进入；镜子保留旧角色存在提示，随后才决定是否切入新角色反应。",
+      "counterexample_or_limit": "镜面一致性是当前模型高风险项；若两轮仍漂移，改为门框遮挡或独立反应镜头。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "focus-depth-information-plan",
+      "domain": "cinematography",
+      "title": "按信息优先级规划景深与焦点转移",
+      "source_refs": ["ZGNUqNFfD8M"],
+      "claim_refs": ["ZGN-C01", "ZGN-C02", "ZGN-C03", "ZGN-C04", "ZGN-C06", "ZGN-C07", "ZGN-C08", "ZGN-C09"],
+      "source_type": "secondary_cinematography_taxonomy_with_sampled_frames",
+      "stability": "stable",
+      "applicability": {"use_when": ["需要控制观众读取前后景的顺序", "背景线索或多平面动作重要"], "do_not_use_when": ["焦点效果没有叙事对象", "相邻 clip 无法保持焦点风格连续"]},
+      "non_applicability": ["静帧不能证明 rack focus 动态", "prompt 中的焦段或光圈数值不保证模型真实模拟"],
+      "inputs": ["plane information priority", "focus subject A/B", "reveal cue", "visual bible focus rule"],
+      "steps": [
+        {"step": 1, "action": "为前、中、后景分别标 critical、support 或 suppress。", "check": "每个 critical 元素在需要时有清晰度和构图支持。"},
+        {"step": 2, "action": "全部平面都需读取时选深焦；只有单点需读取时选浅焦。", "check": "选择由信息任务决定，而不是装饰性 bokeh。"},
+        {"step": 3, "action": "需要无剪切揭示时写 focus A → cue → focus B 的时间顺序。", "check": "A、B 都有稳定 ID，cue 是可见动作或声音事件。"},
+        {"step": 4, "action": "对 soft focus 或 split focus 写明风格理由和相邻镜头延续。", "check": "没有把意外失焦误当设计。"},
+        {"step": 5, "action": "抽取进入、中点和退出帧检查焦点平面；动态 rack 另用连续片段检查。", "check": "静态和动态证据没有混写。"}
+      ],
+      "outputs": ["focus plan per clip", "rack cue timeline", "focus continuity QC"],
+      "failure_signals": ["关键背景线索虚化", "焦点落在错误人物", "rack 无过渡或方向相反", "软焦跨镜跳变", "split seam 抢戏"],
+      "repair_actions": ["扩大景深", "拆成 insert", "改为硬切焦点对象", "锁定起始参考帧", "移除无动机 soft/split 效果"],
+      "acceptance_tests": [
+        {"test": "信息可读", "pass_criteria": "所有 critical 平面在计划时间可辨，suppressed 平面不抢夺主要注意力。"},
+        {"test": "焦点动态", "pass_criteria": "若要求 rack，连续播放能看到焦点从 A 迁移到 B，且曝光与身份不发生 blocking 漂移。"}
+      ],
+      "worked_example": "群像环境线索使用深焦；秘密被发现时从前景脸部 rack 到后景道具；若 rack 失败，拆为脸部反应和道具 insert。",
+      "counterexample_or_limit": "视频抽样帧只能验证深焦、浅焦和 soft focus 的单帧外观；rack 的时间行为仍需 clip 证据。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "motivated-light-range-color-continuity",
+      "domain": "cinematography",
+      "title": "动机光、动态范围与色彩连续性检查",
+      "source_refs": ["K9w8I_YD29E"],
+      "claim_refs": ["K9W-C01", "K9W-C02", "K9W-C03", "K9W-C04", "K9W-C05", "K9W-C06", "K9W-C08", "K9W-C09"],
+      "source_type": "edited_firsthand_cinematographer_interview_with_sampled_frames",
+      "stability": "stable",
+      "applicability": {"use_when": ["同一场景跨多个生成 clip", "需要冻结光向、对比和色彩情绪"], "do_not_use_when": ["有意让每镜发生超现实光色断裂"]},
+      "non_applicability": ["不规定实体灯具数量", "不把 Deakins 的个人色彩复制成风格模板"],
+      "inputs": ["time/weather", "dominant motivated source", "shadow direction", "highlight/black intent", "color reference frames"],
+      "steps": [
+        {"step": 1, "action": "先写观众应感到的光线结果，再映射为方向、软硬、色温、对比。", "check": "每个情绪词都有可见变量，不只写 cinematic。"},
+        {"step": 2, "action": "冻结一个主导动机来源和允许的补光关系。", "check": "同场景所有 clip 的阴影方向和高光侧一致。"},
+        {"step": 3, "action": "定义允许压黑的区域、必须保留的暗部细节和不可剪裁的高光。", "check": "QC 帧中关键脸、道具和环境线索没有因黑白位丢失。"},
+        {"step": 4, "action": "把参考帧转成关系描述：暖/冷比例、饱和度、肤色与背景分离。", "check": "不使用在世创作者姓名作为唯一风格指令。"},
+        {"step": 5, "action": "若整体感觉错误，回到主光和对比重设，而不是继续堆局部形容词。", "check": "新版本只改变一个主要光线变量并与 baseline A/B。"}
+      ],
+      "outputs": ["motivated-light rule", "range and color QC table", "scene look prompt block"],
+      "failure_signals": ["阴影方向跳变", "高光无纹理", "关键暗部消失", "色温跨镜漂移", "脸部光质不一致"],
+      "repair_actions": ["重写主光方向", "降低高光或恢复关键暗部", "锁定场景参考帧", "按单变量重生成", "用场景级调色做小范围匹配"],
+      "acceptance_tests": [
+        {"test": "光向连续", "pass_criteria": "相邻镜头关键脸和物体的亮侧、阴影方向与 visual bible 一致。"},
+        {"test": "范围完整", "pass_criteria": "必须读取的高光和暗部保留纹理；有意压黑区域在 director intent 中有记录。"},
+        {"test": "色彩连续", "pass_criteria": "同场景相邻 clips 的色温、饱和度和对比没有无动机跳变。"}
+      ],
+      "worked_example": "阴天外景锁定冷灰漫射主光；进入室内后由固定暖色 practical 主导，但窗侧仍保持同一方向关系。",
+      "counterexample_or_limit": "单帧看似一致不代表整段无 flicker；动态亮度变化必须在 clip QC 中另查。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "performance-first-dialogue-assembly",
+      "domain": "editing_sound",
+      "title": "表演优先的对白组接",
+      "source_refs": ["gebNTySOXbY"],
+      "claim_refs": ["GEB-C01", "GEB-C02", "GEB-C08"],
+      "source_type": "firsthand_editor_interview_recall",
+      "stability": "stable",
+      "applicability": {"use_when": ["同一句有多个生成 take", "机位不完美但表演成立"], "do_not_use_when": ["身份、口型或几何错误无法修复", "关键叙事信息缺失"]},
+      "non_applicability": ["不因表演好而接受 blocking 连续性错误", "VFX 可修不等于成本无限"],
+      "inputs": ["all takes", "line intention", "continuity state", "repair capability"],
+      "steps": [
+        {"step": 1, "action": "先不看模型或美观评分，标记每个 take 中意图最清楚的表演区间。", "check": "每个候选能读出角色策略和变化。"},
+        {"step": 2, "action": "排除身份、口型、空间或关键道具 blocking failure。", "check": "留下的 take 都满足不可妥协连续性。"},
+        {"step": 3, "action": "以最佳表演为骨架，再选择反应和切点。", "check": "没有为了 coverage 对称而牺牲主要表演。"},
+        {"step": 4, "action": "对可修构图问题记录 edit/VFX 成本并与次优干净 take A/B。", "check": "修复成本未超过 iteration/cost limit。"}
+      ],
+      "outputs": ["performance selects", "dialogue assembly", "repair decision log"],
+      "failure_signals": ["情绪跨切断裂", "最佳表演含不可修几何", "说话人身份或口型错误", "修复成本失控"],
+      "repair_actions": ["缩短使用区间", "改画外对白", "插入反应/手部/环境镜头", "选择次优但连续的 take"],
+      "acceptance_tests": [
+        {"test": "策略可读", "pass_criteria": "不看脚本时，审看者能指出每个说话人的当下意图和策略变化。"},
+        {"test": "技术底线", "pass_criteria": "最终区间无身份、口型、空间和关键道具 blocking failure。"}
+      ],
+      "worked_example": "最佳表演角度不是标准 OTS 时，先确认能否裁切、遮挡或局部修复；不能修则保留声音并切反应。",
+      "counterexample_or_limit": "访谈是编辑回忆，不能证明该原则在所有类型或快速动作场景中优先级最高。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "hold-performance-then-reaction",
+      "domain": "editing_sound",
+      "title": "先持主表演，再决定反应切点",
+      "source_refs": ["gebNTySOXbY"],
+      "claim_refs": ["GEB-C03", "GEB-C04"],
+      "source_type": "firsthand_editor_interview_recall",
+      "stability": "stable",
+      "applicability": {"use_when": ["揭示、哭戏、喜剧落点或决定的主表演可持续"], "do_not_use_when": ["关键信息同时发生在反应方", "主表演中段出现生成瑕疵"]},
+      "non_applicability": ["不规定固定持镜秒数", "反应镜头不是必需装饰"],
+      "inputs": ["primary performance take", "reaction takes", "information order", "target emotion"],
+      "steps": [
+        {"step": 1, "action": "标出主表演从建立到不可逆变化的完整区间。", "check": "提前切走会损失明确的表演变化。"},
+        {"step": 2, "action": "制作持镜版与提前切反应版。", "check": "两个版本仅改变切点和反应时长。"},
+        {"step": 3, "action": "比较信息清楚度、情绪余韵和拖沓感。", "check": "记录具体时间段，而不是写更好看。"},
+        {"step": 4, "action": "只有反应增加新理解、选择或笑点时才保留。", "check": "删除反应会损失可说明的信息。"}
+      ],
+      "outputs": ["hold version", "reaction version", "cut-point decision"],
+      "failure_signals": ["主表演被抢切", "反应过早泄露", "长持暴露 flicker", "反应重复同一情绪"],
+      "repair_actions": ["调整切点", "缩短主表演尾部", "用声音先行", "删除冗余反应"],
+      "acceptance_tests": [
+        {"test": "A/B 选择", "pass_criteria": "所选版本更清楚地完成目标情绪或信息，且未新增生成瑕疵或等待感。"}
+      ],
+      "worked_example": "先完整持住读信者的情绪变化，余韵后再切三人反应；若脸部后段漂移，则提前在情绪峰值后切出。",
+      "counterexample_or_limit": "一手回忆支持此案例，但效果仍需用项目自己的 A/B 版本验证。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "timing-variant-preview-loop",
+      "domain": "editing_sound",
+      "title": "节奏多版本试剪与观众诊断",
+      "source_refs": ["gebNTySOXbY"],
+      "claim_refs": ["GEB-C05", "GEB-C06", "GEB-C07", "GEB-C09", "GEB-C10"],
+      "source_type": "firsthand_editor_interview_recall",
+      "stability": "stable",
+      "applicability": {"use_when": ["喜剧 timing、悬念延迟或情绪转调不确定"], "do_not_use_when": ["只有一个不可延伸素材版本"]},
+      "non_applicability": ["观众说太快或太慢不能直接照改", "音乐不能掩盖角色铺垫缺失"],
+      "inputs": ["baseline edit", "alternate handles", "temporary sound/music", "fresh viewers"],
+      "steps": [
+        {"step": 1, "action": "保存 baseline，并制作 fast、medium、slow 三种切点版本。", "check": "除 timing 和必要声音入点外不改变其他主要变量。"},
+        {"step": 2, "action": "标记每版的预期笑点、揭示点或决定点。", "check": "目标时刻可在时间线上定位。"},
+        {"step": 3, "action": "让未见过版本的审看者指出困惑、预期和失去兴趣的时间。", "check": "反馈记录具体时间，不只收集偏好。"},
+        {"step": 4, "action": "区分信息不足、角色投入不足和纯节奏问题，再选择修复层级。", "check": "没有用更快剪辑掩盖故事缺口。"}
+      ],
+      "outputs": ["timing variants", "viewer observation log", "selected rhythm with rationale"],
+      "failure_signals": ["笑点落空", "悬念变拖沓", "观众提前猜到", "配乐强迫情绪", "反馈只剩偏好投票"],
+      "repair_actions": ["回滚 baseline", "重排信息先后", "缩短过场", "延后声音提示", "回到 writer/director 修复角色动机"],
+      "acceptance_tests": [
+        {"test": "目标时刻", "pass_criteria": "所选版本在预定时刻产生可复述的笑点、揭示或决定，且观众没有因缺信息而困惑。"},
+        {"test": "单变量记录", "pass_criteria": "版本日志能明确列出唯一主要 timing 变化。"}
+      ],
+      "worked_example": "对洞穴抉择制作三种停顿长度，声音保持一致；若慢版更紧张但角色动机不清，先补动机而非继续延长。",
+      "counterexample_or_limit": "小样本反馈只用于定位问题，不能代表所有受众。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "coverage-gap-edit-repair",
+      "domain": "editing_sound",
+      "title": "Coverage 缺口与坏素材的剪辑补救",
+      "source_refs": ["gebNTySOXbY"],
+      "claim_refs": ["GEB-C12", "GEB-C13", "GEB-C14", "GEB-C10"],
+      "source_type": "firsthand_editor_interview_recall",
+      "stability": "stable",
+      "applicability": {"use_when": ["AI 生成素材缺过场、动作冗长或 coverage 不完整"], "do_not_use_when": ["must beat、关键选择或身份本身缺失"]},
+      "non_applicability": ["剪辑不能凭空修复不存在的关键表演", "字幕不应默认替代空间和动作信息"],
+      "inputs": ["all generated clips", "must-beat ledger", "current assembly", "available audio/insert/reaction assets"],
+      "steps": [
+        {"step": 1, "action": "重新审查所有未采用素材，按 scene/beat/character 建索引。", "check": "每个 must beat 至少有一个候选区间或明确缺口。"},
+        {"step": 2, "action": "删除不改变因果的走路、回房和重复动作。", "check": "删后 entry/exit state 和空间方向仍可理解。"},
+        {"step": 3, "action": "按优先级尝试声音桥、反应、insert、遮挡切出和动作中切。", "check": "补救不引入新的道具、服装或时间冲突。"},
+        {"step": 4, "action": "若 must beat 仍缺失，停止美化并回到 clip plan 重生成最小缺口。", "check": "新 clip 只有一个主要叙事任务。"}
+      ],
+      "outputs": ["coverage audit", "repair edit", "minimal regeneration request"],
+      "failure_signals": ["角色突然换位", "动作因果断裂", "声音桥掩盖错误", "漂亮镜头占据时长但不完成 beat"],
+      "repair_actions": ["恢复必要过场", "增加 location/prop insert", "改画外对白", "重生成一个最小功能 clip"],
+      "acceptance_tests": [
+        {"test": "因果完整", "pass_criteria": "不看脚本时，审看者能复述进入状态、关键选择和退出状态。"},
+        {"test": "重生成最小化", "pass_criteria": "新增生成请求只覆盖一个已记录缺口，未重做已通过素材。"}
+      ],
+      "worked_example": "删除完整走路，只保留呼喊、门铃和开门；用门铃声音桥保持因果，若开门后人物状态错误则只重生成开门反应。",
+      "counterexample_or_limit": "无声可理解不是所有场景的要求；声音驱动段落应按设计的声音信息验收。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "series-carrying-capacity-test",
+      "domain": "writer",
+      "title": "系列承载力压力测试",
+      "source_refs": ["hIdZEZ2rCo4"],
+      "claim_refs": ["HID-C01", "HID-C02", "HID-C03", "HID-C04"],
+      "source_type": "multi_speaker_professional_panel",
+      "stability": "stable",
+      "applicability": {"use_when": ["长篇、剧集或多集 AI 叙事概念"], "do_not_use_when": ["明确封闭的一次性短片"]},
+      "non_applicability": ["不要求真的规划 60 或 90 集", "限定剧可有封闭结局，但仍需中段发动机"],
+      "inputs": ["premise", "world rules", "relationship map", "genre engine", "intended episode count"],
+      "steps": [
+        {"step": 1, "action": "分别列出关系发动机、类型发动机和世界制度发动机。", "check": "每个发动机能产生冲突，而不只增加背景设定。"},
+        {"step": 2, "action": "在早、中、晚三个阶段各写一个不重复的冲突和新角色入口。", "check": "冲突由既有世界和关系有机产生。"},
+        {"step": 3, "action": "识别会过早耗尽的终局条件，并改成阶段目标或明确限定集数。", "check": "目标格式与实际承载力一致。"},
+        {"step": 4, "action": "为每阶段写角色不可逆代价和发动机变化。", "check": "不是同一案件或误会换皮重复。"}
+      ],
+      "outputs": ["series engine map", "stage conflict matrix", "exhaustion risks"],
+      "failure_signals": ["中段只能重复首集", "新角色与世界无因果", "唯一悬念提前耗尽", "关系长期不变化"],
+      "repair_actions": ["缩短格式", "增加制度或派系压力", "把终局改成阶段目标", "重建角色代价"],
+      "acceptance_tests": [
+        {"test": "阶段差异", "pass_criteria": "早、中、晚冲突在目标、代价和关系状态上均不同，但能追溯到同一核心发动机。"},
+        {"test": "格式诚实", "pass_criteria": "若发动机只能支撑有限篇幅，项目明确标为限定剧或短片而非伪装开放系列。"}
+      ],
+      "worked_example": "关系线和程序性任务双发动机：案件持续变化，关系因每次选择积累不可逆后果。",
+      "counterexample_or_limit": "面向 AI 视频的短篇项目通常不需要长系列测试；不要为了显得宏大而制造无用支线。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "pilot-character-information-budget",
+      "domain": "writer",
+      "title": "Pilot 角色与信息预算",
+      "source_refs": ["hIdZEZ2rCo4"],
+      "claim_refs": ["HID-C06", "HID-C07", "HID-C08", "HID-C09"],
+      "source_type": "multi_speaker_professional_panel",
+      "stability": "stable",
+      "applicability": {"use_when": ["群像 pilot 或第一集需要建立多名常规角色"], "do_not_use_when": ["单主角极短片"]},
+      "non_applicability": ["七至八人和六至七页都是案例数字，不是硬阈值", "cliffhanger 不是唯一续看理由"],
+      "inputs": ["regular cast", "episode runtime", "core story", "world rules", "next-episode promise"],
+      "steps": [
+        {"step": 1, "action": "为每个常规角色安排首次可见目标、选择和代价。", "check": "角色不是只靠姓名或说明台词被介绍。"},
+        {"step": 2, "action": "为每场限制一个主要冲突和必要世界信息。", "check": "删掉说明后仍能看懂人物行动。"},
+        {"step": 3, "action": "用角色感受和原因写场景提纲，再补情节动作。", "check": "提纲能说明事件如何改变角色，不只是发生了什么。"},
+        {"step": 4, "action": "结尾同时完成本集局部变化并提出下一集压力。", "check": "不是无因果地截断。"}
+      ],
+      "outputs": ["pilot character grid", "scene information budget", "continuation promise"],
+      "failure_signals": ["角色只能靠职业区分", "连续世界观说明", "主角本集无变化", "结尾只是突然停下"],
+      "repair_actions": ["合并功能角色", "把世界规则转成阻碍", "延后次要人物", "让结尾源于本集选择"],
+      "acceptance_tests": [
+        {"test": "角色记忆", "pass_criteria": "审看者能用目标或选择而非外貌复述每个主要角色。"},
+        {"test": "信息可视化", "pass_criteria": "每条必须世界信息至少有一个行动、空间或后果载体，不依赖连续解释台词。"}
+      ],
+      "worked_example": "第一集只让六名角色进入主冲突，其余通过名字或环境预留；每人首次出现都必须做一个有代价的选择。",
+      "counterexample_or_limit": "角色数量应由时长和复杂度决定；AI 模型多人稳定性差时还需进一步拆 clip。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "three-episode-block-cast-attendance",
+      "domain": "writer",
+      "title": "三集循环与群像考勤账本",
+      "source_refs": ["21FS7CVClxo"],
+      "claim_refs": ["21F-C01", "21F-C02", "21F-C03", "21F-C04", "21F-C10"],
+      "source_type": "firsthand_showrunner_interview",
+      "stability": "stable",
+      "applicability": {"use_when": ["多主角季播、时间跳跃或三集局部弧"], "do_not_use_when": ["一次性短片或单集封闭故事"]},
+      "non_applicability": ["三集 block 是 Andor 项目模型，不是平台要求", "不保留实体排拍和导演排程管理"],
+      "inputs": ["season beats", "character roster", "time jumps", "convergence events", "episode runtime"],
+      "steps": [
+        {"step": 1, "action": "为每个三集块定义进入状态、局部升级、汇聚或转折和退出状态。", "check": "第三集既完成局部弧又改变下一块条件。"},
+        {"step": 2, "action": "建立角色考勤：出现、主动缺席、意外回归和状态更新。", "check": "每个主要角色的缺席都有叙事原因或明确 pending。"},
+        {"step": 3, "action": "时间跳跃只展示改变后的互动和选择，避免逐项回顾。", "check": "观众能从行为推断关键变化；无法推断的才补最小信息。"},
+        {"step": 4, "action": "提前冻结婚礼、葬礼、集会或音乐等汇聚事件的叙事功能。", "check": "事件让多条线发生因果碰撞，不只是把角色集中。"}
+      ],
+      "outputs": ["three-episode block cards", "cast attendance ledger", "time-jump change map"],
+      "failure_signals": ["角色无故消失", "跳时后用大段回顾", "第三集没有局部结果", "汇聚事件只做场面"],
+      "repair_actions": ["前置缺席理由", "用互动替代回顾", "重写第三集不可逆选择", "删除无因果参与者"],
+      "acceptance_tests": [
+        {"test": "block 闭环", "pass_criteria": "每个三集块有可识别的进入、局部转折和退出状态，且下一块从该状态继续。"},
+        {"test": "群像账本", "pass_criteria": "每个主要角色在块结束时都有更新状态或明确的有意缺席记录。"}
+      ],
+      "worked_example": "三集围绕婚礼汇聚：第一集建立分离目标，第二集产生相互干扰，第三集在婚礼中碰撞并留下下一年跳时后的新状态。",
+      "counterexample_or_limit": "原视频包含实体制作模型，但本程序只保留叙事分块和角色连续性，不管理真实剧组排程。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "foreshadow-culture-causality-ledger",
+      "domain": "writer",
+      "title": "伏笔回收与文化因果账本",
+      "source_refs": ["21FS7CVClxo"],
+      "claim_refs": ["21F-C05", "21F-C06", "21F-C07", "21F-C08", "21F-C09"],
+      "source_type": "firsthand_showrunner_interview",
+      "stability": "stable",
+      "applicability": {"use_when": ["长篇世界观、时间跳跃和多人物弧"], "do_not_use_when": ["无后续回收空间的一次性片段"]},
+      "non_applicability": ["未展示 backstory 不能无限累积", "文化细节不能只作为异域装饰"],
+      "inputs": ["character hidden history", "current choices", "culture rules", "institutional pressures", "payoff windows"],
+      "steps": [
+        {"step": 1, "action": "为隐藏历史写当前可见约束和最晚回收窗口。", "check": "历史会改变现在的选择，而不只是解释人物。"},
+        {"step": 2, "action": "用互动、能力、伤痕或关系变化暗示时间跳跃。", "check": "没有角色互相复述双方都知道的过去。"},
+        {"step": 3, "action": "把语言、仪式、习俗或空间规则连接到制度权力。", "check": "至少一个文化规则会改变行动结果。"},
+        {"step": 4, "action": "给每个主要人物设计不同类型的道德选择和不可逆代价。", "check": "人物弧不是同一牺牲的换名重复。"}
+      ],
+      "outputs": ["foreshadow/payoff ledger", "culture causal map", "moral choice grid"],
+      "failure_signals": ["伏笔只有解释作用", "文化仅是美术标签", "多人弧同质", "回收过晚导致观众遗忘"],
+      "repair_actions": ["把历史转为当前阻碍", "让文化规则与资源或身份冲突", "区分代价类型", "增加中间提醒而非完整回顾"],
+      "acceptance_tests": [
+        {"test": "伏笔功能", "pass_criteria": "每条保留伏笔都能指向后续选择、误解或后果；无功能条目被删除。"},
+        {"test": "文化因果", "pass_criteria": "文化规则至少一次改变角色可采取的行动或行动后果。"}
+      ],
+      "worked_example": "地方语言起初只在日常互动中出现，后来成为宣传机构操控社区的入口；回收改变角色对制度的选择。",
+      "counterexample_or_limit": "Andor 的规模和世界观资源特殊；小项目只需保留会进入成片因果链的少量文化规则。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "adaptation-core-partner-filter",
+      "domain": "adaptation",
+      "title": "改编核心保真与合作方案筛选",
+      "source_refs": ["FCopBMqWu44"],
+      "claim_refs": ["FCO-C01", "FCO-C03", "FCO-C05", "FCO-C06", "FCO-C13"],
+      "source_type": "firsthand_novelist_screenwriter_interview",
+      "stability": "stable",
+      "applicability": {"use_when": ["长篇小说改编，需要区分核心与可妥协形式"], "do_not_use_when": ["权利不明且用户要求可发行成品"]},
+      "non_applicability": ["不能保证创作控制权", "不提供合同或法律意见", "等待多年只是 Sharp Objects 个案"],
+      "inputs": ["source text", "theme and POV", "ending function", "must/translate/omit list", "candidate adaptation directions"],
+      "steps": [
+        {"step": 1, "action": "把原作不可替代的视角、主题压力、关键选择和结局功能写成一页 core brief。", "check": "每项都能映射到原作证据和可视听结果。"},
+        {"step": 2, "action": "让每个候选改编方向说明如何承载这些功能。", "check": "没有只用类型标签或画面风格替代核心。"},
+        {"step": 3, "action": "将分歧分为 must preserve、translate、negotiable 和 intentional departure。", "check": "每项有功能理由和 change log。"},
+        {"step": 4, "action": "若方向删除核心，明确 reject 或标为另一个改编版本。", "check": "不得在交付中把偏离静默称为忠实。"}
+      ],
+      "outputs": ["adaptation core brief", "direction comparison", "departure log"],
+      "failure_signals": ["只剩类型包装", "POV 被抹平", "结局功能改变却未记录", "珍爱细节被误当核心"],
+      "repair_actions": ["回到源作功能证据", "换视听载体而非复制段落", "分离替代版本", "请用户选择真实分歧"],
+      "acceptance_tests": [
+        {"test": "核心追溯", "pass_criteria": "每个 must preserve 项都能回到源作证据，并在生产包中找到具体载体。"},
+        {"test": "偏离诚实", "pass_criteria": "所有 intentional departure 都有理由、影响和用户可见记录。"}
+      ],
+      "worked_example": "若原作核心是女性 POV 与代际暴力，不能用 generic horror 视觉包装替代；可以压缩角色，但必须保留体验和因果。",
+      "counterexample_or_limit": "该判断来自 Flynn 的项目经验；其他原作的核心需要独立分析，不能复制结论。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "compressed-spine-selective-restoration",
+      "domain": "adaptation",
+      "title": "先压缩可视听主干，再选择性回填",
+      "source_refs": ["FCopBMqWu44"],
+      "claim_refs": ["FCO-C09", "FCO-C10", "FCO-C13"],
+      "source_type": "firsthand_gone_girl_case_and_general_observation",
+      "stability": "stable",
+      "applicability": {"use_when": ["长篇原作远超目标时长", "已有导演意图和时长预算"], "do_not_use_when": ["把 120 页或 160 分钟当硬模板"]},
+      "non_applicability": ["回填必须通过时长和因果门", "物理片场预算建议不进入 AI 管理流程"],
+      "inputs": ["source scene/function list", "target runtime", "main causal spine", "director intent", "deletion ledger"],
+      "steps": [
+        {"step": 1, "action": "仅用主因果、视角转折和不可替代选择写压缩版。", "check": "目标时长内主线闭合，且每场有可见功能。"},
+        {"step": 2, "action": "记录每个删除项原本承担的信息、情绪或主题功能。", "check": "没有把删除误当功能消失；必要功能已有替代。"},
+        {"step": 3, "action": "按观众困惑、角色贫化或主题断裂决定是否回填。", "check": "不是因为作者喜欢某段文字而回填。"},
+        {"step": 4, "action": "每次只回填一个功能单元并重新对账时长。", "check": "回填后 must beats 完整，且未挤压关键选择。"}
+      ],
+      "outputs": ["compressed spine", "deletion/function ledger", "selective restoration log"],
+      "failure_signals": ["把小说所有内容塞入", "压缩后 POV 或因果断裂", "回填导致节奏失衡", "页数被当质量指标"],
+      "repair_actions": ["回到主因果", "合并角色或场景载体", "用视觉/声音替代说明", "撤销无功能回填"],
+      "acceptance_tests": [
+        {"test": "时长与因果", "pass_criteria": "最终 clip/edit 贡献时长与目标一致，且主因果链无缺口。"},
+        {"test": "回填功能", "pass_criteria": "每个回填单元解决一个已记录问题；无法指向问题的回填被删除。"}
+      ],
+      "worked_example": "首稿先压到目标长度；盲读发现婚姻权力转折不足后，只回填承载该转折的场景功能，不恢复整条支线。",
+      "counterexample_or_limit": "Gone Girl 的 120 页和 160 分钟是异常成功个案，不能作为本 skill 的页数或片长标准。",
+      "last_verified_at": "2026-07-24"
+    },
+    {
+      "id": "notes-pov-continuity-review",
+      "domain": "adaptation",
+      "title": "修改意见与 POV 连续性审查",
+      "source_refs": ["FCopBMqWu44"],
+      "claim_refs": ["FCO-C04", "FCO-C11", "FCO-C14"],
+      "source_type": "firsthand_interview_general_and_novel_revision_case",
+      "stability": "stable",
+      "applicability": {"use_when": ["改编收到多方 notes", "多 POV 或角色线被删并重组"], "do_not_use_when": ["用户尚未提供源作或改动范围"]},
+      "non_applicability": ["不能替代权利人最终决定", "Dark Places 是小说修订例，不冒充影视制作事实"],
+      "inputs": ["notes list", "POV map", "scene dependency graph", "core brief", "current draft"],
+      "steps": [
+        {"step": 1, "action": "逐条写 note 对主题、POV、因果、时长和可生成性的影响。", "check": "理由可被另一位审看者复述。"},
+        {"step": 2, "action": "区分功能性坚持与纯个人偏爱。", "check": "每个坚持项至少连接一个核心功能或验收门。"},
+        {"step": 3, "action": "删除或合并角色线前先查依赖图，再整段重建 POV 声音。", "check": "没有留下拼贴式代词、知识或语气冲突。"},
+        {"step": 4, "action": "把接受、拒绝和折中方案写入 change log，并重新跑连续性检查。", "check": "无静默改动，未知项保持 pending。"}
+      ],
+      "outputs": ["notes decision table", "POV continuity map", "dependency-aware revision"],
+      "failure_signals": ["无法说明坚持原因", "知识状态越权", "声音突然变化", "删线后残留悬空因果", "Frankenstein 式拼接"],
+      "repair_actions": ["整条支线撤回后重建", "补最小过渡", "重新分配信息载体", "让用户裁决核心分歧"],
+      "acceptance_tests": [
+        {"test": "POV 盲读", "pass_criteria": "审看者能识别每段 POV、已知信息和欲望，且没有未解释跳变。"},
+        {"test": "note 可追溯", "pass_criteria": "每条 note 都有 accepted/rejected/modified 状态、理由和影响文件。"}
+      ],
+      "worked_example": "发现主 POV 声音与另外两线不兼容时，先删除整条试验版再重建，而不是逐句补丁；依赖线多时先保留并改载体。",
+      "counterexample_or_limit": "若被删角色与所有主线高度交织，整线删除可能比局部修复代价更高，必须先看依赖图。",
+      "last_verified_at": "2026-07-24"
+    }
+  ]
+}

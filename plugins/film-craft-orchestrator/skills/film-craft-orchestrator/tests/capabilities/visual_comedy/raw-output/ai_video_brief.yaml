@@ -1,0 +1,30 @@
+project_id: umbrella_rack_prank_30s
+format: short
+audience: general audience
+runtime_sec: 30
+aspect_ratio: "16:9"
+genre_tone: visual slapstick comedy, warm coffee-shop realism
+source_material: none
+rights_status: not-applicable
+creative_goal: A cafe worker secretly returns a self-spraying umbrella to the rack and escalating customer encounters pay off in a final callback.
+must_beats:
+  - worker hides a visibly pressurized auto-spray umbrella in the rack
+  - three customers approach and trigger distinct escalating consequences
+  - final reaction repeats the first customer's overconfident gesture, then sprays the worker
+  - no dialogue, narration, explanatory subtitles, or intertitles
+model_access: []
+reference_assets: []
+dialogue_strategy: none
+generation_constraints:
+  iteration_limit_per_clip: 4
+  credit_budget: unknown
+delivery_constraints: 16:9 master, 24 fps, 30 seconds final edit, diegetic sound only
+assumptions:
+  - contemporary urban cafe with a freestanding umbrella stand by the entrance
+  - umbrella has a small mechanical trigger and safe comedic water mist
+  - customers and worker are consenting fictional generated characters
+  - no real reference images or generated outputs are available
+open_questions:
+  - provider/model and output resolution remain unknown
+  - exact water-spray particle limits require model test
+status: diagnostic_preview

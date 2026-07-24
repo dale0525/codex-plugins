@@ -1,0 +1,18 @@
+id: novel_adaptation
+runtime_sec: 90
+common_gate: validate_ai_video_package
+required_artifacts: canonical_13_files_plus_adaptation_matrix
+deterministic_checks:
+  - every source unit records source function, screen unit, preservation decision and verification
+  - every required source fact has a delivery_requirement_id carried through story, prompt information carrier and edit timeline
+  - every invention has a stable invent_id and reason
+  - discovery, playback, warning, interruption and final choice beats are covered
+  - every clip has canonical downstream records and edit total is 90 seconds
+  - every visible character is registered and each character has at least one state_version
+  - short clips expose atomic action_steps rather than hiding overloaded action chains
+creative_checks:
+  - interior narration becomes visible or audible behavior
+  - the warning changes the meaning of the sibling relationship
+  - invented material supports rather than replaces the source causality
+  - opening the breakwater door reads as a consequential final choice
+research_trigger: only_if_canonical_retest_cannot_repair_pov_translation_or_source_function_trace
