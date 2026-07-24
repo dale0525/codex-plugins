@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-version="${CODEX_SYNC_VERSION:-0.1.2}"
+version="${CODEX_SYNC_VERSION:-0.2.0}"
 codex_home_path="${CODEX_HOME:-${HOME}/.codex}"
 install_directory="${CODEX_SYNC_BIN_HOME:-${codex_home_path}/codex-sync/bin/${version}}"
 

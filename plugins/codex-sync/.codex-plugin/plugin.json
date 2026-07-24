@@ -1,7 +1,7 @@
 {
   "name": "codex-sync",
-  "version": "0.1.2",
-  "description": "Synchronize global Codex instructions, portable settings, providers, marketplaces, and plugins through a private GitHub repository.",
+  "version": "0.2.0",
+  "description": "Synchronize global Codex instructions, native agent profiles, portable settings, providers, marketplaces, and plugins through a private GitHub repository.",
   "author": {
     "name": "Logic Tan",
     "email": "logictan89@gmail.com",
@@ -15,7 +15,7 @@
   "interface": {
     "displayName": "Codex Sync",
     "shortDescription": "Synchronize Codex safely across devices.",
-    "longDescription": "Connect a selected private GitHub repository, preview portable Codex configuration changes, apply them transactionally, reconcile marketplaces and plugins, and roll back when needed.",
+    "longDescription": "Connect a selected private GitHub repository, preview portable Codex configuration and native agent profile changes, apply them transactionally without lifecycle hooks, reconcile marketplaces and plugins, and roll back when needed.",
     "developerName": "Logic Tan",
     "category": "Productivity",
     "capabilities": ["Read", "Write", "Authentication"],

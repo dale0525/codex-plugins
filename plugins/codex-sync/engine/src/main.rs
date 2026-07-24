@@ -3,6 +3,7 @@ mod auth;
 mod config;
 mod github;
 mod model;
+mod profiles;
 mod reconcile;
 mod storage;
 
@@ -64,8 +65,6 @@ enum Commands {
     },
     /// Validate state, repository schema, secret policy, and Codex availability.
     Doctor,
-    /// Check whether the configured repository has a newer commit without changing state.
-    CheckUpdate,
     /// Restore the latest or a named pre-apply backup.
     Rollback {
         backup: Option<String>,
@@ -116,7 +115,6 @@ fn run() -> Result<()> {
         } => app::apply(&plan_id, approve_high_risk),
         Commands::Status { json } => app::status(json),
         Commands::Doctor => app::doctor(),
-        Commands::CheckUpdate => app::check_update(),
         Commands::Rollback { backup, approve } => app::rollback(backup.as_deref(), approve),
         Commands::Publish { message, approve } => app::publish(&message, approve),
     }

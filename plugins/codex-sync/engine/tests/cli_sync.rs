@@ -10,6 +10,10 @@ use std::thread;
 use assert_cmd::Command;
 use zip::write::SimpleFileOptions;
 
+const DEFAULT_PROFILE: &str = "name = \"default\"\ndescription = \"General-purpose scout\"\nmodel = \"gpt-test\"\nmodel_reasoning_effort = \"medium\"\ndeveloper_instructions = \"Return compact evidence.\"\n\n[features]\nimage_generation = false\n";
+const UPDATED_DEFAULT_PROFILE: &str = "name = \"default\"\ndescription = \"Updated general-purpose scout\"\nmodel = \"gpt-test\"\nmodel_reasoning_effort = \"high\"\ndeveloper_instructions = \"Return updated compact evidence.\"\n\n[features]\nimage_generation = false\n";
+const IMAGE_PROFILE: &str = "name = \"image\"\ndescription = \"Image specialist\"\nmodel = \"gpt-test\"\nmodel_reasoning_effort = \"max\"\ndeveloper_instructions = \"Handle raster image work.\"\n\n[features]\nimage_generation = true\n";
+
 fn command(sync_home: &Path, codex_home: &Path, codex_bin: &Path) -> Command {
     let mut command = Command::cargo_bin("codex-sync").unwrap();
     command
@@ -58,16 +62,45 @@ fn repository_zip(model: Option<&str>) -> Vec<u8> {
         let files = [
             (
                 "owner-config-commit/codex-sync.toml",
-                "schema_version = 1\n",
+                "schema_version = 2\n",
             ),
             (
                 "owner-config-commit/AGENTS.md",
                 "# Synchronized instructions\n",
             ),
             ("owner-config-commit/config/common.toml", common.as_str()),
+            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
         ];
         for (path, content) in files {
             zip.start_file(path, options).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+        zip.finish().unwrap();
+    }
+    cursor.into_inner()
+}
+
+fn repository_zip_with_profiles(profiles: &[(&str, &str)]) -> Vec<u8> {
+    let mut cursor = Cursor::new(Vec::new());
+    {
+        let mut zip = zip::ZipWriter::new(&mut cursor);
+        let options = SimpleFileOptions::default();
+        for (path, content) in [
+            (
+                "owner-config-commit/codex-sync.toml",
+                "schema_version = 2\n",
+            ),
+            (
+                "owner-config-commit/AGENTS.md",
+                "# Synchronized instructions\n",
+            ),
+        ] {
+            zip.start_file(path, options).unwrap();
+            zip.write_all(content.as_bytes()).unwrap();
+        }
+        for (name, content) in profiles {
+            zip.start_file(format!("owner-config-commit/agents/{name}.toml"), options)
+                .unwrap();
             zip.write_all(content.as_bytes()).unwrap();
         }
         zip.finish().unwrap();
@@ -81,11 +114,12 @@ fn repository_zip_with_plaintext_provider_token() -> Vec<u8> {
         let mut zip = zip::ZipWriter::new(&mut cursor);
         let options = SimpleFileOptions::default();
         let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 1\n"),
+            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
             ("owner-config-commit/AGENTS.md", "# Synchronized\n"),
+            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
             (
                 "owner-config-commit/providers.toml",
-                "[providers.company]\nname = \"Company API\"\nbase_url = \"https://api.example.com/v1\"\nwire_api = \"responses\"\nexperimental_bearer_token = \"test-provider-bearer-token\"\n",
+                "[providers.company]\nname = \"Company API\"\nbase_url = \"https://api.example.com/v1\"\nwire_api = \"responses\"\nenv_key = \"COMPANY_OPENAI_API_KEY\"\nexperimental_bearer_token = \"test-provider-bearer-token\"\n",
             ),
         ];
         for (path, content) in files {
@@ -103,8 +137,9 @@ fn repository_zip_with_plugins() -> Vec<u8> {
         let mut zip = zip::ZipWriter::new(&mut cursor);
         let options = SimpleFileOptions::default();
         let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 1\n"),
+            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
             ("owner-config-commit/AGENTS.md", "# New\n"),
+            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
             (
                 "owner-config-commit/plugins.toml",
                 "[[plugins]]\nid = \"good@market\"\nenabled = true\n\n[[plugins]]\nid = \"fail@market\"\nenabled = true\n",
@@ -125,8 +160,9 @@ fn repository_zip_with_marketplace_failure() -> Vec<u8> {
         let mut zip = zip::ZipWriter::new(&mut cursor);
         let options = SimpleFileOptions::default();
         let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 1\n"),
+            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
             ("owner-config-commit/AGENTS.md", "# New\n"),
+            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
             (
                 "owner-config-commit/marketplaces.toml",
                 "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.com/new-market.git\"\ngit_ref = \"main\"\n",
@@ -151,8 +187,9 @@ fn repository_zip_with_disabled_plugin_failure() -> Vec<u8> {
         let mut zip = zip::ZipWriter::new(&mut cursor);
         let options = SimpleFileOptions::default();
         let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 1\n"),
+            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
             ("owner-config-commit/AGENTS.md", "# New\n"),
+            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
             (
                 "owner-config-commit/plugins.toml",
                 "[[plugins]]\nid = \"old@market\"\nenabled = false\n\n[[plugins]]\nid = \"fail@market\"\nenabled = true\n",
@@ -396,6 +433,136 @@ fn setup_sync_and_apply_preserve_unmanaged_config() {
 }
 
 #[test]
+fn agent_profiles_are_transactional_and_preserve_unmanaged_profiles() {
+    let temporary = tempfile::tempdir().unwrap();
+    let sync_home = temporary.path().join("sync");
+    let codex_home = temporary.path().join("codex");
+    let agents = codex_home.join("agents");
+    fs::create_dir_all(&agents).unwrap();
+    fs::write(agents.join("personal.toml"), "personal\n").unwrap();
+    fs::write(agents.join("default.toml"), "local drift\n").unwrap();
+    let codex_bin = temporary.path().join("codex-fake");
+    fake_codex(&codex_bin);
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            "owner/config",
+            "--device",
+            "test-device",
+        ])
+        .assert()
+        .success();
+
+    let initial_archive =
+        repository_zip_with_profiles(&[("default", DEFAULT_PROFILE), ("image", IMAGE_PROFILE)]);
+    let (api_url, server) = serve_github("abc123", initial_archive);
+    let output = command(&sync_home, &codex_home, &codex_bin)
+        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
+        .arg("sync")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    server.join().unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("agent-profile default.toml"));
+    assert!(stdout.contains("agent-profile image.toml"));
+    let plan_id = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("Plan "))
+        .and_then(|line| line.split_whitespace().next())
+        .unwrap();
+
+    fs::write(agents.join("default.toml"), "changed after planning\n").unwrap();
+    command(&sync_home, &codex_home, &codex_bin)
+        .args(["apply", plan_id, "--approve-high-risk"])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains(
+            "Codex configuration changed after planning",
+        ));
+
+    let (api_url, server) = serve_commit("abc123");
+    let output = command(&sync_home, &codex_home, &codex_bin)
+        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
+        .arg("sync")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    server.join().unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    let plan_id = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("Plan "))
+        .and_then(|line| line.split_whitespace().next())
+        .unwrap();
+    command(&sync_home, &codex_home, &codex_bin)
+        .args(["apply", plan_id, "--approve-high-risk"])
+        .assert()
+        .success();
+    assert_eq!(
+        fs::read_to_string(agents.join("default.toml")).unwrap(),
+        DEFAULT_PROFILE
+    );
+    assert_eq!(
+        fs::read_to_string(agents.join("image.toml")).unwrap(),
+        IMAGE_PROFILE
+    );
+    assert_eq!(
+        fs::read_to_string(agents.join("personal.toml")).unwrap(),
+        "personal\n"
+    );
+
+    let updated_archive = repository_zip_with_profiles(&[("default", UPDATED_DEFAULT_PROFILE)]);
+    let (api_url, server) = serve_github("def456", updated_archive);
+    let output = command(&sync_home, &codex_home, &codex_bin)
+        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
+        .arg("sync")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    server.join().unwrap();
+    let stdout = String::from_utf8(output.stdout).unwrap();
+    assert!(stdout.contains("remove previously synchronized agent profile"));
+    let plan_id = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("Plan "))
+        .and_then(|line| line.split_whitespace().next())
+        .unwrap();
+    command(&sync_home, &codex_home, &codex_bin)
+        .args(["apply", plan_id, "--approve-high-risk"])
+        .assert()
+        .success();
+    assert_eq!(
+        fs::read_to_string(agents.join("default.toml")).unwrap(),
+        UPDATED_DEFAULT_PROFILE
+    );
+    assert!(!agents.join("image.toml").exists());
+    assert_eq!(
+        fs::read_to_string(agents.join("personal.toml")).unwrap(),
+        "personal\n"
+    );
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .args(["rollback", "--approve"])
+        .assert()
+        .success();
+    assert_eq!(
+        fs::read_to_string(agents.join("default.toml")).unwrap(),
+        DEFAULT_PROFILE
+    );
+    assert_eq!(
+        fs::read_to_string(agents.join("image.toml")).unwrap(),
+        IMAGE_PROFILE
+    );
+    assert_eq!(
+        fs::read_to_string(agents.join("personal.toml")).unwrap(),
+        "personal\n"
+    );
+}
+
+#[test]
 fn plaintext_provider_token_is_applied_without_leaking_into_plan_output() {
     let temporary = tempfile::tempdir().unwrap();
     let sync_home = temporary.path().join("sync");
@@ -440,9 +607,9 @@ fn plaintext_provider_token_is_applied_without_leaking_into_plan_output() {
         .args(["apply", plan_id, "--approve-high-risk"])
         .assert()
         .success();
-    assert!(fs::read_to_string(codex_home.join("config.toml"))
-        .unwrap()
-        .contains("experimental_bearer_token = \"test-provider-bearer-token\""));
+    let config = fs::read_to_string(codex_home.join("config.toml")).unwrap();
+    assert!(config.contains("env_key = \"COMPANY_OPENAI_API_KEY\""));
+    assert!(config.contains("experimental_bearer_token = \"test-provider-bearer-token\""));
 }
 
 #[test]

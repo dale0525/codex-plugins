@@ -1,3 +1,13 @@
-# Define provider configuration under [providers.<name>]. Prefer env_key or
-# command-backed authentication. Plaintext cross-device tokens are supported
-# only as experimental_bearer_token and remain permanently visible in Git history.
+# Define each complete provider under [providers.<name>]. Agent profiles inherit
+# these definitions; do not duplicate partial model_providers tables in profiles.
+# For a private repository that should work immediately on every device, both an
+# env_key fallback and experimental_bearer_token may be synchronized. The
+# plaintext token remains permanently visible in Git history.
+#
+# [providers.company]
+# name = "Company API"
+# base_url = "https://api.example.com/v1"
+# wire_api = "responses"
+# env_key = "COMPANY_OPENAI_API_KEY"
+# experimental_bearer_token = "replace-with-the-real-token"
+# requires_openai_auth = false

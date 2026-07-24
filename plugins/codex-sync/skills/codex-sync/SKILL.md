@@ -1,6 +1,6 @@
 ---
 name: codex-sync
-description: Set up, inspect, synchronize, publish, or roll back global Codex configuration through a selected private GitHub repository. Use when a user is onboarding a new device, syncing AGENTS.md or portable config.toml settings, reconciling providers, marketplaces, or plugins, checking configuration drift, or restoring a previous synchronized state.
+description: Set up, inspect, synchronize, publish, or roll back global Codex configuration through a selected private GitHub repository. Use when a user is onboarding a new device, syncing AGENTS.md, native agent profiles, or portable config.toml settings, reconciling providers, marketplaces, or plugins, checking configuration drift, or restoring a previous synchronized state.
 ---
 
 # Codex Sync
@@ -64,11 +64,11 @@ Do not silently replace an existing setup. Run `<bootstrap> status` first. Use `
 1. Run `<bootstrap> doctor` if the previous synchronization failed or the device has changed materially.
 2. Run `<bootstrap> sync`. This fetches an immutable commit snapshot and creates a pending plan; it does not apply changes.
    If the engine reports unpublished cache edits, publish them or obtain explicit permission before running `<bootstrap> sync --discard-local`; never discard them automatically. Discarding invalidates any older pending plan, so run sync again and use only the newly printed plan ID.
-3. Show the plan ID, commit, affected configuration paths, marketplace operations, and plugin operations.
+3. Show the plan ID, commit, affected configuration paths, agent profile operations, marketplace operations, and plugin operations.
 4. For a low-risk plan, show all changes and ask “Apply this plan now?”; wait for an affirmative answer. For a high-risk plan, enumerate those changes and obtain explicit confirmation.
-5. If the engine reports that `config.toml` or `AGENTS.md` changed after planning, do not use the old plan ID. Run `sync` again, which replaces the pending plan, and review the newly printed ID.
+5. If the engine reports that `config.toml`, `AGENTS.md`, or a managed agent profile changed after planning, do not use the old plan ID. Run `sync` again, which replaces the pending plan, and review the newly printed ID.
 
-Never copy hook trust hashes, project trust, authentication, sessions, SQLite state, or plugin caches between devices.
+Never copy hook trust hashes, project trust, authentication sessions, SQLite state, or plugin caches between devices.
 
 ## Publish
 
@@ -87,7 +87,7 @@ The engine publishes one commit only when the remote branch still matches the fe
 
 ## Roll back
 
-1. Explain that rollback restores the synchronized `config.toml`, global `AGENTS.md`, and local sync state from a pre-apply backup. Downloaded caches may remain but are not authoritative.
+1. Explain that rollback restores the synchronized `config.toml`, global `AGENTS.md`, managed agent profiles, and local sync state from a pre-apply backup. Downloaded caches may remain but are not authoritative.
 2. After confirmation, run `<bootstrap> rollback --approve` for the latest backup, or `<bootstrap> rollback BACKUP_NAME --approve` for a named backup.
 3. Ask the user to start a new Codex task.
 
@@ -96,6 +96,5 @@ The engine publishes one commit only when the remote branch still matches the fe
 - Prefer provider credentials in environment variables, command-backed authentication, or the OS credential store. If the user explicitly chooses plaintext cross-device storage, allow only `providers.<name>.experimental_bearer_token`, warn that it persists in Git history and global `config.toml`, and treat it as a high-risk provider change. Never ask the user to paste the token into chat.
 - Do not bypass a secret-scan failure.
 - Do not apply a plan whose ID, base hashes, or commit no longer match.
-- Do not automatically trust plugin hooks. Each device must review them locally.
 - Do not manually edit Codex marketplace snapshot metadata or plugin cache directories.
-- Do not turn the session-start update check into an automatic apply.
+- Do not add lifecycle hooks for synchronization or drift repair. All checks and applies are explicitly invoked.

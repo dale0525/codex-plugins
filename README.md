@@ -8,14 +8,6 @@ Public Codex plugin marketplace maintained by [dale0525](https://github.com/dale
 codex plugin marketplace add dale0525/codex-plugins
 ```
 
-## Install Subagent Dispatch
-
-```bash
-codex plugin add subagent-dispatch@dale0525-codex-plugins
-```
-
-Start a new Codex task after installation. Review and trust the plugin hooks on each device; hook trust is intentionally device-local.
-
 ## Install Apple Design
 
 ```bash
@@ -30,26 +22,17 @@ codex plugin add codex-sync@dale0525-codex-plugins
 
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
-global `AGENTS.md`, portable `config.toml` values, providers, marketplaces, or
-plugins. The bundled GitHub App uses Device Flow. Provider credentials remain
-device-local by default; an explicitly configured `experimental_bearer_token`
-can be synchronized in plaintext through the private repository.
+global `AGENTS.md`, native agent profiles, portable `config.toml` values,
+providers, marketplaces, or plugins. It uses no lifecycle hooks. The bundled
+GitHub App uses Device Flow. A complete provider definition, including an
+explicitly configured plaintext `experimental_bearer_token`, can be synchronized
+through the private repository for zero-setup use on every device.
 
 Apple Design packages seven MIT-licensed design-engineering skills from
 [emilkowalski/skills](https://github.com/emilkowalski/skills). The upstream
 license is preserved in the plugin's `third-party/` directory.
 
 ## Included plugins
-
-### Subagent Dispatch
-
-Routes delegated work to three native Codex profiles and synchronizes their TOML definitions at session start:
-
-- `default`: read-heavy exploration and verification
-- `creative_text`: fiction, scripts, poetry, and creative revision
-- `image`: raster image generation, editing, inspection, and quality control
-
-The plugin stores no credentials and only updates its three managed files under `$CODEX_HOME/agents/`. It does not delete unrelated agent profiles.
 
 ### Apple Design
 
@@ -59,11 +42,25 @@ planning and review, design-engineering guidance, and UI library selection.
 ### Codex Sync
 
 Bootstraps new devices from a private GitHub repository through GitHub App
-device authorization. It applies configuration with managed-key ownership,
-atomic writes, drift detection, scoped secret policy, pre-apply backups, and
-rollback. Private marketplaces are downloaded at immutable commit SHAs and
-registered as local versioned snapshots instead of exposing GitHub credentials
-to Git subprocesses.
+device authorization. It synchronizes global instructions and shared native
+agent profiles, including `default`, `creative_text`, and `image`, without
+lifecycle hooks. Configuration is applied with managed ownership, atomic writes,
+drift detection, scoped secret policy, pre-apply backups, and rollback. Private
+marketplaces are downloaded at immutable commit SHAs and registered as local
+versioned snapshots instead of exposing GitHub credentials to Git subprocesses.
+
+#### Migrate from Subagent Dispatch
+
+Before applying Codex Sync 0.2.0 on an existing configuration repository:
+
+1. Set `schema_version = 2` and `agent_profiles = "agents"` in `codex-sync.toml`.
+2. Merge the `Subagent orchestration` section from the template `AGENTS.md` into the private repository and remove instructions that require loading the retired `subagent-dispatch` skill.
+3. Copy the three profile templates from `plugins/codex-sync/templates/config-repository/agents/` into the private repository's `agents/` directory.
+4. Keep every complete custom provider definition in `providers.toml`. Do not add partial `model_providers` tables to agent profiles; omitted provider settings inherit from the synchronized parent configuration.
+5. Remove `subagent-dispatch@dale0525-codex-plugins` from the private repository's `plugins.toml`.
+6. Publish the private repository change, run the reviewed `sync` and `apply` workflow on each device, then start a new Codex task.
+
+The 0.2.0 apply transaction takes ownership of the synchronized profile filenames while preserving unrelated files under `$CODEX_HOME/agents/`.
 
 ## External content synchronization
 
@@ -93,7 +90,6 @@ destination must remain inside this repository.
 .agents/plugins/marketplace.json
 plugins/apple-design/
 plugins/codex-sync/
-plugins/subagent-dispatch/
 sync-sources.toml
 ```
 

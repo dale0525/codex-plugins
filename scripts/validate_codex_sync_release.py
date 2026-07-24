@@ -36,16 +36,8 @@ def main() -> int:
             PLUGIN / "scripts/bootstrap.sh",
             f"CODEX_SYNC_VERSION:-{expected}",
         ),
-        "POSIX update check": (
-            PLUGIN / "scripts/check-update.sh",
-            f"CODEX_SYNC_VERSION:-{expected}",
-        ),
         "Windows bootstrap": (
             PLUGIN / "scripts/bootstrap.ps1",
-            f"else {{ '{expected}' }}",
-        ),
-        "Windows update check": (
-            PLUGIN / "scripts/check-update.ps1",
             f"else {{ '{expected}' }}",
         ),
     }

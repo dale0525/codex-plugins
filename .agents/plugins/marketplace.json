@@ -5,18 +5,6 @@
   },
   "plugins": [
     {
-      "name": "subagent-dispatch",
-      "source": {
-        "source": "local",
-        "path": "./plugins/subagent-dispatch"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "apple-design",
       "source": {
         "source": "local",
