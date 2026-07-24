@@ -31,6 +31,28 @@ def main() -> int:
         if version != expected:
             print(f"{label} version {version} does not match release {expected}", file=sys.stderr)
             return 1
+    script_markers = {
+        "POSIX bootstrap": (
+            PLUGIN / "scripts/bootstrap.sh",
+            f"CODEX_SYNC_VERSION:-{expected}",
+        ),
+        "POSIX update check": (
+            PLUGIN / "scripts/check-update.sh",
+            f"CODEX_SYNC_VERSION:-{expected}",
+        ),
+        "Windows bootstrap": (
+            PLUGIN / "scripts/bootstrap.ps1",
+            f"else {{ '{expected}' }}",
+        ),
+        "Windows update check": (
+            PLUGIN / "scripts/check-update.ps1",
+            f"else {{ '{expected}' }}",
+        ),
+    }
+    for label, (path, marker) in script_markers.items():
+        if marker not in path.read_text(encoding="utf-8"):
+            print(f"{label} does not default to release {expected}", file=sys.stderr)
+            return 1
     print(f"Codex Sync release versions match {expected}")
     return 0
 
