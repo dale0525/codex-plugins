@@ -1,0 +1,7 @@
+schema_version = 1
+agents = "AGENTS.md"
+common_config = "config/common.toml"
+devices = "devices"
+marketplaces = "marketplaces.toml"
+plugins = "plugins.toml"
+providers = "providers.toml"

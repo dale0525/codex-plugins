@@ -1,0 +1,107 @@
+name: Release Codex Sync engine
+
+on:
+  push:
+    tags:
+      - "codex-sync-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: codex-sync-x86_64-unknown-linux-gnu
+          - os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-gnu
+            artifact: codex-sync-aarch64-unknown-linux-gnu
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            artifact: codex-sync-x86_64-apple-darwin
+          - os: macos-15
+            target: aarch64-apple-darwin
+            artifact: codex-sync-aarch64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: codex-sync-x86_64-pc-windows-msvc.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out marketplace
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Validate release version
+        run: python scripts/validate_codex_sync_release.py "${{ github.ref_name }}"
+
+      - name: Build Unix engine
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: plugins/codex-sync/engine
+        run: |
+          cargo build \
+            --locked \
+            --release \
+            --target "${{ matrix.target }}"
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          cp \
+            "target/${{ matrix.target }}/release/codex-sync" \
+            "$GITHUB_WORKSPACE/dist/${{ matrix.artifact }}"
+
+      - name: Build Windows engine
+        if: runner.os == 'Windows'
+        shell: pwsh
+        working-directory: plugins/codex-sync/engine
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cargo build `
+            --locked `
+            --release `
+            --target '${{ matrix.target }}'
+          $dist = Join-Path $env:GITHUB_WORKSPACE 'dist'
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+          Copy-Item `
+            -LiteralPath 'target/${{ matrix.target }}/release/codex-sync.exe' `
+            -Destination (Join-Path $dist '${{ matrix.artifact }}')
+
+      - name: Upload engine artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Download engine artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd dist
+          sha256sum codex-sync-* > checksums.txt
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create \
+            "${{ github.ref_name }}" \
+            dist/* \
+            --verify-tag \
+            --title "Codex Sync ${GITHUB_REF_NAME#codex-sync-v}" \
+            --generate-notes

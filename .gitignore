@@ -3,3 +3,4 @@
 __pycache__/
 .pixi/
 .tool/
+plugins/codex-sync/engine/target/
