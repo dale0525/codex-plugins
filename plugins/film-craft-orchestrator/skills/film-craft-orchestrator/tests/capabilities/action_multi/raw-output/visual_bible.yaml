@@ -1,0 +1,11 @@
+project_id: action_multi_45s
+format: "16:9"
+characters:
+  A: {silhouette: slim courier, costume: blue utility jacket, prop: taped brown parcel, must_not_drift: parcel stays in right hand until handoff}
+  B: {silhouette: broad gatekeeper, costume: orange safety vest, prop: flashlight, must_not_drift: no weapon, no strike}
+  C: {silhouette: compact coordinator, costume: yellow rain shell, prop: coiled red rope, must_not_drift: always above ground before throw}
+location: {warehouse: single aisle, left_door: screen-left, catwalk: high rear-right, safe_exit: screen-right, floor_marker: yellow line}
+lighting: cool industrial overheads with warm sodium spill at left door; keep direction constant.
+camera_language: 35mm-equivalent, eye-level for A/B, high angle only for C throw; restrained handheld, no gratuitous whip pans.
+palette: steel blue, safety orange, rope red, parcel brown.
+status: diagnostic_preview

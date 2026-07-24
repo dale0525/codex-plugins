@@ -1,0 +1,16 @@
+project_id: old_radio_montage
+version: 1
+timeline:
+  - {clip_id: c01, source_in: 0, source_out: 8, contribution_sec: 8}
+  - {clip_id: c02, source_in: 0, source_out: 8, contribution_sec: 8}
+  - {clip_id: c03, source_in: 0, source_out: 8, contribution_sec: 8}
+  - {clip_id: c04, source_in: 0, source_out: 8, contribution_sec: 8}
+  - {clip_id: c05, source_in: 0, source_out: 8, contribution_sec: 8}
+cuts:
+  - {at_sec: 8, type: match_on_brush}
+  - {at_sec: 16, type: match_on_solder_lift}
+  - {at_sec: 24, type: match_on_oil_wipe}
+  - {at_sec: 32, type: match_on_knob_turn}
+runtime_target_sec: 40
+sum_edit_contribution_sec: 40
+status: pending

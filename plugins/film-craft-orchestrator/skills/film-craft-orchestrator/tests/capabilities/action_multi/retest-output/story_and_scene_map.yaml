@@ -1,0 +1,46 @@
+id: action-multi.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [project.ai-video-brief@1.0.0]
+assumptions: []
+constraints:
+  runtime_target_sec: 45
+open_questions: []
+status: draft
+change_log: []
+logline: "甲从左门带包裹进仓库，乙拦截时丙从高台放绳索迫使路线改变；误判被及时纠正，包裹完成一次交接。"
+dramatic_question: "三人能否在不造成致命伤的情况下控制包裹与出口？"
+theme_question: "在压力下，确认事实是否比抢先行动更有力量？"
+protagonist:
+  character_id: CHAR-A
+  want: "把包裹带到右侧安全门"
+  need: "确认同伴信号后再行动"
+  fear: "包裹落入错误的人手中"
+  contradiction: "越想快走越容易忽略信息"
+antagonistic_force: "乙的拦截与丙的高位绳索改变空间路线"
+ending_choice: "甲在确认丙身份后把包裹交给丙，三人停手"
+sequences: [S01-ENTRY,S01-ROUTE,S01-HANDOFF,S01-RESOLVE]
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 45
+    location_id: LOC-WAREHOUSE
+    time: "傍晚，冷色天窗光与暖色安全灯"
+    entry_state: "甲在左门外持包裹，乙在中景通道，丙在右上高台"
+    objective: "甲把包裹送到右侧安全门"
+    obstacle: "乙封住直线路径，丙只能从高台以绳索提供替代路线"
+    turn: "甲误以为绳索来自威胁者，短暂回撤后看见丙的识别手势"
+    exit_state: "包裹由甲交给丙，乙放下阻拦姿势，出口安全"
+    beats:
+      - {beat_id: S01-B01, narrative_function: orient, visible_start: "左门打开", trigger: "甲踏入", character_tactic: "甲贴墙保护包裹", visible_end: "三人空间关系可读", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [多人,道具], fallback: "仓库宽景加甲入画"}
+      - {beat_id: S01-B02, narrative_function: obstacle, visible_start: "甲向右走", trigger: "乙横移封路", character_tactic: "乙张开双臂占住通道", visible_end: "甲停步", runtime_budget_sec: 5, preferred_carrier: blocking, generation_risks: [多人,接触], fallback: "乙单人阻拦加甲反应"}
+      - {beat_id: S01-B03, narrative_function: reveal, visible_start: "高台阴影", trigger: "绳索落下", character_tactic: "丙用绳索指向侧门", visible_end: "路线从直行变为侧绕", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [高位,绳索], fallback: "绳索insert与丙高台反打"}
+      - {beat_id: S01-B04, narrative_function: choice, visible_start: "甲看绳索", trigger: "绳端落在甲前方", character_tactic: "甲抓住绳端但不前进", visible_end: "甲误判丙为威胁", runtime_budget_sec: 5, preferred_carrier: reaction, generation_risks: [手部,道具], fallback: "甲手部特写加后退反应"}
+      - {beat_id: S01-B05, narrative_function: transition, visible_start: "甲后退", trigger: "乙看向高台", character_tactic: "乙用手势示意停", visible_end: "三人短暂停顿", runtime_budget_sec: 5, preferred_carrier: reaction, generation_risks: [多人,眼线], fallback: "乙反应与高台剪接"}
+      - {beat_id: S01-B06, narrative_function: reveal, visible_start: "丙举起识别布条", trigger: "天窗光照亮布条", character_tactic: "丙展示约定信号", visible_end: "甲确认误判可逆", runtime_budget_sec: 5, preferred_carrier: insert, generation_risks: [道具,光向], fallback: "布条insert"}
+      - {beat_id: S01-B07, narrative_function: choice, visible_start: "甲放松握绳", trigger: "乙让开半步", character_tactic: "甲沿绳索指向侧门", visible_end: "路线改变完成", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [多人,绳索], fallback: "甲单人侧绕与乙让路反应"}
+      - {beat_id: S01-B08, narrative_function: payoff, visible_start: "侧门前", trigger: "甲把包裹递向丙", character_tactic: "丙拉绳靠近并伸手", visible_end: "包裹完成一次交接", runtime_budget_sec: 5, preferred_carrier: handoff, generation_risks: [交接,手部], fallback: "包裹before/contact/after三镜"}
+      - {beat_id: S01-B09, narrative_function: resolve, visible_start: "丙持包裹", trigger: "乙放下双臂", character_tactic: "三人确认出口", visible_end: "无人受致命伤，空间安静", runtime_budget_sec: 5, preferred_carrier: reaction, generation_risks: [多人,连续性], fallback: "三人宽景静止尾帧"}
+must_beat_ids: [S01-B01]
+runtime_reconciliation:
+  scene_budget_sum_sec: 45
+  result: pending

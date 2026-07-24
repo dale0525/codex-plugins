@@ -1,0 +1,24 @@
+id: visual-comedy-retest.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions:
+  - "No reference images or model access supplied; all clips remain diagnostic_preview/pending."
+constraints:
+  runtime_target_sec: 30
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: []
+status: frozen
+change_log: []
+format: short
+audience: "general audience"
+genre_tone: "wordless visual comedy, escalating deadpan timing"
+rights_status: not-applicable
+creative_goal: "A cafe worker hides a self-spraying umbrella; each approaching customer triggers a different consequence, and the final spray returns the joke to the worker."
+must_beats: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05, S01-B06]
+generation_constraints:
+  available_models: []
+  dialogue_strategy: none
+  delivery: "1920x1080, 24fps, 16:9"

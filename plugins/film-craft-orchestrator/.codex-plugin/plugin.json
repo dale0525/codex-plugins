@@ -1,0 +1,42 @@
+{
+  "name": "film-craft-orchestrator",
+  "version": "1.0.0",
+  "description": "End-to-end film craft and AI-video production skills for adaptation, writing, directing, cinematography, continuity, editing, sound, and evidence research.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/film-craft-orchestrator",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "film",
+    "screenwriting",
+    "directing",
+    "cinematography",
+    "adaptation",
+    "ai-video"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Film Craft Orchestrator",
+    "shortDescription": "Create and supervise narrative AI video end to end.",
+    "longDescription": "Nine coordinated skills for source adaptation, screenwriting, directing, cinematography, AI-video generation, continuity and quality control, editing and sound, and evidence-based learning from film videos.",
+    "developerName": "Logic Tan",
+    "category": "Media",
+    "capabilities": [
+      "Novel and source adaptation",
+      "Screenwriting and dialogue",
+      "Directing and cinematography",
+      "AI-video production packages",
+      "Continuity, editing, sound, and quality control",
+      "Timestamped video evidence distillation"
+    ],
+    "defaultPrompt": [
+      "Turn this source into a complete AI-video production package.",
+      "Rewrite this scene with stronger visual storytelling.",
+      "Diagnose continuity and generation failures in these clips."
+    ]
+  }
+}

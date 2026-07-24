@@ -1,0 +1,62 @@
+id: red-envelope.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [red-envelope.director-intent@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: frozen
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: [cool gray walls, navy and charcoal wardrobe, single matte red prop, warm amber practical]
+camera_language:
+  allowed_framing: [locked medium wide, locked two-shot, medium close-up, prop insert, slow push-in]
+  lens_or_fov_range: moderate normal perspective, no wide-angle face distortion
+  height_rules: eye level except printer inserts
+  movement_rules: locked before reveal; one slow push-in after final choice
+  axis_rules: printer-left to door-right; cross only after both face audit slot
+lighting_rules:
+  - key_direction: window_left
+    quality: cool soft
+    continuity: stable for all clips
+  - source: printer_practical
+    quality: warm local glow
+    continuity: fades only during power dip
+characters:
+  - character_id: CHAR-LIN
+    age: 32
+    identity_anchors: [black chin-length bob, oval face, small mole below left eye]
+    wardrobe_id: WARDROBE-LIN-01
+    wardrobe: navy cardigan, cream blouse, silver access badge
+    must_not_drift: [hair length, badge shape, cardigan color]
+  - character_id: CHAR-BO
+    age: 38
+    identity_anchors: [short black hair, rectangular jaw, no glasses]
+    wardrobe_id: WARDROBE-BO-01
+    wardrobe: charcoal work jacket, pale blue shirt
+    must_not_drift: [jacket color, no glasses, hairline]
+locations:
+  - location_id: LOC-COPY-ROOM
+    layout: narrow room; printer north wall left; door east/right; audit slot immediately left of door
+    anchors: [printer, output tray, audit slot, frosted window]
+    screen_direction: CHAR-BO enters from right; printer remains left
+props:
+  - prop_id: PROP-RED-ENVELOPE
+    appearance: matte red C5 envelope, unmarked front, triangular flap
+    initial_owner: CHAR-LIN
+    state_machine: [sealed, open, hidden_one_corner, exposed, contains_badge, resealed, deposited]
+  - prop_id: PROP-BO-RESIGNATION
+    appearance: plain off-white card, no legible text required
+    initial_owner: CHAR-BO
+    state_machine: [jacket, beside_envelope, removed_by_LIN]
+  - prop_id: PROP-LIN-BADGE
+    appearance: silver rectangular access badge on navy lanyard, no legible text required
+    initial_owner: CHAR-LIN
+    state_machine: [worn, removed, inside_envelope]
+motifs:
+  - motif_id: MOTIF-RED
+    rule: red appears only on the envelope and becomes more visible as concealment fails
+reference_assets: [CHAR-LIN-MASTER, CHAR-BO-MASTER, LOC-COPY-ROOM-MASTER, PROP-RED-ENVELOPE-MASTER]
+must_preserve: [CHAR-LIN final choice, CHAR-BO does not force her, envelope enters audit slot]
+must_not: [printed text dependence, identity swap, BO placing LIN badge, unexplained light-direction change]

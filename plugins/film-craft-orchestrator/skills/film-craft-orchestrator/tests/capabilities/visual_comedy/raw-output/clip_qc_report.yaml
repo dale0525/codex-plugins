@@ -1,0 +1,10 @@
+project_id: umbrella_rack_prank_30s
+status: pending
+clips:
+  c01: {narrative_purpose: pending, identity: pending, state: pending, space: pending, environment: pending, editability: pending, evidence_frames: []}
+  c02: {narrative_purpose: pending, identity: pending, state: pending, space: pending, environment: pending, editability: pending, evidence_frames: []}
+  c03: {narrative_purpose: pending, identity: pending, state: pending, space: pending, environment: pending, editability: pending, evidence_frames: []}
+  c04: {narrative_purpose: pending, identity: pending, state: pending, space: pending, environment: pending, editability: pending, evidence_frames: []}
+  c05: {narrative_purpose: pending, identity: pending, state: pending, space: pending, environment: pending, editability: pending, evidence_frames: []}
+blocking_conflicts: []
+note: Awaiting actual clips; no clip is approved.

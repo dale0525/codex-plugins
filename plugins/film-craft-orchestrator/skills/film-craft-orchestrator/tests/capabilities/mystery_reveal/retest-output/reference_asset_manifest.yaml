@@ -1,0 +1,18 @@
+id: cold-cup.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [cold-cup.visual-bible@1.0.0]
+assumptions: ["无真实参考/生成图像"]
+constraints: {}
+open_questions: []
+status: pending
+change_log: []
+assets:
+  - {asset_id: FRAME-C-S01-01-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}
+  - {asset_id: FRAME-C-S01-02-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}
+  - {asset_id: FRAME-C-S01-03-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}
+  - {asset_id: FRAME-C-S01-04-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}
+  - {asset_id: FRAME-C-S01-05-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}
+  - {asset_id: FRAME-C-S01-06-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}
+  - {asset_id: FRAME-C-S01-07-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}
+  - {asset_id: FRAME-C-S01-08-START, role: first_frame, status: pending, sha256: "", reference_transport: not_attached}

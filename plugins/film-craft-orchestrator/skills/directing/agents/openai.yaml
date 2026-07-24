@@ -1,0 +1,6 @@
+interface:
+  display_name: "Directing"
+  short_description: "设计表演、调度、注意力与镜头覆盖"
+  default_prompt: "Use $directing to turn this scene into an executable performance, blocking, and coverage plan."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,18 @@
+id: radio-montage.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [radio-montage.clip-plan@1.0.0]
+assumptions: ["No outputs to inspect; QC remains pending."]
+constraints: {}
+open_questions: []
+status: qc_pending
+change_log: []
+clips:
+  - {clip_id: C-S01-01, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}
+  - {clip_id: C-S01-02, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}
+  - {clip_id: C-S01-03, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}
+  - {clip_id: C-S01-04, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}
+  - {clip_id: C-S01-05, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}
+  - {clip_id: C-S01-06, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}
+  - {clip_id: C-S01-07, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}
+  - {clip_id: C-S01-08, status: pending, narrative_purpose: pending, identity: pending, state: pending, spatial: pending, environment: pending, editability: pending, audio: pending, blocking_conflicts: []}

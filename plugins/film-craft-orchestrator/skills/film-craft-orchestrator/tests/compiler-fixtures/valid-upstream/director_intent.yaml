@@ -1,0 +1,120 @@
+id: compiler-smoke.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [compiler-smoke.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {runtime_target_sec: 20}
+open_questions: []
+status: frozen
+change_log: []
+audience_experience: Share the temptation, then discover the badge one beat before the courier returns the key.
+theme_form_answer: The key moves toward the lock and then reverses toward the public return slot.
+viewpoint_rule: Stay with the courier; do not reveal the badge portrait before the courier sees it.
+performance_rules: [Play intention through hand distance from the lock, not abstract guilt.]
+space_and_blocking_rules: [Archive door remains screen left and return slot screen right.]
+camera_language_rules: [Use one locked composition per clip.]
+lighting_color_rules: [Cool window-left light and one warm desk practical remain stable.]
+editing_sound_rules: [Carry the closing bell under both clips.]
+scenes:
+  - scene_id: S01
+    audience_knowledge: The key opens the archive and using it would implicate the badge owner.
+    audience_misunderstanding: The courier may still use the key after seeing the badge.
+    attention_path: [PROP-KEY, archive_lock, badge_portrait, return_slot]
+    axis: archive door left to return slot right
+    screen_direction: {CHAR-COURIER: moves_left_then_right}
+    performance_beats:
+      - {beat_id: S01-B01, want_now: reach the lock, obstacle: closing time, tactic: conceal the found key, playable_action: curl one hand around the key, reaction_trigger: key glint}
+      - {beat_id: S01-B02, want_now: refuse the compromised access, obstacle: the lock is within reach, tactic: reverse direction, playable_action: lower and return the key, reaction_trigger: badge portrait}
+    blocking_beats:
+      - {beat_id: S01-B01, before_state: courier at hall center, trigger: key glint, action: step toward archive door, world_position: {CHAR-COURIER: center_to_door}, frame_position: {CHAR-COURIER: center_to_left}, eye_line: key then lock, attention_change: floor to hand to lock, after_state: courier one step from lock}
+      - {beat_id: S01-B02, before_state: courier beside archive door, trigger: badge portrait, action: turn and cross to return slot, world_position: {CHAR-COURIER: door_to_slot}, frame_position: {CHAR-COURIER: left_to_right}, eye_line: badge then return slot, attention_change: lock to portrait to slot, after_state: courier beside return slot}
+    coverage_strategy: Two locked base clips with no redundant beauty coverage.
+    base_clip_purpose: Preserve the directional reversal that embodies the choice.
+    required_coverage: [key discovery, badge reaction, key return]
+    sound_intent: Distant closing bell continues; key drop ends the scene.
+    non_negotiables: [archive stays closed, courier returns key personally]
+    generation_risks: [hand_prop_contact, small_object_identity]
+    fallbacks: [replace hand contact with before-and-after inserts]
+    clip_specs:
+      - clip_id: C-S01-01
+        beat_ids: [S01-B01]
+        priority: must
+        narrative_purpose: Establish temptation and move the key toward the lock.
+        target_duration_sec: 12
+        edit_contribution_sec: 10
+        handle_in_sec: 1
+        handle_out_sec: 1
+        visible_character_ids: [CHAR-COURIER]
+        narrative_character_ids: [CHAR-COURIER]
+        visible_prop_ids: [PROP-KEY]
+        narrative_prop_ids: [PROP-KEY]
+        location_id: LOC-ARCHIVE-HALL
+        entry_state:
+          characters: {CHAR-COURIER: {state_id: CHAR-COURIER.STATE-HALL, position: hall_center, wardrobe: WARD-COURIER-01}}
+          props: {PROP-KEY: {state: floor_beside_badge, holder: none}}
+          environment: {location_id: LOC-ARCHIVE-HALL, time: blue_hour, light: cool_left_warm_practical}
+        exit_state:
+          characters: {CHAR-COURIER: {state_id: CHAR-COURIER.STATE-HALL, position: archive_door, wardrobe: WARD-COURIER-01}}
+          props: {PROP-KEY: {state: raised_near_lock, holder: CHAR-COURIER}}
+          environment: {location_id: LOC-ARCHIVE-HALL, time: blue_hour, light: cool_left_warm_practical}
+        action:
+          start: The courier sees the key on the floor.
+          motion: The courier picks up the key and approaches the closed archive door.
+          end: The key is raised near the lock but has not entered it.
+          steps:
+            - {step_id: A01, action: pick up the key, end_state: key held in one palm}
+            - {step_id: A02, action: take two steps toward the archive door, end_state: key raised near lock}
+        attention_change: key glint to courier hand to archive lock
+        camera: {framing: medium wide, behavior: locked}
+        lighting: cool window-left key with stable warm practical
+        temporal_constraints: {event_order: [A01, A02]}
+        continuity_invariants: [courier coat, brass key shape, archive door stays closed]
+        negative_constraints: [no extra people, no key entering lock, no camera movement]
+        generation_method: text_to_video
+        adapter_id: google-veo-3-1-gemini-api-2026-07
+        reference_inputs_expected: []
+        information_carrier_overrides: []
+        generation_risks: [hand_prop_contact, small_object_identity]
+        fallback: Separate the key insert from the reaction.
+        sound: {category: ambience, diegetic: true, source: generated, sync_target: closing_bell, entry: continue, exit: continue}
+      - clip_id: C-S01-02
+        beat_ids: [S01-B02]
+        priority: must
+        narrative_purpose: Reverse direction and complete the refusal by returning the key.
+        target_duration_sec: 12
+        edit_contribution_sec: 10
+        handle_in_sec: 1
+        handle_out_sec: 1
+        visible_character_ids: [CHAR-COURIER]
+        narrative_character_ids: [CHAR-COURIER]
+        visible_prop_ids: [PROP-KEY]
+        narrative_prop_ids: [PROP-KEY]
+        location_id: LOC-ARCHIVE-HALL
+        entry_state:
+          characters: {CHAR-COURIER: {state_id: CHAR-COURIER.STATE-HALL, position: archive_door, wardrobe: WARD-COURIER-01}}
+          props: {PROP-KEY: {state: raised_near_lock, holder: CHAR-COURIER}}
+          environment: {location_id: LOC-ARCHIVE-HALL, time: blue_hour, light: cool_left_warm_practical}
+        exit_state:
+          characters: {CHAR-COURIER: {state_id: CHAR-COURIER.STATE-HALL, position: return_slot, wardrobe: WARD-COURIER-01}}
+          props: {PROP-KEY: {state: inside_return_slot, holder: return_slot}}
+          environment: {location_id: LOC-ARCHIVE-HALL, time: blue_hour, light: cool_left_warm_practical}
+        action:
+          start: The key pauses near the lock as the courier sees the badge portrait.
+          motion: The courier lowers the key, crosses right, and drops it into the return slot.
+          end: The key is inside the slot and the archive door remains closed.
+          steps:
+            - {step_id: A01, action: lower the key after seeing the badge portrait, end_state: key below waist}
+            - {step_id: A02, action: cross to the return slot and release the key, end_state: key inside return slot}
+        attention_change: archive lock to badge portrait to return slot
+        camera: {framing: medium wide, behavior: locked}
+        lighting: cool window-left key with stable warm practical
+        temporal_constraints: {event_order: [A01, A02]}
+        continuity_invariants: [courier coat, brass key shape, archive door stays closed]
+        negative_constraints: [no extra people, no opened archive, no camera movement]
+        generation_method: text_to_video
+        adapter_id: google-veo-3-1-gemini-api-2026-07
+        reference_inputs_expected: []
+        information_carrier_overrides: []
+        generation_risks: [hand_prop_contact, prop_continuity]
+        fallback: Use a reaction close-up followed by a locked key insert.
+        sound: {category: foley, diegetic: true, source: generated, sync_target: key_drop, entry: continue, exit: hard_stop}

@@ -1,0 +1,17 @@
+project_id: mystery_reveal
+runtime_target_sec: 60
+timeline:
+  - range: 0-15
+    clips: [C01, C02]
+    cut_logic: Hold wide long enough for room tone, then insert clue before any human enters.
+  - range: 15-30
+    clips: [C03, C04]
+    cut_logic: Match Lin's eyeline to Mara; let her false line land without reaction cut.
+  - range: 30-47
+    clips: [C05, C06, C07]
+    cut_logic: Latch rattle J-cut bridges from Lin to physical trail; preserve thread direction.
+  - range: 47-60
+    clips: [C08, C09]
+    cut_logic: Use coat catch as visual punctuation; police pulses motivate final reaction cut to black.
+must_use_clips: [C01, C02, C03, C04, C05, C06, C07, C08, C09]
+handles_overlap: false

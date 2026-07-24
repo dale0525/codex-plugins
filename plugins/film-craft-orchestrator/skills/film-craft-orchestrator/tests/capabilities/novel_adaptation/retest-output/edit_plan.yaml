@@ -1,0 +1,134 @@
+id: tide-station.edit-plan
+version: 1.0.0
+owner_role: editor
+source_inputs:
+- tide-station.clip-plan@1.0.0
+assumptions:
+- timeline is planned; no approved media
+constraints:
+  runtime_target_sec: 90
+open_questions: []
+status: qc_pending
+timeline:
+- clip_id: C-S01-01
+  delivery_requirement_ids: [DR-B01]
+  in_sec: 0
+  out_sec: 10
+  handles:
+  - 1
+  - 1
+  cut_purpose: establish return and door
+  must_beat: S01-B01
+  sound_bridge: broadcast enters
+  contribution_sec: 10
+  must_beat_ids:
+  - S01-B01
+- clip_id: C-S01-02
+  delivery_requirement_ids: [DR-B02]
+  in_sec: 10
+  out_sec: 20
+  handles:
+  - 1
+  - 1
+  cut_purpose: reveal station still speaks
+  must_beat: S01-B02
+  sound_bridge: tide continues
+  contribution_sec: 10
+  must_beat_ids:
+  - S01-B02
+- clip_id: C-S01-03
+  delivery_requirement_ids: [DR-B03]
+  in_sec: 20
+  out_sec: 30
+  handles:
+  - 1
+  - 1
+  cut_purpose: named tape
+  must_beat: S01-B03
+  sound_bridge: tide under insert
+  contribution_sec: 10
+  must_beat_ids:
+  - S01-B03
+- clip_id: C-S01-04
+  delivery_requirement_ids: [DR-B04]
+  in_sec: 30
+  out_sec: 40
+  handles:
+  - 1
+  - 1
+  cut_purpose: brother blocks
+  must_beat: S01-B04
+  sound_bridge: footsteps L-cut
+  contribution_sec: 10
+  must_beat_ids:
+  - S01-B04
+- clip_id: C-S01-05
+  delivery_requirement_ids: [DR-B05-A]
+  in_sec: 40
+  out_sec: 50
+  handles:
+  - 1
+  - 1
+  cut_purpose: press play
+  must_beat: S01-B05
+  sound_bridge: click sync
+  contribution_sec: 10
+  must_beat_ids:
+  - S01-B05
+- clip_id: C-S01-06
+  delivery_requirement_ids: [DR-B05-B]
+  in_sec: 50
+  out_sec: 58
+  handles:
+  - 0
+  - 0
+  cut_purpose: childhood voice
+  must_beat: S01-B05
+  sound_bridge: child voice dry
+  contribution_sec: 8
+  must_beat_ids:
+  - S01-B05
+- clip_id: C-S01-07
+  delivery_requirement_ids: [DR-B06]
+  in_sec: 58
+  out_sec: 68
+  handles:
+  - 0
+  - 0
+  cut_purpose: information reversal
+  must_beat: S01-B06
+  sound_bridge: warning then silence
+  contribution_sec: 10
+  must_beat_ids:
+  - S01-B06
+- clip_id: C-S01-08
+  delivery_requirement_ids: [DR-B07-A]
+  in_sec: 68
+  out_sec: 78
+  handles:
+  - 1
+  - 1
+  cut_purpose: active exit choice
+  must_beat: S01-B07
+  sound_bridge: wind rises
+  contribution_sec: 10
+  must_beat_ids:
+  - S01-B07
+- clip_id: C-S01-09
+  delivery_requirement_ids: [DR-B07-B]
+  in_sec: 78
+  out_sec: 88
+  handles:
+  - 0
+  - 0
+  cut_purpose: threshold payoff
+  must_beat: S01-B07
+  sound_bridge: surf replaces room tone
+  contribution_sec: 12
+  must_beat_ids:
+  - S01-B07
+runtime_reconciliation:
+  target_sec: 90
+  contribution_sum_sec: 90
+  result: pass
+  note: 2 sec end hold reserved for surf tail

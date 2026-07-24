@@ -1,0 +1,407 @@
+{
+  "id": "action-multi.prompt-pack",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [
+    "action-multi.visual-bible@1.0.0"
+  ],
+  "assumptions": [
+    "无真实参考图与生成输出"
+  ],
+  "constraints": {
+    "aspect_ratio": "16:9",
+    "runtime_target_sec": 45
+  },
+  "open_questions": [
+    "模型能力与实际输出待验证"
+  ],
+  "status": "qc_pending",
+  "change_log": [],
+  "prompts": [
+    {
+      "prompt_id": "PROMPT-C-S01-01",
+      "clip_id": "C-S01-01",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "A in dark green jacket carries taped brown package through left loading door; B center lane; C upper-right platform",
+        "action": {
+          "start": "A outside left door",
+          "motion": "A enters and moves right",
+          "end": "three positions readable"
+        },
+        "environment": "dusk warehouse with yellow pillar and right safety exit",
+        "camera": {
+          "framing": "wide three-layer",
+          "movement": "locked",
+          "position": "eye level"
+        },
+        "lighting": "cool skylight upper left, warm safety lamp right",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "door opens",
+            "A enters",
+            "space establishes"
+          ]
+        },
+        "continuity_invariants": [
+          "A left-to-right",
+          "package with A",
+          "C on platform"
+        ]
+      },
+      "rendered_prompt": "Wide 16:9 dusk warehouse. A enters from the left door carrying a taped brown package; B blocks the center lane; C is visible on the upper-right platform. Locked eye-level camera, cool skylight upper left and warm safety lamp right. No weapons or injuries.",
+      "rendered_prompt_hash": "2efe8dfb19bab3d4916793c631e7c4c76ad36a3ef6d09d730c47b6c49c3845c3",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-02",
+      "clip_id": "C-S01-02",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "A with package and B in orange vest",
+        "action": {
+          "start": "A moving right",
+          "motion": "B slides sideways and raises open hands",
+          "end": "A stops without contact"
+        },
+        "environment": "same warehouse center lane",
+        "camera": {
+          "framing": "medium two-shot",
+          "movement": "locked",
+          "position": "eye level"
+        },
+        "lighting": "same cool-left warm-right",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "A advances",
+            "B blocks",
+            "A stops"
+          ]
+        },
+        "continuity_invariants": [
+          "package remains with A",
+          "B nonviolent"
+        ]
+      },
+      "rendered_prompt": "16:9 locked medium two-shot. A advances right with the brown package; B slides into the center lane and blocks with open hands. A stops, no strike or injury. Maintain warehouse anchors and screen direction.",
+      "rendered_prompt_hash": "bfeada83172dd21f55f005265a04359c247f6e22501cae5d4170eb1e1d32c5b7",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-03",
+      "clip_id": "C-S01-03",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "C on upper-right platform with yellow safety rope",
+        "action": {
+          "start": "rope coiled at platform",
+          "motion": "C lowers rope to floor",
+          "end": "rope reaches A"
+        },
+        "environment": "warehouse high platform and yellow pillar",
+        "camera": {
+          "framing": "wide to platform",
+          "movement": "tilt_up_to_platform",
+          "position": "neutral perspective"
+        },
+        "lighting": "cool skylight upper left",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "C lifts rope",
+            "rope falls",
+            "rope contacts floor"
+          ]
+        },
+        "continuity_invariants": [
+          "C upper right",
+          "rope yellow",
+          "no body contact"
+        ]
+      },
+      "rendered_prompt": "16:9 warehouse. From the upper-right platform C lowers a thick yellow safety rope; it falls and lands on the floor near A. Tilt up to platform, no collision or injury, preserve left-to-right axis.",
+      "rendered_prompt_hash": "ee48b554517fd7967b09491febf7136c6873ab20d6077116b68c624b4ddfa01a",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-04",
+      "clip_id": "C-S01-04",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "A holding yellow rope",
+        "action": {
+          "start": "rope on floor",
+          "motion": "A grips rope and looks up",
+          "end": "A recoils one step, still holding rope"
+        },
+        "environment": "center lane warehouse",
+        "camera": {
+          "framing": "medium close",
+          "movement": "locked",
+          "position": "A eye level"
+        },
+        "lighting": "cool-left key",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "hand reaches",
+            "grip",
+            "look up",
+            "recoil"
+          ]
+        },
+        "continuity_invariants": [
+          "package stays under A arm",
+          "rope remains in A hand"
+        ]
+      },
+      "rendered_prompt": "16:9 locked medium close on A. A grips the yellow rope, looks up toward the platform, then recoils one step while keeping the package under one arm. Suspense without violence, no injury.",
+      "rendered_prompt_hash": "35460bd852fbcb4232db918ca21d8ec1472f681f67a1f1cff0117b09db70d0c2",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-05",
+      "clip_id": "C-S01-05",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "A, B and C positions",
+        "action": {
+          "start": "A recoiled",
+          "motion": "B raises stop hand and looks to platform",
+          "end": "all three pause"
+        },
+        "environment": "warehouse center lane",
+        "camera": {
+          "framing": "locked reaction two-shot with platform background",
+          "movement": "locked",
+          "position": "neutral"
+        },
+        "lighting": "consistent dusk practicals",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "B raises hand",
+            "A freezes",
+            "C remains still"
+          ]
+        },
+        "continuity_invariants": [
+          "B center",
+          "C upper right",
+          "package with A"
+        ]
+      },
+      "rendered_prompt": "16:9 locked reaction shot. B raises an open stop hand and looks toward C; A freezes with package and rope; C remains on the platform. No contact, no weapon, keep eye lines consistent.",
+      "rendered_prompt_hash": "67abfa12d389072fef2cd3145df4e8c3afebad411d04c54c28180597df7146ed",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-06",
+      "clip_id": "C-S01-06",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "C holding white cloth with blue triangle",
+        "action": {
+          "start": "cloth hidden",
+          "motion": "C raises cloth into skylight",
+          "end": "signal clearly visible"
+        },
+        "environment": "upper-right platform",
+        "camera": {
+          "framing": "prop insert",
+          "movement": "locked",
+          "position": "slight low angle"
+        },
+        "lighting": "cool skylight makes cloth legible",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "hand enters",
+            "cloth unfolds",
+            "triangle visible"
+          ]
+        },
+        "continuity_invariants": [
+          "signal white-blue",
+          "C on platform"
+        ]
+      },
+      "rendered_prompt": "16:9 locked insert of C's hand raising a small white cloth marked with a blue triangle into cool skylight. The signal unfolds clearly; no text, no weapon, no injury.",
+      "rendered_prompt_hash": "ffc7e4eae2c1c836472ead1ffcd6bf3bc4bda90c00d6d38f35547f8d3157700a",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-07",
+      "clip_id": "C-S01-07",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "A follows yellow rope; B steps aside",
+        "action": {
+          "start": "B blocks center",
+          "motion": "B yields half-step; A walks along rope toward side exit",
+          "end": "route changed"
+        },
+        "environment": "warehouse from center lane to right safety exit",
+        "camera": {
+          "framing": "medium tracking",
+          "movement": "slow_tracking_right",
+          "position": "side-on"
+        },
+        "lighting": "cool-left warm-right",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "B yields",
+            "A turns",
+            "A follows rope"
+          ]
+        },
+        "continuity_invariants": [
+          "A rightward",
+          "B left of path",
+          "package with A"
+        ]
+      },
+      "rendered_prompt": "16:9 side-on medium shot with slow tracking right. B steps aside; A turns and follows the yellow rope toward the right safety exit while carrying the brown package. Preserve direction and nonviolent blocking.",
+      "rendered_prompt_hash": "8f43d1d3041b0069fdb03a0bad939065e51d0b70875cde3983053ffa5c3d6295",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-08",
+      "clip_id": "C-S01-08",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "A and C at right exit with package and rope",
+        "action": {
+          "start": "A holds package; C reaches from rope",
+          "motion": "A extends package; hands contact; C takes weight",
+          "end": "C holds package"
+        },
+        "environment": "right safety exit beside yellow pillar",
+        "camera": {
+          "framing": "handoff insert",
+          "movement": "locked",
+          "position": "neutral close"
+        },
+        "lighting": "warm practical right with cool fill",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "before",
+            "contact",
+            "after"
+          ]
+        },
+        "continuity_invariants": [
+          "single package",
+          "A releases only after contact",
+          "C becomes holder"
+        ]
+      },
+      "rendered_prompt": "16:9 locked handoff insert at the right safety exit. A extends the taped brown package; C's hands meet A's, then C takes the package. Show before, contact, after clearly; no dropped box, no injury.",
+      "rendered_prompt_hash": "9fd7885d9d4c73b4dc148670d6e46bc8e484294a7a34e5774317819edbbd9dad",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-09",
+      "clip_id": "C-S01-09",
+      "adapter_id": "luma-ray-2-api-2026-07",
+      "prompt_ir": {
+        "subject": "A, B, C with C holding package",
+        "action": {
+          "start": "handoff complete",
+          "motion": "B lowers arms; A and C confirm exit",
+          "end": "three-person calm tableau"
+        },
+        "environment": "warehouse right exit",
+        "camera": {
+          "framing": "wide three-layer",
+          "movement": "locked",
+          "position": "eye level"
+        },
+        "lighting": "consistent dusk warehouse",
+        "temporal_constraints": {
+          "duration_sec": 5,
+          "event_order": [
+            "C secures package",
+            "B lowers arms",
+            "all pause"
+          ]
+        },
+        "continuity_invariants": [
+          "C package holder",
+          "no injuries",
+          "screen direction preserved"
+        ]
+      },
+      "rendered_prompt": "16:9 locked wide ending. C holds the brown package at the right safety exit; B lowers open hands; A exhales and checks the doorway. Calm tableau, no injury or weapons, maintain warehouse anchors.",
+      "rendered_prompt_hash": "5e006de814c8a7fd4e99c3e6b3c0316cae37f780275273904728d8cf634a3929",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 5
+      },
+      "production_status": "diagnostic_preview"
+    }
+  ]
+}

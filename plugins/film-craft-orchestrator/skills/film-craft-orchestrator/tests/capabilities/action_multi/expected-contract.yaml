@@ -1,0 +1,15 @@
+id: action_multi
+runtime_sec: 45
+common_gate: validate_ai_video_package
+required_artifacts: canonical_13_files
+deterministic_checks:
+  - all three characters, package and rope IDs resolve
+  - package holder, positions and screen direction survive continuity checks
+  - handoff and reversible misunderstanding have dedicated clips
+  - every clip has canonical downstream records and edit total is 45 seconds
+creative_checks:
+  - a viewer can reconstruct the three-person geography
+  - each clip carries one main action and camera behavior
+  - handoff, changed route and correction of the misunderstanding are causal
+  - no teleportation, duplicate package or unexplained axis reversal occurs
+research_trigger: only_if_canonical_retest_exhausts_split_coverage_and_reference_repairs

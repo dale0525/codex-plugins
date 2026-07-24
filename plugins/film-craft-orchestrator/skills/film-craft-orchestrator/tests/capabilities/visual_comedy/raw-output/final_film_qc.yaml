@@ -1,0 +1,15 @@
+project_id: umbrella_rack_prank_30s
+status: pending
+final: pending
+runtime_target_sec: 30
+must_beats_coverage: pending
+approved_clips: []
+generation_logs_complete: false
+output_hashes_present: false
+reference_gate: pending_no_references
+continuity_conflicts: pending
+audio_and_dialogue_qc: pending_no_dialogue
+rights_and_provenance: pending
+known_deviations:
+  - No real reference images or generated clips supplied.
+  - Model/provider parameters intentionally unspecified.

@@ -1,0 +1,32 @@
+id: project.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: [冷青荧光, 锈红门禁灯, 灰黑制服]
+camera_language:
+  allowed_framing: [medium_two_shot, single_close, insert]
+  lens_or_fov_range: "35-65mm等效"
+  height_rules: [eye_level, key_inserts_low_angle]
+  movement_rules: [locked, slow_push]
+  axis_rules: [desk_to_exit_door_axis]
+lighting_rules: [fluorescent_key_overhead, red_practical_at_exit]
+characters:
+  - {character_id: CHAR-ALAN, name: "阿岚", wardrobe_id: WARDROBE-ALAN-NIGHT, anchors: [短发, 左眉疤, 深蓝保安制服], must_not_drift: [年龄, 制服颜色], reference_ids: []}
+  - {character_id: CHAR-XIAOZHOU, name: "小周", wardrobe_id: WARDROBE-XIAOZHOU-NIGHT, anchors: [圆框眼镜, 灰色连帽衫, 右手钥匙圈], must_not_drift: [眼镜, 钥匙持有人], reference_ids: []}
+locations:
+  - {location_id: LOC-NIGHT-DESK, name: "园区保安岗亭", layout: "桌在左、出口门在右、监控屏后墙", fixed_objects: [交接表, 门禁灯, 钥匙盒], time: "凌晨", weather: "雨夜", reference_ids: []}
+props:
+  - {prop_id: PROP-MASTER-KEY, name: "原钥匙串", appearance: "三把黄铜钥匙与黑牌", holder_initial: CHAR-XIAOZHOU, state_machine: [挂在腰间, 收入口袋, 放回桌面]}
+  - {prop_id: PROP-SPARE-KEY, name: "备用钥匙", appearance: "单把银色钥匙", holder_initial: "key_box", state_machine: [盒内, 阿岚推过, 小周拿走]}
+motifs: [{motif_id: MOTIF-RED-LED, appearance: "谈判转折后亮起", change: "由绿变红", payoff: "删除记录时保持红色"}]
+motifs: []
+reference_assets: []
+must_preserve: ["原钥匙串始终由小周到B05才放下", "阿岚在B04前不主动提地下门"]
+must_not: ["不可出现第三名可见说话者", "不可生成可读屏幕文字"]

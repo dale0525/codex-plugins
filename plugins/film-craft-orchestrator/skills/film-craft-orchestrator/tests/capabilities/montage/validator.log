@@ -1,0 +1,85 @@
+OK: 7 model adapters with official sources
+ERROR: root: prompts must be a non-empty list
+ERROR: root: clips must be a non-empty ordered list
+ERROR: brief: missing id
+ERROR: brief: missing version
+ERROR: brief: missing owner_role
+ERROR: brief: missing constraints
+ERROR: brief: constraints.runtime_target_sec must be positive
+ERROR: story-and-scene-map: missing id
+ERROR: story-and-scene-map: missing status
+ERROR: story-and-scene-map: missing scenes
+ERROR: story-and-scene-map: missing must_beat_ids
+ERROR: story-and-scene-map: missing runtime_reconciliation
+ERROR: director-intent: missing id
+ERROR: director-intent: missing status
+ERROR: director-intent: missing scenes
+ERROR: director-intent.scenes: must be a list
+ERROR: visual-bible: missing id
+ERROR: visual-bible: missing status
+ERROR: visual-bible: missing aspect_ratio
+ERROR: visual-bible: missing camera_language
+ERROR: visual-bible: missing lighting_rules
+ERROR: visual-bible: missing characters
+ERROR: visual-bible: missing locations
+ERROR: visual-bible.characters: must be a list
+ERROR: visual-bible.locations: must be a list
+ERROR: visual-bible.props[0]: missing prop_id
+ERROR: visual-bible.props[1]: missing prop_id
+ERROR: visual-bible.props[2]: missing prop_id
+ERROR: visual-bible.props[3]: missing prop_id
+ERROR: visual-bible.props[4]: missing prop_id
+ERROR: visual-bible.props[5]: missing prop_id
+ERROR: visual-bible.props[6]: missing prop_id
+ERROR: clip-plan.csv row 2: unknown scene_id
+ERROR: clip-plan.csv row 2: unknown location_id
+ERROR: clip-plan.csv row 3: unknown scene_id
+ERROR: clip-plan.csv row 3: unknown location_id
+ERROR: clip-plan.csv row 4: unknown scene_id
+ERROR: clip-plan.csv row 4: unknown location_id
+ERROR: clip-plan.csv row 5: unknown scene_id
+ERROR: clip-plan.csv row 5: unknown location_id
+ERROR: clip-plan.csv row 6: unknown scene_id
+ERROR: clip-plan.csv row 6: unknown location_id
+ERROR: reference-asset-manifest: missing id
+ERROR: reference-asset-manifest: missing assets
+ERROR: generation-prompt-pack.prompts: must be a list
+ERROR: generation-prompt-pack.prompts: missing IDs ['c01', 'c02', 'c03', 'c04', 'c05']
+ERROR: continuity-state.clips: must be a list
+ERROR: continuity-state.clips: missing IDs ['c01', 'c02', 'c03', 'c04', 'c05']
+ERROR: generation-log.jsonl record 1: missing run_id
+ERROR: generation-log.jsonl record 1: missing attempt
+ERROR: generation-log.jsonl record 1: missing primary_variable
+ERROR: generation-log.jsonl record 1: missing adapter_id
+ERROR: generation-log.jsonl record 1: attempt must be a positive integer
+ERROR: generation-log.jsonl record 2: missing run_id
+ERROR: generation-log.jsonl record 2: missing attempt
+ERROR: generation-log.jsonl record 2: missing primary_variable
+ERROR: generation-log.jsonl record 2: missing adapter_id
+ERROR: generation-log.jsonl record 2: duplicate run_id
+ERROR: generation-log.jsonl record 2: attempt must be a positive integer
+ERROR: generation-log.jsonl record 3: missing run_id
+ERROR: generation-log.jsonl record 3: missing attempt
+ERROR: generation-log.jsonl record 3: missing primary_variable
+ERROR: generation-log.jsonl record 3: missing adapter_id
+ERROR: generation-log.jsonl record 3: duplicate run_id
+ERROR: generation-log.jsonl record 3: attempt must be a positive integer
+ERROR: generation-log.jsonl record 4: missing run_id
+ERROR: generation-log.jsonl record 4: missing attempt
+ERROR: generation-log.jsonl record 4: missing primary_variable
+ERROR: generation-log.jsonl record 4: missing adapter_id
+ERROR: generation-log.jsonl record 4: duplicate run_id
+ERROR: generation-log.jsonl record 4: attempt must be a positive integer
+ERROR: generation-log.jsonl record 5: missing run_id
+ERROR: generation-log.jsonl record 5: missing attempt
+ERROR: generation-log.jsonl record 5: missing primary_variable
+ERROR: generation-log.jsonl record 5: missing adapter_id
+ERROR: generation-log.jsonl record 5: duplicate run_id
+ERROR: generation-log.jsonl record 5: attempt must be a positive integer
+ERROR: edit-plan.timeline[0]: missing must_beat_ids
+ERROR: edit-plan.timeline[1]: missing must_beat_ids
+ERROR: edit-plan.timeline[2]: missing must_beat_ids
+ERROR: edit-plan.timeline[3]: missing must_beat_ids
+ERROR: edit-plan.timeline[4]: missing must_beat_ids
+ERROR: validate_prompt_pack.py: exit 1
+ERROR: validate_continuity_state.py: exit 1

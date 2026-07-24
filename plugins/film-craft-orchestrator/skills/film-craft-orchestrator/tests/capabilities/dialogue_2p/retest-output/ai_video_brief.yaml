@@ -1,0 +1,22 @@
+id: project.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints:
+  runtime_target_sec: 45
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions: []
+status: draft
+change_log: []
+format: short
+audience: "成人悬疑剧情观众"
+genre_tone: "夜班现实主义、克制悬疑"
+rights_status: unknown
+creative_goal: "45秒内完成保安阿岚发现小周带走钥匙、双方隐藏目的曝光一角、谈判策略至少改变一次。"
+must_beats: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05, S01-B06]
+generation_constraints:
+  available_models: []
+  dialogue_strategy: separate_audio_then_lipsync

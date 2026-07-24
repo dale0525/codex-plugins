@@ -1,0 +1,12 @@
+project_id: umbrella_rack_prank_30s
+audience_knowledge: audience sees the worker arm the umbrella; customers do not
+attention_order: trigger hand -> customer confidence -> spray path -> worker's fake innocence -> escalating collateral -> callback
+blocking:
+  worker: starts center-left, retreats behind counter, returns for final callback
+  rack: fixed screen-right three-quarter angle, handle at chest height
+  customers: enter from screen-left, maintain left-to-right eyeline
+performance: broad readable gestures, one-beat holds before each spray, no spoken language
+camera_language: locked wides establish geography; short push-ins only at trigger and final reversal
+coverage: each gag has one wide action clip and one reaction insert; final beat includes worker close reaction
+sound_intent: umbrella click and air hiss are rhythmic punctuation; cafe room tone remains continuous
+visual_payoff: final spray duplicates customer_1's confident pull composition, reversing victim and prankster

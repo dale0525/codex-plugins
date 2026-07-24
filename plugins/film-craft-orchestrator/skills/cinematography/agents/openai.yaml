@@ -1,0 +1,6 @@
+interface:
+  display_name: "Cinematography"
+  short_description: "设计可执行的构图、镜头、灯光与视觉圣经"
+  default_prompt: "Use $cinematography to create a coherent visual bible and shot-level camera and lighting rules."
+policy:
+  allow_implicit_invocation: true

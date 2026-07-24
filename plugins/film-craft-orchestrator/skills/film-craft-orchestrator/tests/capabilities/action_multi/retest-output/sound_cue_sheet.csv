@@ -1,0 +1,10 @@
+cue_id,scene_id,clip_id,timeline_start_sec,timeline_end_sec,category,diegetic,source,rights_status,audio_hash,sync_target,entry,exit,status
+SND-001,S01,C-S01-01,0,5,ambience,true,warehouse_room_tone,unknown,,door_open,fade_in,continue,pending
+SND-002,S01,C-S01-02,5,10,foley,true,footsteps_and_vest,unknown,,B_blocks,continue,continue,pending
+SND-003,S01,C-S01-03,10,15,spot_effects,true,rope_drop,unknown,,rope_lands,continue,continue,pending
+SND-004,S01,C-S01-04,15,20,ambience,true,brief_silence,unknown,,A_recoils,duck,restore,pending
+SND-005,S01,C-S01-05,20,25,foley,true,stop_hand_cloth,unknown,,stop_hand,continue,continue,pending
+SND-006,S01,C-S01-06,25,30,spot_effects,true,signal_cloth,unknown,,signal_visible,continue,continue,pending
+SND-007,S01,C-S01-07,30,35,foley,true,rope_drag_and_steps,unknown,,route_turn,continue,continue,pending
+SND-008,S01,C-S01-08,35,40,spot_effects,true,carton_handoff,unknown,,hands_contact,continue,continue,pending
+SND-009,S01,C-S01-09,40,45,ambience,true,warehouse_room_tone,unknown,,arms_lower,continue,fade_out,pending

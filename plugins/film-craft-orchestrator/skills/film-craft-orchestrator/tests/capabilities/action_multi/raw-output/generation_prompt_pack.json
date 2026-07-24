@@ -1,0 +1,16 @@
+{
+  "project_id": "action_multi_45s",
+  "status": "diagnostic_preview",
+  "provider_neutral_clips": [
+    {"clip_id":"C01","prompt":"16:9 cinematic warehouse, blue-jacket courier A enters from screen-left door holding taped brown parcel in right hand; cool overhead light, warm door spill; eye-level 35mm, slow push-in; end at yellow center line; no weapons, no injury, preserve parcel shape."},
+    {"clip_id":"C02","prompt":"Same warehouse axis and characters. Orange-vest gatekeeper B steps laterally into center and raises open palm to stop A; A brakes without collision; restrained handheld lateral follow; nonviolent blocking, no strike."},
+    {"clip_id":"C04","prompt":"Yellow-rain-shell coordinator C remains on rear-right catwalk and throws one soft red rope down to yellow floor line; single high-angle action, rope forms visible safe arc; no falling person, no impact injury."},
+    {"clip_id":"C06","prompt":"Close medium shot of A handing taped parcel with both hands to B; B receives securely; one clear handoff, stable background, no morphing hands or parcel."},
+    {"clip_id":"C07","prompt":"B opens outer label and reads medical filter label; suspicion visibly relaxes; parcel intact, no blood, no explosive imagery; fixed close shot."},
+    {"clip_id":"C09","prompt":"All three walk safely along red rope's bent route toward screen-right exit, warehouse unchanged, calm release; stable pull-back, no injury, no collapse."}
+  ],
+  "negative_constraints": ["fatal injury", "blood", "weapons", "explosion", "rope around neck", "unmotivated teleport", "axis flip", "extra characters"],
+  "adapter": {"model": "unknown", "version": "pending", "parameters": "pending"},
+  "reference_inputs_expected": [],
+  "reference_inputs_attached": []
+}

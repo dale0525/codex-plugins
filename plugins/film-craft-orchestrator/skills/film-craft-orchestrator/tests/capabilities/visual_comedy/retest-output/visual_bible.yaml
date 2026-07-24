@@ -1,0 +1,27 @@
+id: visual-comedy-retest.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [visual-comedy-retest.director-intent@1.0.0]
+assumptions: ["No real reference assets are attached."]
+constraints: {dialogue: none}
+open_questions: []
+status: frozen
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: [warm amber cafe, cool blue rain, saturated red umbrella]
+camera_language: {allowed_framing: [wide, medium, insert, reaction_close], lens_or_fov_range: "28-50mm equivalent", height_rules: ["eye-level"], movement_rules: ["locked", "gentle push-in"], axis_rules: ["screen-right rack remains fixed"]}
+lighting_rules: ["soft overcast key from glass door", "warm practical counter fill", "wet highlights on floor"]
+characters:
+  - {character_id: CHAR-WORKER, wardrobe_version: WARDROBE-WORKER-01, anchors: ["mid-20s, curly dark hair, green apron, yellow sneakers"], must_not_drift: ["apron color, hair silhouette"], reference_ids: []}
+  - {character_id: CHAR-CUSTOMER-A, wardrobe_version: WARDROBE-CUST-A-01, anchors: ["blue raincoat, tote bag"], must_not_drift: ["blue coat"], reference_ids: []}
+  - {character_id: CHAR-CUSTOMER-B, wardrobe_version: WARDROBE-CUST-B-01, anchors: ["orange scarf, glasses"], must_not_drift: ["orange scarf"], reference_ids: []}
+  - {character_id: CHAR-CUSTOMER-C, wardrobe_version: WARDROBE-CUST-C-01, anchors: ["purple beanie, denim jacket"], must_not_drift: ["purple beanie"], reference_ids: []}
+locations:
+  - {location_id: LOC-CAFE-ENTRY, layout: "glass entry left, counter rear-left, umbrella rack right", fixed_objects: ["menu board", "wood rack", "door mat"], time_weather: "rainy afternoon", reference_ids: []}
+props:
+  - {prop_id: PROP-UMBRELLA, appearance: "closed red umbrella with black curved handle and hidden sprinkler nozzle", dimensions: "110cm closed", state_machine: ["dripping", "armed", "mist", "side-jet", "burst", "spent"], initial_holder: CHAR-WORKER, initial_location: "rack-right", reference_ids: []}
+motifs: [{motif_id: MOTIF-WATER-CIRCLE, appearance: "water moves from shoes to spin to burst to worker", payoff: "worker receives full spray"}]
+reference_assets: []
+must_preserve: ["PROP-UMBRELLA red color and rack-right position", "distinct customer reactions", "worker green apron"]
+must_not: ["dialogue", "narration", "explanatory subtitles", "readable brand logos", "extra umbrellas"]

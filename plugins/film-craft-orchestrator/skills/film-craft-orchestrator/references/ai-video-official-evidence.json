@@ -1,0 +1,188 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-24",
+  "purpose": "Official, version-sensitive evidence for model adapters. Vendor quality language is excluded from capability claims.",
+  "method": {
+    "access": "All URLs returned HTTP 200 on 2026-07-24. Documentation pages were read as rendered public HTML; YouTube items were confirmed through public oEmbed metadata only.",
+    "boundary": "official_verified proves only the cited documentation claim at the access date. official_video_metadata proves that the official tutorial exists, not its full narrated content."
+  },
+  "stats": {
+    "sources": 11,
+    "official_verified": 9,
+    "official_video_metadata": 2,
+    "model_platform_families": 6,
+    "claims": 27
+  },
+  "sources": [
+    {
+      "id": "official-openai-sora-video-guide-2026-07",
+      "publisher": "OpenAI",
+      "title": "Video generation with Sora | OpenAI API",
+      "url": "https://developers.openai.com/api/docs/guides/video-generation",
+      "source_type": "official_doc",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["openai-sora-2-videos-api-2026-07"],
+      "claims": [
+        {"id": "OFF-OAI-C01", "paraphrase": "The Sora 2 video models and Videos API are deprecated and scheduled to shut down on 2026-09-24.", "evidence_locator": "deprecation banner", "boundary": "Applies to the model/API names listed on the page."},
+        {"id": "OFF-OAI-C02", "paraphrase": "The API documents prompt generation, first-frame image reference, reusable non-human character assets, extensions, targeted edits, asynchronous polling and webhooks.", "evidence_locator": "overview, image reference, characters, extensions, edits, webhooks", "boundary": "Each feature has separate constraints; not every combination is allowed."},
+        {"id": "OFF-OAI-C03", "paraphrase": "The guide documents 16- and 20-second generations, Sora 2 Pro 1080p portrait/landscape exports, up to two character assets, no character assets with extensions, and an image reference that must match target size.", "evidence_locator": "model choice, input_reference, characters", "boundary": "The page also states human-likeness character uploads and input images containing human faces are blocked under the cited policy state."}
+      ]
+    },
+    {
+      "id": "official-google-gemini-video-api-2026-07",
+      "publisher": "Google",
+      "title": "Video generation in the Gemini API",
+      "url": "https://ai.google.dev/gemini-api/docs/video",
+      "source_type": "official_doc",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["google-veo-3-1-gemini-api-2026-07", "google-gemini-omni-flash-interactions-2026-07"],
+      "claims": [
+        {"id": "OFF-GGL-C01", "paraphrase": "Gemini Omni Flash accepts text, image, audio and video inputs and supports multi-turn editing examples such as element replacement and perspective changes.", "evidence_locator": "Gemini Omni Flash overview", "boundary": "Vendor quality adjectives on the same page are not recorded as capabilities."},
+        {"id": "OFF-GGL-C02", "paraphrase": "Veo 3.1 is documented for native-audio video generation with extension, frame-specific generation and image-based direction through generateContent.", "evidence_locator": "Veo 3.1 overview", "boundary": "Exact limits must come from the current endpoint schema."},
+        {"id": "OFF-GGL-C03", "paraphrase": "The documentation navigation exposes first-frame, first-and-last-frame, ingredients/reference-image, extension, object insertion and object removal workflows.", "evidence_locator": "video-generation capability navigation", "boundary": "Navigation presence identifies official workflow pages; it does not imply every model supports every workflow."}
+      ]
+    },
+    {
+      "id": "official-google-video-prompt-guide-2026-07",
+      "publisher": "Google Cloud",
+      "title": "Video generation prompt guide",
+      "url": "https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/video/video-gen-prompt-guide",
+      "source_type": "official_doc",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["google-veo-3-1-gemini-api-2026-07", "google-gemini-omni-flash-interactions-2026-07"],
+      "claims": [
+        {"id": "OFF-GGP-C01", "paraphrase": "The prompt guide recommends decomposing a video idea into key components and says not every component must appear in every prompt.", "evidence_locator": "Anatomy of a prompt", "boundary": "Official prompting guidance, not a deterministic result guarantee."},
+        {"id": "OFF-GGP-C02", "paraphrase": "The guide separately defines subject, action, scene/context, camera, lighting and audio-related prompt controls.", "evidence_locator": "prompt component sections", "boundary": "Keywords guide generation but do not prove physical lens or timing accuracy."}
+      ]
+    },
+    {
+      "id": "official-google-veo-frames-video-metadata-2026-07",
+      "publisher": "Google",
+      "title": "Veo 3.1 - Frames to video",
+      "url": "https://www.youtube.com/watch?v=ZFh6gVarloc",
+      "source_type": "official_video_demo",
+      "status": "official_video_metadata",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["google-veo-3-1-gemini-api-2026-07"],
+      "claims": [
+        {"id": "OFF-GYV-C01", "paraphrase": "Public oEmbed metadata confirms an official Google video titled 'Veo 3.1 - Frames to video'.", "evidence_locator": "YouTube oEmbed", "boundary": "The video content has not yet been transcript/frame distilled; it supplies no parameter claim."}
+      ]
+    },
+    {
+      "id": "official-runway-api-reference-2026-07",
+      "publisher": "Runway",
+      "title": "API Reference | Runway Dev",
+      "url": "https://docs.dev.runwayml.com/api/",
+      "source_type": "official_api_doc",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["runway-api-2024-11-06"],
+      "claims": [
+        {"id": "OFF-RWY-C01", "paraphrase": "The API surface lists image-to-video, text-to-video, video-to-video, video upscale and character-control operations.", "evidence_locator": "API operation navigation", "boundary": "Specific model support must be checked per endpoint."},
+        {"id": "OFF-RWY-C02", "paraphrase": "The API surface also lists sound effects, speech-to-speech, text-to-speech, dubbing, voice isolation, task management and realtime sessions.", "evidence_locator": "API operation navigation", "boundary": "Listing is not a quality or latency guarantee."}
+      ]
+    },
+    {
+      "id": "official-runway-models-2026-07",
+      "publisher": "Runway",
+      "title": "Available AI Models | Runway Dev",
+      "url": "https://docs.dev.runwayml.com/guides/models/",
+      "source_type": "official_doc",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["runway-api-2024-11-06"],
+      "claims": [
+        {"id": "OFF-RWM-C01", "paraphrase": "The current model table differentiates text/image/video inputs and lists multiple generated-video model routes rather than one universal video model.", "evidence_locator": "Generate Video model table", "boundary": "Model roster is highly version-sensitive and must be re-read at compile time."},
+        {"id": "OFF-RWM-C02", "paraphrase": "The page documents a creative video upscaler endpoint with an input-video maximum of 30 seconds.", "evidence_locator": "Upscale Video", "boundary": "Applies only to the named endpoint/model on the accessed page."},
+        {"id": "OFF-RWM-C03", "paraphrase": "Audio models are listed separately for speech, effects, isolation, dubbing and speech-to-speech.", "evidence_locator": "Generate Audio model table", "boundary": "Availability and pricing remain model-specific."}
+      ]
+    },
+    {
+      "id": "official-runway-gen4-i2v-video-metadata-2026-07",
+      "publisher": "Runway Academy",
+      "title": "Gen-4 Image to Video | Runway Academy",
+      "url": "https://www.youtube.com/watch?v=OLWd5O1O66s",
+      "source_type": "official_video_tutorial",
+      "status": "official_video_metadata",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["runway-api-2024-11-06"],
+      "claims": [
+        {"id": "OFF-RYV-C01", "paraphrase": "Public oEmbed metadata confirms a Runway Academy tutorial titled 'Gen-4 Image to Video'.", "evidence_locator": "YouTube oEmbed", "boundary": "The video has not yet been transcript/frame distilled; it supplies no current API parameter claim."}
+      ]
+    },
+    {
+      "id": "official-luma-ray-video-api-2026-07",
+      "publisher": "Luma Labs",
+      "title": "Video Generation | Luma API",
+      "url": "https://docs.lumalabs.ai/docs/video-generation",
+      "source_type": "official_api_doc",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["luma-ray-2-api-2026-07"],
+      "claims": [
+        {"id": "OFF-LUM-C01", "paraphrase": "The page names ray-2 and ray-flash-2 and shows text-to-video plus image keyframe requests.", "evidence_locator": "model table and Ray 2 examples", "boundary": "Examples are schema evidence, not output-quality evidence."},
+        {"id": "OFF-LUM-C02", "paraphrase": "The API examples expose frame0, frame1, combined start/end keyframes, loop, aspect ratio, resolution and duration fields.", "evidence_locator": "start frame, ending frame, start and end keyframes", "boundary": "Allowed values remain current-schema facts."},
+        {"id": "OFF-LUM-C03", "paraphrase": "Extension is documented only for completed videos generated by the service, and the page directs clients to a concepts-list endpoint rather than inventing motion tokens.", "evidence_locator": "Extend Video and concepts list", "boundary": "Does not establish subjective camera quality."}
+      ]
+    },
+    {
+      "id": "official-adobe-firefly-editor-generation-2026-07",
+      "publisher": "Adobe",
+      "title": "Generate video with Firefly models and add it to the timeline",
+      "url": "https://helpx.adobe.com/firefly/web/firefly-video-editor/generate-videos/generate-video-using-firefly-models.html",
+      "source_type": "official_help",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["adobe-firefly-video-web-2026-07"],
+      "claims": [
+        {"id": "OFF-ADF-C01", "paraphrase": "Generated videos are saved to Generation History and can be dragged onto the Firefly editor timeline.", "evidence_locator": "generation result step", "boundary": "Proves editor workflow, not model output quality."},
+        {"id": "OFF-ADF-C02", "paraphrase": "The public page exposes model choice and timeline insertion but does not publish a stable numeric model version.", "evidence_locator": "page workflow", "boundary": "Numeric model version remains unknown."}
+      ]
+    },
+    {
+      "id": "official-adobe-firefly-video-faq-2026-07",
+      "publisher": "Adobe",
+      "title": "About Generate video",
+      "url": "https://helpx.adobe.com/firefly/web/work-with-audio-and-video/work-with-video/about-generate-video.html",
+      "source_type": "official_help",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["adobe-firefly-video-web-2026-07"],
+      "claims": [
+        {"id": "OFF-ADQ-C01", "paraphrase": "Availability can vary by geographic location, user type, regulation and plan.", "evidence_locator": "FAQ availability", "boundary": "Access must be checked in the user's account rather than assumed."},
+        {"id": "OFF-ADQ-C02", "paraphrase": "An input image may be center-cropped to the model's required size, potentially losing edge content.", "evidence_locator": "FAQ cropping", "boundary": "Pre-crop critical compositions before generation."},
+        {"id": "OFF-ADQ-C03", "paraphrase": "Using the same seed, prompt and controls can generate a similar asset; changing properties changes the experiment.", "evidence_locator": "FAQ seed", "boundary": "Similar is not identical or deterministic."}
+      ]
+    },
+    {
+      "id": "official-adobe-firefly-kling-2026-07",
+      "publisher": "Adobe",
+      "title": "Generate videos using Kling video generation model",
+      "url": "https://helpx.adobe.com/firefly/web/work-with-audio-and-video/work-with-video/generate-videos-using-kling.html",
+      "source_type": "official_help",
+      "status": "official_verified",
+      "accessed_at": "2026-07-24",
+      "http_status": 200,
+      "adapter_refs": ["adobe-firefly-kling-integration-2026-07"],
+      "claims": [
+        {"id": "OFF-ADK-C01", "paraphrase": "The page documents Kling 2.5 Turbo plus Kling 3.0 and Kling 3.0 Omni inside Firefly; a first frame is mandatory for the described Kling workflows.", "evidence_locator": "model sections and first-frame note", "boundary": "Applies to the Firefly integration, not the underlying provider API."},
+        {"id": "OFF-ADK-C02", "paraphrase": "Kling 3.0 and 3.0 Omni allow a maximum total duration of 15 seconds and per-shot duration control.", "evidence_locator": "Duration step", "boundary": "Current Firefly UI limit at access date."},
+        {"id": "OFF-ADK-C03", "paraphrase": "The page documents synchronized audio, a multi-shot toggle with up to five shots, and element references created from images or video.", "evidence_locator": "Audio, Multi-shot and Elements sections", "boundary": "Does not prove identity consistency or audio quality."},
+        {"id": "OFF-ADK-C04", "paraphrase": "The page states that Kling access is for individual subscribers rather than Teams or Enterprise creators.", "evidence_locator": "availability note", "boundary": "Plan availability can change and must be rechecked."}
+      ]
+    }
+  ]
+}

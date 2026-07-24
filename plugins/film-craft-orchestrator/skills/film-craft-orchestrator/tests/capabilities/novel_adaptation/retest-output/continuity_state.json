@@ -1,0 +1,615 @@
+{
+  "id": "tide-station.continuity-state",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [
+    "tide-station.visual-bible@1.0.0"
+  ],
+  "assumptions": [
+    "all clips pending generation"
+  ],
+  "constraints": {},
+  "open_questions": [],
+  "status": "qc_pending",
+  "change_log": [],
+  "clips": [
+    {
+      "clip_id": "C-S01-01",
+      "prior_clip_id": null,
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "outside_left",
+            "screen_facing": "right",
+            "knowledge": []
+          }
+        },
+        "props": {},
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "inside_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "station_active"
+            ]
+          }
+        },
+        "props": {},
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-02",
+      "prior_clip_id": "C-S01-01",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "inside_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "station_active"
+            ]
+          }
+        },
+        "props": {
+          "PROP-CLOCK": {
+            "location": "wall",
+            "condition": "frozen"
+          },
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "idle"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "station_active",
+              "heard_tide"
+            ]
+          }
+        },
+        "props": {
+          "PROP-CLOCK": {
+            "location": "wall",
+            "condition": "frozen"
+          },
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "broadcasting"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-03",
+      "prior_clip_id": "C-S01-02",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "heard_tide"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "behind_window",
+            "holder": "none",
+            "condition": "boxed"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "heard_tide",
+              "found_named_tape"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "Shenlan_hand",
+            "holder": "CHAR-SHENLAN",
+            "condition": "boxed"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-04",
+      "prior_clip_id": "C-S01-03",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "found_named_tape"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "dark_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "tape_exists"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "Shenlan_hand",
+            "holder": "CHAR-SHENLAN",
+            "condition": "boxed"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "found_named_tape"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "center_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "tape_exists"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "Shenlan_hand",
+            "holder": "CHAR-SHENLAN",
+            "condition": "boxed"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-05",
+      "prior_clip_id": "C-S01-04",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "found_named_tape"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "center_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "tape_exists"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "Shenlan_hand",
+            "holder": "CHAR-SHENLAN",
+            "condition": "boxed"
+          },
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "idle"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "found_named_tape",
+              "started_playback"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "player",
+            "holder": "PROP-PLAYER",
+            "condition": "playing"
+          },
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "playing"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-06",
+      "prior_clip_id": "C-S01-05",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "started_playback"
+            ]
+          }
+        },
+        "props": {
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "playing"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "heard_child_voice"
+            ]
+          }
+        },
+        "props": {
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "playing"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-07",
+      "prior_clip_id": "C-S01-06",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "heard_child_voice"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "center_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "tape_exists"
+            ]
+          }
+        },
+        "props": {
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "playing"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "heard_child_voice",
+              "heard_warning"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "center_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "heard_warning"
+            ]
+          }
+        },
+        "props": {
+          "PROP-PLAYER": {
+            "location": "counter",
+            "condition": "stopped"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-08",
+      "prior_clip_id": "C-S01-07",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "counter_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "heard_warning"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "center_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "heard_warning"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "player",
+            "holder": "none",
+            "condition": "stopped"
+          },
+          "PROP-PLAYER": {
+            "location": "ticket_counter",
+            "holder": "none",
+            "condition": "stopped"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "door_right",
+            "screen_facing": "right",
+            "knowledge": [
+              "heard_warning",
+              "chooses_exit"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "center",
+            "screen_facing": "left",
+            "knowledge": [
+              "heard_warning"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "player",
+            "holder": "none",
+            "condition": "stopped"
+          },
+          "PROP-PLAYER": {
+            "location": "ticket_counter",
+            "holder": "none",
+            "condition": "stopped"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "heavy rain",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "environment.time"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-09",
+      "prior_clip_id": "C-S01-08",
+      "entry": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "door_right",
+            "screen_facing": "right",
+            "knowledge": [
+              "chooses_exit"
+            ]
+          }
+        },
+        "props": {},
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "typhoon",
+          "key_direction": "left"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-SHENLAN": {
+            "wardrobe": "WARD-SHENLAN-01",
+            "position": "outside_seawall",
+            "screen_facing": "away",
+            "knowledge": [
+              "chooses_exit"
+            ]
+          },
+          "CHAR-SHENYU": {
+            "wardrobe": "WARD-SHENYU-01",
+            "position": "inside_station",
+            "screen_facing": "left",
+            "knowledge": [
+              "Shenlan_left"
+            ]
+          }
+        },
+        "props": {
+          "PROP-TAPE": {
+            "location": "player",
+            "holder": "none",
+            "condition": "stopped"
+          }
+        },
+        "environment": {
+          "time": "pre-typhoon dusk",
+          "weather": "typhoon",
+          "key_direction": "left"
+        }
+      },
+      "expected_next": {
+        "must_preserve": []
+      },
+      "conflicts": [],
+      "status": "pending"
+    }
+  ]
+}

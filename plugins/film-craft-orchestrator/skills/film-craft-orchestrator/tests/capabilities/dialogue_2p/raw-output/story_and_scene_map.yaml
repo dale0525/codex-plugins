@@ -1,0 +1,38 @@
+id: night-shift-handoff.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [night-shift-handoff.ai-video-brief@1.0.0]
+assumptions: ["单一地点、实时发生；对白为中文。"]
+constraints: {runtime_target_sec: 45}
+open_questions: []
+status: frozen
+change_log: []
+logline: "夜班保安阿岚发现同事小周带走旧仓库钥匙；两人借交接之名互相试探，在一方亮出证据后重新定价彼此的沉默。"
+dramatic_question: "阿岚会按规章拦下小周，还是承认自己也需要那把钥匙？"
+theme_question: "当每个人都在保护一个不能说的秘密，守规矩是否仍然等于做对的事？"
+protagonist: {character_id: CHAR-ALAN, want: "拿回钥匙并确认小周没碰仓库", need: "承认自己也在利用值班权限", fear: "监控记录暴露他私下调查", contradiction: "嘴上守规章，行动上给自己留后门"}
+antagonistic_force: "小周掌握阿岚不愿公开的监控盲区，并以离岗时间为筹码。"
+ending_choice: "阿岚不夺钥匙，故意让小周离开，同时把交接簿翻到空白页，留下可追责的选择。"
+sequences:
+  - sequence_id: SQ01
+    promise: "钥匙不该出现在出口。"
+    escalation: "规章质问升级为相互揭短。"
+    reversal: "小周点出阿岚删过一段监控。"
+    temporary_result: "阿岚放行，但把责任写进交接。"
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 45
+    location_id: LOC-GATEHOUSE
+    time: "凌晨02:17"
+    entry_state: "雨夜门卫室，阿岚独自整理交接簿；小周已走到外门。"
+    objective: "阿岚确认钥匙去向并控制出口。"
+    obstacle: "小周拒绝解释，但知道阿岚的监控秘密。"
+    turn: "小周从服从规章改为以证据反制，并提出交换。"
+    exit_state: "小周带钥匙离开；阿岚留下书面痕迹，双方关系不可逆地变成互保。"
+    beats:
+      - {beat_id: S01-B01, narrative_function: "发现异常", visible_start: "小周手里钥匙圈撞响", trigger: "阿岚抬头看见钥匙", character_tactic: "拦出口", visible_end: "门被阿岚按住", runtime_budget_sec: 7, preferred_carrier: "visual_action+prop", generation_risks: [two_characters, hand_prop_contact], fallback: "钥匙insert后切阿岚反应"}
+      - {beat_id: S01-B02, narrative_function: "表层试探", visible_start: "阿岚挡门，小周停步", trigger: "阿岚问交接", character_tactic: "规章质问", visible_end: "小周把钥匙收进掌心", runtime_budget_sec: 9, preferred_carrier: "dialogue+blocking", generation_risks: [lip_sync], fallback: "单人近景对白+对方反应"}
+      - {beat_id: S01-B03, narrative_function: "策略反转", visible_start: "阿岚伸手要钥匙", trigger: "小周报出监控盲区", character_tactic: "证据反制", visible_end: "阿岚收手并让开半步", runtime_budget_sec: 12, preferred_carrier: "reaction+dialogue", generation_risks: [two_characters, lip_sync], fallback: "小周画外声，阿岚近景反应"}
+      - {beat_id: S01-B04, narrative_function: "交换与退出", visible_start: "两人共享沉默", trigger: "小周提出各留一页空白", character_tactic: "互保交易", visible_end: "小周出门，阿岚翻开交接簿写字", runtime_budget_sec: 17, preferred_carrier: "prop+choice", generation_risks: [handwriting_text, prop_contact], fallback: "空白页insert+门响+阿岚落笔声音"
+must_beat_ids: [S01-B01, S01-B02, S01-B03, S01-B04]
+runtime_reconciliation: {scene_budget_sum_sec: 45, result: pass}

@@ -1,0 +1,48 @@
+id: project.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [project.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+audience_experience: "观众先看到钥匙，再听见借口，最后意识到阿岚也在删证据。"
+theme_form_answer: "规则是谈判筹码，不是安全保证。"
+viewpoint_rule: "不提前展示地下门内部。"
+performance_rules: []
+space_and_blocking_rules: []
+camera_language_rules: []
+lighting_color_rules: []
+editing_sound_rules: []
+scenes:
+  - scene_id: S01
+    audience_knowledge: "观众知道钥匙被带走，尚不知道两人的真实目的。"
+    audience_misunderstanding: "以为阿岚只是在执行流程。"
+    attention_path: []
+    axis: ""
+    screen_direction: {}
+    performance_beats:
+      - beat_id: S01-B01
+        want_now: ""
+        obstacle: ""
+        tactic: ""
+        playable_action: ""
+        reaction_trigger: ""
+    blocking_beats:
+      - beat_id: S01-B01
+        before_state: {}
+        trigger: ""
+        action: ""
+        world_position: {}
+        frame_position: {}
+        eye_line: ""
+        attention_change: ""
+        after_state: {}
+    coverage_strategy: ""
+    base_clip_purpose: ""
+    required_coverage: []
+    sound_intent: ""
+    non_negotiables: []
+    generation_risks: []
+    fallbacks: []

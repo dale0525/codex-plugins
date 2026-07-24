@@ -1,0 +1,123 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-23",
+  "source": {
+    "video_id": "mbHD6GQUgu0",
+    "title": "20 Screenwriting Tips from Aaron Sorkin",
+    "channel": "Outstanding Screenplays",
+    "url": "https://www.youtube.com/watch?v=mbHD6GQUgu0",
+    "evidence_type": "asr_reviewed",
+    "evidence_level": "E2",
+    "source_note": "由多段 Aaron Sorkin 访谈剪辑而成；主张来自本人，但剪辑可能省略上下文。英文原始音轨为 YouTube format 140-11；第一次误下法语音轨已保留为失败记录。"
+  },
+  "procedures": [
+    {
+      "id": "intention-obstacle-tactic-character",
+      "domain": "writer",
+      "title": "用意图—障碍—策略显示人物",
+      "claim_refs": [
+        {"start_sec": 353.8, "end_sec": 420.8, "kind": "video_claim", "paraphrase": "Sorkin 把 drama 的核心概括为重要意图、真实障碍，以及角色为克服障碍采取的策略；策略使人物可见。"},
+        {"start_sec": 1214.8, "end_sec": 1253.8, "kind": "video_claim", "paraphrase": "他再次强调，与其告诉观众人物是谁，不如让观众看见人物强烈想要什么及其策略。"},
+        {"start_sec": 80.3, "end_sec": 152.5, "kind": "video_claim", "paraphrase": "写对手时不应由作者先判其为反派，要理解其自我辩护与认为自己应被接纳的理由。"}
+      ],
+      "applicability": {"use_when": ["人物介绍依赖履历/标签", "场景只有观点没有企图", "对手缺少自我正当性"], "do_not_use_when": ["把所有人物欲望简化成单一外在目标", "忽略结构性/环境障碍", "用同理理解替代伦理判断"]},
+      "inputs": ["场景人物", "want_now", "why_now", "formidable obstacle", "可用策略", "不可接受代价"],
+      "steps": [
+        {"step": 1, "action": "把人物介绍删到只剩当下 want 与 why_now。", "check": "want 可成功或失败，不能是‘被理解’等不可观察愿望。"},
+        {"step": 2, "action": "设计一个能真正阻止 want 的 obstacle，并写对手自己的正当理由。", "check": "障碍不是误会一句话即可解除。"},
+        {"step": 3, "action": "列三种策略，按人物最愿意付出的代价排序。", "check": "策略动词不同。"},
+        {"step": 4, "action": "让障碍对每种策略产生可见反应，迫使人物换策略或越界。", "check": "策略显示人物价值排序。"},
+        {"step": 5, "action": "删除人物标签/解释，盲读后让读者只凭选择描述人物。", "check": "描述应引用行为证据。"}
+      ],
+      "outputs": ["intention/obstacle card", "三策略阶梯", "对手自我辩护", "标签删除版场景"],
+      "failure_signals": ["want 不重要或无时限", "障碍只负责说不", "策略三轮都是恳求", "人物性格只在介绍段出现"],
+      "acceptance_tests": [
+        {"test": "意图可读", "pass_criteria": "至少 4/5 读者能复述人物 want 与 why_now。"},
+        {"test": "策略显人", "pass_criteria": "至少 4/5 读者用具体选择证据描述人物价值排序。"},
+        {"test": "对手主体", "pass_criteria": "对手能提出不依赖‘邪恶’标签的目标与理由。"}
+      ],
+      "worked_example": {"want": "Lin 要 Bo 今天签担保。", "obstacle": "Bo 要保护家庭资产，并已准备退出。", "tactics": ["请求旧友情", "承诺调休与股权", "锁系统权限"], "character_reveal": "Lin 从互惠滑向控制，说明她把公司生存置于友谊同意之上。"}
+    },
+    {
+      "id": "dialogue-rhythm-speakability-pass",
+      "domain": "writer",
+      "title": "对白节奏与可说性朗读",
+      "claim_refs": [
+        {"start_sec": 156.5, "end_sec": 243.5, "kind": "video_claim", "paraphrase": "Sorkin 把对白视为具有节奏、拍点和停顿的音乐，并会把口头卡顿也写入。"},
+        {"start_sec": 1130.8, "end_sec": 1187.8, "kind": "video_claim", "paraphrase": "他写作时会出声扮演所有角色，以减少演员无法自然说出的句子。"},
+        {"start_sec": 1009.8, "end_sec": 1057.8, "kind": "video_claim", "paraphrase": "他区分模仿观点与模仿专业说话的声音/节奏；快速术语段不一定要求观众理解每个词。"}
+      ],
+      "applicability": {"use_when": ["对白纸面聪明但演员说不出", "喜剧回击节奏不准", "角色声音彼此相同"], "do_not_use_when": ["强迫演员复制作者每个停顿却未协商", "以节奏为由保留无功能冗词", "术语不可懂会破坏关键因果"]},
+      "inputs": ["场景对白", "每人 intention", "角色语速/句长/停顿规则", "必须理解的信息", "演员朗读"],
+      "steps": [
+        {"step": 1, "action": "作者先出声读所有角色，标出换气、绊嘴、无意重音和不可说句。", "check": "按实际速度计时。"},
+        {"step": 2, "action": "为每句标功能与拍点：推进、反制、隐藏、回击或停顿。", "check": "无功能句删候选。"},
+        {"step": 3, "action": "用斜线标重音/呼吸，用省略/打断只在表演需要时写入。", "check": "标记不替演员完成全部选择。"},
+        {"step": 4, "action": "由演员盲读，记录自然改词和失败点；区分角色特征与作者执念。", "check": "关键因果词不可随意丢失。"},
+        {"step": 5, "action": "做原版/修订版音频 A/B，比较可懂度、角色区分和时长。", "check": "不以更快等同更好。"}
+      ],
+      "outputs": ["朗读标记稿", "句功能/拍点表", "演员失败日志", "修订版音频", "A/B 结果"],
+      "failure_signals": ["每个角色同一节奏", "演员反复在同一处换词", "术语段让观众错过行动结果", "标点过密使表演机械"],
+      "acceptance_tests": [
+        {"test": "可说性", "pass_criteria": "演员连续三次朗读中关键句无非故意绊词。"},
+        {"test": "信息理解", "pass_criteria": "至少 4/5 听众正确复述必须理解的信息。"},
+        {"test": "声音区分", "pass_criteria": "去掉角色名后至少 4/5 读者能区分主要说话者。"}
+      ],
+      "worked_example": {"before": "‘我希望你能够考虑到公司目前可能面临的流动性风险。’", "intention": "让 Bo 在看账户前签字。", "after": "‘先签。账户——明早给你。’", "rhythm": "命令/停顿/延迟承诺，策略更清楚且可说。"}
+    },
+    {
+      "id": "second-draft-discovered-movie",
+      "domain": "writer",
+      "title": "从结尾发现的电影重写第二稿",
+      "claim_refs": [
+        {"start_sec": 738.8, "end_sec": 820.8, "kind": "video_claim", "paraphrase": "Sorkin 认为初稿写到结尾才发现影片真正关于什么；第二稿应从开头重写、删去无关材料，并补强早期 setup。"},
+        {"start_sec": 40.5, "end_sec": 58.5, "kind": "video_claim", "paraphrase": "视频开头摘要同样强调到结尾发现电影后返回开头、剥离无关内容至 fighting weight。"},
+        {"start_sec": 701.8, "end_sec": 725.8, "kind": "video_claim", "paraphrase": "他建议在当天停在知道次日要写什么的位置，给自己一个可继续的 leave。"}
+      ],
+      "applicability": {"use_when": ["初稿完成", "结尾主题/选择偏离最初计划", "第三幕问题可能源于第一幕缺 setup"], "do_not_use_when": ["初稿尚未完成却不断回头润色", "机械全稿重打但不重做承诺", "删减破坏必要事实"]},
+      "inputs": ["完整初稿", "结尾选择", "初始承诺", "无关/偏航材料", "第三幕问题", "第一幕 setups"],
+      "steps": [
+        {"step": 1, "action": "从结尾写一句 discovered movie：主角最终在什么价值间做了什么选择。", "check": "引用具体行动与代价。"},
+        {"step": 2, "action": "回读前三场，列 promise aligned、missing setup、false promise。", "check": "每项指向结尾。"},
+        {"step": 3, "action": "从空白副本重建 scene/sequence map，不在旧句上只做修辞改动。", "check": "保留场景需写 retained_because。"},
+        {"step": 4, "action": "把第三幕每个问题追到最早缺失 setup，优先前移因果而非补解释。", "check": "setup 后有 payoff。"},
+        {"step": 5, "action": "删去不服务 discovered movie 的承诺，再做节奏/对白精修。", "check": "总时长与核心承诺同时变清楚。"}
+      ],
+      "outputs": ["discovered movie 句", "开头承诺审计", "新 scene map", "setup/payoff 修复", "删减日志"],
+      "failure_signals": ["第二稿只是修台词", "第三幕靠新人物解释第一幕", "开头承诺另一种类型/问题", "因喜欢而保留无关场景"],
+      "acceptance_tests": [
+        {"test": "承诺兑现", "pass_criteria": "前三场提出的核心问题在结尾得到行动性回答。"},
+        {"test": "setup/payoff", "pass_criteria": "第三幕关键选择的能力、关系和代价在前两幕均有 setup。"},
+        {"test": "删除纪律", "pass_criteria": "所有保留场景有 retained_because；无理由场景删除/合并。"}
+      ],
+      "worked_example": {"discovered_movie": "阿遥最终不是选择走或留，而是拒绝继续用沉默交换爱。", "false_promise": "初稿前三场都在追问她能否赶上火车。", "rewrite": "第一场即建立父女以早餐物件交谈；火车变成压力，不再是主题答案。"}
+    },
+    {
+      "id": "true-story-compressed-container",
+      "domain": "adaptation",
+      "title": "真实事件的压缩容器与事实分栏",
+      "claim_refs": [
+        {"start_sec": 424.8, "end_sec": 493.8, "kind": "video_claim", "paraphrase": "Sorkin 将不同时间的真实事件压入一周和同一制作周期，称其为压缩时间/空间，同时说明没有改变事件本身。"},
+        {"start_sec": 494.8, "end_sec": 585.8, "kind": "video_claim", "paraphrase": "他把人物现实与戏剧角色区分，并用有限切片/构造容器组织传记，而不是声称完整人生或新闻客观性。"},
+        {"start_sec": 875.8, "end_sec": 945.8, "kind": "video_claim", "paraphrase": "他主张艺术应有主观选择，但这不等于可以不标构造或事实边界。"}
+      ],
+      "applicability": {"use_when": ["真实事件跨越很长时间", "需要单一地点/周期容器", "可核验事件多但片长有限"], "do_not_use_when": ["压缩改变责任主体/法律含义", "把合成场景写成逐字事实", "未做专业事实/法律审阅"]},
+      "inputs": ["事实时间线", "事件来源", "责任主体", "目标容器", "可压缩/不可压缩规则", "审阅者"],
+      "steps": [
+        {"step": 1, "action": "建立 fact ledger：事件、真实日期、参与者、来源、风险等级。", "check": "事实与访谈回忆分开。"},
+        {"step": 2, "action": "提出压缩容器：一周、一次发布、一个审判或一处空间，并写叙事收益。", "check": "容器不冒充真实时间顺序。"},
+        {"step": 3, "action": "逐事件标 exact、time_compressed、location_compressed、composite、invented connective tissue。", "check": "高风险事实不合成。"},
+        {"step": 4, "action": "检查压缩是否改变谁知道什么、谁负责什么和为何行动。", "check": "改变则回退或明确戏剧化。"},
+        {"step": 5, "action": "由事实/专业审阅者核对，再在项目材料中披露主要压缩。", "check": "本 skill 不替代法律意见。"}
+      ],
+      "outputs": ["fact ledger", "压缩容器", "逐事件分类", "责任/知识变化审计", "审阅与披露日志"],
+      "failure_signals": ["为戏剧便利改变责任人", "多次真实谈话合成后仍标 exact quote", "容器使观众误认时间/因果", "只有编剧记得哪些是虚构"],
+      "acceptance_tests": [
+        {"test": "事实追溯", "pass_criteria": "100% exact/time_compressed 事件有可靠来源。"},
+        {"test": "责任不变", "pass_criteria": "压缩不改变关键责任主体、可核验指控或职业/法律意义。"},
+        {"test": "分类完整", "pass_criteria": "100% 场景标 exact/compressed/composite/invented 之一。"}
+      ],
+      "worked_example": {"facts": "三次记者联系发生于六个月内。", "container": "压入报道发表前五天。", "classification": "事件与责任主体 exact；日期 time_compressed；走廊偶遇 invented connective tissue；原话只保留有录音来源者。"}
+    }
+  ]
+}

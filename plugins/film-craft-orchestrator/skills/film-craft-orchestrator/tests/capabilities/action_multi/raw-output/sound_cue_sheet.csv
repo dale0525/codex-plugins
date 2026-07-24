@@ -1,0 +1,11 @@
+time_sec,cue,type,source,status
+0.0,warehouse room tone,ambience,designed,planned
+1.0,left door metal hit,Foley,recorded_or_generated,pending
+5.5,shoe skid and open-palm stop,Foley,recorded_or_generated,pending
+14.0,rope whoosh,SFX,designed,pending
+19.0,rope drag on concrete,Foley,recorded_or_generated,pending
+25.5,parcel handoff thump,Foley,recorded_or_generated,pending
+31.5,label tear and paper rustle,Foley,recorded_or_generated,pending
+32.5,B reads “医疗滤芯”,dialogue,separate voice + lipsync,pending
+35.5,C calls “右侧，安全出口”,dialogue,separate voice + lipsync,pending
+40.0,three sets of footsteps recede,ambience,Foley,pending

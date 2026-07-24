@@ -1,0 +1,37 @@
+id: project.scene-01.conflict-rewrite
+version: 0.1.0
+owner_role: writer
+source_inputs: [scene-draft-v1]
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+scene_id: S01
+baseline_problem: ""
+character_A:
+  want_now: ""
+  cannot_say: ""
+  walk_away_point: ""
+character_B:
+  want_now: ""
+  cannot_say: ""
+  walk_away_point: ""
+clock: ""
+shared_resource: ""
+rounds:
+  - beat_id: S01-B01
+    A_tactic: ""
+    B_visible_response: ""
+    B_counter: ""
+    immediate_cost: ""
+    state_change: ""
+entry_state: ""
+exit_state: ""
+retained_facts: []
+retained_lines: []
+acceptance:
+  distinct_tactics: 0
+  visible_responses: 0
+  cost_escalates: false
+  irreversible_change: false

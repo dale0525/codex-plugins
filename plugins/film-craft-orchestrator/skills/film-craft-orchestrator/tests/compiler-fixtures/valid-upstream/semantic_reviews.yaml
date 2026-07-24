@@ -1,0 +1,88 @@
+id: compiler-smoke.semantic-reviews
+version: 1.0.0
+owner_role: semantic_reviewer
+source_inputs: []
+assumptions: []
+constraints: {independent_review_required: true}
+open_questions: []
+status: approved
+change_log: []
+reviews:
+  - review_id: SR-ADAPTATION-001
+    stage: adaptation
+    reviewer_id: independent-adaptation-reviewer
+    independent_from_authors: true
+    expected_answer_visible: false
+    review_scope: source_and_frozen_artifacts_only
+    artifacts:
+      - {path: ai_video_brief.yaml, sha256: __BRIEF_SHA256__}
+      - {path: adaptation_matrix.csv, sha256: __ADAPTATION_SHA256__}
+    verdict: pass
+    claims:
+      - claim_id: CL-ADAPTATION-01
+        source_unit_ids: [SRC-001, SRC-002]
+        screen_unit_ids: [S01-B01, S01-B02]
+        delivery_requirement_ids: [DR-B01, DR-B02]
+        source_claim: The courier finds the key and later returns it without opening the archive.
+        proposed_screen_claim: The screen beats preserve discovery first and refusal with closed archive second.
+        entailment: preserved
+        source_location: source excerpt SRC-001 and SRC-002
+        screen_location: adaptation_matrix.csv S01-B01 and S01-B02
+        temporal_relation: discovery precedes refusal and result
+        responsible_character_ids: [CHAR-COURIER]
+        choice_result_polarity: refuses compromised access and leaves the archive closed
+        evidence: both source rows retain separate requirement IDs and verification conditions
+        verdict: pass
+  - review_id: SR-STORY-001
+    stage: story
+    reviewer_id: independent-story-reviewer
+    independent_from_authors: true
+    expected_answer_visible: false
+    review_scope: source_and_frozen_artifacts_only
+    artifacts:
+      - {path: ai_video_brief.yaml, sha256: __BRIEF_SHA256__}
+      - {path: adaptation_matrix.csv, sha256: __ADAPTATION_SHA256__}
+      - {path: story_and_scene_map.yaml, sha256: __STORY_SHA256__}
+    verdict: pass
+    claims:
+      - claim_id: CL-STORY-01
+        source_unit_ids: []
+        screen_unit_ids: [S01-B01, S01-B02]
+        delivery_requirement_ids: [DR-B01, DR-B02]
+        source_claim: The brief requires a courier to return a sealed key instead of using it.
+        proposed_screen_claim: The courier stops before the lock and deposits the key in the return slot.
+        entailment: preserved
+        source_location: ai_video_brief.yaml creative_goal
+        screen_location: story_and_scene_map.yaml S01-B02
+        temporal_relation: discovery precedes refusal
+        responsible_character_ids: [CHAR-COURIER]
+        choice_result_polarity: refuses compromised access and leaves archive closed
+        evidence: ending_choice and S01-B02 visible_end agree
+        verdict: pass
+  - review_id: SR-DIRECTOR-001
+    stage: director
+    reviewer_id: independent-director-reviewer
+    independent_from_authors: true
+    expected_answer_visible: false
+    review_scope: source_and_frozen_artifacts_only
+    artifacts:
+      - {path: story_and_scene_map.yaml, sha256: __STORY_SHA256__}
+      - {path: director_intent.yaml, sha256: __DIRECTOR_SHA256__}
+      - {path: visual_bible.yaml, sha256: __VISUAL_SHA256__}
+      - {path: reference_asset_manifest.yaml, sha256: __MANIFEST_SHA256__}
+    verdict: pass
+    claims:
+      - claim_id: CL-DIRECTOR-01
+        source_unit_ids: []
+        screen_unit_ids: [S01-B01, S01-B02, C-S01-01, C-S01-02]
+        delivery_requirement_ids: [DR-B01, DR-B02]
+        source_claim: The screen action must preserve the refusal and closed archive.
+        proposed_screen_claim: Direction reverses from lock to slot and negative constraints forbid an opened archive.
+        entailment: preserved
+        source_location: story_and_scene_map.yaml ending_choice
+        screen_location: director_intent.yaml C-S01-02 and visual_bible.yaml must_not
+        temporal_relation: badge recognition triggers reversal before key release
+        responsible_character_ids: [CHAR-COURIER]
+        choice_result_polarity: refusal produces a visibly closed archive
+        evidence: clip entry action exit and visual invariant form one causal chain
+        verdict: pass

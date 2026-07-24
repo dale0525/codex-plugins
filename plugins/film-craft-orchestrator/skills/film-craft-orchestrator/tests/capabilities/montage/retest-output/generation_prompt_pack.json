@@ -1,0 +1,255 @@
+{
+  "id": "radio-montage.prompt-pack",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [],
+  "assumptions": [
+    "Diagnostic only"
+  ],
+  "constraints": {},
+  "open_questions": [],
+  "status": "qc_pending",
+  "change_log": [],
+  "prompts": [
+    {
+      "prompt_id": "PROMPT-C-S01-01",
+      "clip_id": "C-S01-01",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "rusted radio",
+        "action": "tap dial",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "cool window light",
+        "temporal_constraints": "start rusted, end tested",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked 16:9 medium-wide workshop shot: rusted Bakelite radio, indigo-sleeved hands tap dead dial, dust falls.",
+      "rendered_prompt_hash": "a07be41a757bd55dc1857359b08b5f949a6270237e198e5ae7f430af86340ca6",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-02",
+      "clip_id": "C-S01-02",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "opened radio",
+        "action": "remove screws",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "cool window light",
+        "temporal_constraints": "opened dirty",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked 16:9 medium-wide workshop shot: same radio, hands remove screws and open dirty back panel.",
+      "rendered_prompt_hash": "39d685fbf1198b684093f331bcd36710cd1cfc4cedc3837ad65e8f39eda4e3c6",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-03",
+      "clip_id": "C-S01-03",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "dirty chassis",
+        "action": "brush rust",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "neutral light",
+        "temporal_constraints": "partial clean",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked medium-wide: same radio chassis, brush sweeps rust revealing brass contacts.",
+      "rendered_prompt_hash": "4981602e756719ef72b262fff65d2cdc89be09376e1d78cf6e1de8466bbd4e71",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-04",
+      "clip_id": "C-S01-04",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "cleaning radio",
+        "action": "wipe grille",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "warmer light",
+        "temporal_constraints": "clean exposed face",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked medium-wide: cloth wipes grille, cream Bakelite emerges, same composition.",
+      "rendered_prompt_hash": "ccd847255c414a0c785520de1337e64eb11d7cb4ae247bdc0b885552041e02ff",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-05",
+      "clip_id": "C-S01-05",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "radio wire",
+        "action": "solder joint",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "warm practical",
+        "temporal_constraints": "repaired wire",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked medium-wide: soldering iron joins wire, brief glow, same radio position.",
+      "rendered_prompt_hash": "d284d487ddc608db7b5308ad5b66de9ac1d1666f6513cd8cb3eb8d3764696829",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-06",
+      "clip_id": "C-S01-06",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "assembled radio",
+        "action": "seat brass knob",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "warm practical",
+        "temporal_constraints": "ready",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked medium-wide: brass knob seats and case closes, same workbench.",
+      "rendered_prompt_hash": "8ff15ad7860bb0c3a17d3714db437a405483e3a05807cc06c4c2c1b52f97f8f0",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-07",
+      "clip_id": "C-S01-07",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "ready radio",
+        "action": "turn knob and lamp warms",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "amber lamp",
+        "temporal_constraints": "carrier appears",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked medium-wide: hand turns knob, amber dial lamp warms, carrier hum begins.",
+      "rendered_prompt_hash": "efe27b5fb615b9876b04c02c948196fb3042c334b59ff27c173fdb1ac4a9e5a7",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-08",
+      "clip_id": "C-S01-08",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "prompt_ir": {
+        "subject": "playing radio",
+        "action": "speaker cone moves",
+        "environment": "workbench",
+        "camera": {
+          "behavior": "locked"
+        },
+        "lighting": "warm amber",
+        "temporal_constraints": "clear voice payoff",
+        "continuity_invariants": [
+          "same composition"
+        ]
+      },
+      "rendered_prompt": "Locked medium-wide: speaker cone moves as clear warm voice resolves, same composition.",
+      "rendered_prompt_hash": "ce9b91f6c8d4470b24d6b00436a88a680f30f04c2054f6f10a4fd808837638a5",
+      "reference_inputs_expected": [],
+      "reference_inputs_attached": [],
+      "reference_transport": "none",
+      "output_contract": {
+        "aspect_ratio": "16:9",
+        "duration_sec": 8
+      },
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    }
+  ]
+}

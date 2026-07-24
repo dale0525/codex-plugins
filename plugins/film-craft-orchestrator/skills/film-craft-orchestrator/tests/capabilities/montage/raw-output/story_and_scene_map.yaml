@@ -1,0 +1,17 @@
+project_id: old_radio_montage
+version: 1
+runtime_sec: 40
+sequence: restoration_montage
+dramatic_arc: silence -> contact -> repair -> return of voice
+beats:
+  - {id: b01, timecode: 00:00-00:08, stage: rusted_and_silent, action: hands place corroded radio; dust falls; knob does not move, visible_change: rust flakes and torn grille cloth, sound_motif: three dull clicks}
+  - {id: b02, timecode: 00:08-00:16, stage: opened_and_cleaned, action: brush and cloth expose chassis; screws loosen, visible_change: clean brass dial edge and open back, sound_motif: brighter two-note ring}
+  - {id: b03, timecode: 00:16-00:24, stage: circuitry_repaired, action: solder broken lead; seat capacitor; tap speaker, visible_change: glowing solder and taut cloth, sound_motif: sizzle pulses then faint static}
+  - {id: b04, timecode: 00:24-00:32, stage: refinished_and_reassembled, action: oil wood; replace knobs; tighten screws, visible_change: warm sheen, sound_motif: clean plucked three-note motif}
+  - {id: b05, timecode: 00:32-00:40, stage: speaking_again, action: plug in; lamp glows; turn knob; clear weather bulletin, visible_change: moving needle and warm lamp, sound_motif: motif resolves into station ident}
+continuity_rules:
+  - camera remains locked at 35mm-equivalent overhead three-quarter angle
+  - radio center stays at 52 percent frame width and 58 percent frame height
+  - hands enter from screen left; tools travel left-to-right
+  - lamp upper right; chipped green mug lower left
+  - no text, subtitles, date cards, or visible time labels

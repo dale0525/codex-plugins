@@ -1,0 +1,13 @@
+project_id: old_radio_montage
+version: 1
+format: {aspect_ratio: "16:9", fps: 24, camera: locked 35mm-equivalent overhead three-quarter workbench view}
+composition_anchor: radio slightly right of center; lamp upper right; mug lower left; wood grain diagonal
+palette: {start: oxidized blue-gray and dust beige, middle: steel brass and flux amber, end: walnut amber and tungsten gold}
+subject: {radio: 1950s walnut tabletop set with cream dial and two bakelite knobs, hands: adult technician with denim cuff and no jewelry}
+props: [brass brush, flat screwdriver, soldering iron, replacement capacitor, amber wood oil, black power cord, chipped green mug]
+environment: scarred oak bench, upper-right gooseneck lamp, screw tray, dusty window fill
+state_machine: [rusted_silent, opened_cleaned, circuit_repaired, refinished_reassembled, powered_speaking]
+must_not_drift: [radio proportions and dial layout, prop positions and screen direction, no people/logos/captions, no camera height or lens change]
+reference_inputs_expected: []
+reference_inputs_attached: []
+frame_status: diagnostic_preview

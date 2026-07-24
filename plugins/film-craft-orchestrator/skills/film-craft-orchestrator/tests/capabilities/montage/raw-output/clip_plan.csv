@@ -1,0 +1,6 @@
+clip_id,beat_id,duration_sec,narrative_purpose,entry_state,primary_action,attention_change,camera_behavior,exit_state,cut_in,cut_out,fallback
+c01,b01,8,inert baseline,rusted_silent,place radio and test frozen knob,hand contact then dust fall,locked,rusted_silent,00:00,00:08,hold on dust fall and click
+c02,b02,8,cleaning reveals object,rusted_silent,brush grille and remove rear screws,brush sweep left-to-right,locked,opened_cleaned,00:08,00:16,cut on brush crossing frame
+c03,b03,8,make repair legible,opened_cleaned,solder lead seat capacitor tap cone,glow to speaker,locked,circuit_repaired,00:16,00:24,insert solder point matched to composition
+c04,b04,8,material payoff,circuit_repaired,oil wipe replace knobs tighten screws,sheen then knob turn,locked,refinished_reassembled,00:24,00:32,match oil cloth sweep
+c05,b05,8,return of voice,refinished_reassembled,plug turn dial listen,needle/lamp then speaker voice,locked,powered_speaking,00:32,00:40,clean voiceover over speaker vibration

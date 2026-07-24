@@ -1,0 +1,17 @@
+id: action-multi.final-film-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [action-multi.edit-plan@1.0.0, action-multi.clip-qc@1.0.0]
+assumptions: ["未生成、未混音、无真实参考资产"]
+constraints: {runtime_target_sec: 45, aspect_ratio: "16:9"}
+open_questions: ["模型输出、参考hash、声音授权和最终帧待补"]
+status: pending
+change_log: []
+runtime: pending
+must_beat_coverage: pending
+continuity: pending
+dialogue_lipsync: pending
+sound: pending
+rights_and_provenance: pending
+blocking_conflicts: ["all clips pending generation and QC"]
+final_result: pending

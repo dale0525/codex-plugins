@@ -1,0 +1,161 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-23",
+  "sources": [
+    {
+      "video_id": "3Q3eITC01Fg",
+      "title": "How Does an Editor Think and Feel?",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=3Q3eITC01Fg",
+      "evidence_type": "asr_reviewed",
+      "evidence_level": "E4"
+    },
+    {
+      "video_id": "8q4X2vDRfRk",
+      "title": "The Spielberg Oner",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=8q4X2vDRfRk",
+      "evidence_type": "asr_reviewed",
+      "evidence_level": "E4"
+    }
+  ],
+  "procedures": [
+    {
+      "id": "edit-emotion-hold-test",
+      "domain": "editing",
+      "title": "情绪停留 A/B 测试",
+      "claim_refs": [
+        {"start_sec": 51.08, "end_sec": 119.8, "kind": "video_claim", "paraphrase": "视频把演员眼神中的决定变化视为重要剪辑线索，并用眼神—所见对象的连接传递无对白思想。"},
+        {"start_sec": 123.92, "end_sec": 182.64, "kind": "video_claim", "paraphrase": "情绪需要发生前后都留有观看脸部的时间，数秒差异可能改变观众感受。"},
+        {"start_sec": 184.48, "end_sec": 254.24, "kind": "video_claim", "paraphrase": "有些情绪适合单一连续镜头，另一些适合多镜头建立和回落；失败后的回落时间可以长于建立。"}
+      ],
+      "applicability": {
+        "use_when": ["情绪反应显得不可信", "不确定反应镜头应留多久", "需要在连续表演和多镜头之间选择"],
+        "do_not_use_when": ["素材没有可见表演变化", "只凭固定秒数替代观众测试", "音乐尚未锁定却把全部差异归因于画面时长"]
+      },
+      "inputs": ["同一表演的原始 take", "情绪触发帧", "眼神/身体决定点", "目标观众反应", "临时声音版本"],
+      "steps": [
+        {"step": 1, "action": "标记触发前最后一个稳定状态、眼神/身体变化点和变化后第一个稳定状态。", "check": "三个标记来自可见表演，不来自台词文本。"},
+        {"step": 2, "action": "剪 A 版：变化前后各保留最短可读时间；剪 B 版：两端各多留 12–24 帧或项目帧率下约半秒。", "check": "两版只改变 hold，不改音乐、音效或景别。"},
+        {"step": 3, "action": "若眼神指向关键对象，再做 C 版：眼神→对象→回到决定；不默认加入反应反打。", "check": "对象镜头确实改变观众对决定的解释。"},
+        {"step": 4, "action": "五名未看剧本的观察者分别标记感受到情绪变化的时间和可信度。", "check": "问题不提示目标情绪名称。"},
+        {"step": 5, "action": "选择满足目标反应且时长最短的版本；若无版本可信，回报素材/表演缺口。", "check": "不靠无限延长掩盖缺少决定点。"}
+      ],
+      "outputs": ["表演变化标记", "A/B/C 三版时间线", "盲测记录", "选版理由", "素材缺口"],
+      "failure_signals": ["每句台词都自动配反应镜头", "同时更换音乐和 hold 导致无法归因", "观众只说‘更慢’却不能指出人物决定", "延长后表演破绽反而暴露"],
+      "acceptance_tests": [
+        {"test": "变化识别", "pass_criteria": "至少 4/5 观察者在同一秒±1 内指出决定变化。"},
+        {"test": "可信度", "pass_criteria": "目标版本的中位可信度至少 4/5，且高于基线。"},
+        {"test": "单变量", "pass_criteria": "版本差异只包含停留/切点，不含声音或画面内容替换。"}
+      ],
+      "worked_example": {
+        "trigger": "女孩看到父亲把信留在桌上。",
+        "A": "信→女孩 18 帧→手机，观众只读到信息。",
+        "B": "信→女孩 42 帧，眼神从信移向父亲背影→手机，观众读到她先确认再决定。",
+        "result": "5 人中 4 人在 B 版说‘她改变计划’，A 版只有 1 人；采用 B。"
+      }
+    },
+    {
+      "id": "edit-build-peak-recovery-curve",
+      "domain": "editing",
+      "title": "建立—峰值—回落节奏曲线",
+      "claim_refs": [
+        {"start_sec": 203.4, "end_sec": 254.24, "kind": "video_claim", "paraphrase": "案例中镜头时长向高潮逐步缩短，峰值后重新拉长，并给失败后的情绪更长回落时间。"},
+        {"start_sec": 323.32, "end_sec": 405.92, "kind": "video_claim", "paraphrase": "视频把剪辑节奏与动作、走路、场所活动等可感知韵律相连；自然切点来自反复观看和具体素材。"},
+        {"start_sec": 422.28, "end_sec": 478.56, "kind": "video_claim", "paraphrase": "剪辑不必总隐形；不适或焦躁可能需要突兀切点或略微过长的停留，关键是预期观众反应。"}
+      ],
+      "applicability": {
+        "use_when": ["一段行动/争论需要明显峰值和后果", "高潮后情绪没有落地", "剪辑只按固定节拍器切"],
+        "do_not_use_when": ["把镜头时长递减当普遍公式", "素材没有建立/峰值/后果结构", "声音节奏尚未纳入判断"]
+      },
+      "inputs": ["带 beat 标记的素材", "峰值事件", "目标观众反应", "动作/声音内在节奏", "当前 cut 时长表"],
+      "steps": [
+        {"step": 1, "action": "把序列分为 build、peak、recovery，逐镜记录时长与切点触发。", "check": "触发写动作、视线、信息或声音，不写‘感觉该切’。"},
+        {"step": 2, "action": "画镜头时长曲线，检查峰值前是否有可感知压缩、峰值后是否给后果足够时间。", "check": "曲线描述现状，不自动判错。"},
+        {"step": 3, "action": "制作一版功能性改剪：只调整峰值前后时长，保留镜头顺序。", "check": "峰值本身不靠新增素材制造。"},
+        {"step": 4, "action": "需要焦躁/不适时，再做异常版：一次提前切或一次略长停留，并写预期反应。", "check": "异常只有一个主要变量。"},
+        {"step": 5, "action": "盲测观众标记峰值、后果和预期反应；选能同时读出事件与余波的版本。", "check": "若峰值清楚但后果不可复述，延长 recovery 而非继续加快 build。"}
+      ],
+      "outputs": ["镜头时长表", "build/peak/recovery 曲线", "功能版与异常版", "盲测结果"],
+      "failure_signals": ["峰值前每镜等长", "高潮一发生立即切场，人物没有后果", "用快速剪辑掩盖动作不清", "异常切点没有对应观众反应目标"],
+      "acceptance_tests": [
+        {"test": "峰值定位", "pass_criteria": "至少 4/5 观察者在目标峰值±1 秒标记同一点。"},
+        {"test": "后果复述", "pass_criteria": "至少 4/5 观察者能说出峰值如何改变人物状态。"},
+        {"test": "反应匹配", "pass_criteria": "异常版中至少 3/5 观察者自发使用目标反应相近词。"}
+      ],
+      "worked_example": {
+        "baseline": "争吵的七镜都约两秒，揭露后半秒切黑。",
+        "functional_cut": "前四镜 3.0/2.4/1.8/1.2 秒，揭露镜 1.0 秒，沉默反应 4.5 秒。",
+        "ab_result": "观众对揭露定位相同，但只有功能版能复述‘他决定不再辩解’。"
+      }
+    },
+    {
+      "id": "moving-master-composition-chain",
+      "domain": "director",
+      "title": "移动 Master 的构图链设计",
+      "claim_refs": [
+        {"start_sec": 74.6, "end_sec": 92.84, "kind": "video_claim", "paraphrase": "《夺宝奇兵》案例把推近、两个单人和插入等多个功能构图连成一个移动 master。"},
+        {"start_sec": 107.48, "end_sec": 152.08, "kind": "video_claim", "paraphrase": "镜头运动始终由动作推动；演员调度让画面从偏向一人转到另一人，背景活动持续更新注意力。"},
+        {"start_sec": 318.92, "end_sec": 361.36, "kind": "video_claim", "paraphrase": "视频建议先移动演员、再让摄影机响应，并把长镜头拆成 single、over-shoulder、insert、wide 等多个相连构图。"}
+      ],
+      "applicability": {
+        "use_when": ["一场 1–2 分钟戏能由连续空间关系推进", "希望用一个 master 覆盖多个信息/表演 beat", "场景节奏需要流动但不想频繁切镜"],
+        "do_not_use_when": ["长镜头本身没有叙事收益", "场地/演员/焦点/声音无法重复", "安全动作需要独立覆盖和专业设计"]
+      },
+      "inputs": ["scene beats", "每 beat 的注意目标", "空间平面图", "构图链", "演员路线", "焦点/灯光/声音限制"],
+      "steps": [
+        {"step": 1, "action": "为每个 beat 指定一个构图功能：wide、two-shot、single、OTS、insert 或 reveal。", "check": "构图名称后必须写观众任务。"},
+        {"step": 2, "action": "用演员进入、坐下、交物、遮挡或转身连接相邻构图。", "check": "先排演员；去掉相机移动仍能看出关系变化。"},
+        {"step": 3, "action": "只在演员动作触发时移动或重构相机，并标起点/终点/停点。", "check": "无触发移动删掉。"},
+        {"step": 4, "action": "利用实际背景活动更新信息，但每拍只保留一个主要注意目标。", "check": "背景不会抢掉关键选择。"},
+        {"step": 5, "action": "串联成 composition chain，并为焦点、灯光、声音和道具写逐点标记。", "check": "每个标记能现场复现。"},
+        {"step": 6, "action": "三次完整排练；若两次不能同时通过表演/焦点/声音/安全，则拆镜。", "check": "不因形式执念继续消耗。"}
+      ],
+      "outputs": ["composition chain", "演员/相机路线图", "技术标记", "排练通过记录", "拆镜阈值"],
+      "failure_signals": ["相机无原因游走", "长镜头始终只有一个中景构图", "演员为了给相机让路而失去目标", "背景活动制造多重注意竞争"],
+      "acceptance_tests": [
+        {"test": "构图功能", "pass_criteria": "每个主要 beat 有不同或重新定义的构图任务。"},
+        {"test": "运动动机", "pass_criteria": "100% 相机移动有明确演员动作/信息触发。"},
+        {"test": "排练稳定", "pass_criteria": "三次完整排练至少两次通过表演、焦点、声音与安全。"}
+      ],
+      "worked_example": {
+        "chain": ["门口 wide：父女分隔", "随女儿到桌边 two-shot：共享早餐", "糖罐进入前景 insert-like composition：物件冲突", "父亲离开后女儿 single：信息权转移"],
+        "camera_rule": "只在女儿进门和父亲端盘时移动；其余由前景物件重构画面。"
+      }
+    },
+    {
+      "id": "long-take-insurance-and-time-cap",
+      "domain": "director",
+      "title": "长镜头保险与时间止损",
+      "claim_refs": [
+        {"start_sec": 36.84, "end_sec": 49.92, "kind": "video_claim", "paraphrase": "视频观察到这些长镜头多在约一到两分钟，足以覆盖场景且维持节奏。"},
+        {"start_sec": 384.96, "end_sec": 413.94, "kind": "video_claim", "paraphrase": "即使主镜头完整，仍建议拍 insert/cutaway，以便收紧节奏、拼接不同 take 或修复困难标记。"},
+        {"start_sec": 413.94, "end_sec": 426.88, "kind": "video_claim", "paraphrase": "视频建议控制长度，不为追求完美长镜头耗掉整天。"}
+      ],
+      "applicability": {
+        "use_when": ["长镜头已通过构图链设计", "制片需要明确止损", "关键标记可能导致整条 take 报废"],
+        "do_not_use_when": ["把一到两分钟当硬上限", "cutaway 会破坏项目明确的实时性承诺却未与导演确认", "危险动作没有独立安全覆盖"]
+      },
+      "inputs": ["完整 take 预计时长", "困难标记", "最大排练/拍摄时间", "可隐藏切点", "必须保留的实时性"],
+      "steps": [
+        {"step": 1, "action": "列出导致整条报废的高风险点：表演、焦点、道具落点、特效、声音或安全。", "check": "每项有失败概率或历史依据。"},
+        {"step": 2, "action": "为最高风险点设计不改变叙事视角的 insert/cutaway 或自然遮挡。", "check": "保险镜头能覆盖至少一个潜在拼接。"},
+        {"step": 3, "action": "在 call sheet 写止损：排练次数、完整 takes、时间上限和触发拆镜条件。", "check": "制片、摄影、声音、演员均知道。"},
+        {"step": 4, "action": "先拍保险镜头或确认可用旧素材，再尝试完整 take。", "check": "不能把保险留到演员/场地即将离开时。"},
+        {"step": 5, "action": "达到止损即执行 fallback，不用‘再来最后一条’无限延期。", "check": "fallback 已覆盖入口、转折和退出。"}
+      ],
+      "outputs": ["高风险点表", "保险镜头", "自然拼接点", "拍摄止损", "fallback coverage"],
+      "failure_signals": ["只有完美完整 take 才能剪", "每次失败都重置全场但无时间上限", "cutaway 只是随机物件，无法覆盖错误", "为了长镜头削减安全或声音检查"],
+      "acceptance_tests": [
+        {"test": "拼接保险", "pass_criteria": "每个最高风险点至少有一个可用遮挡、insert 或 cutaway。"},
+        {"test": "止损明确", "pass_criteria": "排练/完整 take/分钟上限均为具体数字并写入计划。"},
+        {"test": "最低成片", "pass_criteria": "即使完整 take 全部失败，fallback 仍能剪出入口—转折—退出。"}
+      ],
+      "worked_example": {
+        "risk": "父亲端盘时信必须准确落在桌边；失败会毁掉 90 秒 take。",
+        "insurance": "先拍信角与盘底分离 insert；另拍父亲经过镜头造成全画面遮挡。",
+        "cap": "2 次无机排练、3 次完整 take、45 分钟上限；仍失败则用遮挡拼接两段。"
+      }
+    }
+  ]
+}

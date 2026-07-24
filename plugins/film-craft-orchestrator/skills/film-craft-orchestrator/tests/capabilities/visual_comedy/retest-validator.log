@@ -1,0 +1,5 @@
+OK: 7 model adapters with official sources
+OK: 6 clips, edit contribution 30s
+OK: 6 prompts with valid adapters and reference gates
+OK: 6 ordered continuity states
+OK: AI video package <SKILL_ROOT>/tests/capabilities/visual_comedy/retest-output

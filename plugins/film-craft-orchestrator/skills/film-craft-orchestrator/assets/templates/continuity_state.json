@@ -1,0 +1,12 @@
+{
+  "id": "project.continuity-state",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [],
+  "assumptions": [],
+  "constraints": {},
+  "open_questions": [],
+  "status": "draft",
+  "change_log": [],
+  "clips": []
+}

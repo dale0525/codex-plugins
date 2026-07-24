@@ -1,0 +1,232 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-07-24",
+  "method": {
+    "audio": "Authorized low-bandwidth YouTube audio collected with yt-dlp after public caption requests returned 429 or no transcript.",
+    "asr_engine": "whisper.cpp 1.8.3",
+    "model": "ggml-small.en.bin",
+    "review": "Full ASR read in chronological order; key windows independently spot-checked against raw ASR. Short paraphrases only.",
+    "evidence_boundary": "These are video-author claims or commentary. They do not prove filmmaker intent or universal rules. Visual claims require separate frame/clip verification."
+  },
+  "items": [
+    {
+      "video_id": "pFUKeD3FJm8",
+      "title": "The Dark Knight — Creating the Ultimate Antagonist",
+      "channel": "Lessons from the Screenplay",
+      "url": "https://www.youtube.com/watch?v=pFUKeD3FJm8",
+      "duration_sec": 653.68,
+      "audio_sha256": "0d26ee3e84b004749627b7f0c21e20ed548cccf45e6402dec2ecd5d96edd4ccd",
+      "asr_sha256": "25f1167f8a66b156c4265eb0965cb65033a4f68355ad94354e424264799cfbd8",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "pFU-C1", "start_sec": 84.52, "end_sec": 136.64, "paraphrase": "The video recommends an opponent who can attack the hero's greatest weakness and argues that Joker converts Batman's strengths into liabilities.", "uncertainty": "Truby principle is quoted second-hand."},
+        {"id": "pFU-C2", "start_sec": 172.36, "end_sec": 312.32, "paraphrase": "Escalating dilemmas force increasingly difficult choices that expose Batman's values and limits.", "uncertainty": "Film analysis, not controlled evidence."},
+        {"id": "pFU-C3", "start_sec": 335.16, "end_sec": 413.76, "paraphrase": "A matched antagonist repeatedly conflicts with the hero over the same goal; Batman and Joker compete over Gotham's moral order.", "uncertainty": "Truby principle is quoted second-hand."},
+        {"id": "pFU-C4", "start_sec": 413.76, "end_sec": 463.28, "paraphrase": "A limited, specific and personal threat can be more compelling than generic global destruction.", "uncertainty": "ASR says fairies where the film context indicates ferries."},
+        {"id": "pFU-C5", "start_sec": 478.64, "end_sec": 596.76, "paraphrase": "The antagonist matters because of a profound, specific effect on the hero and story, not surface unpredictability alone.", "uncertainty": "Commentator conclusion."}
+      ]
+    },
+    {
+      "video_id": "CF3lFPW4E1o",
+      "title": "Gone Girl — Don't Underestimate the Screenwriter",
+      "channel": "Lessons from the Screenplay",
+      "url": "https://www.youtube.com/watch?v=CF3lFPW4E1o",
+      "duration_sec": 421.28,
+      "audio_sha256": "06bc44fb55bf5aaaa1509498c3cdef4602cd3e479a4aedf2624e999541d1be4e",
+      "asr_sha256": "80d2dbdc9afdc1e2407c15989808f65ad38b5e68b0a2984276be95569086782b",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "CF3-C1", "start_sec": 59.2, "end_sec": 152.44, "paraphrase": "Concise action lines can preserve scene tone, intention and pacing even when dialogue changes during production.", "uncertainty": "Commentary using selected screenplay examples."},
+        {"id": "CF3-C2", "start_sec": 131.24, "end_sec": 152.44, "paraphrase": "The two-word action line 'ugly pause' communicates both tone and rhythm without an unfilmable psychological explanation.", "uncertainty": "Short quoted phrase; full screenplay version should be checked."},
+        {"id": "CF3-C3", "start_sec": 152.44, "end_sec": 255.64, "paraphrase": "The video frames a scene as a funnel: the beginning states its subject and the final line or action delivers its point and changes the next move.", "uncertainty": "Truby principle quoted second-hand."},
+        {"id": "CF3-C4", "start_sec": 261.56, "end_sec": 368.96, "paraphrase": "A subplot character can face the protagonist's problem differently, reveal new information and demonstrate consequences.", "uncertainty": "Film-analysis interpretation."},
+        {"id": "CF3-C5", "start_sec": 308.96, "end_sec": 381.24, "paraphrase": "Tommy's experience functions as warning and strategy information that changes Nick's later behavior.", "uncertainty": "Interpretation of plot causality."}
+      ]
+    },
+    {
+      "video_id": "-XGUVkOmPTA",
+      "title": "Dan Harmon Story Circle: 8 Proven Steps to Better Stories",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=-XGUVkOmPTA",
+      "duration_sec": 545.52,
+      "audio_sha256": "06c69cfcbb045b0b58f71874c06b0c2ae20cf1138d243e1aca0c5fd5759e9fe7",
+      "asr_sha256": "1163154548b03ed9e9deff9ec1c4c4921e85ca53d2485a3051d8e136e2808a73",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "XGU-C1", "start_sec": 34.0, "end_sec": 60.0, "paraphrase": "The video presents the story circle as eight diagnostic steps rather than a detailed screenplay formula.", "uncertainty": "Commercial teaching model."},
+        {"id": "XGU-C2", "start_sec": 65.0, "end_sec": 224.0, "paraphrase": "You, Need, Go and Search establish a protagonist's stable state, unmet need, active crossing and escalating attempts.", "uncertainty": "The Dark Knight is used as a retrospective fit."},
+        {"id": "XGU-C3", "start_sec": 237.0, "end_sec": 345.0, "paraphrase": "Find and Take distinguish reaching the apparent goal from paying a severe cost that changes the need.", "uncertainty": "Step labels are occasionally repeated ambiguously in ASR."},
+        {"id": "XGU-C4", "start_sec": 345.0, "end_sec": 384.72, "paraphrase": "Return carries the consequences into a changed version of the original world.", "uncertainty": "Model simplification."},
+        {"id": "XGU-C5", "start_sec": 384.72, "end_sec": 452.52, "paraphrase": "Change must become visually testable in a final confrontation or mirrored return, not remain explanatory dialogue.", "uncertainty": "Commentary claim; visual examples not independently frame-checked here."}
+      ]
+    },
+    {
+      "video_id": "ba-CB6wVuvQ",
+      "title": "Whiplash vs. Black Swan — The Anatomy of the Obsessed Artist",
+      "channel": "Lessons from the Screenplay",
+      "url": "https://www.youtube.com/watch?v=ba-CB6wVuvQ",
+      "duration_sec": 995.72,
+      "audio_sha256": "e5cdf4b1720d0fe842b03e6d42f3431fcc0980ff0dea9975f4dd1fa70901af5f",
+      "asr_sha256": "846f6ee933f83c7b33e8fee595a32687050cd09f0fd557ba94b834c7ff698703",
+      "review_status": "full_asr_read_and_browser_transcript_cross_checked",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "BA-C1", "start_sec": 75.0, "end_sec": 127.0, "paraphrase": "The inciting incident creates a measurable desire that starts the character's change.", "uncertainty": "Comparison of two selected films."},
+        {"id": "BA-C2", "start_sec": 137.08, "end_sec": 195.6, "paraphrase": "Desire becomes consequential when linked to a specific fear; both films use home life to embody feared mediocrity.", "uncertainty": "Interpretive comparison."},
+        {"id": "BA-C3", "start_sec": 323.0, "end_sec": 482.0, "paraphrase": "A replacement rival and absolute mentor pressure turn escalating obstacles into visible self-destruction.", "uncertainty": "Do not treat abusive mentorship as real-world advice."},
+        {"id": "BA-C4", "start_sec": 504.64, "end_sec": 563.8, "paraphrase": "The placement and response to a warning can branch similar structures toward recovery or tragedy.", "uncertainty": "Commentator's causal interpretation."},
+        {"id": "BA-C5", "start_sec": 563.8, "end_sec": 690.0, "paraphrase": "Both climaxes begin with failure and require a choice that destroys or replaces the old self.", "uncertainty": "Comparative structural claim."}
+      ]
+    },
+    {
+      "video_id": "Y5S4PyBR364",
+      "title": "How Good Filmmaking Brings a Script to Life",
+      "channel": "Lessons from the Screenplay",
+      "url": "https://www.youtube.com/watch?v=Y5S4PyBR364",
+      "duration_sec": 991.62,
+      "audio_sha256": "5adc914f06dc363b5a6dceb3ed737c7739e84cd1f406e83dba207b7465b1bbad",
+      "asr_sha256": "d82cf378b1269afa8c7e099a754518244fae57043a6703392d10083b5198b3cc",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "Y5S-C1", "start_sec": 98.82, "end_sec": 129.34, "paraphrase": "The video argues that performance, blocking, editing, sound and framing can be anticipated in screenplay action and rhythm.", "uncertainty": "No screenplay page number in ASR; page image needs separate verification."},
+        {"id": "Y5S-C2", "start_sec": 186.34, "end_sec": 293.02, "paraphrase": "A scene's setup, inciting turn, midpoint, crisis, climax and resolution are expressed through action, silence and distance, not only dialogue.", "uncertainty": "Beat labels are commentator analysis."},
+        {"id": "Y5S-C3", "start_sec": 342.96, "end_sec": 450.18, "paraphrase": "Observer/observed framing, obstruction, distance and a midpoint push-in turn a power reversal into visible geometry.", "uncertainty": "Visual claim still requires frame verification."},
+        {"id": "Y5S-C4", "start_sec": 555.12, "end_sec": 647.62, "paraphrase": "Silences and short action lines punctuate beats; the duration and placement of pauses shape the scene's rhythm.", "uncertainty": "Exact screenplay wording not present in ASR."},
+        {"id": "Y5S-C5", "start_sec": 655.12, "end_sec": 798.82, "paraphrase": "The midpoint replaces frequent cutting with a long take; footsteps, breathing, blocking and the incomplete count of five steps carry suspense and power.", "uncertainty": "The claimed 77-second take and five-step effect need clip/frame timing to confirm."}
+      ]
+    },
+    {
+      "video_id": "eFU3FQh3xgE",
+      "title": "Drive Opening Scene — How Refn Builds Suspense with Sound Design & Editing",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=eFU3FQh3xgE",
+      "duration_sec": 564.0,
+      "audio_sha256": "4088f8d1f6df906489d4cdc8b9dd6b137a9751c6cc2c13529d79ed877857b444",
+      "asr_sha256": "e66559c276c47ff62f5aad64e537104f6b8f4573089b7a9387bcf73eebf732c6",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "EFU-C1", "start_sec": 126.0, "end_sec": 139.0, "paraphrase": "A low controlled rhythm arrives before the first image and preloads tension.", "uncertainty": "Commentary; no waveform measurement."},
+        {"id": "EFU-C2", "start_sec": 200.0, "end_sec": 248.0, "paraphrase": "Clicks, stopwatch, alarms and scanner make the time constraint audible and progressively denser.", "uncertainty": "Layer description should be checked against the original mix."},
+        {"id": "EFU-C3", "start_sec": 290.0, "end_sec": 308.0, "paraphrase": "The police scanner provides off-screen information that the camera withholds.", "uncertainty": "Film-analysis claim."},
+        {"id": "EFU-C4", "start_sec": 343.0, "end_sec": 364.0, "paraphrase": "A brief lull subtracts sound to hold breath, then off-screen scanner information releases the uncertainty.", "uncertainty": "Subjective description."},
+        {"id": "EFU-C5", "start_sec": 377.0, "end_sec": 408.0, "paraphrase": "A high swell and rising level mark renewed vulnerability and acceleration while the image remains comparatively restrained.", "uncertainty": "No independent loudness measurement."}
+      ]
+    },
+    {
+      "video_id": "kavxsXhzD48",
+      "title": "See With Your Ears: Spielberg And Sound Design",
+      "channel": "Nerdwriter1",
+      "url": "https://www.youtube.com/watch?v=kavxsXhzD48",
+      "duration_sec": 513.1,
+      "audio_sha256": "e8e67181f42585a23cfa6fbbd647e094738c5c993e7aca1ac1e397f800f9ec25",
+      "asr_sha256": "837bdf0913c60507983ff106650c3c620ab4a92e39ddde701b876cd687fd888b",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "KAV-C1", "start_sec": 125.8, "end_sec": 181.28, "paraphrase": "Sound can assign a viewpoint that differs from the camera by selectively bringing street, car and target sounds forward.", "uncertainty": "Author comparison, not a controlled published experiment."},
+        {"id": "KAV-C2", "start_sec": 208.16, "end_sec": 240.0, "paraphrase": "A long scene can progress with ambient bed and isolated narrative sounds rather than score or dialogue.", "uncertainty": "Claimed scene duration and mix need source-film verification."},
+        {"id": "KAV-C3", "start_sec": 269.48, "end_sec": 317.24, "paraphrase": "Competing environmental sounds can mask critical information before one sound is isolated as the next clue.", "uncertainty": "Interpretation of mixing priority."},
+        {"id": "KAV-C4", "start_sec": 324.12, "end_sec": 368.4, "paraphrase": "Tension can grow by subtracting elements until the expected explosion is represented by silence.", "uncertainty": "Subjective suspense interpretation."},
+        {"id": "KAV-C5", "start_sec": 374.0, "end_sec": 425.12, "paraphrase": "Restoring reverb, footsteps and sirens after the silent climax reopens space and consequence.", "uncertainty": "ASR-based sound description."}
+      ]
+    },
+    {
+      "video_id": "Z1PCtIaM_GQ",
+      "title": "Jackie Chan - How to Do Action Comedy",
+      "channel": "Every Frame a Painting",
+      "url": "https://www.youtube.com/watch?v=Z1PCtIaM_GQ",
+      "duration_sec": 542.8,
+      "audio_sha256": "78ea9537707fcd8058a598ed9b4b2fb805f4d9e45a09439537fa307a56290120",
+      "asr_sha256": "ded70a384f32e4d3a976b2a33cedac54208828fd0b98c020bac0332368eec756",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "Z1-C1", "start_sec": 50.36, "end_sec": 118.2, "paraphrase": "Action comedy builds from disadvantage and uses familiar environmental objects in unfamiliar actions.", "uncertainty": "Selected examples; visual proof requires clips."},
+        {"id": "Z1-C2", "start_sec": 118.2, "end_sec": 189.52, "paraphrase": "Clear contrast and stable framing let action and reaction share a frame and preserve geography.", "uncertainty": "Commentator generalization."},
+        {"id": "Z1-C3", "start_sec": 270.14, "end_sec": 303.44, "paraphrase": "Action rhythm is rehearsed and performed, not created only by faster cuts.", "uncertainty": "No production documentation beyond quoted examples."},
+        {"id": "Z1-C4", "start_sec": 309.02, "end_sec": 362.76, "paraphrase": "A hit can be shown in a wide and then repeated in close-up with a brief registration offset so the mind combines it as one stronger event.", "uncertainty": "The three-frame example must be frame-checked before treating it as exact."},
+        {"id": "Z1-C5", "start_sec": 393.12, "end_sec": 464.3, "paraphrase": "Visible pain humanizes the hero, while persistence and a concrete payoff complete the action-comedy contract.", "uncertainty": "Critical interpretation."}
+      ]
+    },
+    {
+      "video_id": "pC1-i1PI8Lw",
+      "title": "BEWARE! This video is EVIL — How to Build Suspense with Shot Composition",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=pC1-i1PI8Lw",
+      "duration_sec": 363.0,
+      "audio_sha256": "3db1f11822e77b02b366e08f108529eee31262b9da126d710c3458810b6dd2b2",
+      "asr_sha256": "55bcb3ae4b02eec2301fac12cd5cf842405d8bb92a3345e75c856b840cd33a38",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "PC1-C1", "start_sec": 59.0, "end_sec": 70.0, "paraphrase": "Relative size in the frame can assign visible power or weakness.", "uncertainty": "Qualitative principle, not a fixed ratio."},
+        {"id": "PC1-C2", "start_sec": 164.0, "end_sec": 206.0, "paraphrase": "Telephone and television are framed larger than the character as the threat gains control.", "uncertainty": "Visual claim requires frame evidence."},
+        {"id": "PC1-C3", "start_sec": 219.0, "end_sec": 237.0, "paraphrase": "Negative space and a high angle isolate and diminish the vulnerable protagonist.", "uncertainty": "Commentary interpretation."},
+        {"id": "PC1-C4", "start_sec": 247.0, "end_sec": 280.0, "paraphrase": "A foreground puddle and oversized doorknob delay the reveal while making the threat larger than the protagonist.", "uncertainty": "Visual size and pause need frame/clip verification."},
+        {"id": "PC1-C5", "start_sec": 286.0, "end_sec": 320.0, "paraphrase": "The summary recommends enlarging the threat and diminishing the protagonist at peak vulnerability.", "uncertainty": "Course-style heuristic."}
+      ]
+    },
+    {
+      "video_id": "FVR8zz8ci2k",
+      "title": "6 Ways to Edit Any Scene — Essential Film & Video Editing Techniques Explained",
+      "channel": "StudioBinder",
+      "url": "https://www.youtube.com/watch?v=FVR8zz8ci2k",
+      "duration_sec": 1122.84,
+      "audio_sha256": "f593b1078599aa4e455c3c7a08987e529f73588a1b7d1f6eb5ff82d411bea474",
+      "asr_sha256": "ad1660fb41391df600ba4124c1695d0c5aba9bb8a3bd7d6da755a1d23a7a8b9a",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "FVR-C1", "start_sec": 41.0, "end_sec": 48.0, "paraphrase": "Editing decisions can be framed as what to show, when to cut and what to cut to.", "uncertainty": "Teaching simplification."},
+        {"id": "FVR-C2", "start_sec": 169.4, "end_sec": 204.64, "paraphrase": "An eyeline match links a character's attention to an object; delaying or withholding the object creates intrigue.", "uncertainty": "Selected examples."},
+        {"id": "FVR-C3", "start_sec": 355.0, "end_sec": 473.0, "paraphrase": "Cross-cutting can braid concurrent locations and create parallel or escalating action.", "uncertainty": "Concurrency must be established per project."},
+        {"id": "FVR-C4", "start_sec": 486.0, "end_sec": 580.0, "paraphrase": "Eye trace preserves a focal region across cuts so short action clips remain readable.", "uncertainty": "The cited 1.8-second example is not a universal threshold."},
+        {"id": "FVR-C5", "start_sec": 621.16, "end_sec": 788.0, "paraphrase": "J- and L-cuts let sound lead or trail image to smooth dialogue, reactions and plan-to-execution transitions.", "uncertainty": "Course taxonomy."},
+        {"id": "FVR-C6", "start_sec": 949.0, "end_sec": 1066.0, "paraphrase": "Cutting within an action can connect direction and force when exit and entry moments match.", "uncertainty": "Exact cut should be tested against generated material."}
+      ]
+    },
+    {
+      "video_id": "Yf86yNjZNUY",
+      "title": "How to Write 1 Hour TV Pilot for Netflix, HBO, Amazon (PART 2) - 5 Act Structure & A,B,C Stories",
+      "channel": "Continuance Pictures",
+      "url": "https://www.youtube.com/watch?v=Yf86yNjZNUY",
+      "duration_sec": 1330.48,
+      "audio_sha256": "6b57f8f952111d9d43b80f25320dd779868fcc9b5fcbd274122d956650857be0",
+      "asr_sha256": "888dd3cd99b2919f1b719aabb3dab7c59d3aa02bff96ab1185be17eeea3b9d07",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "YF-C1", "start_sec": 41.0, "end_sec": 132.24, "paraphrase": "A pilot should keep a clear A-story goal and obstacle, with only a small number of interwoven supporting lines.", "uncertainty": "One writer's teaching framework, not platform policy."},
+        {"id": "YF-C2", "start_sec": 147.84, "end_sec": 164.16, "paraphrase": "The A story should build across the pilot toward a cliffhanger that creates a next-episode question.", "uncertainty": "Commercial advice."},
+        {"id": "YF-C3", "start_sec": 236.0, "end_sec": 504.0, "paraphrase": "The five-act model moves from ordinary setup through inciting disruption, midpoint loss or false victory, renewed responsibility and final escalation.", "uncertainty": "Page counts and act proportions are not universal."},
+        {"id": "YF-C4", "start_sec": 554.0, "end_sec": 840.0, "paraphrase": "Supporting lines should return as obstacles or responsibilities that directly press the A-story.", "uncertainty": "Ozark example used retrospectively."},
+        {"id": "YF-C5", "start_sec": 906.64, "end_sec": 1016.4, "paraphrase": "A B/C line belongs in the pilot when it raises A-story stakes and can merge into a moral choice or crisis.", "uncertainty": "Do not mechanically label every relationship as a subplot."},
+        {"id": "YF-C6", "start_sec": 1150.0, "end_sec": 1280.0, "paraphrase": "The final act can resolve the immediate surface problem while revealing a larger task or cost that becomes the cliffhanger.", "uncertainty": "Genre-dependent."}
+      ]
+    },
+    {
+      "video_id": "ma1rD2OP85c",
+      "title": "Parasite's Perfect Montage",
+      "channel": "Nerdwriter1",
+      "url": "https://www.youtube.com/watch?v=ma1rD2OP85c",
+      "duration_sec": 487.36,
+      "audio_sha256": "c7e1b81918eb6cbe662a1cc6493abe1d34a352202a0b896b3857f4a13b66f21a",
+      "asr_sha256": "588af294e55aff5fb599975198adbf4c945e4793741981b57bad0450f261920d",
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "MA1-C1", "start_sec": 9.22, "end_sec": 45.04, "paraphrase": "Editing, camera movement, sound and music jointly calibrate pacing so large tonal shifts remain coherent.", "uncertainty": "Commentator interpretation."},
+        {"id": "MA1-C2", "start_sec": 99.24, "end_sec": 128.08, "paraphrase": "Montage accelerates a repeated con pattern while solving the information-budget problem of a more complex plan.", "uncertainty": "Selected sequence analysis."},
+        {"id": "MA1-C3", "start_sec": 175.16, "end_sec": 251.24, "paraphrase": "Every shot supplies information or foreshadowing; slow motion, linear movement and music make the sequence a rhythmic unit that manipulates time.", "uncertainty": "Visual/music assertions need clip verification."},
+        {"id": "MA1-C4", "start_sec": 316.88, "end_sec": 332.54, "paraphrase": "Two performances can be stitched within a camera move when neither take supplies the desired tempo alone.", "uncertainty": "Specific edit claim; frame-level verification required."},
+        {"id": "MA1-C5", "start_sec": 345.0, "end_sec": 364.52, "paraphrase": "Intercutting locations removes repeated lines and makes multiple places feel like one bouncing conversation.", "uncertainty": "Commentary about an editor's revision."},
+        {"id": "MA1-C6", "start_sec": 375.0, "end_sec": 435.42, "paraphrase": "The montage's apparent control also plants material that later recontextualizes the family's success.", "uncertainty": "Theme interpretation."}
+      ]
+    }
+  ]
+}

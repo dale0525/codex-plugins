@@ -1,0 +1,19 @@
+id: cold-cup.edit-plan
+version: 1.0.0
+owner_role: editor
+source_inputs: [cold-cup.clip-plan@1.0.0, cold-cup.clip-qc@1.0.0]
+assumptions: ["所有素材 pending，时间线为 planned"]
+constraints: {runtime_target_sec: 60, aspect_ratio: "16:9"}
+open_questions: []
+status: pending
+change_log: []
+timeline:
+  - {clip_id: C-S01-01, in_sec: 0, out_sec: 6, contribution_sec: 6, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "观众先看水环", must_beat_ids: [S01-B01], sound_bridge: "水滴J-cut"}
+  - {clip_id: C-S01-02, in_sec: 6, out_sec: 12, contribution_sec: 6, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "纤维线索", must_beat_ids: [S01-B01], sound_bridge: "水滴延续"}
+  - {clip_id: C-S01-03, in_sec: 12, out_sec: 20, contribution_sec: 8, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "侦探入场", must_beat_ids: [S01-B02], sound_bridge: "门声L-cut"}
+  - {clip_id: C-S01-04, in_sec: 20, out_sec: 28, contribution_sec: 8, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "误导窗边", must_beat_ids: [S01-B03], sound_bridge: "脚步前景"}
+  - {clip_id: C-S01-05, in_sec: 28, out_sec: 35, contribution_sec: 7, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "压回杯垫", must_beat_ids: [S01-B03], sound_bridge: "杯垫摩擦"}
+  - {clip_id: C-S01-06, in_sec: 35, out_sec: 43, contribution_sec: 8, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "选择实验", must_beat_ids: [S01-B04], sound_bridge: "热水J-cut"}
+  - {clip_id: C-S01-07, in_sec: 43, out_sec: 49, contribution_sec: 6, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "复现证据", must_beat_ids: [S01-B04], sound_bridge: "抽走脚步声"}
+  - {clip_id: C-S01-08, in_sec: 49, out_sec: 60, contribution_sec: 11, handles_sec: {in: 0.5, out: 0.5}, cut_purpose: "动作揭示和扣留", must_beat_ids: [S01-B05], sound_bridge: "纸袋摩擦后静音"}
+runtime_reconciliation: {target_sec: 60, contribution_sum_sec: 60, handles_counted: false, result: pending}

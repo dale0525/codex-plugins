@@ -1,0 +1,47 @@
+id: compiler-smoke.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [compiler-smoke.director-intent@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: frozen
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: [slate blue, warm brass, muted charcoal]
+camera_language:
+  allowed_framing: [medium wide, prop insert, reaction close-up]
+  lens_or_fov_range: neutral perspective
+  height_rules: [eye level except prop insert]
+  movement_rules: [locked]
+  axis_rules: [archive door left and return slot right]
+lighting_rules: [cool window-left key, stable warm desk practical]
+characters:
+  - character_id: CHAR-COURIER
+    role: protagonist
+    visible_anchors: [short dark curls, charcoal courier coat, brass bicycle pin]
+    state_versions:
+      - state_id: CHAR-COURIER.STATE-HALL
+        age: early-30s
+        time_context: present blue hour
+        visible_state: dry coat and alert posture
+        wardrobe_version: WARD-COURIER-01
+        must_not_drift: [short curls, charcoal coat, brass bicycle pin]
+    must_not_drift: [short curls, charcoal coat, brass bicycle pin]
+locations:
+  - location_id: LOC-ARCHIVE-HALL
+    layout: Archive door on left wall and public return slot on right wall.
+    anchors: [closed bronze archive door, narrow return slot, dropped badge]
+    directions: window light from frame left
+    time_weather: clear blue hour
+props:
+  - prop_id: PROP-KEY
+    appearance: palm-sized brass key with a round bow
+    dimensions: 7 cm long
+    holder_state_machine: floor to courier hand to return slot
+    narrative_function: compromised access
+motifs: [{motif_id: MOTIF-DIRECTION, rule: movement reverses from private lock to public return slot}]
+reference_assets: []
+must_preserve: [archive stays closed, key remains brass and round-bowed]
+must_not: [extra people, readable generated text, key enters archive lock]

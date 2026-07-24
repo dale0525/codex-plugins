@@ -1,0 +1,39 @@
+id: visual-comedy-retest.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [visual-comedy-retest.story-and-scene-map@1.0.0]
+assumptions: ["Comedy is carried by readable action, reaction, and timing only."]
+constraints: {aspect_ratio: "16:9", dialogue: none}
+open_questions: []
+status: frozen
+change_log: []
+audience_experience: "Audience sees the trap before customers do, then anticipates escalation and enjoys the circular payoff."
+theme_form_answer: "A helpful-looking concealment becomes a self-inflicted consequence."
+viewpoint_rule: "Objective observer; reveal umbrella mechanism just before each trigger, never explain with text."
+performance_rules: ["Worker deadpan and overconfident", "Customers each have a distinct reaction: hop, spin, applause, mirrored stare"]
+space_and_blocking_rules: ["Rack stays screen-right, counter screen-left", "Worker crosses behind customers but never changes axis"]
+camera_language_rules: ["Locked or gentle push-in only", "One clear action per clip", "Reaction holds land after each spray"]
+lighting_color_rules: ["Cool rainy exterior light, warm cafe practicals", "Red umbrella is the visual anchor"]
+editing_sound_rules: ["Hard cuts on trigger and reaction", "No dialogue; use room tone, water spurts, squeak, and silence before payoff"]
+scenes:
+  - scene_id: S01
+    audience_knowledge: "Audience sees the worker hide the self-spraying umbrella."
+    audience_misunderstanding: "Customers believe the umbrella is ordinary."
+    attention_path: ["worker", "red umbrella", "approaching customer", "trigger", "reaction"]
+    axis: "cafe counter-left to umbrella rack-right"
+    screen_direction: {worker: "left-to-right", customers: "right-to-left"}
+    performance_beats:
+      - {beat_id: S01-B01, want_now: "avoid blame", obstacle: "visible rack", tactic: "sneak", playable_action: "place umbrella and act casual", reaction_trigger: "footsteps"}
+      - {beat_id: S01-B02, want_now: "stay unnoticed", obstacle: "spray", tactic: "freeze", playable_action: "watch customer hop", reaction_trigger: "mist"}
+      - {beat_id: S01-B03, want_now: "redirect attention", obstacle: "spinning customer", tactic: "point away", playable_action: "gesture to menu", reaction_trigger: "side jet"}
+      - {beat_id: S01-B04, want_now: "pretend normal", obstacle: "burst", tactic: "hide", playable_action: "peek over menu", reaction_trigger: "button click"}
+      - {beat_id: S01-B05, want_now: "reset trap", obstacle: "last drip", tactic: "confidence", playable_action: "grip handle", reaction_trigger: "quiet rack"}
+      - {beat_id: S01-B06, want_now: "escape spray", obstacle: "pressure release", tactic: "flinch too late", playable_action: "get drenched", reaction_trigger: "lift"}
+    blocking_beats: []
+    coverage_strategy: "Base clips isolate trigger/action/reaction; inserts are fallback only."
+    base_clip_purpose: "Complete each escalation with readable cause and effect."
+    required_coverage: ["umbrella handle insert", "customer reaction inserts", "final worker reaction hold"]
+    sound_intent: "Water sounds escalate; one beat of silence precedes final spray."
+    non_negotiables: ["No spoken words", "No explanatory subtitles", "Final spray mirrors first three reactions"]
+    generation_risks: ["water physics", "prop continuity", "multi-actor contact"]
+    fallbacks: ["split action and reaction", "use off-screen spray with visible aftermath"]

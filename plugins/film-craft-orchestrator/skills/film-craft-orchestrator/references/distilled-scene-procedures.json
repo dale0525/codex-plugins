@@ -1,0 +1,202 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-23",
+  "source": {
+    "video_id": "3TukzX6R57Y",
+    "title": "How to Write Great Scenes — 4 Elements Every Scene Should Have",
+    "channel": "StudioBinder",
+    "url": "https://www.youtube.com/watch?v=3TukzX6R57Y",
+    "evidence_type": "asr_reviewed",
+    "evidence_level": "E4",
+    "asr_note": "whisper.cpp small.en；已完整人工阅读，电影专名仍需与官方字幕交叉核对。"
+  },
+  "procedures": [
+    {
+      "id": "scene-four-function-gate",
+      "domain": "writer",
+      "title": "场景四功能闸门",
+      "claim_refs": [
+        {"start_sec": 68.66, "end_sec": 81.66, "kind": "video_claim", "paraphrase": "视频引用场景定义：由时空统一的单一行动构成，并以变化结束；变化同时涉及故事与人物。"},
+        {"start_sec": 827.66, "end_sec": 845.66, "kind": "video_claim", "paraphrase": "场景需要在整部影片语境中运作，并影响更大的情节线。"},
+        {"start_sec": 747.66, "end_sec": 764.66, "kind": "video_claim", "paraphrase": "若场景完全不影响人物，它可能可以被删除。"},
+        {"start_sec": 1517.66, "end_sec": 1523.66, "kind": "video_claim", "paraphrase": "视频把冲突、人物发展、情节功能和调度概括为四项核心元素。"}
+      ],
+      "applicability": {
+        "use_when": ["诊断已有场景", "决定场景是否应删/并", "从大纲进入场景卡"],
+        "do_not_use_when": ["纯氛围段落被项目明确指定为形式实验", "蒙太奇由跨时空关系而非单一时空构成"]
+      },
+      "inputs": ["场景稿", "前一场退出状态", "后一场进入状态", "主角当前目标", "全片弧光"],
+      "steps": [
+        {"step": 1, "action": "用一句动词句写场景的 single action：谁试图对谁/什么做什么。", "check": "不能用‘谈论、展示、铺垫’等无结果词。"},
+        {"step": 2, "action": "写 entry_state 与 exit_state，分别标关系、信息、资源、身份四项。", "check": "至少一项发生不可忽略变化。"},
+        {"step": 3, "action": "填写冲突：目标、阻碍、风险；阻碍必须能改变策略。", "check": "不是只写‘内心挣扎’而无可见后果。"},
+        {"step": 4, "action": "填写人物功能：本场建立、暴露或改变人物的哪项策略/矛盾。", "check": "删掉本场后人物理解确实会损失。"},
+        {"step": 5, "action": "填写情节功能：本场打开或关闭了哪个下一步。", "check": "后一场至少一项可行动条件因此改变。"},
+        {"step": 6, "action": "填写调度功能：哪一次位置、视线或距离变化使转折可见。", "check": "调度与 beat_id 对齐。"},
+        {"step": 7, "action": "四项有两项为空则先合并/删除实验，不进入台词润色。", "check": "保留必须写例外理由。"}
+      ],
+      "outputs": ["scene diagnostic card", "保留/合并/删除决策", "entry/exit state diff", "调度转折句"],
+      "failure_signals": ["场景只传递信息，信息没有改变任何选择", "人物与情节在场景后都保持原状", "调度只是自然走动，和权力/信息无关"],
+      "acceptance_tests": [
+        {"test": "状态变化", "pass_criteria": "entry/exit 至少一项变化能由镜头或声音观察到。"},
+        {"test": "删除测试", "pass_criteria": "删除场景会造成明确因果、人物或信息断裂；否则删除或合并。"},
+        {"test": "下一步约束", "pass_criteria": "场景结尾使至少一个角色下一步能做/不能做的事发生变化。"}
+      ],
+      "worked_example": {
+        "weak_scene": "两名合伙人在餐厅讨论资金紧张。",
+        "single_action": "Lin 试图让 Bo 签下个人担保。",
+        "conflict": "Bo 想保住友谊但拒绝承担家庭风险。",
+        "turn": "Lin 已经替他签了名字。",
+        "exit_change": "Bo 拿走合同原件；合作关系从争执变成证据争夺。",
+        "blocking": "开场同侧并坐；看到伪造签名后 Bo 换到桌对面并挡住出口。"
+      }
+    },
+    {
+      "id": "scene-conflict-escalation-grid",
+      "domain": "writer",
+      "title": "冲突升级网格",
+      "claim_refs": [
+        {"start_sec": 184.66, "end_sec": 215.66, "kind": "video_claim", "paraphrase": "冲突由角色目标及阻止目标的障碍构成，既可身体化，也可由人物之间的言语目标产生。"},
+        {"start_sec": 315.66, "end_sec": 416.66, "kind": "video_claim", "paraphrase": "冲突也可来自环境或人物内部；内部冲突可以使表面合作的角色关系复杂化。"},
+        {"start_sec": 416.66, "end_sec": 482.66, "kind": "video_claim", "paraphrase": "冲突本身不够，它要服务更大的故事弧，并让观众清楚失败会损失什么。"},
+        {"start_sec": 254.66, "end_sec": 315.66, "kind": "video_claim", "paraphrase": "《心灵捕手》案例中，挑衅越过私人边界后产生爆发；镜头随张力逐步收紧。"}
+      ],
+      "applicability": {
+        "use_when": ["两人场景冲突疲软", "人物只轮流表达观点", "冲突升级只靠提高音量"],
+        "do_not_use_when": ["场景目标是有意的低压留白且后果在场外发生", "安全或亲密动作尚未获排练确认"]
+      },
+      "inputs": ["双方可失败目标", "各自不可让步项", "信息差", "时间压力", "场景最大允许代价"],
+      "steps": [
+        {"step": 1, "action": "为 A/B 分别写 want、public_reason、private_cost 和 walk_away_point。", "check": "双方目标不能同时无代价满足。"},
+        {"step": 2, "action": "建立至少三行 tactic/counter 网格：A 策略→B 可见反应→B 反制→A 新损失。", "check": "每行策略必须与上一行不同。"},
+        {"step": 3, "action": "为每轮选择一种阻碍来源：对方、环境、内部禁令；不能三轮都只靠拒绝。", "check": "阻碍会迫使策略改变。"},
+        {"step": 4, "action": "在第二或第三轮触碰具体边界，让关系、资源或身份成本升级。", "check": "边界事先由行为或道具建立。"},
+        {"step": 5, "action": "把最大一轮的摄影/调度变化写成结果而非情绪符号。", "check": "例如距离收紧是因为退路消失，不是因为‘紧张就推近’。"},
+        {"step": 6, "action": "结尾让一方赢得目标但支付另一项代价，或明确关闭退路。", "check": "不能回到开场聊天状态。"}
+      ],
+      "outputs": ["双人冲突诊断", "三轮 tactic/counter grid", "边界与代价表", "重写后的 beat sheet"],
+      "failure_signals": ["每轮都是同一句请求换说法", "障碍只有‘对方不同意’", "风险只在对白里说，现场没有可失去之物", "角色爆发前没有边界累积"],
+      "acceptance_tests": [
+        {"test": "策略差异", "pass_criteria": "至少三轮可用不同动词命名，且每轮由上一轮反应触发。"},
+        {"test": "成本升级", "pass_criteria": "第三轮可见代价高于第一轮，并改变关系、资源或身份至少一项。"},
+        {"test": "结局差分", "pass_criteria": "exit_state 与 entry_state 至少两项不同，且不能通过一句道歉完全复位。"}
+      ],
+      "worked_example": {
+        "A_want": "主管要员工留下修复事故。",
+        "B_want": "员工要准时去接孩子。",
+        "rounds": [
+          "请求帮助→员工展示已签离岗单→主管改为承诺调休",
+          "承诺调休→员工指出上次承诺作废→主管锁住系统权限",
+          "锁权限→员工把事故邮件抄送全组→主管被迫公开承担责任"
+        ],
+        "exit": "员工留下，但主管失去私下控制事故叙事的权力。"
+      }
+    },
+    {
+      "id": "scene-turning-point-four-effects",
+      "domain": "writer",
+      "title": "转折四效应检查",
+      "claim_refs": [
+        {"start_sec": 933.66, "end_sec": 967.66, "kind": "video_claim", "paraphrase": "视频引用 McKee 的四项转折效果：惊讶、好奇增加、获得洞见、故事进入新方向。"}
+      ],
+      "applicability": {
+        "use_when": ["场景有事件但不像转折", "结尾只制造悬念却不改变行动", "中段反转依赖巧合"],
+        "do_not_use_when": ["项目有意采用无转折观察段落", "把四项当固定公式硬塞"]
+      },
+      "inputs": ["候选转折事件", "转折前观众预期", "角色可行动选项", "下一场入口"],
+      "steps": [
+        {"step": 1, "action": "写 surprise：它违反了哪条已建立预期。", "check": "预期必须在此前可见，不是作者临时解释。"},
+        {"step": 2, "action": "写 curiosity：转折后新增的具体问题。", "check": "问题能通过后续行动回答。"},
+        {"step": 3, "action": "写 insight：观众或角色对既有信息重新理解什么。", "check": "不是重复新事实。"},
+        {"step": 4, "action": "写 new_direction：谁下一步必须换目标、策略或路线。", "check": "若行动不变，转折降级为信息点。"},
+        {"step": 5, "action": "四项不足两项则重写 setup 或后果，不用更响的音乐掩盖。", "check": "重写优先补因果而非冲击。"}
+      ],
+      "outputs": ["turning-point card", "setup 缺口", "next-direction handoff"],
+      "failure_signals": ["惊讶来自未建立的新人物突然出现", "新问题与主角目标无关", "获得信息后所有人继续原计划"],
+      "acceptance_tests": [
+        {"test": "四效应", "pass_criteria": "至少满足三项，其中 new_direction 必须满足。"},
+        {"test": "预期证据", "pass_criteria": "surprise 对应至少一个此前可定位 setup。"},
+        {"test": "行动改变", "pass_criteria": "转折后首个角色动作与转折前计划不同。"}
+      ],
+      "worked_example": {
+        "event": "失踪者主动打来电话，要求停止寻找。",
+        "surprise": "此前证据表明她被绑架。",
+        "curiosity": "她为何能自由打电话却不能说地点？",
+        "insight": "此前求救短信可能是给绑匪看的。",
+        "new_direction": "主角停止报警，转而追查通话背景里的车站广播。"
+      }
+    },
+    {
+      "id": "blocking-power-transfer-map",
+      "domain": "director",
+      "title": "权力转移调度图",
+      "claim_refs": [
+        {"start_sec": 987.66, "end_sec": 1005.66, "kind": "video_claim", "paraphrase": "视频区分 blocking 为演员运动，staging 为摄影机运动与放置。"},
+        {"start_sec": 1023.66, "end_sec": 1081.66, "kind": "video_claim", "paraphrase": "《公民凯恩》案例通过站坐高度、相机下降、起身和推近，使争论中的权力转移可见。"},
+        {"start_sec": 1395.66, "end_sec": 1464.66, "kind": "video_claim", "paraphrase": "《沉默的羔羊》案例把接近、站坐、高低角度、转身和最终同框与控制权、拒绝及伙伴关系对应。"}
+      ],
+      "applicability": {
+        "use_when": ["场景存在权力或信息反转", "台词已定但情绪反转不清", "需要给演员可排练走位"],
+        "do_not_use_when": ["把高低位置机械等同强弱", "走位涉及亲密、暴力、阻挡却未做安全与同意确认"]
+      },
+      "inputs": ["scene beats", "空间平面图", "门/桌/障碍物", "起始权力状态", "转折触发", "拍摄轴线"],
+      "steps": [
+        {"step": 1, "action": "在平面图设坐标和边界，写每人起始位置、视线、出口距离。", "check": "位置能被现场复现。"},
+        {"step": 2, "action": "每个 beat 只标一次主导变化：接近、占位、撤退、转身、升高、坐下、同框或隔离。", "check": "变化由角色策略触发。"},
+        {"step": 3, "action": "把相机 staging 写成对该变化的揭示方式：保持、降低、推近、改构图或不切。", "check": "相机不抢先宣布尚未发生的权力变化。"},
+        {"step": 4, "action": "在 trigger beat 明确 before_state/after_state 和谁先行动。", "check": "演员能用动词执行，不依赖‘更强势’等形容词。"},
+        {"step": 5, "action": "排练无台词版，记录观察者何时判断权力转移。", "check": "观察点与预设 trigger 相差不超过一个 beat。"},
+        {"step": 6, "action": "确认轴线、灯光、收音、安全和重置时间后冻结。", "check": "替代走位也保留同一权力功能。"}
+      ],
+      "outputs": ["带坐标平面图", "movement beat sheet", "camera staging handoff", "无台词排练记录", "安全与替代方案"],
+      "failure_signals": ["角色无原因地来回走", "权力变化只靠仰拍/俯拍标签", "摄影机先推近但演员策略没有变化", "位置变化破坏轴线或收音却无 fallback"],
+      "acceptance_tests": [
+        {"test": "无台词识别", "pass_criteria": "至少 4/5 观察者在同一 beat±1 内指出权力转移。"},
+        {"test": "动作因果", "pass_criteria": "每次位移都能追溯到 tactic、counter 或 new information。"},
+        {"test": "片场复现", "pass_criteria": "平面图包含距离/坐标、视线、轴线、道具和 fallback。"}
+      ],
+      "worked_example": {
+        "before": "老板站在门内，员工坐在桌边；老板控制退出。",
+        "trigger": "员工播放老板的录音。",
+        "movement": "老板绕桌夺手机；员工不退，起身把手机放到门外走廊。",
+        "after": "老板停在门槛，员工站到门内；退出权和证据控制同时反转。",
+        "camera": "前半固定双人中景；手机出门时横移保持二人同框，不用特写替代空间变化。"
+      }
+    },
+    {
+      "id": "long-take-attention-routing",
+      "domain": "director",
+      "title": "长镜头注意力路由",
+      "claim_refs": [
+        {"start_sec": 1127.66, "end_sec": 1158.66, "kind": "video_claim", "paraphrase": "视频认为较长镜头可用演员与摄影机运动把注意力从一人转到另一人，而不是在静态镜头之间剪切。"},
+        {"start_sec": 1167.66, "end_sec": 1207.66, "kind": "video_claim", "paraphrase": "《雨中曲》案例让人物与场景元素互动；相机主要保持宽景并由人物运动驱动，只在关键表达处推近。"}
+      ],
+      "applicability": {
+        "use_when": ["空间关系本身是戏剧", "表演与信息能连续交接", "希望减少 coverage 但保持可读性"],
+        "do_not_use_when": ["只是为了炫技", "演员/对焦/安全无法稳定完成", "关键反应必须通过剪辑控制时机"]
+      },
+      "inputs": ["beat sheet", "attention target per beat", "空间路线", "焦点/收音/灯光边界", "最小替代 coverage"],
+      "steps": [
+        {"step": 1, "action": "为每个 beat 指定唯一主要注意目标和转移触发。", "check": "不能同时要求观众读三个同等重要信息。"},
+        {"step": 2, "action": "优先用演员进入/离开、视线、遮挡和道具交接完成转移。", "check": "去掉相机运动后仍有基本可读性。"},
+        {"step": 3, "action": "只在演员运动无法完成景别/信息任务时移动相机。", "check": "每段运动写起点、终点、触发和停点。"},
+        {"step": 4, "action": "为关键表情决定保持宽景还是短推近，并说明观众会损失的空间信息。", "check": "推近不是默认情绪加强。"},
+        {"step": 5, "action": "排练时分别做演员、机位、焦点、声音和安全五条标记。", "check": "任一条失败都有重置或替代镜头。"},
+        {"step": 6, "action": "拍最小 fallback：入口、转折、退出三个覆盖点。", "check": "fallback 能剪出完整因果，不要求整场重拍。"}
+      ],
+      "outputs": ["attention route", "长镜头 blocking/staging 表", "技术标记", "最小 fallback coverage"],
+      "failure_signals": ["镜头移动但观众不知道该看什么", "演员只为配合器材走位", "长镜头失败后没有可剪替代", "宽景看不到关键选择却拒绝改变设计"],
+      "acceptance_tests": [
+        {"test": "注意力盲测", "pass_criteria": "至少 80% 观察者按预定顺序复述三个关键信息点。"},
+        {"test": "技术可行", "pass_criteria": "完整跑三次中至少两次同时通过焦点、收音、走位和安全检查。"},
+        {"test": "剪辑保险", "pass_criteria": "fallback 三镜能独立构成进入—转折—退出。"}
+      ],
+      "worked_example": {
+        "beats": ["母亲藏信", "孩子进入", "父亲从厨房听见谎言", "孩子发现信角"],
+        "routing": "母亲把信压入桌布→镜头随孩子经过桌边→父亲在背景开门进入焦点→孩子坐下时桌布被膝盖带起。",
+        "camera_rule": "不切信件特写；只有孩子看见信角时从三人宽景缓推至双人中景。",
+        "fallback": "桌边 master、父亲开门反应、信角与孩子手的 insert。"
+      }
+    }
+  ]
+}

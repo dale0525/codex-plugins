@@ -1,0 +1,15 @@
+{
+  "project_id": "mystery_reveal",
+  "status": "diagnostic_preview",
+  "provider_neutral_ir": [
+    {"clip_id":"C01","subject_state":"empty midnight apartment kitchen; white blue-rim cup cooling","action":"steam thins while curtain breathes","camera":"locked 35mm wide","continuity":"window screen right, table center, slate-blue shadows","negative":"no people, no text, no extra cups"},
+    {"clip_id":"C02","subject_state":"same cup and saucer","action":"camera reveals crimson thread trapped under saucer","camera":"65mm slow slider insert","continuity":"thread under saucer, amber tea, tungsten practical","negative":"detective absent, no explanatory graphics"},
+    {"clip_id":"C04","subject_state":"Mara calm in cream sweater; Lin listening","action":"Mara says cup was untouched all night and gestures to phone","camera":"medium over-shoulder","continuity":"Mara screen right, thread barely at frame edge","negative":"no confession, no subtitles"},
+    {"clip_id":"C07","subject_state":"brass latch loose, red thread continuous from saucer","action":"thread leads to latch then wet footprints below sill","camera":"low 65mm tracking insert","continuity":"same red thread, moon fill from right","negative":"no extra footprints, no police yet"},
+    {"clip_id":"C08","subject_state":"Mara rust coat hem near latch","action":"she steps back and thread tightens on coat","camera":"subtle handheld close","continuity":"thread taut, latch cracked","negative":"no visible text, no melodramatic gesture"},
+    {"clip_id":"C09","subject_state":"Lin and Mara frozen as police lights pulse","action":"latch clicks shut around thread; Lin looks at Mara","camera":"reaction close-up, micro-wobble","continuity":"red-blue wash, thread taut, no dialogue","negative":"no explanatory subtitle, no flashback"}
+  ],
+  "model_adapters": [],
+  "reference_inputs_expected": [],
+  "reference_inputs_attached": []
+}

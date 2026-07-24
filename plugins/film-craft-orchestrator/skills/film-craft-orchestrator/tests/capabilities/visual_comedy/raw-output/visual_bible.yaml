@@ -1,0 +1,16 @@
+project_id: umbrella_rack_prank_30s
+format: 16:9
+look: bright natural morning, soft window daylight, mint and cream cafe palette with saturated prop accents
+camera: eye-level 35mm equivalent, moderate depth of field, clean lateral screen direction
+location:
+  id: cafe_entrance
+  invariants: glass door upstage, umbrella rack screen-right, pastry counter screen-left, red floor mat centered
+characters:
+  worker_A: {silhouette: slim, wardrobe: green apron, red knit beanie, black trousers, must_not_drift: beanie and apron colors}
+  customer_B: {wardrobe: yellow raincoat, black bob, must_not_drift: yellow coat}
+  customer_C: {wardrobe: navy jacket, blue tote, must_not_drift: tote remains left shoulder}
+  customer_D: {wardrobe: beige coat, purple scarf, smartphone, must_not_drift: scarf and phone}
+prop_states:
+  auto_umbrella: {id: umbrella_X, appearance: matte black compact umbrella with silver trigger, states: [armed_in_rack, spraying, spent_reset], holder: worker_A}
+motif: spray mist forms small arcs; final arc mirrors first arc direction
+negative: no text, logos, subtitles, signage readable, injury, panic, photoreal bodily harm

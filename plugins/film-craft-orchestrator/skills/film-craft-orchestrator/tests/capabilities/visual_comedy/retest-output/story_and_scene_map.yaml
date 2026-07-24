@@ -1,0 +1,38 @@
+id: visual-comedy-retest.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [visual-comedy-retest.ai-video-brief@1.0.0]
+assumptions: ["No dialogue, narration, or explanatory subtitles."]
+constraints: {runtime_target_sec: 30}
+open_questions: []
+status: frozen
+change_log: []
+logline: "A cafe employee secretly returns a self-spraying umbrella to the rack, but each customer gets a new comic consequence until the umbrella sprays its prankster."
+dramatic_question: "Can the employee keep the dangerous umbrella hidden?"
+theme_question: "Who is really in control of a supposedly helpful fix?"
+protagonist: {character_id: CHAR-WORKER, want: "avoid blame", need: "accept the consequence", fear: "being caught", contradiction: "pretends to help while setting a trap"}
+antagonistic_force: "PROP-UMBRELLA's pressure-triggered sprinkler mechanism"
+ending_choice: "Worker reaches for the umbrella and is sprayed in a full-circle payoff."
+sequences:
+  - sequence_id: SQ01
+    purpose: "escalating attempts to conceal a prank umbrella"
+    scene_ids: [S01]
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 30
+    location_id: LOC-CAFE-ENTRY
+    time: "rainy afternoon"
+    entry_state: "Worker holds a dripping red umbrella beside a cafe umbrella rack."
+    objective: "Return umbrella unnoticed."
+    obstacle: "Each customer approaches the rack and triggers a distinct spray gag."
+    turn: "The worker finally touches the umbrella to reset it."
+    exit_state: "Worker is drenched; customers stare; umbrella sits innocent and closed."
+    beats:
+      - {beat_id: S01-B01, narrative_function: establish, visible_start: "Worker scans cafe entry and hides red umbrella", trigger: "No one watches", character_tactic: "sneak", visible_end: "Umbrella is placed on rack", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [prop_state], fallback: "insert of hand placing umbrella"}
+      - {beat_id: S01-B02, narrative_function: first_escalation, visible_start: "First customer reaches for rack", trigger: "hand presses umbrella handle", character_tactic: "worker freezes", visible_end: "short mist sprays customer's shoes; customer hops", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [water_contact], fallback: "spray insert then shoe reaction"}
+      - {beat_id: S01-B03, narrative_function: second_escalation, visible_start: "Second customer leans under rack", trigger: "umbrella canopy is brushed", character_tactic: "worker points elsewhere", visible_end: "side jet spins customer around into coat stand", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [multi_actor_geometry], fallback: "separate jet and reaction clips"}
+      - {beat_id: S01-B04, narrative_function: third_escalation, visible_start: "Third customer opens umbrella", trigger: "button click", character_tactic: "worker hides behind menu", visible_end: "umbrella pops confetti-like water burst; customer applauds", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [water_volume], fallback: "cut to dry confetti substitute"}
+      - {beat_id: S01-B05, narrative_function: false_relief, visible_start: "Worker sees rack quiet", trigger: "worker steps out smiling", character_tactic: "reset umbrella", visible_end: "worker grips handle; tiny warning drip", runtime_budget_sec: 5, preferred_carrier: reaction, generation_risks: [hand_prop_contact], fallback: "close-up handle and drip"}
+      - {beat_id: S01-B06, narrative_function: payoff, visible_start: "Worker lifts umbrella", trigger: "pressure release", character_tactic: "too late to dodge", visible_end: "full spray drenches worker; customers mirror earlier reactions", runtime_budget_sec: 5, preferred_carrier: visual_action, generation_risks: [identity_and_water], fallback: "spray silhouette plus reaction montage"}
+must_beat_ids: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05, S01-B06]
+runtime_reconciliation: {scene_budget_sum_sec: 30, result: frozen}

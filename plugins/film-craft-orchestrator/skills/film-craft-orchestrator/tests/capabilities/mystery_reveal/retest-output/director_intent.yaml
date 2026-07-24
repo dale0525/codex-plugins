@@ -1,0 +1,35 @@
+id: cold-cup.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [cold-cup.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: frozen
+change_log: []
+audience_experience: "观众在第一个镜头已知杯底水环与杯垫纤维；侦探被林岚的窗边叙事带偏，直到实验复现让两条线索合并。"
+theme_form_answer: "物证通过重复动作说话，口供通过占据空间误导。"
+viewpoint_rule: "客观视点偏向桌面物证，不进入林岚主观。"
+performance_rules: ["侦探以记录动作掩饰怀疑", "林岚指向窗边后把杯垫压回", "揭示时侦探不提高音量，林岚停止动作"]
+space_and_blocking_rules: ["轴线为桌面—窗边", "侦探从左进入，林岚固定右侧窗边", "杯垫由林岚右手压回杯下"]
+camera_language_rules: ["锁定和慢横向揭示", "反转前不推近林岚主观", "关键物使用独立insert"]
+lighting_color_rules: ["冷蓝窗光左侧，桌面暖 practical 右后", "揭示仅提高杯底高光"]
+editing_sound_rules: ["冷凝水滴J-cut", "窗边脚步声前景误导", "实验段抽走脚步仅留热水与纸袋摩擦"]
+scenes:
+  - scene_id: S01
+    audience_knowledge: "杯底水环先于侦探可见"
+    audience_misunderstanding: "侦探暂时相信窗边脚印"
+    attention_path: [水环, 侦探手电, 林岚手与杯垫, 热水, 纤维]
+    axis: "桌面_to_窗边"
+    screen_direction: {CHAR-DETECTIVE: left_to_right, CHAR-LIN: faces_left}
+    performance_beats:
+      - {beat_id: S01-B03, want_now: "让侦探忽略杯垫", obstacle: "侦探已在记录桌面", tactic: "指向窗边脚印", playable_action: "压回杯垫并后退", reaction_trigger: "侦探转头看窗"}
+    blocking_beats:
+      - {beat_id: S01-B03, before_state: {mat: offset}, trigger: "林岚指向窗边", action: "右手压回杯垫", world_position: {林岚: window_right}, frame_position: {林岚: right_third}, eye_line: "侦探看窗边", attention_change: "cup_to_window", after_state: {mat: covered, detective_belief: window_timeline}}
+    coverage_strategy: "先物证insert，再双人中景，仅在复现实验时切杯垫macro"
+    base_clip_purpose: "观众与侦探共享桌面空间但信息不同步"
+    required_coverage: [C-S01-01, C-S01-03, C-S01-07]
+    sound_intent: "水滴、脚步、热水形成三段声音桥"
+    non_negotiables: ["观众先看见水环", "林岚一次明确误导", "无解释字幕"]
+    generation_risks: [condensation, hand_prop_contact, two_character_blocking]
+    fallbacks: ["静态道具insert", "画外对白+侦探反应", "独立纤维macro"]

@@ -1,0 +1,6 @@
+interface:
+  display_name: "AI Video Production"
+  short_description: "把导演方案编译成可生成、可迭代的 clips"
+  default_prompt: "Use $ai-video-production to convert this approved scene into model-routed clips, prompts, and generation records."
+policy:
+  allow_implicit_invocation: true

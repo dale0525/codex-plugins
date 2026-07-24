@@ -1,0 +1,33 @@
+id: cold-cup.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [cold-cup.director-intent@1.0.0]
+assumptions: ["无实际参考资产"]
+constraints: {}
+open_questions: []
+status: frozen
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: [cool_blue_gray, muted_amber, glass_highlight]
+camera_language:
+  allowed_framing: [wide_table_anchor, medium_two_shot, close_reaction, prop_macro]
+  lens_or_fov_range: "neutral to moderate telephoto"
+  height_rules: ["桌面物证与侦探手部同高", "人物眼线保持水平"]
+  movement_rules: [locked, slow_lateral_reveal]
+  axis_rules: ["桌面—窗边轴线不跳轴", "侦探左进右看，林岚右侧面向左"]
+lighting_rules: ["冷蓝窗光左侧", "暖色台灯右后", "揭示时只提高杯底高光"]
+characters:
+  - {character_id: CHAR-DETECTIVE, state_version: WARDROBE-DETECTIVE-01, visible_anchors: [深色防水外套, 银色记录笔, 左眉小疤], must_not_drift: [年龄, 发型, 眼镜], reference_ids: []}
+  - {character_id: CHAR-LIN, state_version: WARDROBE-LIN-01, visible_anchors: [灰色针织衫, 红色发夹, 右手食指戒指], must_not_drift: [发夹颜色, 袖口长度, 身高比例], reference_ids: []}
+locations:
+  - {location_id: LOC-TEAHOUSE, layout: "方桌中央、窗在右后、门在左前", fixed_objects: [保温壶, 台灯, 封锁带], directions: "窗光左向桌面", time_weather: "凌晨、雨后", reference_ids: []}
+props:
+  - {prop_id: PROP-CUP, appearance: "透明厚玻璃直筒杯，杯底圆环", scale: "掌心大小", initial_holder: none, state_machine: ["冷却有水环", "热水复现水环", "证物袋封存"], reference_ids: []}
+  - {prop_id: PROP-MAT, appearance: "深蓝圆形杯垫，背面粘白色纸纤维", scale: "杯底两倍", initial_holder: none, state_machine: ["偏移", "被压回", "翻面揭示纤维"], reference_ids: []}
+  - {prop_id: PROP-FILE, appearance: "棕色薄文件夹", scale: "A4", initial_holder: none, state_machine: ["失窃", "纤维残留"], reference_ids: []}
+motifs:
+  - {motif_id: MOTIF-WATER-RING, appearance_condition: "开场和实验", evolution: "从未解释的痕迹变为可复现证据", payoff: "与杯垫纤维同框"}
+reference_assets: []
+must_preserve: [aspect_ratio, water_ring_visibility, mat_screen_position, key_direction, no_explanatory_subtitles]
+must_not: [readable_generated_text, extra_people, neon_teal_orange, axis_flip, explanatory_subtitles]

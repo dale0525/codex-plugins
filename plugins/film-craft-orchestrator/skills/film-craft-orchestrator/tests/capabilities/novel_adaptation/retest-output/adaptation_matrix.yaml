@@ -1,0 +1,28 @@
+id: tide-station.adaptation-matrix
+version: 1.0.0
+owner_role: adaptation
+source_inputs: [user-provided-original-fragment]
+assumptions: ["片段为用户原创且权利 user-owned", "允许为90秒媒介发明连接动作"]
+constraints: {runtime_target_sec: 90, aspect_ratio: "16:9"}
+open_questions: []
+status: frozen
+change_log: []
+source_title: 海潮站片段
+source_creator: user
+source_version: user-provided fragment
+rights_status: user-owned
+adaptation_scope: single excerpt
+target_format: short
+target_runtime: 90
+non_negotiables: ["台风前一小时", "停用七年海潮站", "写有沈岚名字的录音带", "沈屿阻止播放", "母亲警告", "沈岚打开防波堤门"]
+permission_to_invent: true
+chosen_viewpoint: "贴近沈岚的选择性客观视角；母亲仅声音存在"
+entries:
+  - {source_unit: U01, source_excerpt: "台风登陆前一小时，沈岚回到停用七年的海潮站", source_function: [world_rule, causal], screen_unit: S01-B01, preservation: must_preserve, translate: "外景雨幕与推门动作", combine: [], omit: [], invent_ids: [INV-01], reason: "在10秒内建立倒计时与地点", risks: ["天气生成漂移"], verification: "时钟/广播/门三锚点", rights_status: user-owned}
+  - {source_unit: U02, source_excerpt: "钟停在母亲失踪那天，广播吐出潮声", source_function: [world_rule, information, theme], screen_unit: S01-B02, preservation: must_preserve, translate: "停钟insert与潮声J-cut", combine: [], omit: [], invent_ids: [], reason: "以声音让废站仍有生命", risks: ["钟面文字乱码"], verification: "后期钟面合成", rights_status: user-owned}
+  - {source_unit: U03, source_excerpt: "售票窗后找到写着自己名字的录音带", source_function: [causal, information], screen_unit: S01-B03, preservation: must_preserve, translate: "道具近景替代叙述说明", combine: [], omit: [], invent_ids: [INV-02], reason: "把姓名线索变成可见选择", risks: ["可读文字能力"], verification: "合规标签资产", rights_status: user-owned}
+  - {source_unit: U04, source_excerpt: "弟弟出现，坚持那只是母亲留下的道歉", source_function: [character, information], screen_unit: S01-B04, preservation: must_preserve, translate: "从黑暗入画并占住出口", combine: [], omit: [], invent_ids: [INV-03], reason: "用blocking显示其控制信息的策略", risks: ["双人身份混淆"], verification: "单人反应coverage", rights_status: user-owned}
+  - {source_unit: U05, source_excerpt: "播放先是童年背诵潮汐表，随后母亲警告", source_function: [reversal, theme, information], screen_unit: S01-B05/S01-B06, preservation: must_preserve, translate: "分为按钮、童声、母亲VO三段", combine: [], omit: [], invent_ids: [], reason: "拆分高风险口型与道具动作", risks: ["音频连续性"], verification: "独立音频ID与时间线", rights_status: user-owned}
+  - {source_unit: U06, source_excerpt: "沈屿关机；沈岚不开抢回磁带而打开防波堤门", source_function: [choice, payoff], screen_unit: S01-B07, preservation: must_preserve, translate: "绕行blocking与门外白光", combine: [], omit: [], invent_ids: [INV-04], reason: "让不抢磁带成为可见主动选择", risks: ["门/风动作"], verification: "门前背影与海浪cutaway", rights_status: user-owned}
+selection_rationale: "保留因果、视角与选择；把内在迟疑转为视线/走位，把母亲实体和额外背景删去。"
+viewpoint_cost: "观众无法确认母亲是否仍在世，只能与沈岚共享警告的不确定性。"

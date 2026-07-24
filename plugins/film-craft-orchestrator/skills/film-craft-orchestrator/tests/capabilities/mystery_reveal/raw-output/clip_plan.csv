@@ -1,0 +1,10 @@
+clip_id,beat_id,start_sec,duration_sec,narrative_purpose,primary_action,camera,entry_state,exit_state,handles,status
+C01,B01,0,6,Establish empty kitchen and cooling tea,steam fades from cup,locked wide,empty kitchen kettle clicks off,cup isolated on table,1s diagnostic_preview
+C02,B02,6,5,Give viewer decisive clue before detective,red thread visible under saucer,65mm slider insert,cup centered thread hidden by saucer,thread clearly readable,1s diagnostic_preview
+C03,B03,11,7,Introduce detective and suspect geography,Lin enters and Mara rises,locked two-shot,thread remains under saucer,Mara seated screen right,1s diagnostic_preview
+C04,B04,18,8,Deliver misdirection, Mara says cup untouched all night,medium OTS on Mara,Lin opens notebook,Mara points to phone,1s diagnostic_preview
+C05,B05,26,7,Plant audible bridge to window,latch rattles offscreen while Lin pauses,slow push toward Lin,alibi hangs in air,Lin turns toward window,1s diagnostic_preview
+C06,B06,33,7,Let detective discover clue,Lin lifts saucer and sees thread,65mm insert,Lin hand reaches cup,thread trails off frame,1s diagnostic_preview
+C07,B07,40,7,Convert clue into causal path,thread leads to latch and wet footprints,low tracking insert,latch loose,footprints visible below sill,1s diagnostic_preview
+C08,B08,47,7,Expose suspect connection,thread tightens on Mara coat hem,handheld micro-wobble,Mara steps back,coat catches thread,1s diagnostic_preview
+C09,B09,54,6,Complete silent reveal,police lights pulse; Lin looks at Mara,slow reaction close-up,thread taut and latch closed,Mara freezes on inhale,1s diagnostic_preview

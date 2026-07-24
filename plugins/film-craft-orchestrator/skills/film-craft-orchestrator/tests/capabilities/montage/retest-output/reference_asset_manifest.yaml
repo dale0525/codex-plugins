@@ -1,0 +1,11 @@
+id: radio-montage.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: ["No real reference assets supplied."]
+constraints: {reference_transport: none}
+open_questions: []
+status: diagnostic_preview
+change_log: []
+assets:
+  - {asset_id: REF-NONE, role: diagnostic_placeholder, status: pending, sha256: "", reference_transport: none}

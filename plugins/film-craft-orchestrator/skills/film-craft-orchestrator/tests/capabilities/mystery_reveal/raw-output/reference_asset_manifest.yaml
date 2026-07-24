@@ -1,0 +1,7 @@
+project_id: mystery_reveal
+status: diagnostic_preview
+reference_inputs_expected: []
+reference_inputs_attached: []
+reference_transport: none
+assets: []
+note: No real reference images supplied; do not promote generated previews to production.

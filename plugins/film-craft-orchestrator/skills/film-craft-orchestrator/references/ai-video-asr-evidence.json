@@ -1,0 +1,224 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-07-24",
+  "method": {
+    "audio": "Authorized low-bandwidth YouTube audio collected after public caption access was rate-limited or unavailable.",
+    "metadata": "Public YouTube oEmbed title and author metadata independently queried on 2026-07-24.",
+    "asr_engine": "whisper.cpp 1.8.3",
+    "model": "ggml-small.en.bin",
+    "review": "All ten ASR files were read in chronological order. Claims below are short paraphrases with time windows, not transcript redistribution.",
+    "evidence_boundary": "ASR proves what the presenter said, not that every visible output, vendor capability or quality judgment is correct. Visual-result claims remain speaker-reported until linked to frame evidence; current model capabilities require official documentation."
+  },
+  "items": [
+    {
+      "video_id": "31GR1pXlB1g",
+      "title": "My AI Filmmaking Workflow: Kling, Veo & Nano Banana",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=31GR1pXlB1g",
+      "duration_sec": 2190.92,
+      "audio_sha256": "77b82f3b9ee3d0bf9a12d33141e0813a1072e11932abbc5fcd8643bc9553484d",
+      "asr_sha256": "b8aa8d873543e80fe55ff06b2bd9c31ebaa3d85de58162e97aa3d1b172d49e8e",
+      "asr_segments": 726,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "31G-C01", "start_sec": 48.16, "end_sec": 111.32, "paraphrase": "The presenter builds a multi-angle character sheet from a character reference plus selected screenshots, then explicitly labels the views as one character.", "uncertainty": "Workflow report; cross-angle visual identity still needs frame comparison."},
+        {"id": "31G-C02", "start_sec": 320.38, "end_sec": 352.2, "paraphrase": "Three generated segments are chained by using each end frame as the next start frame to form an approximately 23-second continuous sequence.", "uncertainty": "The exact duration and seam quality are project-specific."},
+        {"id": "31G-C03", "start_sec": 352.2, "end_sec": 396.16, "paraphrase": "A straight join exposes mismatched rain and an approximately ten-frame glitch; trimming the preceding tail improves the seam.", "uncertainty": "Ten frames is an observed repair, not a general constant."},
+        {"id": "31G-C04", "start_sec": 1055.8, "end_sec": 1069.8, "paraphrase": "When generated motion goes in the wrong direction, the presenter trims the failure and cuts during motion to preserve the intended action.", "uncertainty": "Narrated edit choice; the before/after result needs frame or clip evidence."},
+        {"id": "31G-C05", "start_sec": 1137.4, "end_sec": 1187.64, "paraphrase": "Background errors are removed or rearranged with masks and redraws, then rain, grain and color matching are added to blend the replacement.", "uncertainty": "Specific software and model version are time-sensitive."},
+        {"id": "31G-C06", "start_sec": 1579.76, "end_sec": 1650.0, "paraphrase": "Dialogue is built as a separate voice-design and voice-change layer, reduced against the source recording, then sent through a lip-sync stage.", "uncertainty": "Does not prove current vendor support or voice-rights compliance."}
+      ]
+    },
+    {
+      "video_id": "8FD8M7jhX20",
+      "title": "Complete AI Filmmaking Workflow - From Concept to Film",
+      "channel": "FRMWRKD-EXPLAINED",
+      "url": "https://www.youtube.com/watch?v=8FD8M7jhX20",
+      "duration_sec": 2700.92,
+      "audio_sha256": "b0ae027c6added68f19b436785532a9827f530459aa5f6125af24cae5207ffd1",
+      "asr_sha256": "a666489c5aea27e38064adeed53d84bae9a2db984371772bc6531c4e3ac6d4c4",
+      "asr_segments": 448,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "8FD-C01", "start_sec": 74.72, "end_sec": 84.0, "paraphrase": "The video discloses Artlist sponsorship.", "uncertainty": "Product endorsements and workflow claims involving the sponsor require bias labeling."},
+        {"id": "8FD-C02", "start_sec": 95.92, "end_sec": 123.04, "paraphrase": "The high-level order is idea, voiceover, visuals, audio, post and final film; concept, script and voice timing precede detailed visual generation.", "uncertainty": "The presenter later notes that real projects iterate rather than remain linear."},
+        {"id": "8FD-C03", "start_sec": 289.92, "end_sec": 518.4, "paraphrase": "The presenter tests one to three characters, selects one and builds a five- or seven-view sheet containing wardrobe, pose and lighting information.", "uncertainty": "A visible result still needs frame verification."},
+        {"id": "8FD-C04", "start_sec": 691.2, "end_sec": 1123.2, "paraphrase": "A database stores camera, focal-length, lens, stock, action and reference fields; a formula compiles them into prompts for batch shot-image generation.", "uncertainty": "Database and generator UI are workflow-specific; focal-length wording does not guarantee optical simulation."},
+        {"id": "8FD-C05", "start_sec": 1730.4, "end_sec": 1863.36, "paraphrase": "For image-to-video the presenter chooses a start frame, sometimes an end frame, and reports that short camera-plus-subject prompts are often more stable than overloaded prompts.", "uncertainty": "Personal experience, not a controlled prompt benchmark."},
+        {"id": "8FD-C06", "start_sec": 2071.84, "end_sec": 2369.04, "paraphrase": "Effects are assigned by story layer: reality remains cleaner while memory or emotion receives prism, blur and individually tuned grain.", "uncertainty": "Aesthetic choice, not a universal look rule."},
+        {"id": "8FD-C07", "start_sec": 2386.4, "end_sec": 2603.92, "paraphrase": "Multiple effects and inner-voice tracks are layered; obscuring elements and micro-cuts are used to hide transitions and add rhythm.", "uncertainty": "The presenter frames this as a fast 80/20 spec workflow, not final-master practice."}
+      ]
+    },
+    {
+      "video_id": "6UFFR2BLr5U",
+      "title": "How I Made a Time Travel Movie with Kling, Runway Act-One, ElevenLabs, & Suno | AI Workflow Tutorial",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=6UFFR2BLr5U",
+      "duration_sec": 912.92,
+      "audio_sha256": "01f345dd14f88b158ab16204156ed0b938d538274b0ac55caa738a2fc0c7e306",
+      "asr_sha256": "d53374872590d1e303efda9c34716700cb752c38a830d36fbcf1488814bb4d1a",
+      "asr_segments": 212,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "6UF-C01", "start_sec": 28.52, "end_sec": 34.22, "paraphrase": "The presenter performs both characters with a phone at a kitchen table.", "uncertainty": "Speaker-reported setup."},
+        {"id": "6UF-C02", "start_sec": 45.88, "end_sec": 75.48, "paraphrase": "Character voices are designed separately, applied to the recorded performance and then combined with a character-reference performance-transfer stage.", "uncertainty": "Vendor capabilities and terms require official verification."},
+        {"id": "6UF-C03", "start_sec": 332.76, "end_sec": 367.76, "paraphrase": "The presenter deliberately records larger facial expressions so that smaller expressions survive performance transfer.", "uncertainty": "Personal technique; not a measured transfer-function claim."},
+        {"id": "6UF-C04", "start_sec": 393.92, "end_sec": 408.7, "paraphrase": "The performance is split by dialogue line, exported as separate audio files and named by character and scene.", "uncertainty": "Workflow observation."},
+        {"id": "6UF-C05", "start_sec": 450.64, "end_sec": 493.68, "paraphrase": "The presenter describes high similarity, variable stability and moderate style exaggeration as preferred voice-change settings.", "uncertainty": "Uncontrolled personal settings; must not be generalized or treated as current defaults."},
+        {"id": "6UF-C06", "start_sec": 727.38, "end_sec": 788.96, "paraphrase": "The same clip is compared without effects, with horse effects, and with music; generated effects may consume credits yet return the wrong type of sound.", "uncertainty": "Presenter evaluation, not a blind listening test."},
+        {"id": "6UF-C07", "start_sec": 788.96, "end_sec": 862.92, "paraphrase": "Footsteps, hoofbeats and desert wind are layered, while library licensing statements are mentioned but not independently verified.", "uncertainty": "Licensing remarks are not legal advice and require current terms."}
+      ]
+    },
+    {
+      "video_id": "BBFNgQ1EQgY",
+      "title": "How I Made an AI Short Film (Seedream 4.5 + Kling 3.0)",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=BBFNgQ1EQgY",
+      "duration_sec": 645.0,
+      "audio_sha256": "c02a58b5f0fd5a14a175e1a3ced4c748d92f85ac32f0f1fd791fdf839dceacce",
+      "asr_sha256": "98e0fd153af691aeff5ecc921fefbda4f631af5b6d8a9b461fd5685eb9912627",
+      "asr_segments": 133,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "BBF-C01", "start_sec": 29.0, "end_sec": 121.0, "paraphrase": "The presenter compares character candidates, chooses one for natural facial texture and records that the choice is subjective rather than an objective model ranking.", "uncertainty": "Visual comparison not yet frame-verified."},
+        {"id": "BBF-C02", "start_sec": 122.0, "end_sec": 170.0, "paraphrase": "A front-and-side character sheet exposes wardrobe inconsistency, prompting a single final outfit specification.", "uncertainty": "Does not guarantee later generations preserve the outfit."},
+        {"id": "BBF-C03", "start_sec": 170.0, "end_sec": 208.0, "paraphrase": "Exterior and interior location assets are created and unwanted set elements are explicitly removed or replaced.", "uncertainty": "No complete floor plan is established by the narration."},
+        {"id": "BBF-C04", "start_sec": 217.0, "end_sec": 333.0, "paraphrase": "A dialogue sequence is designed as coverage inside one multi-shot generation, with character and world references attached.", "uncertainty": "Consistency is claimed only within the demonstrated generation, not across a film."},
+        {"id": "BBF-C05", "start_sec": 341.0, "end_sec": 376.0, "paraphrase": "When a falling-piano shot has implausible worker and rope physics, the presenter removes some references and simplifies the subject responsibility.", "uncertainty": "The replacement is described as better, not proven physically correct."},
+        {"id": "BBF-C06", "start_sec": 391.0, "end_sec": 455.0, "paraphrase": "A crash and food-stealing sequence is constrained by door-to-table adjacency, explicit start and impact frames, and multiple shots because the original action attribution was confused.", "uncertainty": "Spatial relation and action clarity require frame verification."},
+        {"id": "BBF-C07", "start_sec": 455.0, "end_sec": 531.0, "paraphrase": "The same apartment reference and captured prior-video frames are reused as anchors; dialogue audio still requires multiple regenerations.", "uncertainty": "Model-quality comparison is personal experience."}
+      ]
+    },
+    {
+      "video_id": "WvtBCvxsNkw",
+      "title": "Finally, Consistent Locations for AI Filmmaking (Seedance 2.0 & Kling 3 Omni)",
+      "channel": "AI Video School",
+      "url": "https://www.youtube.com/watch?v=WvtBCvxsNkw",
+      "duration_sec": 620.0,
+      "audio_sha256": "68817f603f3c444c93dfffd44fd7ad1a1ff297e31c08bbc3bc36600da98cf34f",
+      "asr_sha256": "4be992b572eb0165e6417475727443fb9e61959db8f3f6c2e4c7c8520cb645fd",
+      "asr_segments": 72,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "WVT-C01", "start_sec": 32.0, "end_sec": 62.0, "paraphrase": "The workflow creates a navigable world, places characters, derives storyboard images and combines references for video generation.", "uncertainty": "Tutorial workflow, not a unique required method."},
+        {"id": "WVT-C02", "start_sec": 72.0, "end_sec": 90.0, "paraphrase": "An existing room image is converted into a world in roughly five minutes.", "uncertainty": "Single-operation time estimate."},
+        {"id": "WVT-C03", "start_sec": 140.0, "end_sec": 188.0, "paraphrase": "The world can be explored from multiple heights and focal settings; an initial character-size error reveals that these images are references rather than production start/end frames.", "uncertainty": "Product and UI naming are ASR-sensitive."},
+        {"id": "WVT-C04", "start_sec": 188.0, "end_sec": 248.0, "paraphrase": "Wardrobe mismatch may be tolerable in loose reference images but is unacceptable when the images are intended as exact start and end frames.", "uncertainty": "Presenter boundary; exact tolerance remains project-specific."},
+        {"id": "WVT-C05", "start_sec": 279.0, "end_sec": 330.0, "paraphrase": "A location is specified with persistent red-door, chair, dock and rope anchors plus explicit character staging.", "uncertainty": "Prompt intent does not prove every generation preserves the anchors."},
+        {"id": "WVT-C06", "start_sec": 330.0, "end_sec": 410.0, "paraphrase": "Shot/reverse-shot coverage specifies high and low viewpoints, defocused foreground heads and left/right positions; the first staging result is corrected with more explicit placement.", "uncertainty": "Visual correction needs frame verification."},
+        {"id": "WVT-C07", "start_sec": 417.0, "end_sec": 500.0, "paraphrase": "Different world images are referenced per shot inside a multi-shot prompt rather than treated as one undifferentiated reference set.", "uncertainty": "Current syntax and support require official verification."},
+        {"id": "WVT-C08", "start_sec": 489.0, "end_sec": 555.0, "paraphrase": "A complex dive is broken across storyboarded time windows and bridged by a prior clip's end frame plus a character-back reference.", "uncertainty": "The underwater result is a target, not a guaranteed visible outcome."}
+      ]
+    },
+    {
+      "video_id": "Lp8ZAdGopDw",
+      "title": "How To Create AI Film Storyboards & Maintain Character Consistency",
+      "channel": "Helyz Space",
+      "url": "https://www.youtube.com/watch?v=Lp8ZAdGopDw",
+      "duration_sec": 832.48,
+      "audio_sha256": "826c510af19864222302fff759936c8729b43ee00c825cf8dbcd5ab838b34887",
+      "asr_sha256": "4755b960e05d7492627586c91bbfe8215dfb6669120388f43a6230348f6f837c",
+      "asr_segments": 222,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "LP8-C01", "start_sec": 0.0, "end_sec": 13.52, "paraphrase": "Storyboards are positioned as a pre-generation tool for continuity, structure and visualization.", "uncertainty": "Presenter rationale, not an outcome measurement."},
+        {"id": "LP8-C02", "start_sec": 60.72, "end_sec": 130.48, "paraphrase": "Each storyboard shot records framing, camera angle, subject/action and atmosphere/lighting, serving as both a visual blueprint and prompt plan.", "uncertainty": "Teaching definition."},
+        {"id": "LP8-C03", "start_sec": 178.8, "end_sec": 200.64, "paraphrase": "Character references, location references and shot-by-shot prompts are prepared before generation, with a separate grid per scene.", "uncertainty": "Demonstrated workflow."},
+        {"id": "LP8-C04", "start_sec": 281.04, "end_sec": 345.28, "paraphrase": "Only characters needed for the current shot are attached alongside the environment reference.", "uncertainty": "UI-specific operation."},
+        {"id": "LP8-C05", "start_sec": 424.56, "end_sec": 465.12, "paraphrase": "Image numbers are mapped to named characters and environments, and the map must be updated whenever upload order changes.", "uncertainty": "A fragile UI-reference rule, but the manifest principle is stable."},
+        {"id": "LP8-C06", "start_sec": 521.04, "end_sec": 647.6, "paraphrase": "A start frame is extracted from a selected grid by attaching the grid, the required character references and the matching shot prompt, while keeping frame labels and image numbers synchronized.", "uncertainty": "Some ASR terms around start-frame labels are ambiguous."},
+        {"id": "LP8-C07", "start_sec": 667.76, "end_sec": 776.4, "paraphrase": "Removing a character reference for a later shot requires renumbering the remaining assets before extracting the next start frame.", "uncertainty": "UI-specific, but directly supports separate expected/attached manifests."}
+      ]
+    },
+    {
+      "video_id": "o7iUGdeSUPE",
+      "title": "How to Lip Sync TWO characters in ONE scene with AI [Tutorial]",
+      "channel": "Bozek Media",
+      "url": "https://www.youtube.com/watch?v=o7iUGdeSUPE",
+      "duration_sec": 414.88,
+      "audio_sha256": "fa82d19f8bbb3c3d4123b1685f5839ba15cb46b31108b5e5d4b3da45e009c84c",
+      "asr_sha256": "12b52efc9dbab0eb932db49298c6353998c21a30b63a3efd651e77481808e32c",
+      "asr_segments": 103,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "O7I-C01", "start_sec": 0.0, "end_sec": 12.8, "paraphrase": "The demonstrated pipeline connects script, visuals, voice generation, animation/lip-sync and conventional editing/post tools.", "uncertainty": "Tool chain, not a one-click capability."},
+        {"id": "O7I-C02", "start_sec": 184.8, "end_sec": 203.68, "paraphrase": "Two-speaker dialogue is generated with speaker assignment and optional emotion tags.", "uncertainty": "The cited voice version was described as alpha; current support and terms require official verification."},
+        {"id": "O7I-C03", "start_sec": 231.44, "end_sec": 256.08, "paraphrase": "A wide-shot lip-sync pass initially makes both characters perform the full recording, so the material is treated as an intermediate layer.", "uncertainty": "Single workflow observation."},
+        {"id": "O7I-C04", "start_sec": 292.08, "end_sec": 317.76, "paraphrase": "The frame is divided with masks or crops; the non-speaking side is frozen, then the treatment is reversed for the other speaker.", "uncertainty": "A fifty-percent split only fits the demonstrated symmetrical composition."},
+        {"id": "O7I-C05", "start_sec": 317.76, "end_sec": 336.08, "paraphrase": "Left and right close-ups are mixed into the sequence and duplicated audio tracks are explicitly removed.", "uncertainty": "Timing similarity is project-specific."},
+        {"id": "O7I-C06", "start_sec": 357.44, "end_sec": 386.56, "paraphrase": "An attempted alternative lip-sync path errors and misplaces characters, so the output is rejected.", "uncertainty": "One failure does not establish that the tool always fails."},
+        {"id": "O7I-C07", "start_sec": 386.56, "end_sec": 400.64, "paraphrase": "The presenter concludes that this dialogue setup still requires multiple tools and manual editing.", "uncertainty": "Time-sensitive practitioner conclusion."}
+      ]
+    },
+    {
+      "video_id": "PswcbMbJ37c",
+      "title": "Stop Making Cheap AI Videos - Use This $10M Workflow Instead | AI Filmmaking Sound Design",
+      "channel": "Motion Lab",
+      "url": "https://www.youtube.com/watch?v=PswcbMbJ37c",
+      "duration_sec": 394.16,
+      "audio_sha256": "31901edccf13acb66830b2bbb2df18e7928d093c11fc16d07fe5168b0d698d39",
+      "asr_sha256": "77f449b68db02c0053fb1d4d0acbe87061f651fb758b3fb0f44c359425c2076f",
+      "asr_segments": 135,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "PSW-C01", "start_sec": 46.56, "end_sec": 74.72, "paraphrase": "The presenter reports that native generated ambience changes across cuts and that generated dialogue often shares an artificial cadence.", "uncertainty": "Personal observation, not a broad model benchmark."},
+        {"id": "PSW-C02", "start_sec": 95.84, "end_sec": 118.56, "paraphrase": "Each planned shot receives its own prompt and character reference before the best raw versions are selected.", "uncertainty": "Vendor UI and model names are version-specific."},
+        {"id": "PSW-C03", "start_sec": 151.04, "end_sec": 165.36, "paraphrase": "Shots are assigned narrative jobs such as establishing the world, introducing a character, isolating a subject or creating tension with an insert.", "uncertainty": "Presenter planning method."},
+        {"id": "PSW-C04", "start_sec": 167.2, "end_sec": 189.2, "paraphrase": "Prompts describe how the camera observes the event through low tracking, slow pushes, rack focus, wide views and close-ups.", "uncertainty": "Mentioned camera language does not prove exact optical execution."},
+        {"id": "PSW-C05", "start_sec": 202.4, "end_sec": 238.8, "paraphrase": "Generated clips are reordered and retimed in an editor, while native generated audio is deliberately discarded.", "uncertainty": "Editing decision, not a claim that all native audio is unusable."},
+        {"id": "PSW-C06", "start_sec": 238.8, "end_sec": 320.64, "paraphrase": "Footsteps, cloth, ticking, impacts, risers, explosions and debris are rebuilt in layers with ambience and reverb.", "uncertainty": "The exact mix is not independently measured."},
+        {"id": "PSW-C07", "start_sec": 276.16, "end_sec": 318.4, "paraphrase": "A cut-wire beat uses a drop to silence, black screen, heartbeat, riser, explosion and a returning drone to carry uncertainty without music.", "uncertainty": "Narrated design; the final audible result needs waveform or clip verification."}
+      ]
+    },
+    {
+      "video_id": "3MQn-A1q9vo",
+      "title": "The Reality of Making Cinematic AI Videos (My Workflow, Mistakes & Lessons) - Behind The Scenes",
+      "channel": "AI for Real Life: Redefining Filmmaking",
+      "url": "https://www.youtube.com/watch?v=3MQn-A1q9vo",
+      "duration_sec": 1900.34,
+      "audio_sha256": "aa6dca7d0d23af0a95558a22f4841b953346b4206f9532cb46399239c41288c4",
+      "asr_sha256": "0740080198be96c2c0d406331082e4fc677c946d2d3000af5303d3005f2a8177",
+      "asr_segments": 759,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "3MQ-C01", "start_sec": 513.0, "end_sec": 560.0, "paraphrase": "Using the newest generated image as the next character reference accumulates small facial changes into visible drift.", "uncertainty": "One project retrospective; no general failure rate."},
+        {"id": "3MQ-C02", "start_sec": 567.0, "end_sec": 588.0, "paraphrase": "For client work the presenter recommends stopping, returning to the original anchor and regenerating affected assets; a personal concept film may tolerate more drift.", "uncertainty": "Presenter's delivery boundary."},
+        {"id": "3MQ-C03", "start_sec": 753.0, "end_sec": 870.0, "paraphrase": "A nine-panel storyboard is used for fast composition and mood exploration, then selected panels are enlarged and re-anchored with character and location references.", "uncertainty": "The presenter reports that enlargement can return the wrong panel."},
+        {"id": "3MQ-C04", "start_sec": 885.0, "end_sec": 952.0, "paraphrase": "Time pressure and generation fatigue allow small inconsistencies to pass and compound, motivating separate exploration and refinement passes.", "uncertainty": "Self-report; fatigue effect is not quantified."},
+        {"id": "3MQ-C05", "start_sec": 1083.0, "end_sec": 1122.0, "paraphrase": "An unidentified hand can change identity during motion unless a reference or complete identity/wardrobe description is supplied.", "uncertainty": "Illustrative risk, not inevitable behavior."},
+        {"id": "3MQ-C06", "start_sec": 1166.0, "end_sec": 1225.0, "paraphrase": "Repeated failure in one model triggers a switch to a backup model chosen for the task rather than a universal best-model assumption.", "uncertainty": "Model behavior changes with version."},
+        {"id": "3MQ-C07", "start_sec": 1352.0, "end_sec": 1397.0, "paraphrase": "A second review catches an inconsistent arena face and cleaner grain; the proposed repairs are a faster cut, regeneration and grain matching.", "uncertainty": "Review suggestion, not an automatic correction."}
+      ]
+    },
+    {
+      "video_id": "f5BYj6XHGwg",
+      "title": "I Stopped Prompting AI Videos Like Everyone Else",
+      "channel": "AI for Real Life: Redefining Filmmaking",
+      "url": "https://www.youtube.com/watch?v=f5BYj6XHGwg",
+      "duration_sec": 1153.6,
+      "audio_sha256": "b5670acf138466855c71a60a6383c44b3c48aa832416c636e320af126f1ec0b9",
+      "asr_sha256": "139d3234ae717b45812dca2a5262c2f8677130f9a1202e2792ba1f4fb67c80e8",
+      "asr_segments": 224,
+      "review_status": "full_asr_read",
+      "evidence_level": "E4",
+      "claims": [
+        {"id": "F5B-C01", "start_sec": 29.84, "end_sec": 48.16, "paraphrase": "The presenter reports that generic descriptive prompts occasionally work but often retain an artificial, non-filmic result.", "uncertainty": "Personal baseline, not an objective quality metric."},
+        {"id": "F5B-C02", "start_sec": 324.56, "end_sec": 384.32, "paraphrase": "A preset repeatedly preserves character and location but produces the wrong story and emotion; the same structured prompt is then moved to a different model.", "uncertainty": "One successful pivot does not prove the second model is generally better."},
+        {"id": "F5B-C03", "start_sec": 549.68, "end_sec": 593.76, "paraphrase": "Prompts are segmented into short time windows containing shot, action and sound beats, while the presenter warns that not every beat will be honored.", "uncertainty": "Observed prompt strategy, not a guarantee of temporal control."},
+        {"id": "F5B-C04", "start_sec": 675.84, "end_sec": 742.08, "paraphrase": "A single color word causes a two-color surfboard to become all yellow, while fins and object relationships also become incorrect.", "uncertainty": "Specific failure example."},
+        {"id": "F5B-C05", "start_sec": 770.4, "end_sec": 801.04, "paraphrase": "The next iteration adds a prior-shot screenshot and product reference while removing the ambiguous color word, changing one primary control hypothesis.", "uncertainty": "Several supporting prompt edits may still interact."},
+        {"id": "F5B-C06", "start_sec": 833.92, "end_sec": 909.76, "paraphrase": "Incorrect fins are hidden with a crop, while arm reversal and inconsistent golden-hour grading remain unresolved because the project is labeled a proof of concept.", "uncertainty": "Editing conceals but does not repair source-state errors."},
+        {"id": "F5B-C07", "start_sec": 993.6, "end_sec": 1055.04, "paraphrase": "The presenter frames the process as generate, analyze and fix, and limits rapid montage cutting to short sequences rather than a whole feature.", "uncertainty": "Practitioner heuristic."}
+      ]
+    }
+  ]
+}

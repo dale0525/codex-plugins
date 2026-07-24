@@ -1,0 +1,18 @@
+id: project.final-film-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints:
+  runtime_target_sec: 60
+open_questions: []
+status: draft
+change_log: []
+runtime: pending
+must_beat_coverage: pending
+continuity: pending
+dialogue_lipsync: pending
+sound: pending
+rights_and_provenance: pending
+blocking_conflicts: []
+final_result: pending

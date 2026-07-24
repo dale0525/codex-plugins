@@ -1,0 +1,10 @@
+{
+  "project_id": "mystery_reveal",
+  "status": "pending",
+  "characters": {"detective_lin_v1": {"costume": "charcoal raincoat", "watch": "left wrist"}, "mara_v1": {"costume": "cream sweater; rust coat", "ear_cuff": "right"}},
+  "prop_states": {"red_thread": ["under_saucer", "trailing_to_latch", "caught_on_coat"], "window_latch": ["loose", "thread_caught"]},
+  "screen_direction": {"window": "screen_right", "lin_entry": "screen_left"},
+  "approved_exits": [],
+  "blocking_conflicts": [],
+  "note": "No generated evidence frames available; all transitions await QC."
+}

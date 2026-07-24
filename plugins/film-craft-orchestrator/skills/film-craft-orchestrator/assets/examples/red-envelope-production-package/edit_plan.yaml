@@ -1,0 +1,20 @@
+id: red-envelope.edit-plan
+version: 1.0.0
+owner_role: editor_sound
+source_inputs: [red-envelope.clip-plan@1.0.0]
+assumptions: []
+constraints:
+  runtime_target_sec: 60
+open_questions: [实际 handles 与表演时长待生成后替换]
+status: planned
+change_log: []
+timeline:
+  - {order: 1, clip_id: C-S01-01, contribution_sec: 7, must_beat_ids: [S01-B01], transition: hard_cut_on_door_sound}
+  - {order: 2, clip_id: C-S01-02, contribution_sec: 6, must_beat_ids: [], transition: L_cut_footsteps}
+  - {order: 3, clip_id: C-S01-03, contribution_sec: 7, must_beat_ids: [S01-B03], transition: hold_two_shot}
+  - {order: 4, clip_id: C-S01-04, contribution_sec: 7, must_beat_ids: [], transition: eyeline_to_insert}
+  - {order: 5, clip_id: C-S01-05, contribution_sec: 6, must_beat_ids: [S01-B05], transition: power_dip_then_half_beat_silence}
+  - {order: 6, clip_id: C-S01-06, contribution_sec: 8, must_beat_ids: [S01-B06], transition: BO_line_over_card_insert}
+  - {order: 7, clip_id: C-S01-07, contribution_sec: 8, must_beat_ids: [S01-B07], transition: hold_LIN_choice}
+  - {order: 8, clip_id: C-S01-08, contribution_sec: 11, must_beat_ids: [S01-B08], transition: final_slot_clunk_and_silence}
+runtime_reconciliation: pass

@@ -1,0 +1,34 @@
+id: tide-station.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [tide-station.director-intent@1.0.0]
+assumptions: ["无实际参考图；FRAME IDs为待附加占位"]
+constraints: {}
+open_questions: ["角色参考图和录音带道具图待提供"]
+status: frozen
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: [cool storm blue, oxidized teal, tape amber, wet concrete gray]
+camera_language:
+  allowed_framing: [wide_establish, medium_two_layer, close_reaction, prop_insert, back_figure]
+  lens_or_fov_range: "neutral to moderate telephoto; no wide edge distortion"
+  height_rules: ["eye-level with沈岚 except final low threshold view"]
+  movement_rules: [locked, slow_push, lateral_reveal, short_tracking]
+  axis_rules: ["售票窗—防波堤门 axis maintained; intentional threshold cut only at final door"]
+lighting_rules: ["cool overcast key from left windows", "warm amber tape lamp practical", "wind-blown rain highlights outside", "no neon teal-orange grade"]
+characters:
+  - {character_id: CHAR-SHENLAN, role: protagonist, state_versions: [{state_id: CHAR-SHENLAN.STATE-STORM, age: late-20s, time_context: present, visible_state: wet and alert, wardrobe_version: WARD-SHENLAN-01, must_not_drift: [coat color, left eyebrow scar]}], visible_anchors: [wet shoulder-length black hair, dark olive raincoat, scar above left eyebrow], must_not_drift: [age late-20s, coat color, left eyebrow scar], reference_ids: [CHARREF-SHENLAN-01]}
+  - {character_id: CHAR-SHENYU, role: brother, state_versions: [{state_id: CHAR-SHENYU.STATE-STORM, age: early-30s, time_context: present, visible_state: guarded, wardrobe_version: WARD-SHENYU-01, must_not_drift: [no beard, navy jacket]}], visible_anchors: [early-30s, faded navy work jacket, flashlight clipped at chest], must_not_drift: [no beard, navy jacket, height slightly taller], reference_ids: [CHARREF-SHENYU-01]}
+locations:
+  - {location_id: LOC-TIDE-STATION, layout: "候车室、售票窗、广播喇叭、停钟、后侧防波堤门", anchors: [round station clock, ticket window grille, rusted speaker, blue metal door], directions: "window light left; door on right rear", time_weather: "pre-typhoon dusk, heavy rain", reference_ids: [LOCREF-TIDE-STATION-01]}
+props:
+  - {prop_id: PROP-TAPE, appearance: "small brown cassette in cream paper box, handwritten name label", dimensions: "palm-sized", holder_state_machine: "behind_window→SHENLAN_hand→player→machine", narrative_function: "mother warning", reference_ids: [PROPREF-TAPE-01]}
+  - {prop_id: PROP-PLAYER, appearance: "1980s gray cassette player with amber LED", dimensions: "shoebox-sized", holder_state_machine: "ticket_counter_fixed", narrative_function: "voice carrier", reference_ids: [PROPREF-PLAYER-01]}
+  - {prop_id: PROP-CLOCK, appearance: "round station clock frozen at disappearance date", dimensions: "wall-mounted", holder_state_machine: "fixed", narrative_function: "time wound", reference_ids: [PROPREF-CLOCK-01]}
+motifs:
+  - {motif_id: MOTIF-TIDE, appearance_condition: "broadcast and exterior sea", progression: "ambient→message→silence→roar", payoff: "door opens to white surf"}
+  - {motif_id: MOTIF-THRESHOLD, appearance_condition: "ticket window and door", progression: "barrier→choice", payoff: "Shenlan crosses door"}
+reference_assets: []
+must_preserve: ["16:9", "沈岚左向右到门", "磁带暖棕LED", "冷蓝暴雨光", "不展示母亲实体"]
+must_not: ["extra people", "readable generated text beyond approved tape label composite", "modern digital devices", "camera orbit", "identity drift"]

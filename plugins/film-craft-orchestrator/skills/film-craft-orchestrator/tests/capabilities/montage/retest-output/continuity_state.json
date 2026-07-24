@@ -1,0 +1,9 @@
+{"id":"radio-montage.continuity-state","version":"1.0.0","owner_role":"ai_video_supervisor","source_inputs":[],"assumptions":[],"constraints":{},"open_questions":[],"status":"qc_pending","change_log":[],"clips":[
+{"clip_id":"C-S01-01","entry":{"radio":{"state":"rusted"}},"exit":{"radio":{"state":"tested"}},"expected_next":{"must_preserve":["radio"]},"conflicts":[],"status":"pending"},
+{"clip_id":"C-S01-02","prior_clip_id":"C-S01-01","entry":{"radio":{"state":"tested"}},"exit":{"radio":{"state":"opened"}},"expected_next":{"must_preserve":["radio"]},"conflicts":[],"status":"pending"},
+{"clip_id":"C-S01-03","prior_clip_id":"C-S01-02","entry":{"radio":{"state":"opened"}},"exit":{"radio":{"state":"cleaning"}},"expected_next":{"must_preserve":["radio"]},"conflicts":[],"status":"pending"},
+{"clip_id":"C-S01-04","prior_clip_id":"C-S01-03","entry":{"radio":{"state":"cleaning"}},"exit":{"radio":{"state":"clean"}},"expected_next":{"must_preserve":["radio"]},"conflicts":[],"status":"pending"},
+{"clip_id":"C-S01-05","prior_clip_id":"C-S01-04","entry":{"radio":{"state":"clean"}},"exit":{"radio":{"state":"repaired"}},"expected_next":{"must_preserve":["radio"]},"conflicts":[],"status":"pending"},
+{"clip_id":"C-S01-06","prior_clip_id":"C-S01-05","entry":{"radio":{"state":"repaired"}},"exit":{"radio":{"state":"assembled"}},"expected_next":{"must_preserve":["radio"]},"conflicts":[],"status":"pending"},
+{"clip_id":"C-S01-07","prior_clip_id":"C-S01-06","entry":{"radio":{"state":"assembled"}},"exit":{"radio":{"state":"carrier"}},"expected_next":{"must_preserve":["radio"]},"conflicts":[],"status":"pending"},
+{"clip_id":"C-S01-08","prior_clip_id":"C-S01-07","entry":{"radio":{"state":"carrier"}},"exit":{"radio":{"state":"playing"}},"expected_next":{"must_preserve":[]},"conflicts":[],"status":"pending"}]}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Continuity and QC"
+  short_description: "诊断跨镜漂移、生成失败与终片质量"
+  default_prompt: "Use $continuity-qc to audit these clips for narrative, identity, continuity, editability, and finish failures."
+policy:
+  allow_implicit_invocation: true

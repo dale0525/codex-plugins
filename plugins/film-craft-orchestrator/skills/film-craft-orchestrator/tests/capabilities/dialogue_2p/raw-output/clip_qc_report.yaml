@@ -1,0 +1,18 @@
+id: night-shift-handoff.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [night-shift-handoff.clip-plan@1.0.0, night-shift-handoff.generation-log@1.0.0]
+assumptions: ["无生成输出，不能产生证据帧或hash。"]
+constraints: {max_iterations_per_clip: 4}
+open_questions: ["待实际生成后逐clip提供进入/中点/退出证据帧。"]
+status: qc_pending
+change_log: []
+clips:
+  - {clip_id: C-S01-01, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "附加场景/钥匙参考后生成；先审身份与钥匙持有。", status: diagnostic_preview}
+  - {clip_id: C-S01-02, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "若手部接触失败，拆门把与反应。", status: diagnostic_preview}
+  - {clip_id: C-S01-03, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "对白分离后单人近景lip-sync。", status: diagnostic_preview}
+  - {clip_id: C-S01-04, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "优先小周反应，阿岚画外声。", status: diagnostic_preview}
+  - {clip_id: C-S01-05, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "若双人口型失败，保留小周声画外，切阿岚反应。", status: diagnostic_preview}
+  - {clip_id: C-S01-06, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "保持退半步为唯一动作。", status: diagnostic_preview}
+  - {clip_id: C-S01-07, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "拆成小周台词与阿岚反应。", status: diagnostic_preview}
+  - {clip_id: C-S01-08, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance_consent: pending, evidence: [], repair: "禁止可读文字；空白页insert。", status: diagnostic_preview}

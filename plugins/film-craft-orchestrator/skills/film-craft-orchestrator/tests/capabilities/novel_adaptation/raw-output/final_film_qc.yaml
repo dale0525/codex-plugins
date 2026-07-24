@@ -1,0 +1,19 @@
+final: pending
+status: diagnostic_preview
+runtime_target_sec: 90
+runtime_verified: false
+must_beats_coverage: pending_generation
+artifacts_frozen: false
+reference_gate: pending
+approved_clips: []
+generation_logs_complete: false
+output_hashes_present: false
+continuity_blocking_conflicts: pending
+dialogue_lipsync: pending
+sound_stems: pending
+rights_and_consent: user-owned_source; performer_consent_pending
+model_versions: pending
+provenance: pending
+rejection_reasons:
+  - 无真实参考图与生成输出
+  - 未执行六门 clip QC 与最终时长验证

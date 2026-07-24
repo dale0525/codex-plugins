@@ -1,0 +1,11 @@
+status: pending
+clips:
+  C01: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+  C02: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+  C03: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+  C04: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+  C05: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+  C06: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+  C07: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+  C08: {narrative: pending, identity: pending, continuity: pending, editability: pending, surface: pending}
+blocking_conflicts: pending_generation

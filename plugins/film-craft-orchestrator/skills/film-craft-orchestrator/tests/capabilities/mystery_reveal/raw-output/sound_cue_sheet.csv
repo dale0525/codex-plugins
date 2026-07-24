@@ -1,0 +1,10 @@
+timecode,stem,event,source,continuity_note
+00:00-00:06,ambience,refrigerator hum and distant rain,designed room tone,continuous kitchen bed
+00:06-00:11,foley,ceramic saucer tick as steam fades,foley,quiet enough for clue insert
+00:18-00:26,dialogue,Mara: “那杯茶整晚没人碰过。”,separate recorded voice,one visible speaker; no subtitle
+00:26-00:33,bridge_sfx,offscreen brass latch rattle,foley,starts before picture of latch
+00:33-00:47,foley,ceramic lift and thread scrape,foley,thread scrape syncs to saucer lift
+00:40-00:47,ambience,wet shoe squeak beneath sill,foley,confirms footprints without narration
+00:47-00:54,cloth_sfx,red thread tightening on wool coat,foley,small fiber pull audible
+00:54-01:00,external,police radio murmur and red-blue electrical buzz,designed sound,arrives before visual pulse
+00:59-01:00,silence,Lin inhale then cut to black,mix automation,leave final breath unresolved

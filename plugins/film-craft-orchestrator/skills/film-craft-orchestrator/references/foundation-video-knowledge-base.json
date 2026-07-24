@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-24",
+  "purpose": "New traditional film-craft sources selected specifically for AI-video story, clip, edit and sound planning. Existing upgraded sources remain in video-knowledge-base.json.",
+  "corpus_stats": {
+    "video_entries": 11,
+    "deep_distilled": 8,
+    "claim_evidence_only": 2,
+    "access_failed": 1,
+    "asr_reviewed_deep": 8,
+    "asr_reviewed_claim_only": 2,
+    "executable_procedure_units_unique": 16,
+    "claims_in_deep_evidence": 43
+  },
+  "distillation_definition_ref": "video-knowledge-base.json#distillation_definition",
+  "entries": [
+    {
+      "id": "lfts-script-to-film-portrait",
+      "video_id": "Y5S4PyBR364",
+      "channel": "Lessons from the Screenplay",
+      "title": "How Good Filmmaking Brings a Script to Life",
+      "url": "https://www.youtube.com/watch?v=Y5S4PyBR364",
+      "domains": ["script_to_screen", "director", "editing", "sound"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#Y5S4PyBR364",
+      "procedure_refs": [
+        "script-film-carrier-map",
+        "power-frame-reversal",
+        "silence-footstep-rhythm"
+      ],
+      "bias": "二手剧本—成片 essay；脚本页、构图、镜头时长仍需画面与公开剧本版本核验。"
+    },
+    {
+      "id": "studiobinder-drive-sound-suspense",
+      "video_id": "eFU3FQh3xgE",
+      "channel": "StudioBinder",
+      "title": "Drive Opening Scene — How Refn Builds Suspense with Sound Design & Editing",
+      "url": "https://www.youtube.com/watch?v=eFU3FQh3xgE",
+      "domains": ["editing", "sound", "suspense"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#eFU3FQh3xgE",
+      "procedure_refs": [
+        "audio-before-picture-suspense",
+        "offscreen-subjective-sound-map",
+        "subtractive-sound-climax"
+      ],
+      "bias": "课程型单场景分析；未公开混音工程参数。"
+    },
+    {
+      "id": "nerdwriter-see-with-ears",
+      "video_id": "kavxsXhzD48",
+      "channel": "Nerdwriter1",
+      "title": "See With Your Ears: Spielberg And Sound Design",
+      "url": "https://www.youtube.com/watch?v=kavxsXhzD48",
+      "domains": ["sound", "subjective_viewpoint", "suspense"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#kavxsXhzD48",
+      "procedure_refs": [
+        "audio-before-picture-suspense",
+        "offscreen-subjective-sound-map",
+        "subtractive-sound-climax"
+      ],
+      "bias": "作者自制声轨与原片比较是评论性A/B，不是公开受控实验。"
+    },
+    {
+      "id": "every-frame-jackie-action-comedy",
+      "video_id": "Z1PCtIaM_GQ",
+      "channel": "Every Frame a Painting",
+      "title": "Jackie Chan - How to Do Action Comedy",
+      "url": "https://www.youtube.com/watch?v=Z1PCtIaM_GQ",
+      "domains": ["action", "comedy", "blocking", "editing"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#Z1PCtIaM_GQ",
+      "procedure_refs": [
+        "action-geography-readable-frame",
+        "action-reaction-double-register"
+      ],
+      "bias": "从成龙案例归纳；三帧注册是具体示例而非固定标准。"
+    },
+    {
+      "id": "studiobinder-ring-threat-composition",
+      "video_id": "pC1-i1PI8Lw",
+      "channel": "StudioBinder",
+      "title": "BEWARE! This video is EVIL — How to Build Suspense with Shot Composition",
+      "url": "https://www.youtube.com/watch?v=pC1-i1PI8Lw",
+      "domains": ["horror", "suspense", "composition"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#pC1-i1PI8Lw",
+      "procedure_refs": ["threat-scale-negative-space"],
+      "bias": "课程型构图启发；大=强、小=弱只能做项目内A/B。"
+    },
+    {
+      "id": "studiobinder-six-editing-techniques",
+      "video_id": "FVR8zz8ci2k",
+      "channel": "StudioBinder",
+      "title": "6 Ways to Edit Any Scene — Essential Film & Video Editing Techniques Explained",
+      "url": "https://www.youtube.com/watch?v=FVR8zz8ci2k",
+      "domains": ["editing", "sound", "action", "continuity"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#FVR8zz8ci2k",
+      "procedure_refs": [
+        "eyeline-reveal-delay",
+        "split-edit-sound-bridge",
+        "crosscut-eye-trace-action-match"
+      ],
+      "bias": "通用课程分类；示例时长和规则不能机械化。"
+    },
+    {
+      "id": "continuance-tv-pilot-five-act",
+      "video_id": "Yf86yNjZNUY",
+      "channel": "Continuance Pictures",
+      "title": "How to Write 1 Hour TV Pilot for Netflix, HBO, Amazon (PART 2) - 5 Act Structure & A,B,C Stories",
+      "url": "https://www.youtube.com/watch?v=Yf86yNjZNUY",
+      "domains": ["series", "structure", "abc_story", "cliffhanger"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#Yf86yNjZNUY",
+      "procedure_refs": [
+        "pilot-abc-stakes-gate",
+        "five-act-cliffhanger-chain"
+      ],
+      "bias": "一名职业作者的教学框架，不是流媒体平台官方页码规范。"
+    },
+    {
+      "id": "nerdwriter-parasite-montage",
+      "video_id": "ma1rD2OP85c",
+      "channel": "Nerdwriter1",
+      "title": "Parasite's Perfect Montage",
+      "url": "https://www.youtube.com/watch?v=ma1rD2OP85c",
+      "domains": ["montage", "editing", "sound", "time_compression"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "foundation-asr-evidence.json#ma1rD2OP85c",
+      "procedure_refs": [
+        "montage-information-budget",
+        "montage-performance-stitch-and-intercut"
+      ],
+      "bias": "二手蒙太奇分析；部分逐帧缝合和访谈归因需原素材/访谈核验。"
+    },
+    {
+      "id": "dark-knight-interrogation-dialogue",
+      "video_id": "rqQdEh0hUsc",
+      "channel": "MovieMonks",
+      "title": "Script To Screen: The Dark Knight Joker Interrogation Scene",
+      "url": "https://www.youtube.com/watch?v=rqQdEh0hUsc",
+      "domains": ["dialogue", "antagonist", "script_to_screen"],
+      "evidence_status": "asr_reviewed_dialogue_only",
+      "evidence_level": "E5",
+      "distillation_status": "claim_evidence_only",
+      "claim_summaries": [
+        {"start_sec": 73.36, "end_sec": 123.6, "claim": "对白将对立从暴力审讯升级为相互依存的价值冲突。"},
+        {"start_sec": 166.44, "end_sec": 194.52, "claim": "规则之争转成有限倒计时和必须二选一的私人困境。"},
+        {"start_sec": 239.96, "end_sec": 256.12, "claim": "地址揭示封口于选择，但ASR地址拼写不可靠。"}
+      ],
+      "warning": "ASR只有电影对白，缺公开剧本页、画面、剪辑和作者论证；不得当作script-to-screen程序。"
+    },
+    {
+      "id": "godfather-opening-dialogue",
+      "video_id": "KbTpWC5IB2o",
+      "channel": "Screenplayed",
+      "title": "The Godfather - Opening Scene + Screenplay Download | Script to Screen",
+      "url": "https://www.youtube.com/watch?v=KbTpWC5IB2o",
+      "domains": ["dialogue", "power", "script_to_screen"],
+      "evidence_status": "asr_reviewed_dialogue_only",
+      "evidence_level": "E5",
+      "distillation_status": "claim_evidence_only",
+      "claim_summaries": [
+        {"start_sec": 0.0, "end_sec": 137.84, "claim": "请求者先以美国司法失败建立求助理由。"},
+        {"start_sec": 183.96, "end_sec": 272.96, "claim": "Don把交易重新定义为尊重、友谊和正义的关系门槛。"},
+        {"start_sec": 298.12, "end_sec": 350.64, "claim": "称谓变化和未来回报完成权力关系转移。"}
+      ],
+      "warning": "视频ASR几乎全是电影对白且错听严重；无旁白论证和画面证据，不能强行蒸馏剪辑程序。"
+    },
+    {
+      "id": "every-frame-satoshi-kon-time-space",
+      "video_id": "oz49vQwSoTE",
+      "channel": "Every Frame a Painting",
+      "title": "Satoshi Kon - Editing Space & Time",
+      "url": "https://www.youtube.com/watch?v=oz49vQwSoTE",
+      "domains": ["editing", "animation", "space_time"],
+      "evidence_status": "access_failed",
+      "evidence_level": "E5",
+      "distillation_status": "access_failed",
+      "warning": "2026-07-24 authorized low-bandwidth audio request returned HTTP 403; no bypass attempted. Metadata remains a future candidate."
+    }
+  ]
+}

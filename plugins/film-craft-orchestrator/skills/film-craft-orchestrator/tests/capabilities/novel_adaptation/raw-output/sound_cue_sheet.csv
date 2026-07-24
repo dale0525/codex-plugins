@@ -1,0 +1,8 @@
+cue_id,clip_id,type,content,entry,exit,mix_note,status
+S01,C01,ambience,台风前雨幕与远海低频,0,12,单声道雨声铺底,pending
+S02,C02,ambience+SFX,广播喇叭失真潮声与电流,12,24,潮声略高于室内底噪,pending
+S03,C04,dialogue,沈屿：“那只是妈留下的道歉。”,36,50,先画外后入画，单人可录,pending
+S04,C05,foley,录音机按键、磁带转动、红灯继电器,50,60,近距离干声,pending
+S05,C06,dialogue,童声潮汐表→母亲：“不要相信带你来这里的人。”,60,68,分层录音，母亲不做唇形,pending
+S06,C07,dialogue+foley,沈屿：“别听了。”关机咔哒,68,78,关机瞬间抽掉潮声,pending
+S07,C08,ambience+SFX,门闩、狂风、浪击防波堤,78,90,风噪覆盖最后对白，保留磁带尾噪,pending

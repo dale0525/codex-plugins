@@ -1,0 +1,58 @@
+id: tide-station.story-and-scene-map
+version: 1.0.0
+owner_role: writer
+source_inputs: [tide-station.ai-video-brief@1.0.0]
+assumptions: ["母亲失踪日与停站七年均为源片段事实"]
+constraints: {runtime_target_sec: 90}
+open_questions: []
+status: frozen
+change_log: ["1.0.0: compressed into one continuous storm-hour sequence"]
+logline: "台风登陆前一小时，沈岚回到停用七年的海潮站，在一盒写有自己名字的录音带与弟弟的阻拦之间，选择打开通往防波堤的门。"
+dramatic_question: "沈岚会相信弟弟的解释，还是相信录音带警告并追向母亲失踪的真相？"
+theme_question: "面对被亲人安排好的叙事，主动选择未知是否比接受道歉更诚实？"
+protagonist:
+  character_id: CHAR-SHENLAN
+  want: "确认母亲是否留下可追踪的线索"
+  need: "停止让家人替她解释失踪，夺回判断与行动权"
+  fear: "母亲的最后信息指向自己信任的人"
+  contradiction: "带着寻找答案的决心，却本能保护弟弟"
+antagonistic_force: "台风倒计时、停站空间和弟弟对信息的控制"
+ending_choice: "她不抢回磁带，改为打开防波堤门，主动进入风暴。"
+sequences:
+  - sequence_id: SQ01
+    promise: "废站仍在说话"
+    escalation: "录音带把童年声音与当下危险叠在一起"
+    reversal: "警告的‘带你来这里的人’可能是沈屿"
+    temporary_result: "沈岚选择门外未知而非弟弟的道歉"
+temporal_state_changes: []
+delivery_requirements:
+  - {requirement_id: DR-B01, content: "沈岚在台风倒计时中主动进入废弃站房", exactness: semantic, approved_carriers: [visual_action], required_character_ids: [CHAR-SHENLAN], visible_character_ids: [CHAR-SHENLAN], required_prop_ids: [], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B02, content: "停钟与潮声广播证明废站仍在运作", exactness: semantic, approved_carriers: [visual_action, separate_audio, prop_composite], required_character_ids: [], visible_character_ids: [], required_prop_ids: [PROP-CLOCK, PROP-PLAYER], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B03, content: "沈岚发现写有自己名字的录音带", exactness: exact, approved_carriers: [prop_composite, post_text], required_character_ids: [CHAR-SHENLAN], visible_character_ids: [CHAR-SHENLAN], required_prop_ids: [PROP-TAPE], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B04, content: "沈屿出现并阻挡她继续调查", exactness: semantic, approved_carriers: [visual_action, separate_audio], required_character_ids: [CHAR-SHENLAN, CHAR-SHENYU], visible_character_ids: [CHAR-SHENLAN, CHAR-SHENYU], required_prop_ids: [], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B05-A, content: "沈岚把录音带装入旧机并主动按下播放", exactness: semantic, approved_carriers: [visual_action], required_character_ids: [CHAR-SHENLAN], visible_character_ids: [CHAR-SHENLAN], required_prop_ids: [PROP-TAPE, PROP-PLAYER], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B05-B, content: "录音先播放童年沈岚的潮汐表背诵", exactness: semantic, approved_carriers: [separate_audio], required_character_ids: [CHAR-SHENLAN], visible_character_ids: [CHAR-SHENLAN], required_prop_ids: [PROP-PLAYER], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B06, content: "母亲警告不要相信带她来的人，沈屿随即关机", exactness: exact, approved_carriers: [separate_audio, visual_action], required_character_ids: [CHAR-SHENLAN, CHAR-SHENYU], visible_character_ids: [CHAR-SHENLAN, CHAR-SHENYU], required_prop_ids: [PROP-PLAYER], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B07-A, content: "沈岚不争抢磁带而是绕过弟弟走向门", exactness: semantic, approved_carriers: [visual_action], required_character_ids: [CHAR-SHENLAN, CHAR-SHENYU], visible_character_ids: [CHAR-SHENLAN, CHAR-SHENYU], required_prop_ids: [PROP-TAPE, PROP-PLAYER], location_ids: [LOC-TIDE-STATION]}
+  - {requirement_id: DR-B07-B, content: "沈岚打开防波堤门走入风暴", exactness: semantic, approved_carriers: [visual_action], required_character_ids: [CHAR-SHENLAN], visible_character_ids: [CHAR-SHENLAN], required_prop_ids: [], location_ids: [LOC-TIDE-STATION]}
+must_beat_ids: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05, S01-B06, S01-B07]
+scenes:
+  - scene_id: S01
+    runtime_budget_sec: 90
+    location_id: LOC-TIDE-STATION
+    time: "台风登陆前一小时，傍晚"
+    entry_state: "沈岚独自推开停用海潮站外门，仍相信这里有母亲线索。"
+    objective: "找到并听完母亲留下的录音。"
+    obstacle: "停站潮声、失灵时钟、弟弟突然出现并试图关机。"
+    turn: "录音从童年背诵转为‘不要相信带你来这里的人’。"
+    exit_state: "沈岚把磁带留在机器旁，打开防波堤门走入风雨；沈屿留在室内。"
+    beats:
+      - {beat_id: S01-B01, narrative_function: orient, visible_start: "沈岚在雨幕中抵达站房", trigger: "她抬头看见停站招牌", character_tactic: "用钥匙确认旧门锁", visible_end: "门被推开，潮声灌入", runtime_budget_sec: 10, delivery_requirement_ids: [DR-B01], preferred_carrier: visual_action, generation_risks: [rain, door], fallback: "雨声J-cut接门把手特写"}
+      - {beat_id: S01-B02, narrative_function: world_rule, visible_start: "候车室空置、钟停在失踪日", trigger: "广播吐出潮声", character_tactic: "靠近钟与喇叭寻找电源", visible_end: "她意识到停站仍在广播", runtime_budget_sec: 10, delivery_requirement_ids: [DR-B02], preferred_carrier: visual_action_and_sound, generation_risks: [readable_clock], fallback: "钟面后期合成，广播独立音轨"}
+      - {beat_id: S01-B03, narrative_function: reveal, visible_start: "售票窗后有贴名录音带盒", trigger: "沈岚伸手取出盒子", character_tactic: "先确认姓名再藏入掌心", visible_end: "磁带标签与她对视", runtime_budget_sec: 10, delivery_requirement_ids: [DR-B03], preferred_carrier: prop_insert, generation_risks: [text], fallback: "可读标签由合规道具后期合成"}
+      - {beat_id: S01-B04, narrative_function: relationship, visible_start: "黑暗中出现沈屿", trigger: "他叫她名字", character_tactic: "挡在售票窗与出口之间", visible_end: "沈屿坚持那是母亲的道歉", runtime_budget_sec: 10, delivery_requirement_ids: [DR-B04], preferred_carrier: performance, generation_risks: [two_characters], fallback: "沈屿先画外声，切单人反应"}
+      - {beat_id: S01-B05, narrative_function: choice, visible_start: "沈岚把磁带装入旧机", trigger: "按下播放键", character_tactic: "以沉默迫使沈屿等待", visible_end: "童年沈岚背诵潮汐表", runtime_budget_sec: 12, delivery_requirement_ids: [DR-B05-A, DR-B05-B], preferred_carrier: prop_action_and_audio, generation_risks: [hand_button], fallback: "按钮insert+童声录音"}
+      - {beat_id: S01-B06, narrative_function: reversal, visible_start: "童声突然被母亲声音覆盖", trigger: "母亲说‘不要相信带你来这里的人’", character_tactic: "沈岚看向沈屿而不争抢", visible_end: "沈屿伸手关掉机器", runtime_budget_sec: 18, delivery_requirement_ids: [DR-B06], preferred_carrier: sound_and_reaction, generation_risks: [lip_sync, two_characters], fallback: "母亲画外声+沈屿手部insert+沈岚近景"}
+      - {beat_id: S01-B07, narrative_function: payoff, visible_start: "机器停止，沈屿手仍压在开关上", trigger: "沈岚松开磁带", character_tactic: "绕过弟弟走向防波堤门", visible_end: "门开，风雨吞没她；沈屿未跟上", runtime_budget_sec: 20, delivery_requirement_ids: [DR-B07-A, DR-B07-B], preferred_carrier: blocking_and_door, generation_risks: [door, wind], fallback: "门前背影+门外海浪cutaway"}
+    must_beat_ids: [S01-B01, S01-B02, S01-B03, S01-B04, S01-B05, S01-B06, S01-B07]
+runtime_reconciliation: {scene_budget_sum_sec: 90, result: pass}

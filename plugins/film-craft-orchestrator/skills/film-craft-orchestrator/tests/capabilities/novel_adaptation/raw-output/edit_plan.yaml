@@ -1,0 +1,13 @@
+runtime_target_sec: 90
+status: pending
+assembly_order: [C01, C02, C03, C04, C05, C06, C07, C08]
+must_clip_coverage: [B1, B2, B3, B4, B5, B6, B7]
+transitions:
+  - between: C01-C02
+    cut: tide sound bridge into frozen clock
+  - between: C05-C06
+    cut: recorder red light match to Shen Lan eye reflection
+  - between: C07-C08
+    cut: dead machine silence into door latch snap
+ending: hold white typhoon light 2 sec, hard cut to black with tide tail
+handles_not_counted: true

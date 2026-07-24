@@ -1,0 +1,10 @@
+project_id: old_radio_montage
+version: 1
+audience_attention: radio silhouette -> hands/tool contact -> material change -> sound source -> returning voice
+blocking: hands enter screen left and complete actions toward screen right
+performance: patient practiced hands; no face shown; each action lands on recurring three-note motif
+camera: locked composition with imperceptible table vibration during solder and plug insertion
+lighting_arc: cool dusty fill -> neutral bench light -> warm tungsten bloom
+edit_strategy: five 8-second clips; match-on-action cuts at brush, solder lift, oil wipe, knob turn
+sound_strategy: continuous room tone; motif mutates clicks -> ring -> plucked chime -> station ident
+acceptance: elapsed work inferred from material, light, hand rhythm, sound; never explanatory text

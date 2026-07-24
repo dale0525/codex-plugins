@@ -1,0 +1,16 @@
+id: project.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [project.prompt-pack@1.0.0]
+assumptions: [无生成结果，无法抽取证据帧]
+constraints: {}
+open_questions: [生成输出与音频]
+status: qc_pending
+change_log: []
+clips:
+  - {clip_id: C-S01-01, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, rights_provenance: pending, evidence: "无输出"}
+  - {clip_id: C-S01-02, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, rights_provenance: pending, evidence: "无输出"}
+  - {clip_id: C-S01-03, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, rights_provenance: pending, evidence: "无输出"}
+  - {clip_id: C-S01-04, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, rights_provenance: pending, evidence: "无输出"}
+  - {clip_id: C-S01-05, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, rights_provenance: pending, evidence: "无输出"}
+  - {clip_id: C-S01-06, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, rights_provenance: pending, evidence: "无输出"}

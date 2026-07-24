@@ -1,0 +1,39 @@
+id: night-shift-handoff.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [night-shift-handoff.story-and-scene-map@1.0.0]
+assumptions: ["观众先看到钥匙，再听见解释；相机不提前宣布策略反转。"]
+constraints: {aspect_ratio: "16:9"}
+open_questions: []
+status: frozen
+change_log: []
+audience_experience: "从‘同事违规’逐渐重解释为‘两人互握把柄’。"
+theme_form_answer: "门和交接簿是边界；谁掌握出口，谁就暂时掌握叙事。"
+viewpoint_rule: "关键揭示优先从阿岚的观察位给出，反转后允许短暂转入小周的冷静主观。"
+performance_rules: ["阿岚语速先快后慢；小周始终少说、先停再答。", "不可说目的由停顿、避开门卫室摄像头和握紧钥匙表现。"]
+space_and_blocking_rules: ["门框为权力边界；阿岚从桌边到门内侧，小周始终靠近出口。", "保持桌—门轴线，避免无动机绕轴。"]
+camera_language_rules: ["先锁定中广建立关系，再用一个缓慢侧移揭示摄像头盲区。", "每clip仅一个主要相机行为；反转由演员动作触发。"]
+lighting_color_rules: ["荧光灯冷绿，门外雨水偏蓝；钥匙金属反光是唯一暖点。"]
+editing_sound_rules: ["先分离对白音频，再做单人lip-sync；多人句子拆成说话者/反应。", "钥匙声与门闩声是切点；小周说出监控盲区时环境声瞬间降一层。"]
+scenes:
+  - scene_id: S01
+    audience_knowledge: "比小周早半拍知道阿岚看见钥匙。"
+    audience_misunderstanding: "以为阿岚只是执行交接制度。"
+    attention_path: ["钥匙", "阿岚眼神", "门框", "小周手掌", "摄像头盲区", "交接簿空白页"]
+    axis: "desk_to_exit-door"
+    screen_direction: {CHAR-ALAN: faces_right, CHAR-XIAOZHOU: faces_left}
+    performance_beats:
+      - {beat_id: S01-B01, want_now: "截住小周", obstacle: "不能公开说自己在查仓库", tactic: "规章口吻", playable_action: "按住门", reaction_trigger: "钥匙声停下"}
+      - {beat_id: S01-B02, want_now: "逼出解释", obstacle: "小周只回答表面问题", tactic: "逐字复述交接规定", playable_action: "伸手不碰钥匙", reaction_trigger: "小周后退半步"}
+      - {beat_id: S01-B03, want_now: "夺回主动权", obstacle: "小周知道监控盲区", tactic: "从索取改为交换", playable_action: "收手让路", reaction_trigger: "阿岚看向摄像头"}
+      - {beat_id: S01-B04, want_now: "保住双方退路", obstacle: "任何书面记录都会留下证据", tactic: "默许离开并留痕", playable_action: "翻空白页落笔", reaction_trigger: "门外雨声盖住门响"}
+    blocking_beats:
+      - {beat_id: S01-B01, before_state: {ALAN: desk_left, XIAOZHOU: door_right}, trigger: "key_jingle", action: "ALAN crosses to door", world_position: {ALAN: inside_door, XIAOZHOU: threshold}, frame_position: {ALAN: foreground_left, XIAOZHOU: background_right}, eye_line: "ALAN→key", attention_change: "key→door", after_state: {door: held_open}
+      - {beat_id: S01-B03, before_state: {ALAN: hand_extended, XIAOZHOU: threshold}, trigger: "blind_spot_named", action: "XIAOZHOU tilts toward camera blind zone; ALAN withdraws", world_position: {ALAN: inside, XIAOZHOU: threshold}, frame_position: {ALAN: center, XIAOZHOU: right_edge}, eye_line: "both→camera", attention_change: "face→camera", after_state: {power: shared_leverage}
+    coverage_strategy: "base为两人中广；必要coverage仅添加钥匙insert、阿岚反应、小周出口反应和空白页insert。"
+    base_clip_purpose: "完成入口、试探与权力反转的连续因果。"
+    required_coverage: ["key_insert", "Alan_reaction", "blank_log_insert"]
+    sound_intent: "钥匙声建立悬念；盲区台词后抽走雨声半秒；落笔声替代解释。"
+    non_negotiables: ["小周始终拥有出口方向", "策略确实从规章施压改变为互保交易", "不显示仓库内容"]
+    generation_risks: ["two_character_lip_sync", "hand_prop_contact", "readable_handwriting"]
+    fallbacks: ["单人近景+画外对白", "道具insert+反应镜头", "不生成可读文字，只保留空白页"]

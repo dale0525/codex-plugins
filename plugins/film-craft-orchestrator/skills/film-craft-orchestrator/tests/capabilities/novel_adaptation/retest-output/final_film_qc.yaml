@@ -1,0 +1,16 @@
+id: tide-station.final-film-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [tide-station.edit-plan@1.0.0, tide-station.clip-qc@1.0.0]
+assumptions: ["No media, hashes, adapter verification or consent records supplied"]
+constraints: {runtime_target_sec: 90, aspect_ratio: "16:9"}
+open_questions: ["render outputs and audio stems", "model provenance and performer consent", "final loudness target"]
+status: qc_pending
+runtime: {target_sec: 90, measured_sec: pending, contribution_sum_sec: 90, result: pending}
+must_beat_coverage: {S01-B01: planned, S01-B02: planned, S01-B03: planned, S01-B04: planned, S01-B05: planned, S01-B06: planned, S01-B07: planned}
+continuity: pending
+dialogue_lipsync: pending
+sound: pending
+rights_and_provenance: {rights_status: user-owned, references_attached: false, consent: pending, model_provenance: pending}
+blocking_conflicts: ["No approved clips", "No reference assets attached"]
+final_result: diagnostic_preview_pending

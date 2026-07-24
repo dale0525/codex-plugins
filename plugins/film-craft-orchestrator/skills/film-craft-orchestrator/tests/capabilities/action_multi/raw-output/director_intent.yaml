@@ -1,0 +1,13 @@
+project_id: action_multi_45s
+audience_knowledge: 观众先知道甲只是急于送达，不知道乙掌握的风险线索。
+attention_order: 左门甲与包裹 → 乙封堵 → 高台丙与下落绳索 → 交接特写 → 标签澄清与共同撤离
+misunderstanding: 乙看到无标识包裹和甲的急切动作，合理但错误地推断有危险；标签显露后可撤销。
+blocking:
+  axis: warehouse center aisle, left-door entry to right-safe-exit
+  A: enters screen-left, stays foreground until handoff
+  B: plants center, palms visible, non-striking block
+  C: remains elevated, throws rope diagonally to floor marker
+performance_beats: [A urgency, B suspicion, C decisive call, B recalibration, shared relief]
+coverage: 每个 clip 单一主动作；交接和误判澄清拆成独立反应镜头。
+sound_triggers: door slam, shoe stop, rope whoosh, parcel handoff thump, label tear, safe-exit ambience
+status: diagnostic_preview

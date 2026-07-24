@@ -1,0 +1,483 @@
+{
+  "id": "cold-cup.prompt-pack",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [
+    "cold-cup.visual-bible@1.0.0"
+  ],
+  "assumptions": [
+    "diagnostic preview only; no references attached"
+  ],
+  "constraints": {
+    "aspect_ratio": "16:9"
+  },
+  "open_questions": [],
+  "status": "pending",
+  "change_log": [],
+  "prompts": [
+    {
+      "prompt_id": "PROMPT-C-S01-01",
+      "clip_id": "C-S01-01",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "PROP-CUP",
+            "PROP-MAT"
+          ]
+        },
+        "action": {
+          "start": "cold cup on offset mat",
+          "motion": "condensation slides",
+          "end": "water ring fully visible"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "prop macro",
+          "movement": "locked"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 7,
+          "event_order": [
+            "drop",
+            "ring"
+          ]
+        },
+        "continuity_invariants": [
+          "PROP-CUP",
+          "PROP-MAT"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-01: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "e975a0a23d8ffc3572e3f555bf49803fe60ab204994f8248b8267f81c65b258a",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-01-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-02",
+      "clip_id": "C-S01-02",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "PROP-MAT"
+          ]
+        },
+        "action": {
+          "start": "mat edge flat",
+          "motion": "air lifts edge",
+          "end": "white fibers visible"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "close insert",
+          "movement": "locked"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 7,
+          "event_order": [
+            "lift",
+            "fiber"
+          ]
+        },
+        "continuity_invariants": [
+          "PROP-MAT"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-02: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "f380403d6b1cd8f20c4b514c1c7f5de80fb6c5ff33e5c0e4c32f813473300264",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-02-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-03",
+      "clip_id": "C-S01-03",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-DETECTIVE"
+          ]
+        },
+        "action": {
+          "start": "door closed",
+          "motion": "detective enters and scans",
+          "end": "pen pauses at cup"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "wide table anchor",
+          "movement": "slow_lateral_reveal"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 9,
+          "event_order": [
+            "enter",
+            "scan",
+            "pause"
+          ]
+        },
+        "continuity_invariants": [
+          "CHAR-DETECTIVE",
+          "PROP-CUP"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-03: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "a7999aa66e747febaf2b6cedc869afc64a251b4558f4bb191a240c4c436600d7",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-03-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-04",
+      "clip_id": "C-S01-04",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-DETECTIVE",
+            "CHAR-LIN"
+          ]
+        },
+        "action": {
+          "start": "detective faces table",
+          "motion": "Lin points to window",
+          "end": "detective looks window"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "medium two shot",
+          "movement": "locked"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 9,
+          "event_order": [
+            "point",
+            "turn",
+            "look"
+          ]
+        },
+        "continuity_invariants": [
+          "screen_direction",
+          "CHAR-LIN"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-04: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "9f6426774de8a49f656c5fa61c7005d148888dc1adc66274ec2d26395de8a30f",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-04-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-05",
+      "clip_id": "C-S01-05",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-LIN",
+            "PROP-MAT"
+          ]
+        },
+        "action": {
+          "start": "mat offset",
+          "motion": "Lin presses mat under cup",
+          "end": "mat covers ring"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "hand insert",
+          "movement": "locked"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 8,
+          "event_order": [
+            "hand",
+            "press",
+            "cover"
+          ]
+        },
+        "continuity_invariants": [
+          "PROP-MAT",
+          "PROP-CUP"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-05: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "8d19db0685e0ccf22c08ce90524f8bdf4b337d444f54ee0ef98df7219ec3baeb",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-05-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-06",
+      "clip_id": "C-S01-06",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-DETECTIVE",
+            "PROP-CUP"
+          ]
+        },
+        "action": {
+          "start": "finger at ring",
+          "motion": "detective pours hot water",
+          "end": "cup remains centered"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "medium close",
+          "movement": "locked"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 9,
+          "event_order": [
+            "point",
+            "pour",
+            "hold"
+          ]
+        },
+        "continuity_invariants": [
+          "CHAR-DETECTIVE",
+          "PROP-CUP"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-06: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "3d5ab60eee48c199e873d1ca8e2c23c8a79d5818b9456fd4e5a491580a6566bd",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-06-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-07",
+      "clip_id": "C-S01-07",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "PROP-CUP",
+            "PROP-MAT"
+          ]
+        },
+        "action": {
+          "start": "warm cup",
+          "motion": "ring forms and mat flips",
+          "end": "fibers visible"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "prop macro",
+          "movement": "locked"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 7,
+          "event_order": [
+            "heat",
+            "ring",
+            "fiber"
+          ]
+        },
+        "continuity_invariants": [
+          "PROP-CUP",
+          "PROP-MAT",
+          "MOTIF-WATER-RING"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-07: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "be17dfc3dae4e6843ad38734f2edbc235400871c94b2ecb78468e651ac2dc297",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-07-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 8,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    },
+    {
+      "prompt_id": "PROMPT-C-S01-08",
+      "clip_id": "C-S01-08",
+      "adapter_id": "openai-sora-2-videos-api-2026-07",
+      "adapter_version": "2026-07",
+      "prompt_ir": {
+        "subject": {
+          "ids": [
+            "CHAR-DETECTIVE",
+            "CHAR-LIN",
+            "PROP-CUP",
+            "PROP-MAT"
+          ]
+        },
+        "action": {
+          "start": "Lin reaches for cup",
+          "motion": "detective blocks with evidence bag and flips mat",
+          "end": "Lin freezes"
+        },
+        "environment": {
+          "location_id": "LOC-TEAHOUSE",
+          "time": "predawn"
+        },
+        "camera": {
+          "framing": "medium reaction with insert",
+          "movement": "locked"
+        },
+        "lighting": {
+          "key": "cool window left",
+          "practical": "warm lamp"
+        },
+        "temporal_constraints": {
+          "duration_sec": 8,
+          "event_order": [
+            "reach",
+            "block",
+            "reveal",
+            "freeze"
+          ]
+        },
+        "continuity_invariants": [
+          "CHAR-DETECTIVE",
+          "CHAR-LIN",
+          "PROP-MAT"
+        ]
+      },
+      "rendered_prompt": "Cold Cup clip C-S01-08: photoreal 16:9 locked camera, visible water ring and blue mat, no subtitles.",
+      "rendered_prompt_hash": "0a4fe4498c1b9ae12445faff0f38af73bd88699b60c10a6b83d3fbb3359e5d69",
+      "reference_inputs_expected": [
+        "FRAME-C-S01-08-START"
+      ],
+      "reference_inputs_attached": [],
+      "reference_transport": "not_attached",
+      "output_contract": {
+        "duration_sec": 16,
+        "aspect_ratio": "16:9"
+      },
+      "parameters": {},
+      "production_status": "diagnostic_preview",
+      "deprecation_warning": "adapter shutdown announced for 2026-09-24",
+      "migration_fallback": "reroute frozen prompt IR to an active adapter before production generation"
+    }
+  ]
+}

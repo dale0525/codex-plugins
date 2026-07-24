@@ -1,0 +1,19 @@
+id: night-shift-handoff.edit-plan
+version: 1.0.0
+owner_role: editor_sound
+source_inputs: [night-shift-handoff.clip-plan@1.0.0, night-shift-handoff.clip-qc@1.0.0]
+assumptions: ["时间线为计划，不代表已生成素材。"]
+constraints: {runtime_target_sec: 45, dialogue_strategy: separate_audio_then_lipsync}
+open_questions: ["待生成后填入实际in/out与handles。"]
+status: qc_pending
+change_log: []
+timeline:
+  - {order: 1, clip_id: C-S01-01, in_sec: 0, out_sec: 7, handles: [0,0], cut_purpose: "钥匙声建立异常", must_beats: [S01-B01], sound_bridge: "钥匙声先入"}
+  - {order: 2, clip_id: C-S01-02, in_sec: 7, out_sec: 12, handles: [0,0], cut_purpose: "门框成为阻挡", must_beats: [S01-B01], sound_bridge: "门闩声"}
+  - {order: 3, clip_id: C-S01-03, in_sec: 12, out_sec: 18, handles: [0,0], cut_purpose: "规章试探", must_beats: [S01-B02], sound_bridge: "连续雨声"}
+  - {order: 4, clip_id: C-S01-04, in_sec: 18, out_sec: 23, handles: [0,0], cut_purpose: "拒绝与握紧钥匙", must_beats: [S01-B02], sound_bridge: "钥匙轻响"}
+  - {order: 5, clip_id: C-S01-05, in_sec: 23, out_sec: 31, handles: [0,0], cut_purpose: "监控盲区揭示，策略改变", must_beats: [S01-B03], sound_bridge: "雨声抽离半秒"}
+  - {order: 6, clip_id: C-S01-06, in_sec: 31, out_sec: 35, handles: [0,0], cut_purpose: "阿岚收手", must_beats: [S01-B03], sound_bridge: "呼吸声"}
+  - {order: 7, clip_id: C-S01-07, in_sec: 35, out_sec: 40, handles: [0,0], cut_purpose: "互保交易", must_beats: [S01-B04], sound_bridge: "门外雨声回归"}
+  - {order: 8, clip_id: C-S01-08, in_sec: 40, out_sec: 45, handles: [0,0], cut_purpose: "放行与落笔后果", must_beats: [S01-B04], sound_bridge: "落笔声L-cut"}
+runtime_reconciliation: {sum_edit_contribution_sec: 45, result: pending_until_generation}

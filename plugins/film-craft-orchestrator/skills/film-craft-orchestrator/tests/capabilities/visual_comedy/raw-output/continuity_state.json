@@ -1,0 +1,11 @@
+{
+  "project_id": "umbrella_rack_prank_30s",
+  "status": "pending",
+  "world": {"location": "cafe_entrance", "time": "morning", "light_direction": "upstage-left window daylight", "axis": "door-to-counter left-right"},
+  "characters": {"worker_A": {"wardrobe": "green apron, red beanie", "screen_side": "left/center"}, "customer_B": {"wardrobe": "yellow raincoat"}, "customer_C": {"wardrobe": "navy jacket, blue tote left shoulder"}, "customer_D": {"wardrobe": "beige coat, purple scarf, phone"}},
+  "prop": {"umbrella_X": {"state": "armed_in_rack", "screen_side": "right", "owner": "worker_A"}},
+  "transitions": [{"from":"c01","to":"c02","entry":"umbrella armed, shoe misted"},{"from":"c02","to":"c03","entry":"rack fixed, worker fake-polishes"},{"from":"c03","to":"c04","entry":"coat sleeves wet"},{"from":"c04","to":"c05","entry":"umbrella still in rack, halo dissipates"}],
+  "evidence": [],
+  "blocking_conflicts": [],
+  "note": "No generated evidence frames or hashes exist yet."
+}

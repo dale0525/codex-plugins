@@ -1,0 +1,39 @@
+id: action-multi.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [project.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+audience_experience: "观众先读懂左门—中道—高台，再与甲一起经历一次可逆误判，最后清楚看见交接。"
+theme_form_answer: "把确认信号放在动作之后，让暂停成为改变路线的选择。"
+viewpoint_rule: "以甲的知情范围为主；不在甲看到前展示识别布条。"
+performance_rules: ["乙用占位而非攻击表达阻拦", "丙动作慢且可辨识，避免致命威胁", "甲先警觉后确认"]
+space_and_blocking_rules: ["轴线为左门—右侧门；甲始终从左向右，乙面对左，丙位于右上高台", "绳索接触分为before/contact/after"]
+camera_language_rules: ["每clip一个主要相机行为", "动作关键处以中性视角和insert确保可读"]
+lighting_color_rules: ["冷天窗光从左上，暖安全灯在右侧；光向跨clip不变"]
+editing_sound_rules: ["交接在动作接触点剪切；误判处短暂抽掉环境声后恢复", "原生音频全部pending，后期统一room tone/Foley"]
+scenes:
+  - scene_id: S01
+    audience_knowledge: "知道三人位置与包裹目标，但不知道丙身份信号"
+    audience_misunderstanding: "与甲同步误以为绳索是威胁"
+    attention_path: [左门,包裹,乙的阻拦,高台绳索,识别布条,交接]
+    axis: "left_door_to_right_exit"
+    screen_direction: {CHAR-A: right, CHAR-B: left, CHAR-C: down-left_from_platform}
+    performance_beats:
+      - {beat_id: S01-B01, want_now: "甲想快速通过", obstacle: "乙占位", tactic: "贴墙护包", playable_action: "压低肩膀前进", reaction_trigger: "乙横移"}
+      - {beat_id: S01-B04, want_now: "甲想确认绳索用途", obstacle: "看不清高台", tactic: "先抓后退", playable_action: "抓绳后抬头", reaction_trigger: "乙示意停"}
+      - {beat_id: S01-B08, want_now: "丙要安全接包", obstacle: "距离与绳索", tactic: "拉绳靠近", playable_action: "手掌向上接包", reaction_trigger: "甲松手"
+        }
+    blocking_beats:
+      - {beat_id: S01-B03, before_state: {C: high_platform}, trigger: "绳端落地", action: "丙放绳指向侧门", world_position: {A: left_door,B: center_lane,C: upper_right}, frame_position: {A: left,B: center,C: upper_right}, eye_line: "A looks up", attention_change: "B→rope→C", after_state: {rope: floor_to_A}}
+      - {beat_id: S01-B08, before_state: {A: side_door,B: lane,C: rope_near_A}, trigger: "甲确认信号", action: "甲把包裹递给丙", world_position: {A: right_exit,B: center,C: right_exit}, frame_position: {A: mid_right,B: mid_left,C: right}, eye_line: "A/C meet", attention_change: "package→hands", after_state: {package_holder: C}}
+    coverage_strategy: "base宽景读空间，阻拦用双人中景，绳索/布条/交接用insert与反应补齐；不让快切掩盖因果。"
+    base_clip_purpose: "让观众无字幕复述谁从哪扇门带包、谁挡路、谁从高台改变路线。"
+    required_coverage: ["rope_insert", "signal_insert", "handoff_before_contact_after", "B_reaction"]
+    sound_intent: "仓库混响连续；绳索落地有单一重音；误判短静默；交接有纸箱摩擦。"
+    non_negotiables: ["不展示致命伤", "包裹只在C-S01-08从A转给C", "误判必须可逆"]
+    generation_risks: ["多人动作、绳索物理、手部交接"]
+    fallbacks: ["拆成before/contact/after并以声音桥连接", "保留诊断状态"]

@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-07-24",
+  "method": "Authorized low-resolution local videos were sampled at ASR-selected times. Every listed frame was inspected at original resolution and hashed after copying into the skill.",
+  "global_limit": "A sampled still can verify visible subjects, depth, focus state, lighting appearance and UI overlays at that instant. It cannot prove camera movement, edit causality, focus transition, sound, lens/exposure values, creator intent or model-independent audience response.",
+  "items": [
+    {
+      "video_id": "o-4rk3T8PbQ",
+      "channel": "StudioBinder",
+      "title": "How Kubrick, Spielberg, and Inarritu Stage their Scenes",
+      "url": "https://www.youtube.com/watch?v=o-4rk3T8PbQ",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec":150,"path":"frame-samples/foundation-gap/o-4rk3T8PbQ-150s.jpg","frame_sha256":"f2d1a4dd8a170f81f5c33d6ea5d2eb26eb29c93577a9cbf8dce177181c758398","observation":"Four people form a horizontal group; the central person gestures while the far-right person looks down. The colored diagram is an overlay.","supports_claims":["O4K-C01","O4K-C02"],"limit":"Does not prove who moves or the gesture's target."},
+        {"timestamp_sec":207,"path":"frame-samples/foundation-gap/o-4rk3T8PbQ-207s.jpg","frame_sha256":"48f8a242f3274d2e5951530cc62d874758c760978c43c28ea28cd880b87cd6a2","observation":"Three people form a triangle; the center back-facing figure partially occludes the space between two side-facing people.","supports_claims":["O4K-C02","O4K-C03"],"limit":"Does not prove dialogue power or the preceding transition."},
+        {"timestamp_sec":380,"path":"frame-samples/foundation-gap/o-4rk3T8PbQ-380s.jpg","frame_sha256":"fe6559e2221d1c40873633fb125c4f8dc05e3b86982547f5ae1e3e12058381da","observation":"At least five people are distributed across a corridor in foreground, middle and background; newspapers and furniture create visible directional shapes. Pink dotted lines are overlays.","supports_claims":["O4K-C04","O4K-C05"],"limit":"Overlay lines and still positions do not prove eye movement."},
+        {"timestamp_sec":405,"path":"frame-samples/foundation-gap/o-4rk3T8PbQ-405s.jpg","frame_sha256":"bbe80164575ec1cf9d276eb1ae2b532148384d24070eac56f6460d03fc32598b","observation":"One standing figure with a long cane contrasts with several seated figures, producing visible height and directional differences. Colored lines are overlays.","supports_claims":["O4K-C04","O4K-C06"],"limit":"Does not prove intimidation or movement."},
+        {"timestamp_sec":590,"path":"frame-samples/foundation-gap/o-4rk3T8PbQ-590s.jpg","frame_sha256":"fe7301d849f7b96a006dcbea90606e3146dd029632c5d3fb113fc095717eb3bb","observation":"At least three physical people occupy a narrow dressing room across depth; a mirror adds reflected figures and a back-facing foreground body creates occlusion.","supports_claims":["O4K-C07","O4K-C08"],"limit":"Reflections may duplicate apparent people and do not establish physical locations alone."},
+        {"timestamp_sec":610,"path":"frame-samples/foundation-gap/o-4rk3T8PbQ-610s.jpg","frame_sha256":"424ea55113f5a893c9925c28a29b4290e5f6fa6c78db5b88293a75dc8bd5dcae","observation":"Three physical people remain distributed in front/middle layers in the dressing room; the right foreground back blocks part of the center figure.","supports_claims":["O4K-C08","O4K-C09"],"limit":"Does not prove an entrance or the removal of an occluder."},
+        {"timestamp_sec":675,"path":"frame-samples/foundation-gap/o-4rk3T8PbQ-675s.jpg","frame_sha256":"8e1ee7a28f9794f9b7a6f919087df61e4255f70dfcb5c58ca5f5f60d73790afe","observation":"A blonde woman occupies foreground left while two people are layered behind among racks and mirrors.","supports_claims":["O4K-C09","O4K-C10"],"limit":"Does not prove reveal order, reaction timing or who entered."}
+      ]
+    },
+    {
+      "video_id": "EqTn6lfRNow",
+      "channel": "StudioBinder",
+      "title": "How Back to the Future Uses Perfect Blocking to Tell the Story",
+      "url": "https://www.youtube.com/watch?v=EqTn6lfRNow",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec":88,"path":"frame-samples/foundation-gap/EqTn6lfRNow-88s.jpg","frame_sha256":"59d94ef97e10445e03aeac762fe5e33903d6a952926b8e1018fb8a06b491bc53","observation":"Two foreground people stand shoulder-to-shoulder while a clock-tower building remains clearly visible behind them.","supports_claims":["EQT-C01"],"limit":"Does not prove prior entry or later movement."},
+        {"timestamp_sec":130,"path":"frame-samples/foundation-gap/EqTn6lfRNow-130s.jpg","frame_sha256":"6eaaedcf080f43855593bf526de5b3225b0e6b8f8e834284ab635137378e47ac","observation":"A damaged silver car dominates foreground/middle while one small standing figure appears at the left rear; an animation panel occupies the right side.","supports_claims":["EQT-C02"],"limit":"Only the person-car state is visible; animation dots do not prove motion."},
+        {"timestamp_sec":155,"path":"frame-samples/foundation-gap/EqTn6lfRNow-155s.jpg","frame_sha256":"3339f4a6d3aed58b526fa5ca6f938b43cbb4e73ff8d6490415bfb6badb4dfc10","observation":"One woman faces away in a bedroom, with bed and furniture defining foreground and background layers.","supports_claims":["EQT-C03"],"limit":"Does not prove a transition between planes."},
+        {"timestamp_sec":208,"path":"frame-samples/foundation-gap/EqTn6lfRNow-208s.jpg","frame_sha256":"02fd40a73c48507d5a7c2f62427c8fd694fef4a6ce8fe3d4039a68d306011416","observation":"A central couple has close hand-to-face contact while at least one additional person passes in the right background; a white target graphic is an overlay.","supports_claims":["EQT-C04","EQT-C05"],"limit":"Does not establish the attention sequence or movement path."},
+        {"timestamp_sec":224,"path":"frame-samples/foundation-gap/EqTn6lfRNow-224s.jpg","frame_sha256":"114699b2bffece7702270304b458bdb30207dc88ca8a186a5ec7306f71d972d4","observation":"A crouching woman and standing man occupy separated middle positions with street activity behind them.","supports_claims":["EQT-C05"],"limit":"Does not prove who redirected attention or changed position."},
+        {"timestamp_sec":270,"path":"frame-samples/foundation-gap/EqTn6lfRNow-270s.jpg","frame_sha256":"fd5cd6190005c245302b0e4d7f0b932ad44cfd9acc4919d98cf1274fef9782a0","observation":"Two men face each other across a yard; the left man gestures and the eyeline axis is readable.","supports_claims":["EQT-C06","EQT-C07"],"limit":"Does not prove a long-take transition."},
+        {"timestamp_sec":312,"path":"frame-samples/foundation-gap/EqTn6lfRNow-312s.jpg","frame_sha256":"f9b1c9f56fffdff575ca30b16f5a17793e8ee8ac4c8a760e3be80437a3979017","observation":"Two men align front-to-back along a corridor depth axis; one is foreground left and the other centered behind.","supports_claims":["EQT-C07","EQT-C08"],"limit":"Does not prove walking speed or the number of blocking positions."},
+        {"timestamp_sec":348,"path":"frame-samples/foundation-gap/EqTn6lfRNow-348s.jpg","frame_sha256":"c329b9a8a5bfea7de9ffdf4e858005b9662e0dbad2363a183b25f12021aee9af","observation":"One man occupies the center foreground while the corridor depth remains visible and another person is absent from frame.","supports_claims":["EQT-C08","EQT-C09"],"limit":"Does not prove when or where the other person exited."}
+      ]
+    },
+    {
+      "video_id": "ZGNUqNFfD8M",
+      "channel": "StudioBinder",
+      "title": "Depth of Field Explained: Ultimate Guide to Camera Focus [Shot List Ep. 4]",
+      "url": "https://www.youtube.com/watch?v=ZGNUqNFfD8M",
+      "frame_status": "partial",
+      "frames": [
+        {"timestamp_sec":145,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-145s.jpg","frame_sha256":"8461f8e08b44f69aa39e9f3cc0d2e761b60eafe9b87a2425044720f8827dce4b","observation":"An astronaut and the distant Earth edge are both visibly detailed in a cold, high-contrast composition.","supports_claims":["ZGN-C01","ZGN-C02"],"limit":"Does not prove lens or aperture values."},
+        {"timestamp_sec":180,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-180s.jpg","frame_sha256":"4d98300e8d78ba2a22983d2177bd84cd1141e16e2c875132dba64e31bbf5ad27","observation":"Two astronauts and spacecraft detail remain readable across depth, showing a deep-focus appearance.","supports_claims":["ZGN-C01","ZGN-C02"],"limit":"Does not prove physical focus technique."},
+        {"timestamp_sec":260,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-260s.jpg","frame_sha256":"85ffca773aeeb38adb990681e207c624a8073f7f2a23999fb9dc819a9edd021b","observation":"A flower is sharp while city lights behind become large warm circles, showing shallow focus and bokeh appearance.","supports_claims":["ZGN-C03","ZGN-C04"],"limit":"Does not prove focal length or aperture."},
+        {"timestamp_sec":326,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-326s.jpg","frame_sha256":"0f212893d1ef8cbeebe5b06ccad4899d2e8646f031596ff429ffb4a15ddbe475","observation":"A woman's face is sharp in close-up while the interior background is distinctly soft.","supports_claims":["ZGN-C03","ZGN-C05"],"limit":"Emotional effect remains interpretation."},
+        {"timestamp_sec":446,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-446s.jpg","frame_sha256":"b9e4a3a8bfab718ef75e35e0928e15bdc095496766530086dceb71badb080206","observation":"A boy and surrounding lights have low sharpness and visible glow, supporting a soft-focus appearance.","supports_claims":["ZGN-C06"],"limit":"Does not identify a filter or prove intentionality."},
+        {"timestamp_sec":536,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-536s.jpg","frame_sha256":"50427d17054062b2aef6f179c605ed6353c63ba2fefd8fdb5e9a0229b01dbe3a","observation":"A central masked person is sharp while side/foreground people are heavily soft in a hospital corridor.","supports_claims":["ZGN-C07","ZGN-C08"],"limit":"A still proves only one focus state, not rack direction or speed."},
+        {"timestamp_sec":605,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-605s.jpg","frame_sha256":"0a0347a9e6ff8ec907ea7861fe98a2116fbd2cf8ffe34294cfbb5441cf2d4190","observation":"A black-background diagram shows a camera and several subject planes with colored lines.","supports_claims":["ZGN-C09"],"limit":"Diagram presence does not prove real optical rendering."},
+        {"timestamp_sec":754,"path":"frame-samples/foundation-gap/ZGNUqNFfD8M-754s.jpg","frame_sha256":"a0d4b887cfd8d9db2b1b95e057c09d124d2d3adbd3a140b1724023fb37e71281","observation":"A warm interior image contains severe motion blur and no stable focus plane.","supports_claims":["ZGN-C10"],"limit":"Does not prove tilt-shift; retained as a counterexample to inferring focus type from blur."}
+      ]
+    },
+    {
+      "video_id": "K9w8I_YD29E",
+      "channel": "StudioBinder",
+      "title": "Roger Deakins on \"Learning to Light\" — Cinematography Techniques Ep. 1",
+      "url": "https://www.youtube.com/watch?v=K9w8I_YD29E",
+      "frame_status": "complete_for_sampled_claims",
+      "frames": [
+        {"timestamp_sec":83,"path":"frame-samples/foundation-gap/K9w8I_YD29E-83s.jpg","frame_sha256":"1155ee080e57b2f13c233c1ef04014ac77d4879925e5e93b01e564498e7e14f5","observation":"Upward tree branches against overcast sky show cool-gray diffuse light and broad detail across depth.","supports_claims":["K9W-C01"],"limit":"Does not prove weather causality or settings."},
+        {"timestamp_sec":149,"path":"frame-samples/foundation-gap/K9w8I_YD29E-149s.jpg","frame_sha256":"39673964079f14581416066ee8d35da971517578ad1cdf87574d7bdab1480af6","observation":"A restaurant booth uses warm red-purple environmental color with a readable figure and interior layers.","supports_claims":["K9W-C02","K9W-C09"],"limit":"Does not prove the intended emotion."},
+        {"timestamp_sec":168,"path":"frame-samples/foundation-gap/K9w8I_YD29E-168s.jpg","frame_sha256":"830568cd41a7df376d1979b192ea412c4e266ad56867d065eba92fe66aaa5037","observation":"A low-angle tricycle image under overcast light has low contrast and clear environment depth.","supports_claims":["K9W-C01","K9W-C07"],"limit":"Does not prove exact camera height or lens."},
+        {"timestamp_sec":222,"path":"frame-samples/foundation-gap/K9w8I_YD29E-222s.jpg","frame_sha256":"12c23efac41b4372952f4d21bb330b1dd0b206ae987425b681485439794edbde","observation":"A black-and-white close-up retains face and meter detail while the background is softer; highlights and shadows remain separated.","supports_claims":["K9W-C03","K9W-C04"],"limit":"Does not reveal the actual exposure reading."},
+        {"timestamp_sec":228,"path":"frame-samples/foundation-gap/K9w8I_YD29E-228s.jpg","frame_sha256":"724b67a0b037f4ed8a2b962e0bb0f48dbebfadc71bd06de89ca6cd65b279452e","observation":"A dark interior figure is backlit from a bright left window, with deep shadows and retained corridor depth.","supports_claims":["K9W-C03","K9W-C08"],"limit":"Does not prove exposure values."},
+        {"timestamp_sec":334,"path":"frame-samples/foundation-gap/K9w8I_YD29E-334s.jpg","frame_sha256":"04b8d746651bed2b397a924094f3395b169509bcc2d9b4400c910f3ba8d34f36","observation":"A behind-the-scenes group surrounds a camera in neutral warehouse light.","supports_claims":["K9W-C04","K9W-C10"],"limit":"Does not prove the lighting result in a finished shot."},
+        {"timestamp_sec":391,"path":"frame-samples/foundation-gap/K9w8I_YD29E-391s.jpg","frame_sha256":"9ef5fdfc9d30a132c3276b464a9cf78a7dfc55c54d09fe643525dd962f5743cb","observation":"A tabletop still life retains product color and window highlight detail under directional daylight.","supports_claims":["K9W-C03","K9W-C05"],"limit":"Does not prove meter strategy."},
+        {"timestamp_sec":426,"path":"frame-samples/foundation-gap/K9w8I_YD29E-426s.jpg","frame_sha256":"fb91c03f77b13e2bf0a1264e95d1fb670636103984761fb639f338953cd1f5c4","observation":"A warm practical light dominates a deep corridor with a back-facing figure and dark preserved spatial layers.","supports_claims":["K9W-C05","K9W-C08","K9W-C09"],"limit":"Does not prove the number or type of sources."}
+      ]
+    },
+    {
+      "video_id": "gebNTySOXbY",
+      "channel": "American Cinema Editors",
+      "title": "Editors on Editing: Downsizing - Kevin Tent, ACE",
+      "url": "https://www.youtube.com/watch?v=gebNTySOXbY",
+      "frame_status": "partial",
+      "frames": [
+        {"timestamp_sec":738,"path":"frame-samples/foundation-gap/gebNTySOXbY-738s.jpg","frame_sha256":"71b6d492158e1f0d6e113a64acc92559f6bd6664fa64ac055cf5326cb74d30a0","observation":"A finished-film medium shot shows a woman in a bright room holding a dark rectangular object.","supports_claims":["GEB-C02"],"limit":"One frame cannot prove performance continuity, VFX repair or cut logic."},
+        {"timestamp_sec":782,"path":"frame-samples/foundation-gap/gebNTySOXbY-782s.jpg","frame_sha256":"abc2293a85012a1a0fb76cd59f77c9ffa2b70d24a1dbc6ffc32f12b9a08fe276","observation":"Kevin Tent speaks in interview framing with raised explanatory hands.","supports_claims":["GEB-C01","GEB-C05"],"limit":"Supports speaker context only, not the claimed edit effect."},
+        {"timestamp_sec":980,"path":"frame-samples/foundation-gap/gebNTySOXbY-980s.jpg","frame_sha256":"3285729ef1566b96de529b7e52d6e1a69b987c3558d97e0488bab6a958dfd6c7","observation":"The same interview subject shows a concentrated or puzzled expression.","supports_claims":["GEB-C03"],"limit":"Does not show the letter-reading scene or its duration."},
+        {"timestamp_sec":1028,"path":"frame-samples/foundation-gap/gebNTySOXbY-1028s.jpg","frame_sha256":"dc59a9fb922808902c3297e0ce2cd3ca08a08a2da6f71fcd64f0de268b0e8e74","observation":"A second interview participant listens with a slight smile.","supports_claims":["GEB-C04"],"limit":"A listener pose does not prove the film's reaction cut."},
+        {"timestamp_sec":1083,"path":"frame-samples/foundation-gap/gebNTySOXbY-1083s.jpg","frame_sha256":"0d4bf2788a36ead8620bf980e62a2310e9020a5a64db4197d765252707921255","observation":"The second participant gestures while speaking.","supports_claims":["GEB-C13"],"limit":"No NLE timeline or scene transition is visible."},
+        {"timestamp_sec":1173,"path":"frame-samples/foundation-gap/gebNTySOXbY-1173s.jpg","frame_sha256":"f18aefebdc7b93a23f342d46e610b3f2ff96745c61f9fae9b397df045ce57f1a","observation":"Kevin Tent laughs with a strong visible reaction.","supports_claims":["GEB-C14"],"limit":"Does not prove the trigger, reaction length or edit point."},
+        {"timestamp_sec":1224,"path":"frame-samples/foundation-gap/gebNTySOXbY-1224s.jpg","frame_sha256":"f8b00119454ba2b3a46edcf3e62e70f58c781edde30f67d0c081367841d0efb0","observation":"The second participant touches his chin in a thoughtful listening pose.","supports_claims":["GEB-C09","GEB-C10"],"limit":"Does not prove audience testing or pause duration."},
+        {"timestamp_sec":1274,"path":"frame-samples/foundation-gap/gebNTySOXbY-1274s.jpg","frame_sha256":"c9002ec47a8bff9141f3e67f2ce7164bc0520a4ce7822232b96904d2702821b3","observation":"Kevin Tent speaks with both hands framing an explanation.","supports_claims":["GEB-C06","GEB-C07"],"limit":"No timeline, tracks or timing comparison is visible."}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Editing and Sound"
+  short_description: "设计剪辑节奏、对白、音效、音乐与混音"
+  default_prompt: "Use $editing-sound to turn these clips into a precise edit and layered sound plan."
+policy:
+  allow_implicit_invocation: true

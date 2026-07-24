@@ -1,0 +1,13 @@
+id: night-shift-handoff.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [night-shift-handoff.visual-bible@1.0.0]
+assumptions: ["仅声明预期参考；实际文件未提供。"]
+constraints: {}
+open_questions: []
+status: qc_pending
+change_log: []
+assets:
+  - {asset_id: REF-LOC-MASTER, role: scene_master, entity_ids: [LOC-GATEHOUSE], path_or_uri: "", sha256: null, dimensions: null, rights_status: user-owned, source: "not_attached", version: 1.0.0, status: pending}
+  - {asset_id: REF-KEY-MASTER, role: prop_master, entity_ids: [PROP-KEY], path_or_uri: "", sha256: null, dimensions: null, rights_status: user-owned, source: "not_attached", version: 1.0.0, status: pending}
+  - {asset_id: REF-LOG-MASTER, role: prop_master, entity_ids: [PROP-LOGBOOK], path_or_uri: "", sha256: null, dimensions: null, rights_status: user-owned, source: "not_attached", version: 1.0.0, status: pending}

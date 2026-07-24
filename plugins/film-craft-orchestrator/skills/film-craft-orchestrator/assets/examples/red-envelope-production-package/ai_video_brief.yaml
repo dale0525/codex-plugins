@@ -1,0 +1,24 @@
+id: red-envelope.ai-video-brief
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [red-envelope.source-material@1.0.0]
+assumptions:
+  - 生成模型尚未实际接收参考图，本包保持 diagnostic_preview。
+constraints:
+  runtime_target_sec: 60
+  aspect_ratio: "16:9"
+  max_iterations_per_clip: 4
+  credit_budget: unknown
+open_questions:
+  - 实际使用哪个已授权模型账户完成首轮生成？
+status: frozen
+change_log: []
+format: short
+audience: adult general audience
+genre_tone: moral suspense, restrained office drama
+rights_status: user-owned
+creative_goal: 林发现同事准备替她承担罪责后，主动选择自首。
+must_beats: [S01-B01, S01-B03, S01-B05, S01-B06, S01-B07, S01-B08]
+generation_constraints:
+  available_models: [google-veo-3-1-gemini-api-2026-07]
+  dialogue_strategy: separate_audio_then_lipsync

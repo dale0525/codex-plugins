@@ -1,0 +1,33 @@
+source_title: 海潮站片段
+rights_status: user-owned
+entries:
+  - source: 台风登陆前一小时，沈岚回到停用七年的海潮站
+    action: must_preserve
+    adaptation: 以远景雨幕和手持跟拍建立返回与时限
+  - source: 候车室钟停在母亲失踪那天，广播吐出潮声
+    action: combine
+    adaptation: 一个静止钟特写叠加失真的潮声广播，作为时间锚与声音母题
+  - source: 售票窗后找到写着自己名字的旧录音带
+    action: must_preserve
+    adaptation: 录音带成为可追踪道具，名字特写后保持在沈岚手中
+  - source: 沈屿出现，坚持那只是母亲留下的道歉
+    action: translate
+    adaptation: 先以逆光剪影和画外声出现，避免提前确认其可信度
+  - source: 童年的自己背诵潮汐表，母亲警告不要相信带你来这里的人
+    action: must_preserve
+    adaptation: 分层声音：儿童录音→母亲低声警告，形成信息反转
+  - source: 沈屿伸手关掉机器
+    action: must_preserve
+    adaptation: 拆成手部插入与沈岚反应两个coverage clips
+  - source: 沈岚打开通往防波堤的门
+    action: must_preserve
+    adaptation: 结尾以门外台风白光和海浪吞没画面
+  - source: 未提供母亲失踪经过
+    action: invent
+    adaptation: 仅暗示沈屿可能“带她来这里”，不补写确凿真相
+  - source: 未提供视觉风格
+    action: invent
+    adaptation: 冷青灰、钠灯暖斑、16:9可视化视角固定为沈岚主观与受限客观交替
+  - source: 原片段未写出的站内日常与完整追逐
+    action: omit
+    adaptation: 为90秒节奏省略，保留返回、发现、警告、阻止、开门五个因果节点

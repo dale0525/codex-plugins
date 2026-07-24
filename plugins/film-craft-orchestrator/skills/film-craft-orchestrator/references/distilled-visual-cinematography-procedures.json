@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-23",
+  "sources": [
+    {"video_id": "3FOzD4Sfgag", "title": "Edgar Wright - How to Do Visual Comedy", "channel": "Every Frame a Painting", "url": "https://www.youtube.com/watch?v=3FOzD4Sfgag", "evidence_type": "asr_reviewed", "evidence_level": "E4"},
+    {"video_id": "RXD97Rc5P_s", "title": "4 Unique Setups for Daylight | Add Style to Your Lighting", "channel": "Aputure", "url": "https://www.youtube.com/watch?v=RXD97Rc5P_s", "evidence_type": "asr_reviewed", "evidence_level": "E4", "bias": "灯具厂商教学"},
+    {"video_id": "fdVAM-R8cTI", "title": "Cinematography Case Study — Lighting The Face", "channel": "Wandering DP", "url": "https://www.youtube.com/watch?v=fdVAM-R8cTI", "evidence_type": "asr_reviewed", "evidence_level": "E4", "bias": "单片案例与付费课程导流"}
+  ],
+  "procedures": [
+    {
+      "id": "visual-carrier-substitution",
+      "domain": "director",
+      "title": "把对白信息改成画面—声音载体",
+      "claim_refs": [
+        {"start_sec": 39.6, "end_sec": 56.28, "kind": "video_claim", "paraphrase": "视频批评只靠静态近景对白交付笑点，强调电影还有画面与完整声音范围。"},
+        {"start_sec": 118.2, "end_sec": 141.1, "kind": "video_claim", "paraphrase": "城市移动等普通过场若只用地标、航拍和通用音乐会变得可预测。"},
+        {"start_sec": 122.38, "end_sec": 143.5, "kind": "video_claim", "paraphrase": "案例同时用地点线索、文明远离、稳定银幕方向及音乐/音效反差完成信息和笑点。"}
+      ],
+      "applicability": {"use_when": ["对白只解释状态", "过场只传递地点/时间", "喜剧场景的画面可被广播剧替代"], "do_not_use_when": ["无障碍或叙事清晰度要求必须保留关键信息对白", "视觉花活会破坏 POV 或地理连续性"]},
+      "inputs": ["原对白/过场", "必须理解的信息", "角色态度", "空间与银幕方向", "可用声音元素"],
+      "steps": [
+        {"step": 1, "action": "把原段落拆成事实、态度、节奏三种功能。", "check": "每项能单独验收。"},
+        {"step": 2, "action": "为每项至少提出两个非对白载体：构图、出入画、物件、转场、动作、环境声或音效。", "check": "载体是可拍动作，不是‘更视觉化’。"},
+        {"step": 3, "action": "选择一个主要画面载体和一个声音载体，保留明确银幕方向与地点锚点。", "check": "静音仍懂主要事实，只听声音仍能感到节奏差异。"},
+        {"step": 4, "action": "做对白版与视听版 story reel，保持总时长近似。", "check": "不靠速度差制造虚假优势。"},
+        {"step": 5, "action": "盲测事实理解与态度/笑点反应；若理解下降，补最小锚点而非恢复整段说明。", "check": "锚点不重复已由画面完成的信息。"}
+      ],
+      "outputs": ["功能拆分", "载体候选表", "视听版 story reel", "盲测记录"],
+      "failure_signals": ["只把对白换成字幕", "快切但地点/方向不可读", "音效只是装饰，没有与切点或动作形成关系", "画面和声音重复同一信息"],
+      "acceptance_tests": [
+        {"test": "事实理解", "pass_criteria": "至少 4/5 观众正确复述必要事实。"},
+        {"test": "非对白承载", "pass_criteria": "删除解释对白后，主要因果仍成立。"},
+        {"test": "方向连续", "pass_criteria": "人物/交通移动方向没有无动机反转。"}
+      ],
+      "worked_example": {"baseline": "角色说‘我们离城里越来越远，而且这里没信号。’", "translation": "连续三个同向车窗构图：高楼→仓库→荒地；音乐逐镜降低，最后只剩导航失联提示音；角色仍面向画面右侧。", "result": "地点、方向和不安都由画面/声音完成。"}
+    },
+    {
+      "id": "visual-joke-frame-reveal",
+      "domain": "director",
+      "title": "入画/出画/镜头运动的视觉笑点",
+      "claim_refs": [
+        {"start_sec": 215.32, "end_sec": 274.6, "kind": "video_claim", "paraphrase": "视频提出笑点可来自调度、物体入画/出画、变焦、升降或摇镜，而非只来自台词。"},
+        {"start_sec": 299.8, "end_sec": 441.8, "kind": "video_claim", "paraphrase": "归纳了有趣出入画、往返、匹配转场、定时音效、动作对音乐等画面—声音手段。"},
+        {"start_sec": 287.56, "end_sec": 292.26, "kind": "video_claim", "paraphrase": "视频强调喜剧可通过框内与框外的选择形成。"}
+      ],
+      "applicability": {"use_when": ["笑点依赖观众先看错/漏看", "空间可隐藏信息", "动作与声音可精确排练"], "do_not_use_when": ["笑点需要伤害、危险动作却无安全设计", "构图隐瞒会让主线事实不可懂"]},
+      "inputs": ["setup belief", "隐藏信息", "reveal mechanism", "frame boundary", "声音落点", "表演节奏"],
+      "steps": [
+        {"step": 1, "action": "写 setup：观众此刻合理相信什么，画框排除了什么。", "check": "误导来自构图，不来自欺骗性剪辑。"},
+        {"step": 2, "action": "选择 reveal：对象入画、人物出画、pan/zoom/crane、匹配转场或声音先行。", "check": "只选一个主要揭示机制。"},
+        {"step": 3, "action": "排三拍：建立、延迟、揭示；标帧边界与声音落点。", "check": "延迟足够观众形成预期。"},
+        {"step": 4, "action": "拍正常速度与提前/延后 6–12 帧两版。", "check": "只改变 reveal 时机。"},
+        {"step": 5, "action": "盲测何时理解和是否发笑；选择理解率达标且反应集中的版本。", "check": "不以创作者自己发笑为证据。"}
+      ],
+      "outputs": ["三拍视觉笑点卡", "构图边界图", "三个时机版本", "盲测结果"],
+      "failure_signals": ["观众尚未形成预期就揭示", "笑点必须靠解释台词补完", "镜头运动比信息本身更抢眼", "音效提前泄露 reveal"],
+      "acceptance_tests": [
+        {"test": "理解", "pass_criteria": "至少 4/5 观众首次观看能复述 setup 与 reveal。"},
+        {"test": "反应集中", "pass_criteria": "至少 3/5 观众在 reveal±0.5 秒出现可观察反应。"},
+        {"test": "静音/闭眼分工", "pass_criteria": "静音仍懂画面机制；声音单独提供节奏但不泄露全部信息。"}
+      ],
+      "worked_example": {"setup": "老板严肃宣布办公室禁止宠物，画面只见会议桌。", "delay": "桌下传来一次轻响，老板停半拍继续。", "reveal": "相机不动；老板站起离画，一只戴工牌的狗从他椅后进入画面。", "sound": "狗牌声恰落在老板说‘任何例外’之后。"}
+    },
+    {
+      "id": "daylight-look-variable-matrix",
+      "domain": "cinematography",
+      "title": "日景内景单变量 Look 测试",
+      "claim_refs": [
+        {"start_sec": 47.32, "end_sec": 102.88, "kind": "video_claim", "paraphrase": "夕阳方案用暖窗、压暗白顶环境反射、方向性硬源、旗板塑形及背光雾化光束。"},
+        {"start_sec": 126.04, "end_sec": 178.8, "kind": "video_claim", "paraphrase": "高日方案去掉暖色、增加窗源和柔化，调整 ISO 压整体环境同时保留亮源。"},
+        {"start_sec": 183.2, "end_sec": 274.0, "kind": "video_claim", "paraphrase": "阴天方案改变窗户开闭、使用大面积反弹/扩散形成软源并控制窗外细节。"},
+        {"start_sec": 287.28, "end_sec": 347.84, "kind": "video_claim", "paraphrase": "蓝调时刻方案以冷环境配暖实用灯和少量面部回光形成分离。"}
+      ],
+      "applicability": {"use_when": ["同一室内需模拟不同时段", "需在现有场地先做 look test", "希望从方向/软硬/环境比而非灯具品牌设计"], "do_not_use_when": ["直接复制厂商灯具清单", "未确认 haze、用电、吊装和消防安全", "一次改太多变量却声称知道因果"]},
+      "inputs": ["窗向与实拍时段", "目标情绪/信息", "相机格式与动态范围", "肤色/窗外优先级", "可控窗/顶/实用灯", "安全批准"],
+      "steps": [
+        {"step": 1, "action": "拍未布光基线，记录肤色、窗外、白顶反射、背景和曝光值。", "check": "相机/镜头/构图锁定。"},
+        {"step": 2, "action": "建立变量表：方向、软硬、环境填充、色温、背景层次；每次只改一项并拍测试。", "check": "文件名含变量和值。"},
+        {"step": 3, "action": "先控自然/环境：窗开闭、遮挡、负补、顶反射；再加或替换人工源。", "check": "不先用功率掩盖环境问题。"},
+        {"step": 4, "action": "分别检查肤色、眼神光、窗外、暗部噪声和演员走位范围。", "check": "不只看单帧最美位置。"},
+        {"step": 5, "action": "选 look 后锁曝光/白平衡/灯位容差，写低成本 fallback。", "check": "fallback 保留方向和对比关系。"}
+      ],
+      "outputs": ["未布光基线", "单变量测试矩阵", "选定 look 参数", "演员走位容差", "fallback"],
+      "failure_signals": ["只用蓝/橙标签描述时段", "白顶环境反射使对比失控却不断加灯", "肤色可用但演员一步就脱光", "窗外和实用灯在 coverage 间漂移"],
+      "acceptance_tests": [
+        {"test": "单变量", "pass_criteria": "相邻测试仅改变一个主要变量。"},
+        {"test": "曝光容差", "pass_criteria": "演员完整走位中肤色/高光/暗部均在项目预设容差。"},
+        {"test": "连续性", "pass_criteria": "master 与 coverage 的窗外、主光方向和实用灯色温可匹配。"}
+      ],
+      "worked_example": {"baseline": "白顶把窗光反弹满屋，人物脸平。", "test": "先用黑布压顶反射，再比较硬侧窗与大扩散窗；最后只给背景加暖实用灯。", "selection": "硬侧窗保留人物秘密感，负补 fallback 用黑旗而非品牌灯。"}
+    },
+    {
+      "id": "location-lighting-formula",
+      "domain": "cinematography",
+      "title": "跨场地可复制照明公式",
+      "claim_refs": [
+        {"start_sec": 394.0, "end_sec": 417.56, "kind": "video_claim", "paraphrase": "视频建议旅行/紧张排程时保持简单，先确定一种照明主题或公式，再按地点复现，而非每处重造。"}
+      ],
+      "applicability": {"use_when": ["多地点紧排程", "器材/人员有限", "同一叙事段需要视觉统一"], "do_not_use_when": ["公式忽略不同窗向与安全条件", "剧情要求地点有意区别", "把品牌/灯数当公式"]},
+      "inputs": ["叙事段视觉规则", "各地点 scout 数据", "太阳/窗向", "最小器材包", "setup 工时上限"],
+      "steps": [
+        {"step": 1, "action": "把公式写成功能：主光方向、对比目标、背景分离、色温关系、负补位置。", "check": "不出现具体品牌作为必要条件。"},
+        {"step": 2, "action": "为每地点标 source、control、shape、exposure、fallback 五项。", "check": "每项能用当地资源替代。"},
+        {"step": 3, "action": "在第一地点计时完整 setup，并记录可删步骤。", "check": "工时来自实际而非乐观估计。"},
+        {"step": 4, "action": "其余地点只允许为窗向/空间/肤色做局部偏差，写 deviation reason。", "check": "偏差不破坏叙事规则。"},
+        {"step": 5, "action": "每天收工比较参考帧和曝光日志，更新下一地点。", "check": "不靠记忆匹配。"}
+      ],
+      "outputs": ["功能照明公式", "地点五项表", "首场计时", "偏差日志", "参考帧/曝光日志"],
+      "failure_signals": ["每到新地点重新讨论审美", "公式只能用某灯具完成", "为了统一而忽视演员肤色/窗外", "setup 时间持续超限但计划不变"],
+      "acceptance_tests": [
+        {"test": "可复制", "pass_criteria": "至少两个地点用不同器材仍保持方向/对比/色温关系。"},
+        {"test": "排程", "pass_criteria": "每地点 setup 在核定上限内，超限有预先 fallback。"},
+        {"test": "视觉一致", "pass_criteria": "盲看参考帧时至少 4/5 观察者判断属于同一叙事段。"}
+      ],
+      "worked_example": {"formula": "窗侧主光、镜头侧负补、背景一处暖实用灯、窗外高光不剪切。", "location_A": "真实窗+黑旗。", "location_B": "门口反弹模拟窗+黑布。", "deviation": "B 无实用灯，以走廊暖光替代并记录。"}
+    },
+    {
+      "id": "coverage-lighting-complexity-budget",
+      "domain": "cinematography",
+      "title": "Coverage 布光复杂度预算",
+      "claim_refs": [
+        {"start_sec": 12.44, "end_sec": 45.16, "kind": "video_claim", "paraphrase": "视频把‘先照亮空间再允许人物移动’描述为提高灵活性、减少逐镜重布的一种方法。"},
+        {"start_sec": 69.84, "end_sec": 152.42, "kind": "video_claim", "paraphrase": "小空间、多人物、多视线和多方向 coverage 会迅速增加逐脸布光、错误风险和现场时间。"},
+        {"start_sec": 520.08, "end_sec": 568.36, "kind": "video_claim", "paraphrase": "当人物背向自然源时，需要处理补绕、色温、光形与环境；可以完成但需要能力与时间。"}
+      ],
+      "applicability": {"use_when": ["多人物室内 coverage", "场地小且视线方向多", "需要在空间照明与逐镜精修间取舍"], "do_not_use_when": ["把 space lighting 当唯一正确方法", "项目有充足时间且每镜精修有明确收益", "未与 gaffer/安全人员确认"]},
+      "inputs": ["人物数", "视线/轴线图", "coverage 方向", "自然源", "演员走位", "每 setup 工时", "质量优先级"],
+      "steps": [
+        {"step": 1, "action": "为每个 coverage 方向记录人物是否面向/背向主源、窗是否入镜、所需 wrap/negative fill。", "check": "所有角度都列，不只 master。"},
+        {"step": 2, "action": "给每角度估算新增灯位、调光、旗板、颜色和重置次数。", "check": "估算由摄影/灯光部门确认。"},
+        {"step": 3, "action": "先找 hardest angle，并在 tech scout 做曝光/肤色测试。", "check": "最难角度不是留到片场最后。"},
+        {"step": 4, "action": "比较两案：空间统一照明 vs 逐角精修；按总工时、连续性和画质收益决策。", "check": "收益具体到镜头 purpose。"},
+        {"step": 5, "action": "若采用逐角精修，冻结每角变化表和回归 master 的恢复标记。", "check": "无静默漂移。"}
+      ],
+      "outputs": ["coverage lighting matrix", "hardest-angle test", "两案工时/质量比较", "恢复标记"],
+      "failure_signals": ["拍到反打才发现人物背光脸不可用", "每个角度临场重新找光", "coverage 之间环境亮度/色温漂移", "为了精修超时却没有叙事收益"],
+      "acceptance_tests": [
+        {"test": "角度覆盖", "pass_criteria": "100% must coverage 有预设曝光、光向和工时。"},
+        {"test": "hardest angle", "pass_criteria": "最难角度在开拍前已通过肤色/窗外/背景测试。"},
+        {"test": "排程", "pass_criteria": "灯光变更总工时不超过核定时段，超限则采用已批准简化案。"}
+      ],
+      "worked_example": {"scene": "四人圆桌，三条视线轴，两个窗方向。", "hardest": "母亲反打正对窗，脸需 wrap 且窗外保留。", "decision": "master/两组反打用空间照明；只为母亲关键承认镜加 12 分钟负补与柔和 wrap。"}
+    },
+    {
+      "id": "hardest-angle-first-preflight",
+      "domain": "cinematography",
+      "title": "最难角度优先预检",
+      "claim_refs": [
+        {"start_sec": 240.0, "end_sec": 291.16, "kind": "video_claim", "paraphrase": "视频先判断回看母亲且需平衡窗与面部 wrap 的角度最难，其余角度可沿用已有光。"},
+        {"start_sec": 310.72, "end_sec": 405.64, "kind": "video_claim", "paraphrase": "移动 coverage 需要协调窗、眼神光、负补、背景层次和演员朝向，且需要更多规划与 take。"},
+        {"start_sec": 521.92, "end_sec": 568.36, "kind": "video_claim", "paraphrase": "复杂角度可实现，但若现场没有时间，应减少给自己出错的机会。"}
+      ],
+      "applicability": {"use_when": ["镜头方向跨越自然源", "演员移动导致光比变化", "某一 must 镜头可能决定整场可拍性"], "do_not_use_when": ["只按‘最美’而非最风险角度排序", "未锁 blocking 就做最终灯光"]},
+      "inputs": ["冻结 blocking", "must shot list", "窗/实用灯方位", "肤色与曝光容差", "时间上限"],
+      "steps": [
+        {"step": 1, "action": "给每 must 镜头按窗入镜、背光脸、移动、反射、色温和重置六项打风险。", "check": "每项 0–2 分并写理由。"},
+        {"step": 2, "action": "最高分镜头先搭建并拍皮肤/窗外/背景测试。", "check": "使用最终相机格式和近似服装。"},
+        {"step": 3, "action": "沿演员路径测三个位置，不只测终点。", "check": "曝光与眼神光不超容差。"},
+        {"step": 4, "action": "若失败，按顺序调整 blocking、机位、负补/反弹、窗外优先级；最后才增加复杂灯具。", "check": "每次只改一个主要变量。"},
+        {"step": 5, "action": "通过后把该方案反推到其余角度，并记录不需改光的 setup。", "check": "恢复标记明确。"}
+      ],
+      "outputs": ["六项风险评分", "最难角度测试帧", "三点走位曝光", "简化决策", "setup 继承表"],
+      "failure_signals": ["先拍容易镜导致最难镜无时间", "只测演员静止点", "一失败就堆更多灯", "最难镜不是 must 却占用大量资源"],
+      "acceptance_tests": [
+        {"test": "风险排序", "pass_criteria": "所有 must 镜头均有六项评分，最高风险先验证。"},
+        {"test": "路径容差", "pass_criteria": "演员三点走位的肤色/高光/暗部符合项目容差。"},
+        {"test": "资源合理", "pass_criteria": "新增复杂度对应 must purpose，且总工时仍在上限。"}
+      ],
+      "worked_example": {"scores": "正面 master 3，父亲反打 5，母亲正对窗反打 10。", "test": "母亲起坐终三点中，起点眼窝掉光。", "fix": "先把椅子旋转 15° 再加小反弹；无需为全场重布。"}
+    }
+  ]
+}

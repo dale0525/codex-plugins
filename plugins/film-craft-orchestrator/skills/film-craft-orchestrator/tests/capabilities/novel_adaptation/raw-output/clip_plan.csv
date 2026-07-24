@@ -1,0 +1,9 @@
+clip_id,beat_id,duration_sec,narrative_purpose,action,camera,entry_state,exit_state,dialogue,handles_sec,status
+C01,B1,12,建立返回与台风时限,沈岚穿雨幕推开站门,远景缓慢推近,站外雨幕,门内潮声起,none,1,diagnostic_preview
+C02,B2,12,时间异常,沈岚抬头看停钟并听广播,静止中近景后移,门已关,视线落向售票窗,none,1,diagnostic_preview
+C03,B3,12,关键道具发现,她从售票窗后抽出署名磁带,主观手部俯拍,售票窗遮挡,磁带在掌心,沈岚:我的名字?,1,diagnostic_preview
+C04,B4,14,兄弟现身与策略冲突,沈屿从黑暗侧后出现解释磁带,受限客观侧移,沈岚持带且背对黑暗,两人同框,沈屿:那是妈的道歉。,1,diagnostic_preview
+C05,B5,10,播放与童年证据,沈岚按播放键,录音机微距,磁带未播放,红灯亮起,童声:涨潮一米二…,1,diagnostic_preview
+C06,B5,8,童声转母亲警告,潮汐表童声被母亲低声打断,声音先行配静止反应,红灯亮起,沈岚抬眼看沈屿,母亲:不要相信带你来这里的人。,1,diagnostic_preview
+C07,B6,10,信息反转与阻止,沈屿伸手关机,手部特写切沈岚眼神,警告余音,机器停下,沈屿:别听了。,1,diagnostic_preview
+C08,B7,12,主动选择与悬停结尾,沈岚放手转身打开防波堤门,手持跟拍向白光,机器停下,门大开沈屿留内,none,1,diagnostic_preview

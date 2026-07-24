@@ -1,0 +1,15 @@
+id: mystery_reveal
+runtime_sec: 60
+common_gate: validate_ai_video_package
+required_artifacts: canonical_13_files
+deterministic_checks:
+  - clue, misdirection and reveal beats are covered by clips and edit timeline
+  - prop state, time, light and screen direction survive adjacent continuity checks
+  - every clip has a canonical prompt and generation record
+  - edit contribution totals 60 seconds
+creative_checks:
+  - the audience can see the clue before the investigator
+  - the misdirection is credible but does not erase the clue
+  - the reveal follows the same physical evidence chain
+  - sound bridges guide attention without revealing the answer early
+research_trigger: only_if_canonical_retest_cannot_repair_clue_fairness_or_sound_bridge

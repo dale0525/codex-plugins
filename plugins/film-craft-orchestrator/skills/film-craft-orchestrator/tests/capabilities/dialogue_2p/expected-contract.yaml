@@ -1,0 +1,15 @@
+id: dialogue_2p
+runtime_sec: 45
+common_gate: validate_ai_video_package
+required_artifacts: canonical_13_files
+deterministic_checks:
+  - every clip has prompt, continuity, generation-log, clip-QC and edit records
+  - all scene, beat, character, prop, location and reference IDs resolve
+  - edit contribution totals 45 seconds
+  - absent real references keep production_status diagnostic_preview
+creative_checks:
+  - both characters have a present objective and concealed pressure
+  - at least one strategy change is visible through behavior
+  - one visible speaker per lip-sync unit, with editable reactions
+  - eyelines, screen direction and key ownership remain legible
+research_trigger: only_if_canonical_retest_has_unrepaired_dialogue_or_lipsync_failure

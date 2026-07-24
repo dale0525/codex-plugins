@@ -1,0 +1,15 @@
+id: montage
+runtime_sec: 40
+common_gate: validate_ai_video_package
+required_artifacts: canonical_13_files
+deterministic_checks:
+  - at least four stages are represented by distinct beats and clips
+  - radio identity persists while repair state changes explicitly
+  - every clip has canonical downstream records
+  - edit contribution totals 40 seconds and sound cue IDs resolve
+creative_checks:
+  - elapsed time is legible without text cards
+  - repeated composition creates comparison, not mere duplication
+  - every stage has a visible causal change
+  - the sound motif evolves with the repair
+research_trigger: only_if_canonical_retest_cannot_repair_stage_readability_or_audio_motif

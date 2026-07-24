@@ -1,0 +1,16 @@
+story_id: umbrella_rack_prank
+logline: A cafe employee plants a misbehaving umbrella in the entrance rack; each curious customer suffers a new physical gag until the last trigger turns the prank back on its maker.
+theme_question: How long can a small secret stay under control when curiosity keeps poking it?
+characters:
+  worker: {id: worker_A, strategy: conceal-and-reset, visual_anchor: green apron, red beanie}
+  customer_1: {id: customer_B, strategy: confident inspection, visual_anchor: yellow raincoat}
+  customer_2: {id: customer_C, strategy: cautious workaround, visual_anchor: blue tote}
+  customer_3: {id: customer_D, strategy: phone-first curiosity, visual_anchor: purple scarf}
+beats:
+  - {id: b01, sec: 0-4, action: worker squeezes umbrella trigger and hides it in rack, turn: tiny spray hits worker's shoe}
+  - {id: b02, sec: 4-10, action: customer_1 confidently pulls umbrella, turn: mist blasts face; worker pretends to polish counter}
+  - {id: b03, sec: 10-17, action: customer_2 uses tote as shield and nudges handle, turn: spray ricochets into hanging coat sleeves}
+  - {id: b04, sec: 17-24, action: customer_3 films and leans in, turn: umbrella spins, mist draws a circular halo around phone}
+  - {id: b05, sec: 24-30, action: worker resets rack and repeats customer_1 gesture, turn: delayed spray hits worker full-on; customers silently applaud}
+scenes:
+  - id: s01, location: cafe_entrance, beats: [b01, b02, b03, b04, b05], continuity: fixed rack screen-right, pastry counter screen-left

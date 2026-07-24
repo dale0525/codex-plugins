@@ -20,6 +20,12 @@ codex plugin add apple-design@dale0525-codex-plugins
 codex plugin add codex-sync@dale0525-codex-plugins
 ```
 
+## Install Film Craft Orchestrator
+
+```bash
+codex plugin add film-craft-orchestrator@dale0525-codex-plugins
+```
+
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
@@ -77,6 +83,14 @@ Before applying Codex Sync 0.2.0 on an existing configuration repository:
 
 The 0.2.0 apply transaction takes ownership of the synchronized profile filenames while preserving unrelated files under `$CODEX_HOME/agents/`.
 
+### Film Craft Orchestrator
+
+Provides one end-to-end orchestration skill and eight focused skills for source
+adaptation, screenwriting, directing, cinematography, AI-video production,
+continuity and quality control, editing and sound, and timestamped video-evidence
+research. Shared templates, evidence corpora, compilers, and deterministic
+validators remain in one canonical skill root so the focused skills do not drift.
+
 ## External content synchronization
 
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
@@ -105,6 +119,7 @@ destination must remain inside this repository.
 .agents/plugins/marketplace.json
 plugins/apple-design/
 plugins/codex-sync/
+plugins/film-craft-orchestrator/
 sync-sources.toml
 ```
 

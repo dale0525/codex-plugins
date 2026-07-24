@@ -1,0 +1,10 @@
+cue_id,scene_id,clip_id,timeline_start_sec,timeline_end_sec,category,diegetic,source,rights_status,audio_hash,sync_target,entry,exit,status
+SND-001,S01,C-S01-01,0,10,ambience,true,generated,user-owned,pending,LOC-TIDE-STATION,fade_in,continue,planned
+SND-002,S01,C-S01-02,10,20,spot_effect,true,generated,user-owned,pending,PROP-PLAYER,continue,continue,planned
+SND-003,S01,C-S01-03,20,30,foley,true,generated,user-owned,pending,PROP-TAPE,continue,continue,planned
+SND-004,S01,C-S01-04,30,40,dialogue,true,recorded,user-owned,pending,CHAR-SHENYU,fade_in,continue,planned
+SND-005,S01,C-S01-05,40,50,spot_effect,true,generated,user-owned,pending,PROP-PLAYER,click,continue,planned
+SND-006,S01,C-S01-06,50,58,dialogue,true,recorded,user-owned,pending,CHAR-SHENLAN_CHILD,continue,continue,planned
+SND-007,S01,C-S01-07,58,68,dialogue,true,recorded,user-owned,pending,CHAR-MOTHER,continue,hard_silence,planned
+SND-008,S01,C-S01-08,68,78,foley,true,generated,user-owned,pending,CHAR-SHENLAN,wind_in,continue,planned
+SND-009,S01,C-S01-09,78,88,ambience,true,generated,user-owned,pending,LOC-SEAWALL,continue,tail,planned

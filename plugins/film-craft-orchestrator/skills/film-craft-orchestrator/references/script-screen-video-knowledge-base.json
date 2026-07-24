@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-07-24",
+  "purpose": "Script-to-screen sources that pair a complete explanatory video, a publicly accessible screenplay version and sampled film/script-page frames. Deep-distilled means the analysis has complete claims and procedures; it does not turn editorial interpretation into verified filmmaker intent.",
+  "corpus_stats": {
+    "video_entries": 2,
+    "deep_distilled": 2,
+    "claim_evidence_only": 0,
+    "executable_procedure_units_unique": 4,
+    "claims_in_deep_evidence": 34,
+    "visual_frame_verification_complete_for_sampled_claims": 0,
+    "visual_frame_verification_partial": 2,
+    "public_script_and_film_evidence_gate": 2
+  },
+  "distillation_definition_ref": "video-knowledge-base.json#distillation_definition",
+  "entries": [
+    {
+      "id": "lfts-arrival-examining-adaptation",
+      "video_id": "QTxvzkwVsQE",
+      "channel": "Lessons from the Screenplay",
+      "title": "Arrival — Examining an Adaptation",
+      "url": "https://www.youtube.com/watch?v=QTxvzkwVsQE",
+      "domains": ["script_to_screen", "adaptation", "editing", "function_transfer", "counterevidence"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "script-screen-asr-evidence.json#QTxvzkwVsQE",
+      "procedure_refs": ["page-scene-timecode-alignment", "script-screen-difference-classification", "carrier-function-transfer-map", "competing-edit-explanation-test"],
+      "frame_artifact": "script-screen-frame-evidence.json#QTxvzkwVsQE",
+      "visual_verification_status": "partial",
+      "script_source": {
+        "page_url": "https://www.scriptslug.com/script/arrival-2016",
+        "pdf_url": "https://assets.scriptslug.com/live/pdf/scripts/arrival-2016.pdf",
+        "publisher": "Script Slug",
+        "access_status": "public_no_login",
+        "provenance": "third_party_public_copy; final shooting draft label visible in PDF",
+        "rights_status": "copyrighted; public access does not grant redistribution rights",
+        "pdf_sha256": "a497ba4e8fcfefb90cffc3c0cefc9a88719ddc501d79f9b780e2314407cc92fa",
+        "page_count": 132,
+        "distributed_with_skill": false
+      },
+      "bias": "LFTS secondary analysis using selected screenplay, film and interview material. Sampled frames confirm specific visible page/film anchors but not montage timing, audio, edit causality or authorial intent."
+    },
+    {
+      "id": "lfts-social-network-structure-collaboration",
+      "video_id": "8IAGH6k17nw",
+      "channel": "Lessons from the Screenplay",
+      "title": "The Social Network — Sorkin, Structure, and Collaboration",
+      "url": "https://www.youtube.com/watch?v=8IAGH6k17nw",
+      "domains": ["script_to_screen", "dialogue_rhythm", "nonlinear_structure", "performance_editing", "counterevidence"],
+      "evidence_status": "asr_reviewed",
+      "evidence_level": "E4",
+      "distillation_status": "deep_distilled",
+      "evidence_ref": "script-screen-asr-evidence.json#8IAGH6k17nw",
+      "procedure_refs": ["page-scene-timecode-alignment", "script-screen-difference-classification", "carrier-function-transfer-map", "competing-edit-explanation-test"],
+      "frame_artifact": "script-screen-frame-evidence.json#8IAGH6k17nw",
+      "visual_verification_status": "partial",
+      "script_source": {
+        "page_url": "https://www.scriptslug.com/script/the-social-network-2010",
+        "pdf_url": "https://assets.scriptslug.com/live/pdf/scripts/the-social-network-2010.pdf",
+        "publisher": "Script Slug",
+        "access_status": "public_no_login",
+        "provenance": "third_party_public_low_resolution_copy; draft/version differences remain possible",
+        "rights_status": "copyrighted; public access does not grant redistribution rights",
+        "pdf_sha256": "0cff440b623f0ba771c823c2cdea3c1c81143c2f37842f3367d30050725c3724",
+        "page_count": 164,
+        "distributed_with_skill": false
+      },
+      "bias": "LFTS secondary analysis and edited interview excerpts. Static evidence aligns screenplay words, CUT instructions and film frames, but does not independently prove overlapping sound, 16 angles, 33 cuts or causal contribution by writer/director/actors."
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+project_id: action_multi_45s
+runtime_target_sec: 45
+aspect_ratio: "16:9"
+final: pending
+status: diagnostic_preview
+checks:
+  upstream_artifacts_frozen: pending
+  must_beats_covered_100_percent: pending
+  edit_contribution_sum_equals_runtime: pending
+  references_attached_and_traceable: false
+  approved_clips_with_logs_hashes_and_six_gate_qc: false
+  adjacent_entry_exit_merge: pending
+  blocking_conflicts_zero: pending
+  dialogue_lipsync_sound_stems: pending
+  rights_consent_provenance: pending
+known_blockers:
+  - 无真实参考图
+  - 无生成输出、输出 hash 或证据帧
+  - 模型/版本/参数未指定
+  - 因此不得标记 final approved

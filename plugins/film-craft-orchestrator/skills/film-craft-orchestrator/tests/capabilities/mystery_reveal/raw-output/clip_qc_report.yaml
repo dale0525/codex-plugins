@@ -1,0 +1,30 @@
+project_id: mystery_reveal
+status: pending
+reference_gate: diagnostic_preview
+clips:
+  - clip_id: C01
+    narrative_purpose: pending
+    identity: pending
+    state: pending
+    space: pending
+    environment: pending
+    narrative_continuity: pending
+    evidence_frames: []
+  - clip_id: C02
+    narrative_purpose: pending
+    identity: pending
+    state: pending
+    space: pending
+    environment: pending
+    narrative_continuity: pending
+    evidence_frames: []
+  - clip_id: C03-C09
+    narrative_purpose: pending
+    identity: pending
+    state: pending
+    space: pending
+    environment: pending
+    narrative_continuity: pending
+    evidence_frames: []
+blocking_conflicts: []
+note: Awaiting actual generated clips and entry/mid/exit evidence frames.

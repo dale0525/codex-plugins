@@ -1,0 +1,47 @@
+id: tide-station.director-intent
+version: 1.0.0
+owner_role: director
+source_inputs: [tide-station.story-and-scene-map@1.0.0]
+assumptions: []
+constraints: {runtime_target_sec: 90}
+open_questions: []
+status: frozen
+change_log: []
+audience_experience: "观众先把沈屿当作解释者，随后与沈岚同时怀疑他，最后只看见沈岚的选择而不确认母亲真相。"
+theme_form_answer: "门与广播把‘被带来’和‘自己走出去’对置。"
+viewpoint_rule: "主观贴近沈岚；反转前不进入沈屿主观，不展示母亲影像。"
+performance_rules: ["沈岚以寻找为行动，不表演抽象悲伤", "沈屿以阻止信息扩散为策略，语气克制而非反派化", "母亲只以录音存在"]
+space_and_blocking_rules: ["售票窗是信息边界；防波堤门是选择边界", "沈岚始终由左向右接近门，沈屿从右侧黑暗进入并面向左"]
+camera_language_rules: ["一个clip一个主运动，优先locked、slow push、lateral reveal", "反转由声音与人物反应触发，不由相机提前推近宣布"]
+lighting_color_rules: ["冷蓝台风天光从候车室破窗左侧进入，录音机暖棕指示灯是唯一暖色", "母亲警告后降低环境填充，门外白色风雨成为出口"]
+editing_sound_rules: ["广播潮声作J-cut和L-cut连续层", "录音带停止瞬间抽走潮声半拍，再由门外风声接管", "对白分离录制，原生AI音频默认mute"]
+scenes:
+  - scene_id: S01
+    audience_knowledge: "知道站房废弃但仍广播；不知道沈屿是否带她来。"
+    audience_misunderstanding: "先以为录音只是道歉。"
+    attention_path: ["雨中站房", "停钟/喇叭", "姓名磁带", "沈屿挡路", "播放键", "母亲警告", "防波堤门"]
+    axis: "售票窗—防波堤门"
+    screen_direction: {CHAR-SHENLAN: faces_right, CHAR-SHENYU: faces_left}
+    performance_beats:
+      - {beat_id: S01-B01, want_now: "进入废站寻找线索", obstacle: "台风与锈门", tactic: "用旧钥匙试锁", playable_action: "顶住风推开门", reaction_trigger: "室内广播潮声"}
+      - {beat_id: S01-B02, want_now: "确认废站为何仍运作", obstacle: "停钟与无电空间", tactic: "沿声音寻找喇叭", playable_action: "由钟面转向锈喇叭", reaction_trigger: "潮声突然增强"}
+      - {beat_id: S01-B03, want_now: "确认磁带是否留给自己", obstacle: "售票窗栅栏", tactic: "先读标签再取出", playable_action: "把盒子举到眼前", reaction_trigger: "听见沈屿叫名"}
+      - {beat_id: S01-B04, want_now: "让沈岚相信道歉说法并停止播放", obstacle: "她已拿到磁带", tactic: "把自己放在出口与她之间", playable_action: "以平静口吻重复‘只是道歉’", reaction_trigger: "沈岚不回答而按下播放"}
+      - {beat_id: S01-B05, want_now: "听到母亲留下的完整内容", obstacle: "沈屿在旁施压", tactic: "以沉默逼他等待", playable_action: "按下播放后不看弟弟", reaction_trigger: "童年声音响起"}
+      - {beat_id: S01-B06, want_now: "切断母亲警告", obstacle: "警告已被听见", tactic: "伸手关机", playable_action: "手先停在半空再压下开关", reaction_trigger: "沈岚看向门而非磁带"}
+      - {beat_id: S01-B07, want_now: "夺回行动方向", obstacle: "沈屿挡路与门外风暴", tactic: "放弃争抢磁带改走向门", playable_action: "绕过弟弟推开门", reaction_trigger: "门外白浪扑入"}
+    blocking_beats:
+      - {beat_id: S01-B01, before_state: "沈岚在站门外左侧", trigger: "钥匙转动", action: "顶风推门进入", world_position: {SHENLAN: exterior_to_threshold}, frame_position: {SHENLAN: left_to_center}, eye_line: "门内黑暗", attention_change: "雨幕→门锁→室内", after_state: "沈岚站在候车室入口"}
+      - {beat_id: S01-B02, before_state: "沈岚在入口", trigger: "广播潮声", action: "沿墙靠近停钟和喇叭", world_position: {SHENLAN: entrance_to_clock}, frame_position: {SHENLAN: center_to_left}, eye_line: "钟与喇叭", attention_change: "停钟→锈喇叭", after_state: "沈岚停在售票窗旁"}
+      - {beat_id: S01-B03, before_state: "磁带在售票窗后", trigger: "看见姓名标签", action: "伸手取出并举到眼前", world_position: {SHENLAN: ticket_window}, frame_position: {SHENLAN: left_foreground}, eye_line: "磁带标签", attention_change: "栅栏→标签→眼神", after_state: "磁带在沈岚手中"}
+      - {beat_id: S01-B04, before_state: "沈岚在售票窗，沈屿在右侧黑暗", trigger: "沈屿叫她名字", action: "沈屿走到出口路线中央", world_position: {SHENLAN: ticket_window, SHENYU: shadow_to_center}, frame_position: {SHENLAN: left, SHENYU: right}, eye_line: "两人互视", attention_change: "声音→身影→被挡出口", after_state: "沈屿挡在机器与门之间"}
+      - {beat_id: S01-B05, before_state: "沈岚持磁带面对机器", trigger: "她决定播放", action: "装带并按键", world_position: {SHENLAN: player_left, SHENYU: player_right}, frame_position: {SHENLAN: left_mid, SHENYU: right_back}, eye_line: "播放键", attention_change: "磁带→按钮→转动卷轴", after_state: "录音开始，两人静止聆听"}
+      - {beat_id: S01-B06, before_state: "录音播放，沈屿在机器右侧", trigger: "母亲警告", action: "沈屿压下停止键", world_position: {SHENLAN: player_left, SHENYU: player_right}, frame_position: {SHENLAN: left_close, SHENYU: right_hand_insert}, eye_line: "沈岚转看门", attention_change: "机器→沈屿手→沈岚视线", after_state: "机器停止，路线仍被挡"}
+      - {beat_id: S01-B07, before_state: "沈屿在机器旁，挡住直达门的路线", trigger: "沈岚松开磁带", action: "她绕过沈屿并推门", world_position: {SHENLAN: ticket_window_to_door, SHENYU: machine_to_center}, frame_position: {SHENLAN: left_to_right, SHENYU: right_foreground}, eye_line: "沈岚看向门外白光", attention_change: "沈屿手→沈岚脚步→门", after_state: "沈岚在门外，沈屿留在室内"}
+    coverage_strategy: "以一条空间建立镜头为base；录音带、按钮、手和反应均独立insert，避免多人手部接触同clip。"
+    base_clip_purpose: "让沈岚的主动走向门完成因果"
+    required_coverage: ["磁带标签insert", "童声/母亲声音对应的机器近景", "沈屿关机手部", "门外风雨反应"]
+    sound_intent: "潮声从环境变成信息载体，再在关机后短暂真空。"
+    non_negotiables: ["不展示母亲实体", "反转前不确认沈屿身份", "磁带始终由沈岚先持有再留在机器旁"]
+    generation_risks: ["可读文字", "双人阻挡与道具交接", "暴雨门运动", "口型同步"]
+    fallbacks: ["画外声、道具insert、反应镜头、风雨cutaway"]

@@ -1,0 +1,45 @@
+project_id: mystery_reveal
+version: 1
+logline: During a midnight interview over a cooling cup of tea, a detective misses the clue the audience has already seen until a suspect's tidy alibi unravels at a broken window.
+theme_question: What does a carefully staged ordinary detail reveal when nobody is looking at it?
+characters:
+  detective_lin: observant but hurried; wants a clean timeline before backup arrives.
+  mara: tenant and suspect; controlled, helpful, hiding an exit through the kitchen window.
+sequence_map:
+  - id: S1
+    span_sec: 0-15
+    purpose: Establish empty kitchen, cooling tea, and audience-only clue.
+  - id: S2
+    span_sec: 15-30
+    purpose: Interview begins; Mara supplies a plausible but false account.
+  - id: S3
+    span_sec: 30-47
+    purpose: Detective retraces cup-to-window path, clue becomes causal evidence.
+  - id: S4
+    span_sec: 47-60
+    purpose: Silent physical reveal and arrival of consequence.
+scene_cards:
+  - scene_id: kitchen_night
+    entry_state: kettle clicks off; cup steaming faintly on saucer.
+    objective: Make recent presence legible without showing a person.
+    obstacle: Darkness and visual clutter conceal the red thread except in insert.
+    turn: Audience sees thread snagged under saucer.
+    exit_state: Tea surface stills; window curtain breathes inward.
+  - scene_id: interview
+    entry_state: Lin enters from screen left; Mara seated by table.
+    objective: Lin wants timeline; Mara wants to appear cooperative.
+    obstacle: Mara's calm statement redirects attention to a phone call.
+    turn: Mara says cup was untouched all night.
+    exit_state: Lin marks note; thread remains at frame edge.
+  - scene_id: trace
+    entry_state: Lin notices tea has cooled faster than room temperature.
+    objective: Test Mara's timeline physically.
+    obstacle: Mara blocks direct view of window, offering towel.
+    turn: Lin lifts saucer, follows thread to latch and wet footprints.
+    exit_state: Mara's coat hem catches same red thread.
+  - scene_id: reveal
+    entry_state: Police light pulses through blinds; no one speaks.
+    objective: Let visual evidence convict Mara.
+    obstacle: Mara steps back; thread tightens between coat and latch.
+    turn: Broken latch clicks shut around thread; Lin looks at Mara.
+    exit_state: Red-blue wash fills kitchen; cut to black on inhale.

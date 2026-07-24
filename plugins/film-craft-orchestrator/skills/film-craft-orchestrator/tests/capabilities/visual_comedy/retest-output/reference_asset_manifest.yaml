@@ -1,0 +1,11 @@
+id: visual-comedy-retest.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [visual-comedy-retest.visual-bible@1.0.0]
+assumptions: ["No real references supplied; transport gate remains pending."]
+constraints: {}
+open_questions: []
+status: qc_pending
+change_log: []
+assets:
+  - {asset_id: REF-DIAGNOSTIC-UMBRELLA, role: exploratory, status: pending, sha256: "0000000000000000000000000000000000000000000000000000000000000000", reference_transport: none}

@@ -1,0 +1,33 @@
+id: action-multi.visual-bible
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: []
+assumptions: []
+constraints: {}
+open_questions: []
+status: draft
+change_log: []
+aspect_ratio: "16:9"
+visual_medium: live_action_photoreal
+palette: [冷蓝灰, 暖安全灯琥珀, 包裹纸箱棕]
+camera_language:
+  allowed_framing: [wide_three_layer, medium_two_shot, rope_insert, handoff_insert, reaction_close]
+  lens_or_fov_range: "neutral 35-50mm equivalent"
+  height_rules: ["eye-level for A/B", "slightly low angle only for C platform reveal"]
+  movement_rules: [locked, slow_tracking_right, tilt_up_to_platform]
+  axis_rules: ["left-door_to_right-exit axis", "no 180-degree flip"]
+lighting_rules: ["cool skylight from upper left", "warm practical safety lamp at right", "soft shadow, no graphic injury lighting"]
+characters:
+  - {character_id: CHAR-A, role: courier, silhouette: "slim, dark green jacket", wardrobe_version: A-W01, must_not_drift: [left_entry, package_holder_until_handoff]}
+  - {character_id: CHAR-B, role: blocker, silhouette: "stocky, orange work vest", wardrobe_version: B-W01, must_not_drift: [center_lane, nonviolent_blocking]}
+  - {character_id: CHAR-C, role: high_platform_helper, silhouette: "blue hood, reflective tape", wardrobe_version: C-W01, must_not_drift: [upper_right_platform, rope_holder_after_handoff]}
+locations:
+  - {location_id: LOC-WAREHOUSE, layout: "left loading door, center lane, right safety exit, upper-right steel platform", anchors: [left_loading_door, yellow_pillar, upper_right_platform, right_safety_exit], time: dusk}
+props:
+  - {prop_id: PROP-PACKAGE, description: "medium taped brown carton with red stripe", holder_sequence: [CHAR-A,CHAR-C], state_chain: [sealed, held_by_A, contact, held_by_C]}
+  - {prop_id: PROP-ROPE, description: "thick yellow safety rope", holder_sequence: [CHAR-C,CHAR-A,CHAR-C], state_chain: [coiled_on_platform, falling, floor_contact, pulled_route]}
+  - {prop_id: PROP-SIGNAL, description: "small white cloth with blue triangle", holder_sequence: [CHAR-C], state_chain: [hidden, displayed, visible_to_A]}
+motifs: ["门框作为权力边界", "黄色绳索作为可逆路线"]
+reference_assets: []
+must_preserve: ["16:9", "A左入右出", "B在中道阻拦", "C在高台", "包裹交接一次", "无致命伤"]
+must_not: ["额外人物", "枪械或刀具", "可见致命伤", "包裹颜色变化", "绳索穿过人体", "镜像翻转"]

@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-07-24",
+  "method": {
+    "audio": "Authorized low-resolution YouTube video downloaded with yt-dlp and converted to mono 16 kHz WAV.",
+    "asr_engine": "whisper.cpp 1.8.3",
+    "model": "ggml-small.en.bin",
+    "review": "Complete chronological ASR read by independent research agents; page and frame anchors were separately checked.",
+    "script_boundary": "Public third-party screenplay copies are used only for page alignment and short locating phrases. They are not redistributed and may differ from the exact production draft.",
+    "interpretation_boundary": "Video analysis remains E4 commentary. Sampled frames prove only visible anchors, not movement, sound, edit causality or filmmaker intent."
+  },
+  "items": [
+    {
+      "video_id": "QTxvzkwVsQE",
+      "title": "Arrival — Examining an Adaptation",
+      "channel": "Lessons from the Screenplay",
+      "url": "https://www.youtube.com/watch?v=QTxvzkwVsQE",
+      "duration_sec": 815,
+      "video_sha256": "7ee1d8433dbc3018e644b09aed936f0ccf1efdc3288407865804a7144783e5c2",
+      "audio_sha256": "ae180f947ff4eb1c110d50cdc656bc5924aae1b9dafc5c0194b6f1a839c00234",
+      "asr_sha256": "6e77832f7098dfce582d5a0c744d2fb8089df700bf3b6b2f1960acc655936523",
+      "review_status": "full_asr_read_and_script_frame_aligned",
+      "evidence_level": "E4",
+      "claims": [
+        {"id":"ARR-C01","start_sec":20.36,"end_sec":41.24,"paraphrase":"The video frames Arrival as a chain of changes from Ted Chiang's story to Heisserer's screenplay and then to Villeneuve/Walker's film edit.","uncertainty":"Commentator framing; contribution boundaries require independent production evidence."},
+        {"id":"ARR-C02","start_sec":61.24,"end_sec":149.96,"paraphrase":"The story's already-knowing narrator is reframed as a protagonist discovering the language, and future images are distributed so audience knowledge advances with Louise.","uncertainty":"Narrative interpretation; sampled stills cannot prove temporal order alone."},
+        {"id":"ARR-C03","start_sec":155.44,"end_sec":185.84,"paraphrase":"The story's remote looking-glass communication becomes an arrival at Earth's door in the screenplay/film.","uncertainty":"Video frame and script page provide visible anchors; exact source-story wording is not distributed here."},
+        {"id":"ARR-C04","start_sec":202.6,"end_sec":240.44,"paraphrase":"Face-to-face arrival is said to create immediate threat, public hysteria and institutional conflict sufficient for feature-length pressure.","uncertainty":"Causal sufficiency is commentary, not a controlled comparison."},
+        {"id":"ARR-C05","start_sec":245.24,"end_sec":258.6,"paraphrase":"Hannah's death changes from an adult climbing accident in the story to an incurable disease during adolescence in the screenplay/film.","uncertainty":"The sampled video page shows age dialogue but not the full death-cause comparison."},
+        {"id":"ARR-C06","start_sec":260.84,"end_sec":331.98,"paraphrase":"The video links the incurable illness to a more consequential free-will choice for Louise, who cannot prevent the loss she foresees.","uncertainty":"Interpretation of theme and choice; not verified by one page or frame."},
+        {"id":"ARR-C07","start_sec":353.48,"end_sec":373.64,"paraphrase":"Heisserer describes a third version of the film emerging in editing through scene removal, compression and adjustment.","uncertainty":"Interview excerpt as presented by LFTS; the full interview context should be consulted for high-stakes attribution."},
+        {"id":"ARR-C08","start_sec":377.72,"end_sec":447.98,"paraphrase":"Several separate screenplay explanations are said to move into a short mid-film montage and voiceover carrying nonlinear orthography, learning and naming information.","uncertainty":"Static frames show several source/film states but do not prove montage timing or exact voiceover placement."},
+        {"id":"ARR-C09","start_sec":453.2,"end_sec":487.12,"paraphrase":"A screenplay section where Weber doubts Louise and temporarily replaces her is described as removed while preserving the needed Sapir-Whorf information elsewhere.","uncertainty":"Page anchors exist; the complete omission requires comparing the whole finished-film sequence."},
+        {"id":"ARR-C10","start_sec":491.72,"end_sec":526.2,"paraphrase":"An accidental hard juxtaposition during editing is presented as inspiring a dreamlike psychological reconstruction of the sequence.","uncertainty":"Editorial causality comes from quoted production recollection and cannot be proved by stills."},
+        {"id":"ARR-C11","start_sec":526.2,"end_sec":547.64,"paraphrase":"The line about dreaming in the alien language is described as transferred from a Weber exchange to a heptapod exchange using visual effects.","uncertainty":"Frames and pages anchor the elements but do not prove the exact replacement process."},
+        {"id":"ARR-C12","start_sec":563.32,"end_sec":578.42,"paraphrase":"Omission and reordering are said to narrow the sequence around Louise's arc.","uncertainty":"Commentator conclusion; needs a competing explanation such as runtime or clarity."},
+        {"id":"ARR-C13","start_sec":610.92,"end_sec":648.0,"paraphrase":"The circular, nonlinear alien script is presented as a formal mirror for questions about human linear language and time.","uncertainty":"Theme interpretation; visible logograms do not prove intended metaphor."},
+        {"id":"ARR-C14","start_sec":653.92,"end_sec":720.0,"paraphrase":"Louise's patience and communication are contrasted with human fear, impatience and institutional silence; the video attributes much conflict to human response rather than alien aggression.","uncertainty":"Interpretive synthesis across selected scenes."}
+      ]
+    },
+    {
+      "video_id": "8IAGH6k17nw",
+      "title": "The Social Network — Sorkin, Structure, and Collaboration",
+      "channel": "Lessons from the Screenplay",
+      "url": "https://www.youtube.com/watch?v=8IAGH6k17nw",
+      "duration_sec": 804,
+      "video_sha256": "21ea584aa656befc25d76b165720e25b3ca28be36ce4b3d33dcce8cf2a82dcfe",
+      "audio_sha256": "75169558ec76846fff858ae1ff6b133201c38a33a684322dbfdb1ff29e5882d4",
+      "asr_sha256": "ebdee6a4980a2cc988ee3e1dad1ba2f535db69d366d410c93b71b1a990a03066",
+      "review_status": "full_asr_read_and_script_frame_aligned",
+      "evidence_level": "E4",
+      "claims": [
+        {"id":"SOC-C01","start_sec":42.24,"end_sec":51.28,"paraphrase":"The video describes Sorkin's rapid, witty dialogue as a highly noticeable style.","uncertainty":"Critical description, not an objective quality metric."},
+        {"id":"SOC-C02","start_sec":56.88,"end_sec":65.08,"paraphrase":"Verbal flash is interpreted as carrying substance without making the delivery feel expository.","uncertainty":"Commentator metaphor."},
+        {"id":"SOC-C03","start_sec":65.44,"end_sec":79.24,"paraphrase":"The stated analysis separates dialogue style, nonlinear structure and collaboration as three craft layers.","uncertainty":"The video's organizing thesis."},
+        {"id":"SOC-C04","start_sec":93.24,"end_sec":106.32,"paraphrase":"An interview excerpt presents Sorkin's experience of dialogue as music.","uncertainty":"Quoted interview excerpt with limited context."},
+        {"id":"SOC-C05","start_sec":117.24,"end_sec":122.56,"paraphrase":"Overlapping dialogue is said to dictate a scene's energy and rhythm.","uncertainty":"A static graphic confirms the topic but not audible overlap."},
+        {"id":"SOC-C06","start_sec":138.28,"end_sec":172.68,"paraphrase":"Interjections force Mark to overpower several speakers, escalating the deposition exchange.","uncertainty":"Power and organic escalation are analysis; the screenplay/film line is visibly aligned."},
+        {"id":"SOC-C07","start_sec":176.88,"end_sec":201.26,"paraphrase":"Misunderstanding is described as a way to reveal exposition without a separate explanation speech.","uncertainty":"Course-style generalization."},
+        {"id":"SOC-C08","start_sec":201.26,"end_sec":220.12,"paraphrase":"Different trains of thought challenge the audience to keep up and pull attention into the scene.","uncertainty":"Audience effect requires testing."},
+        {"id":"SOC-C09","start_sec":220.12,"end_sec":307.24,"paraphrase":"The opening's China, SAT and final-club misalignments encode Mark's motivation, Erica's patience and exposition while conversation continues.","uncertainty":"The page and video show matching lines; characterization is interpretation."},
+        {"id":"SOC-C10","start_sec":307.24,"end_sec":384.64,"paraphrase":"Later misunderstandings are used to characterize Mark's communication difficulty and fragile ego.","uncertainty":"Critical reading, not a clinical claim."},
+        {"id":"SOC-C11","start_sec":384.64,"end_sec":412.8,"paraphrase":"The analysis argues that a long dialogue scene remains understandable because recurring misalignments are punctuated by decisive beats.","uncertainty":"The claimed page count and effect depend on draft and viewer."},
+        {"id":"SOC-C12","start_sec":427.16,"end_sec":452.52,"paraphrase":"The video's second layer is structure: scenes and jumps can perform several story functions beyond dialogue.","uncertainty":"Organizing claim."},
+        {"id":"SOC-C13","start_sec":452.52,"end_sec":500.38,"paraphrase":"The first linear screenplay movement gives way to deposition flash-forwards that add exposition, emotional framing and reactions to past events.","uncertainty":"Page and CUT anchors are visible; full sequence needs moving evidence."},
+        {"id":"SOC-C14","start_sec":505.28,"end_sec":550.04,"paraphrase":"Nonlinear order is said to shift the dramatic question from what happens to how a friendship deteriorates.","uncertainty":"Known real events may also contribute to the what-to-how shift."},
+        {"id":"SOC-C15","start_sec":576.08,"end_sec":604.16,"paraphrase":"An interview excerpt attributes Fincher's revisions to searching for the dramatic thought beneath each word.","uncertainty":"Edited interview context; not independent evidence of every revision."},
+        {"id":"SOC-C16","start_sec":604.16,"end_sec":624.76,"paraphrase":"Removing repeated thesis language is described as desorking: preserving function while reducing overt repetition.","uncertainty":"Could also reflect runtime or draft-version differences."},
+        {"id":"SOC-C17","start_sec":639.48,"end_sec":668.0,"paraphrase":"Fincher's cutting is contrasted with walk-and-talk staging as a different way to make dense words cinematic.","uncertainty":"Selected comparison, not a universal directing rule."},
+        {"id":"SOC-C18","start_sec":668.0,"end_sec":694.08,"paraphrase":"A rain deposition passage is described as two script pages translated into many angles and cuts.","uncertainty":"A visible 16-cell graphic does not independently prove 16 angles or 33 cuts; those numbers remain video claims."},
+        {"id":"SOC-C19","start_sec":698.88,"end_sec":734.0,"paraphrase":"Fast speech, multiple thought lines and verbal hesitations create performance difficulty; Jesse Eisenberg is said to naturalize the hesitations.","uncertainty":"Performance interpretation; a still can show beat notation but not spoken rhythm."},
+        {"id":"SOC-C20","start_sec":734.0,"end_sec":759.0,"paraphrase":"The synthesis argues that stylized dialogue depends on actors, director and editor making it playable and cinematic.","uncertainty":"Broad collaboration thesis, not a causal allocation formula."}
+      ]
+    }
+  ]
+}

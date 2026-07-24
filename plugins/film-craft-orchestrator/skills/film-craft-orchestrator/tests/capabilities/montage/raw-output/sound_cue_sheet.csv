@@ -1,0 +1,11 @@
+timecode,layer,event,description,continuity_rule
+00:00-00:08,room_tone,workshop_bed,dry bench tone with window hiss,continuous across clips
+00:00-00:08,motif,failed_tuning,three dull clicks and muted hum,establish degraded motif
+00:08-00:16,foley,brush_and_screws,brass rasp and screw ticks,match brush direction
+00:08-00:16,motif,brightening_ring,two-note ring after brush sweeps,retain interval family
+00:16-00:24,foley,solder_and_tap,sizzle then cone tap,peak at repair reveal
+00:16-00:24,radio,first_static,faint static breath only,no intelligible speech
+00:24-00:32,foley,oil_and_screws,cloth glide oil rub screw ticks,synchronize turns
+00:24-00:32,motif,clean_plucked_chime,three clean plucked notes,retain contour
+00:32-00:40,foley,plug_and_knob,cord seat switch click tuning friction,headroom for voice
+00:32-00:40,radio,station_ident,clear weather bulletin then ident,voice is payoff

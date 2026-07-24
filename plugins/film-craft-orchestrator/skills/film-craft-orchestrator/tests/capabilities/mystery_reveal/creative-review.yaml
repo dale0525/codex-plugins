@@ -1,0 +1,13 @@
+reviewed_at: 2026-07-24
+deterministic_result: pass
+creative_result: design_pass_render_pending
+strengths:
+  - 观众约 8 秒看到红线，侦探约 38 秒才发现，知情顺序明确。
+  - 杯垫红线、窗扣湿脚印和衣摆形成同一物理证据链。
+resolved_issues:
+  - canonical 13 文件、8 个 clips 的全链记录和 60 秒时间线已通过 validator。
+  - continuity must-preserve 与 generation provenance 已补齐。
+remaining_limits:
+  - 无实际影像与声音，线索可见性和声桥效果只通过设计审阅。
+failure_class: resolved_schema_routing
+new_video_research_required: false

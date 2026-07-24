@@ -1,0 +1,36 @@
+id: red-envelope.reference-assets
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [red-envelope.visual-bible@1.0.0]
+assumptions:
+  - Descriptor hashes are not image hashes and cannot satisfy production reference transport.
+constraints: {}
+open_questions:
+  - Generate and attach actual character, location and prop master images.
+status: draft
+change_log: []
+assets:
+  - asset_id: CHAR-LIN-MASTER
+    role: expected_character_master_descriptor
+    status: planned
+    sha256: 28a5f2baaef75e88d547dc9538df24967ece39ac461250b2f1be58f86021b32d
+    hash_scope: descriptor_only
+    reference_transport: not_attached
+  - asset_id: CHAR-BO-MASTER
+    role: expected_character_master_descriptor
+    status: planned
+    sha256: e6a2d61dc6f88c9692e2b37d746b60beecdf261ab0955de08eaacbbf04a9846c
+    hash_scope: descriptor_only
+    reference_transport: not_attached
+  - asset_id: LOC-COPY-ROOM-MASTER
+    role: expected_location_master_descriptor
+    status: planned
+    sha256: 56f8c7f918d07ba1d70c7588d3e185869ffa7f954452d90875619561f3573bed
+    hash_scope: descriptor_only
+    reference_transport: not_attached
+  - asset_id: PROP-RED-ENVELOPE-MASTER
+    role: expected_prop_master_descriptor
+    status: planned
+    sha256: 2ffe40b353d312ccbff2811f395aac08ba912b73681223615c4b6ef8be3c0ffd
+    hash_scope: descriptor_only
+    reference_transport: not_attached

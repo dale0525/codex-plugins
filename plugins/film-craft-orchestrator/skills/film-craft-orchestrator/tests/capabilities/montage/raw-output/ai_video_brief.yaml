@@ -1,0 +1,30 @@
+project_id: old_radio_montage
+format: short
+audience: general audience; tactile restoration and sound-led transformation
+runtime_sec: 40
+aspect_ratio: "16:9"
+genre_tone: intimate workshop realism; hopeful, rhythmic, tactile
+source_material: none
+rights_status: not-applicable
+creative_goal: Restore one rusted tabletop radio in a continuous visual grammar, from silence to a clear human broadcast, using a recurring sound motif instead of time captions.
+must_beats:
+  - rusted radio is inert and silent
+  - exterior is cleaned and opened
+  - circuitry and speaker are repaired
+  - cabinet is refinished and reassembled
+  - radio powers on and speaks clearly
+model_access: unknown
+reference_assets: []
+dialogue_strategy: native_audio_then_mix
+generation_constraints:
+  iteration_limit_per_clip: 4
+  credit_budget: unknown
+delivery_constraints: 16:9 master; 24 fps; 40 seconds; no subtitles or time cards
+assumptions:
+  - one fixed overhead three-quarter workbench composition anchors every stage
+  - the same radio, hands, bench, lamp, and coffee mug persist across clips
+  - an audible three-note tuning motif evolves from noisy hum to clean radio chime
+open_questions:
+  - final video model and audio pipeline are unspecified
+  - no real reference image or generated output is attached
+status: diagnostic_preview

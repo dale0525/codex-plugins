@@ -1,0 +1,472 @@
+{
+  "id": "project.continuity-state",
+  "version": "1.0.0",
+  "owner_role": "ai_video_supervisor",
+  "source_inputs": [
+    "project.visual-bible@1.0.0"
+  ],
+  "assumptions": [
+    "无实际参考图或生成输出，所有状态待验证"
+  ],
+  "constraints": {
+    "aspect_ratio": "16:9"
+  },
+  "open_questions": [
+    "实际角色参考图",
+    "生成输出"
+  ],
+  "status": "qc_pending",
+  "change_log": [],
+  "clips": [
+    {
+      "clip_id": "C-S01-01",
+      "prior_clip_id": null,
+      "entry": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "characters.CHAR-ALAN.wardrobe"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-02",
+      "prior_clip_id": "C-S01-01",
+      "entry": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "characters.CHAR-ALAN.wardrobe"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-03",
+      "prior_clip_id": "C-S01-02",
+      "entry": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "characters.CHAR-ALAN.wardrobe"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-04",
+      "prior_clip_id": "C-S01-03",
+      "entry": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "characters.CHAR-ALAN.wardrobe"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-05",
+      "prior_clip_id": "C-S01-04",
+      "entry": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "characters.CHAR-ALAN.wardrobe"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    },
+    {
+      "clip_id": "C-S01-06",
+      "prior_clip_id": "C-S01-05",
+      "entry": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "exit": {
+        "characters": {
+          "CHAR-ALAN": {
+            "wardrobe": "WARDROBE-ALAN-NIGHT",
+            "position": "desk_left",
+            "screen_facing": "right",
+            "knowledge": [
+              "handoff_pending"
+            ]
+          },
+          "CHAR-XIAOZHOU": {
+            "wardrobe": "WARDROBE-XIAOZHOU-NIGHT",
+            "position": "desk_right",
+            "screen_facing": "left",
+            "knowledge": [
+              "key_in_pocket"
+            ]
+          }
+        },
+        "props": {
+          "PROP-MASTER-KEY": {
+            "holder": "CHAR-XIAOZHOU",
+            "location": "pocket",
+            "condition": "intact"
+          }
+        },
+        "environment": {
+          "location": "LOC-NIGHT-DESK",
+          "time": "02:10",
+          "key_direction": "overhead"
+        }
+      },
+      "expected_next": {
+        "must_preserve": [
+          "characters.CHAR-ALAN.wardrobe"
+        ]
+      },
+      "conflicts": [],
+      "status": "pending"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "note": "仅保存短摘录或准确释义与时间码，不保存完整字幕；用于核对 video-knowledge-base.json 中的 transcript_verified 条目。",
+  "retrieved_at": "2026-07-23",
+  "items": [
+    {
+      "video_id": "pFUKeD3FJm8",
+      "title": "The Dark Knight — Creating the Ultimate Antagonist",
+      "channel": "Lessons from the Screenplay",
+      "segments": [
+        {"start_sec": 56, "end_sec": 177, "paraphrase": "反派应擅长攻击主角最大的弱点；小丑让蝙蝠侠的力量和不杀规则变成限制。"},
+        {"start_sec": 177, "end_sec": 335, "paraphrase": "反派不断施压，迫使主角在越来越困难的选择中暴露真实本性。"},
+        {"start_sec": 335, "end_sec": 478, "paraphrase": "英雄与对手争夺哥谭的灵魂/未来，而不是泛化的世界毁灭目标。"},
+        {"start_sec": 478, "end_sec": 590, "paraphrase": "小丑的累积作用是让蝙蝠侠认识限制、承受代价并成为新的黑暗骑士。"}
+      ],
+      "transformation": "转成反派设计检查表、三轮压力练习和主角弧光审查。"
+    },
+    {
+      "video_id": "CF3lFPW4E1o",
+      "title": "Gone Girl — Don't Underestimate the Screenwriter",
+      "channel": "Lessons from the Screenplay",
+      "segments": [
+        {"start_sec": 49, "end_sec": 141, "paraphrase": "高效动作行用少量文字同时建立语气、节奏和演员可执行的行动。"},
+        {"start_sec": 152, "end_sec": 262, "paraphrase": "场景逐步收束到一个点，末行/末动作使角色作出新决定。"},
+        {"start_sec": 262, "end_sec": 427, "paraphrase": "subplot character 处理与主角相同的问题，但展示另一种策略、信息或后果。"}
+      ],
+      "transformation": "转成动作行压缩练习、场景末点检查和对照角色设计。"
+    },
+    {
+      "video_id": "-XGUVkOmPTA",
+      "title": "Dan Harmon Story Circle: 8 Proven Steps to Better Stories",
+      "channel": "StudioBinder",
+      "segments": [
+        {"start_sec": 64, "end_sec": 135, "paraphrase": "第一步 You 建立主角/状态，第二步 Need 建立欲望或缺口。"},
+        {"start_sec": 135, "end_sec": 230, "paraphrase": "Go 进入未知，Search 在障碍中尝试策略。"},
+        {"start_sec": 230, "end_sec": 330, "paraphrase": "Find 得到目标但不如预期，Take 取得它并支付代价。"},
+        {"start_sec": 330, "end_sec": 454, "paraphrase": "Return 回到熟悉世界，Change 要让角色变化可见。"}
+      ],
+      "transformation": "转成八行 beat sheet、反模型检查和开场/结尾视觉对照练习。"
+    },
+    {
+      "video_id": "ba-CB6wVuvQ",
+      "title": "Whiplash vs. Black Swan — The Anatomy of the Obsessed Artist",
+      "channel": "Lessons from the Screenplay",
+      "segments": [
+        {"start_sec": 75, "end_sec": 140, "paraphrase": "触发事件让主角无法维持现状，形成具体欲望和戏剧问题。"},
+        {"start_sec": 300, "end_sec": 324, "paraphrase": "第二幕用连续障碍和牺牲迫使旧自我失效。"},
+        {"start_sec": 328, "end_sec": 411, "paraphrase": "替代者/竞争者让卓越欲望变成可见的地位威胁。"},
+        {"start_sec": 564, "end_sec": 620, "paraphrase": "转变与完美来自主角重新面对代价；两部片共享骨架但价值判断不同。"},
+        {"start_sec": 912, "end_sec": 963, "paraphrase": "艺术牺牲是否值得是作品留下的问题，而不是自动正确的结论。"}
+      ],
+      "transformation": "转成触发—欲望—障碍—替代者—牺牲结构图和双版本主题实验。"
+    }
+  ]
+}

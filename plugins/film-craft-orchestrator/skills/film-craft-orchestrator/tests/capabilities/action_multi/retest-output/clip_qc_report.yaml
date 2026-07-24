@@ -1,0 +1,19 @@
+id: action-multi.clip-qc
+version: 1.0.0
+owner_role: ai_video_supervisor
+source_inputs: [action-multi.continuity-state@1.0.0]
+assumptions: ["未生成视频，六门QC均pending"]
+constraints: {runtime_target_sec: 45}
+open_questions: ["输出文件、证据帧、实际hash待生成"]
+status: qc_pending
+change_log: []
+clips:
+  - {clip_id: C-S01-01, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-02, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-03, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-04, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-05, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-06, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-07, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-08, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}
+  - {clip_id: C-S01-09, status: pending, technical: pending, semantic: pending, continuity: pending, editability: pending, sound_lipsync: pending, provenance: pending, blocking_issues: [no_output]}

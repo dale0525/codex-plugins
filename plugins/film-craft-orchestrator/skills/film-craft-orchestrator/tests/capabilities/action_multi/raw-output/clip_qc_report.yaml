@@ -1,0 +1,14 @@
+project_id: action_multi_45s
+status: pending
+evidence_frames: []
+clips:
+  C01: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C02: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C03: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C04: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C05: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C06: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C07: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C08: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+  C09: {narrative: pending, identity: pending, state: pending, space: pending, environment: pending, causal: pending}
+blocking_conflicts: unknown_until_generation
