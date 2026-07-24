@@ -1,0 +1,37 @@
+{
+  "name": "apple-design",
+  "version": "1.0.0",
+  "description": "Apple-inspired interface design and web animation guidance by Emil Kowalski.",
+  "author": {
+    "name": "Emil Kowalski",
+    "url": "https://emilkowal.ski"
+  },
+  "homepage": "https://github.com/emilkowalski/skills",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "apple-design",
+    "animation",
+    "design-engineering",
+    "web-motion"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Apple Design",
+    "shortDescription": "Design and review fluid, polished web interfaces.",
+    "longDescription": "Seven design-engineering skills covering Apple-inspired interface principles, animation vocabulary, motion audits, animation reviews, opportunity finding, and UI library selection.",
+    "developerName": "Emil Kowalski",
+    "category": "Design",
+    "capabilities": [
+      "Apple-inspired interface design",
+      "Web animation implementation",
+      "Motion review and planning",
+      "UI library selection"
+    ],
+    "defaultPrompt": [
+      "Apply Apple design principles to this interface.",
+      "Review the animations in this project.",
+      "Find animation opportunities in this product."
+    ]
+  }
+}

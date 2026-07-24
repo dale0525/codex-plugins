@@ -1,0 +1,13 @@
+version = 1
+
+[[sources]]
+id = "emilkowalski-skills"
+repository = "https://github.com/emilkowalski/skills.git"
+ref = "main"
+source = "skills"
+destination = "plugins/apple-design/skills"
+plugin_manifest = "plugins/apple-design/.codex-plugin/plugin.json"
+license_source = "LICENSE"
+license_destination = "plugins/apple-design/third-party/emilkowalski-skills-LICENSE"
+remove_skill_frontmatter_fields = ["disable-model-invocation"]
+skill_description_suffixes = { review-animations = "Use only when the user explicitly asks for an animation review; do not trigger on general code review." }

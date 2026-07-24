@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "sources": {
+    "emilkowalski-skills": {
+      "repository": "https://github.com/emilkowalski/skills.git",
+      "ref": "main",
+      "commit": "e695d13cb298db0f46d5ef05be2ad13fa12908a6",
+      "destination": "plugins/apple-design/skills"
+    }
+  }
+}
