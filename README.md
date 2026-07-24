@@ -22,6 +22,18 @@ Start a new Codex task after installation. Review and trust the plugin hooks on 
 codex plugin add apple-design@dale0525-codex-plugins
 ```
 
+## Install Codex Sync
+
+```bash
+codex plugin add codex-sync@dale0525-codex-plugins
+```
+
+Start a new Codex task, invoke `$codex-sync`, and connect a selected private
+GitHub configuration repository. Codex Sync previews changes before it updates
+global `AGENTS.md`, portable `config.toml` values, providers, marketplaces, or
+plugins. The bundled GitHub App uses Device Flow, and GitHub and provider
+credentials remain device-local.
+
 Apple Design packages seven MIT-licensed design-engineering skills from
 [emilkowalski/skills](https://github.com/emilkowalski/skills). The upstream
 license is preserved in the plugin's `third-party/` directory.
@@ -42,6 +54,15 @@ The plugin stores no credentials and only updates its three managed files under 
 
 Provides Apple-inspired interface design, animation vocabulary, animation
 planning and review, design-engineering guidance, and UI library selection.
+
+### Codex Sync
+
+Bootstraps new devices from a private GitHub repository through GitHub App
+device authorization. It applies configuration with managed-key ownership,
+atomic writes, drift detection, secret rejection, pre-apply backups, and
+rollback. Private marketplaces are downloaded at immutable commit SHAs and
+registered as local versioned snapshots instead of exposing GitHub credentials
+to Git subprocesses.
 
 ## External content synchronization
 
@@ -70,6 +91,7 @@ destination must remain inside this repository.
 ```text
 .agents/plugins/marketplace.json
 plugins/apple-design/
+plugins/codex-sync/
 plugins/subagent-dispatch/
 sync-sources.toml
 ```

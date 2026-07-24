@@ -1,0 +1,6 @@
+[[marketplaces]]
+source = "git"
+name = "dale0525-codex-plugins"
+url = "https://github.com/dale0525/codex-plugins.git"
+git_ref = "main"
+sparse = []

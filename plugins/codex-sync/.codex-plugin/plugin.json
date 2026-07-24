@@ -1,0 +1,28 @@
+{
+  "name": "codex-sync",
+  "version": "0.1.0",
+  "description": "Synchronize global Codex instructions, portable settings, providers, marketplaces, and plugins through a private GitHub repository.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/codex-sync",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": ["sync", "configuration", "github", "bootstrap"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Codex Sync",
+    "shortDescription": "Synchronize Codex safely across devices.",
+    "longDescription": "Connect a selected private GitHub repository, preview portable Codex configuration changes, apply them transactionally, reconcile marketplaces and plugins, and roll back when needed.",
+    "developerName": "Logic Tan",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write", "Authentication"],
+    "defaultPrompt": [
+      "Set up Codex Sync on this device.",
+      "Check and apply my synchronized Codex configuration.",
+      "Show Codex Sync status and available backups."
+    ]
+  }
+}

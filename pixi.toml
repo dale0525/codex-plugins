@@ -8,10 +8,13 @@ python = ">=3.11,<3.14"
 pyyaml = ">=6.0,<7"
 actionlint = ">=1.7,<2"
 shellcheck = ">=0.10,<1"
+rust = ">=1.85,<2"
 
 [tasks]
 sync = "python scripts/sync_external_content.py"
 validate = "python scripts/validate_repository.py"
 test = "python -m unittest discover -s tests -v"
 workflow = "actionlint .github/workflows/*.yml"
-check = { depends-on = ["test", "validate", "workflow"] }
+codex-sync-build = "cargo build --manifest-path plugins/codex-sync/engine/Cargo.toml"
+codex-sync-test = "cargo test --manifest-path plugins/codex-sync/engine/Cargo.toml"
+check = { depends-on = ["test", "validate", "workflow", "codex-sync-test"] }

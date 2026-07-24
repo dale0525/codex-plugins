@@ -1,0 +1,2 @@
+# Define non-secret provider metadata under [providers.<name>].
+# Store only env_key references; never commit tokens or API keys.
