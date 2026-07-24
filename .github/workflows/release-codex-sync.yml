@@ -113,6 +113,7 @@ jobs:
           gh release create \
             "${{ github.ref_name }}" \
             dist/* \
+            --repo "${GITHUB_REPOSITORY}" \
             --verify-tag \
             --title "Codex Sync ${GITHUB_REF_NAME#codex-sync-v}" \
             --generate-notes
