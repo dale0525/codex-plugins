@@ -1,6 +1,6 @@
 ---
 name: codex-sync
-description: Set up, inspect, synchronize, publish, or roll back global Codex configuration through a selected private GitHub repository. Use when a user is onboarding a new device, syncing AGENTS.md, native agent profiles, or portable config.toml settings, reconciling providers, marketplaces, or plugins, checking configuration drift, or restoring a previous synchronized state.
+description: Set up, inspect, capture, synchronize, publish, or roll back global Codex configuration through a selected private GitHub repository. Use when a user is onboarding a new device, uploading the current device configuration, syncing AGENTS.md, native agent profiles, or portable config.toml settings, reconciling providers, marketplaces, or plugins, checking configuration drift, or restoring a previous synchronized state.
 ---
 
 # Codex Sync
@@ -31,6 +31,7 @@ The bootstrap verifies a release checksum before caching the platform binary und
 
 - New device or first connection: run the setup workflow.
 - Pull remote changes: run the synchronization workflow.
+- Upload the current device configuration: run the capture and publication workflow.
 - Inspect without modifying anything: run `status` and `doctor`.
 - Publish deliberate edits from the local repository cache: run the publication workflow.
 - Recover from a bad apply: run the rollback workflow.
@@ -70,6 +71,19 @@ Do not silently replace an existing setup. Run `<bootstrap> status` first. Use `
 
 Never copy hook trust hashes, project trust, authentication sessions, SQLite state, or plugin caches between devices.
 
+## Capture and upload the current device
+
+Use this workflow when the user asks to “upload configuration,” “push this device's configuration,” or otherwise make the current device the reviewed source for synchronized state.
+
+1. Run `status` and `doctor`. The repository cache must match its last fetched digest. If it already has unpublished edits, show them and publish or synchronize them first; never let capture overwrite them.
+2. Run `<bootstrap> capture`. Capture updates only the local repository cache. It copies the current values for configuration keys already declared in common and device configuration, complete current provider tables, global `AGENTS.md`, synchronized native agent profiles, and installed enabled plugins outside OpenAI-managed marketplaces.
+3. Treat marketplace names equal to `openai` or beginning with `openai-` as app-managed. Capture removes their plugin and marketplace declarations from the cache. It never uninstalls those local plugins.
+4. For a captured plugin from a marketplace not yet declared in the repository, capture may add the marketplace only when current Codex configuration exposes a portable HTTPS Git source. It skips local or otherwise non-portable marketplaces with a warning because a plugin declaration alone cannot restore their plugin code on another device.
+5. Run `doctor`, then show the repository diff or exact changed files. Mask `experimental_bearer_token` values while confirming that the field is present when applicable. Explain any skipped plugin before publication.
+6. Obtain explicit confirmation, then run `<bootstrap> publish --message "MESSAGE" --approve`.
+
+Capture and publication remain explicit commands. Do not add hooks or silently capture local changes during `sync`, `apply`, `doctor`, or ordinary publication.
+
 ## Publish
 
 Treat GitHub as the shared source of truth. Do not infer that arbitrary live `config.toml` state should be uploaded.
@@ -97,4 +111,5 @@ The engine publishes one commit only when the remote branch still matches the fe
 - Do not bypass a secret-scan failure.
 - Do not apply a plan whose ID, base hashes, or commit no longer match.
 - Do not manually edit Codex marketplace snapshot metadata or plugin cache directories.
+- Do not claim that a local-only marketplace plugin is portable. Synchronize its source through a reviewed Git marketplace first, then capture it.
 - Do not add lifecycle hooks for synchronization or drift repair. All checks and applies are explicitly invoked.

@@ -215,6 +215,18 @@ pub fn validate_plugin_id(value: &str) -> Result<()> {
     Ok(())
 }
 
+pub fn plugin_marketplace(value: &str) -> Result<&str> {
+    validate_plugin_id(value)?;
+    Ok(value
+        .split_once('@')
+        .expect("validated plugin ID contains a marketplace")
+        .1)
+}
+
+pub fn is_openai_managed_marketplace(value: &str) -> bool {
+    value == "openai" || value.starts_with("openai-")
+}
+
 pub fn portable_name(value: &str) -> bool {
     !value.is_empty()
         && value.len() <= 128
@@ -262,5 +274,14 @@ mod tests {
         assert!(validate_plugin_id("plugin@marketplace").is_ok());
         assert!(validate_plugin_id("plugin").is_err());
         assert!(validate_plugin_id("plugin@../bad").is_err());
+    }
+
+    #[test]
+    fn openai_marketplaces_are_detected_by_namespace() {
+        assert!(is_openai_managed_marketplace("openai-bundled"));
+        assert!(is_openai_managed_marketplace("openai-primary-runtime"));
+        assert!(is_openai_managed_marketplace("openai-curated-remote"));
+        assert!(!is_openai_managed_marketplace("dale0525-codex-plugins"));
+        assert!(!is_openai_managed_marketplace("personal"));
     }
 }

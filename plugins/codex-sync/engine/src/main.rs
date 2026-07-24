@@ -1,5 +1,6 @@
 mod app;
 mod auth;
+mod capture;
 mod config;
 mod github;
 mod model;
@@ -65,6 +66,8 @@ enum Commands {
     },
     /// Validate state, repository schema, secret policy, and Codex availability.
     Doctor,
+    /// Capture current managed configuration and portable installed plugins into the repository cache.
+    Capture,
     /// Restore the latest or a named pre-apply backup.
     Rollback {
         backup: Option<String>,
@@ -115,6 +118,7 @@ fn run() -> Result<()> {
         } => app::apply(&plan_id, approve_high_risk),
         Commands::Status { json } => app::status(json),
         Commands::Doctor => app::doctor(),
+        Commands::Capture => capture::capture(),
         Commands::Rollback { backup, approve } => app::rollback(backup.as_deref(), approve),
         Commands::Publish { message, approve } => app::publish(&message, approve),
     }

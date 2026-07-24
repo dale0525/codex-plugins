@@ -24,6 +24,8 @@ GitHub access and refresh tokens belong in the operating-system credential store
 
 Provider secrets should use an OS credential store, `env_key`, or command-backed authentication. As an explicit exception for private configuration repositories, `providers.<name>.experimental_bearer_token` may contain a plaintext static bearer token for zero-setup cross-device synchronization. It is copied into global `config.toml` and persists in Git history, clones, backups, and GitHub audit surfaces. Confirm the repository is private with narrowly selected access before publishing, never place the token in chat or logs, and rotate it after any suspected exposure. No other probable secret field is allowed.
 
+Current-device capture copies complete `model_providers` tables into the repository cache. Validate them with the same secret policy before replacing the cache, never print an `experimental_bearer_token` value in capture output or review summaries, and retain the explicit publication approval gate.
+
 Publication rejects obvious private-key filenames, `.env`, `auth.json`, GitHub token prefixes, and private-key markers. Treat a rejection as a security incident to investigate; do not rename a secret merely to bypass detection.
 
 ## Supply-chain controls
@@ -33,6 +35,7 @@ Publication rejects obvious private-key filenames, `.env`, `auth.json`, GitHub t
 - Reject ZIP path traversal and multiple archive roots.
 - Verify released engine binaries with the published SHA-256 checksum.
 - Keep marketplace source changes visible in the synchronization plan.
+- Exclude app-managed `openai` and `openai-*` marketplaces and plugins from current-device capture. This exclusion affects synchronized declarations only and never uninstalls the desktop App's local runtime plugins.
 - Applying a plan may download and register plugins, but never invoke their new capabilities in the current task. Start a new task before use.
 
 ## Concurrency and rollback
