@@ -416,6 +416,14 @@ fn setup_sync_and_apply_preserve_unmanaged_config() {
     assert!(fs::read_to_string(sync_home.join("state.toml"))
         .unwrap()
         .contains("Iv23liN2J2Ryzkd99etp"));
+    command(&sync_home, &codex_home, &codex_bin)
+        .arg("doctor")
+        .assert()
+        .success()
+        .stdout(predicates::str::contains(format!(
+            "Codex CLI: {}",
+            codex_bin.display()
+        )));
 
     let (api_url, server) = serve_github("abc123", repository_zip(Some("gpt-test")));
     let sync = command(&sync_home, &codex_home, &codex_bin)

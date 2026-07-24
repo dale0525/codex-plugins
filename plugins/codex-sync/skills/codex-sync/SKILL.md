@@ -48,7 +48,7 @@ Read [repository-schema.md](references/repository-schema.md) when creating or ed
 <bootstrap> setup --repository OWNER/REPOSITORY --device DEVICE --git-ref BRANCH
 ```
 
-3. Run `<bootstrap> login`. Present the GitHub verification URL and one-time user code exactly as emitted by the engine. Wait for the user to complete browser authorization. If credential storage fails, stop and report the OS credential-store error; never fall back to a plaintext token file. The received token exists only in process memory until keyring storage succeeds; if storage fails after authorization, ask the user to revoke the App authorization in GitHub settings before retrying.
+3. Run `<bootstrap> login --no-browser` so the engine prints and flushes the GitHub verification URL and one-time user code before it starts waiting. Present both values exactly as emitted by the engine, then wait for the user to complete browser authorization. Keep the original command session open and poll that session; do not restart login through a redirected temporary log because that creates a different one-time code. If credential storage fails, stop and report the OS credential-store error; never fall back to a plaintext token file. The received token exists only in process memory until keyring storage succeeds; if storage fails after authorization, ask the user to revoke the App authorization in GitHub settings before retrying.
 4. Run `<bootstrap> sync`. Summarize the plan by low-risk and high-risk changes.
 5. Ask for confirmation before every apply. For high-risk plans, enumerate the high-risk changes and obtain explicit confirmation. Apply only the exact plan ID printed by `sync`:
 

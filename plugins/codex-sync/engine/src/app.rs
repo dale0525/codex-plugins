@@ -23,7 +23,8 @@ use crate::profiles::{
 use crate::reconcile::{
     add_local_marketplace, installed_plugins, marketplace_names, marketplace_roots,
     plugin_ids_to_remove, portable_name, reconcile_marketplaces, reconcile_plugins,
-    remove_marketplace, restore_installed_plugins, validate_plugin_id, InstalledPlugin,
+    remove_marketplace, restore_installed_plugins, validate_plugin_id, verify_codex_available,
+    InstalledPlugin,
 };
 use crate::storage::{
     acquire_lock, atomic_write, copy_tree, ensure_data_dirs, load_state, read_json,
@@ -701,14 +702,8 @@ pub fn doctor() -> Result<()> {
             println!("warning: local repository cache contains unpublished edits");
         }
     }
-    let codex = std::env::var_os("CODEX_SYNC_CODEX_BIN").unwrap_or_else(|| "codex".into());
-    let output = std::process::Command::new(codex)
-        .arg("--version")
-        .output()
-        .context("Codex CLI is not available")?;
-    if !output.status.success() {
-        anyhow::bail!("Codex CLI version check failed");
-    }
+    let codex = verify_codex_available().context("Codex CLI is not available")?;
+    println!("Codex CLI: {}", codex.display());
     println!("Codex Sync doctor found no blocking problems");
     Ok(())
 }

@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$version = if ($env:CODEX_SYNC_VERSION) { $env:CODEX_SYNC_VERSION } else { '0.3.1' }
+$version = if ($env:CODEX_SYNC_VERSION) { $env:CODEX_SYNC_VERSION } else { '0.3.2' }
 $codexHomePath = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }
 $installDirectory = if ($env:CODEX_SYNC_BIN_HOME) {
     $env:CODEX_SYNC_BIN_HOME
