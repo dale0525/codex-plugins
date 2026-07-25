@@ -1,7 +1,0 @@
-{
-  "mode": "observe",
-  "identical_failure_limit": 3,
-  "window_seconds": 120,
-  "state_ttl_seconds": 86400,
-  "max_log_bytes": 5242880
-}

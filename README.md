@@ -26,12 +26,6 @@ codex plugin add codex-sync@dale0525-codex-plugins
 codex plugin add film-craft-orchestrator@dale0525-codex-plugins
 ```
 
-## Install Loop Guard
-
-```bash
-codex plugin add loop-guard@dale0525-codex-plugins
-```
-
 ## Install Web Novel Craft
 
 ```bash
@@ -46,6 +40,9 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
+Codex Sync 0.3.5 captures `plugins.toml` as the complete desired installed set,
+removing absent or disabled plugin entries instead of retaining `enabled = false`
+tombstones. Legacy disabled entries remain readable for backward compatibility.
 Codex Sync 0.3.4 runs Codex child processes from a stable configuration
 directory so refreshing the marketplace that contains Codex Sync cannot invalidate
 their working directory. Codex Sync 0.3.3 refreshes an unchanged Git marketplace
@@ -107,14 +104,6 @@ continuity and quality control, editing and sound, and timestamped video-evidenc
 research. Shared templates, evidence corpora, compilers, and deterministic
 validators remain in one canonical skill root so the focused skills do not drift.
 
-### Loop Guard
-
-Observes exact repeated tool failures with privacy-safe keyed fingerprints and
-no generic call limits. It ships in observe-only mode. After reviewed local
-evidence, enforce mode can advise the model on the third identical failure and
-deny only a fourth identical tool call while allowing the task to continue with
-a different strategy.
-
 ### Web Novel Craft
 
 Provides one writer/editor orchestration skill and eight focused skills for web-novel
@@ -157,7 +146,6 @@ destination must remain inside this repository.
 plugins/apple-design/
 plugins/codex-sync/
 plugins/film-craft-orchestrator/
-plugins/loop-guard/
 plugins/web-novel-craft/
 sync-sources.toml
 ```

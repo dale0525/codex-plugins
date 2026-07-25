@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 use std::fs;
 
 use anyhow::{Context, Result};
@@ -128,9 +128,7 @@ fn capture_plugins(
     let current_config = current_config
         .parse::<toml::Value>()
         .context("parse current Codex config.toml")?;
-    let previous: PluginFile = read_optional_toml(&repository.join(&manifest.plugins))?;
-    let mut desired = BTreeMap::new();
-    let mut active = BTreeSet::new();
+    let mut desired = BTreeSet::new();
 
     for plugin in installed_plugins()?
         .into_iter()
@@ -150,20 +148,8 @@ fn capture_plugins(
             marketplace_names.insert(marketplace.to_owned());
             report.added_marketplaces.push(marketplace.to_owned());
         }
-        active.insert(plugin.plugin_id.clone());
-        desired.insert(plugin.plugin_id.clone(), true);
+        desired.insert(plugin.plugin_id.clone());
         report.captured.push(plugin.plugin_id);
-    }
-
-    for plugin in previous.plugins {
-        let marketplace = plugin_marketplace(&plugin.id)?;
-        if is_openai_managed_marketplace(marketplace)
-            || !marketplace_names.contains(marketplace)
-            || desired.contains_key(&plugin.id)
-        {
-            continue;
-        }
-        desired.insert(plugin.id.clone(), active.contains(&plugin.id));
     }
 
     marketplaces
@@ -172,7 +158,7 @@ fn capture_plugins(
     let plugins = PluginFile {
         plugins: desired
             .into_iter()
-            .map(|(id, enabled)| PluginSpec { id, enabled })
+            .map(|id| PluginSpec { id, enabled: true })
             .collect(),
     };
     atomic_write(

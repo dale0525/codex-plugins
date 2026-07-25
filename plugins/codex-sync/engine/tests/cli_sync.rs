@@ -209,7 +209,7 @@ fn repository_zip_for_capture() -> Vec<u8> {
             ),
             (
                 "owner-config-commit/plugins.toml",
-                "[[plugins]]\nid = \"existing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"missing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"documents@openai-primary-runtime\"\nenabled = true\n",
+                "[[plugins]]\nid = \"existing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"missing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"legacy-disabled@private-market\"\nenabled = false\n\n[[plugins]]\nid = \"documents@openai-primary-runtime\"\nenabled = true\n",
             ),
         ];
         for (path, content) in files {
@@ -619,8 +619,9 @@ ref = "stable"
     let plugins = fs::read_to_string(repository.join("plugins.toml")).unwrap();
     assert!(plugins.contains("existing@private-market"));
     assert!(plugins.contains("new-tool@new-private"));
-    assert!(plugins.contains("missing@private-market"));
-    assert!(plugins.contains("enabled = false"));
+    assert!(!plugins.contains("missing@private-market"));
+    assert!(!plugins.contains("legacy-disabled@private-market"));
+    assert!(!plugins.contains("enabled = false"));
     assert!(!plugins.contains("openai-"));
     assert!(!plugins.contains("local-tool@personal"));
     let marketplaces = fs::read_to_string(repository.join("marketplaces.toml")).unwrap();

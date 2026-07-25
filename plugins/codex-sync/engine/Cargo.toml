@@ -1,6 +1,6 @@
 [package]
 name = "codex-sync-engine"
-version = "0.3.4"
+version = "0.3.5"
 edition = "2021"
 license = "MIT"
 description = "Deterministic local engine for the Codex Sync plugin"

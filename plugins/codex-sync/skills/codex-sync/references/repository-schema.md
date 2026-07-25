@@ -137,8 +137,9 @@ id = "private-tool@personal-private"
 enabled = true
 ```
 
-Plugin IDs must use `plugin@marketplace` syntax. `enabled = false` means the plugin should be absent on synchronized devices.
-For each non-OpenAI marketplace declared in `marketplaces.toml`, `plugins.toml` is the complete synchronized plugin set. Removing an installed plugin's entry schedules a high-risk uninstall through `codex plugin remove`, which removes its local configuration and cache. Plugins from undeclared marketplaces are preserved.
+Plugin IDs must use `plugin@marketplace` syntax. For each non-OpenAI marketplace declared in `marketplaces.toml`, `plugins.toml` is the complete synchronized plugin set. Removing an installed plugin's entry schedules a high-risk uninstall through `codex plugin remove`, which removes its local configuration and cache. Plugins from undeclared marketplaces are preserved.
+
+Use presence in this file to express the desired installed set; remove a plugin's entire entry when it should be absent. `enabled = false` remains accepted for backward compatibility and also requests removal, but capture does not generate or retain disabled entries.
 
 ## Ownership behavior
 
@@ -160,7 +161,7 @@ The repository declares desired portable state. It does not own or transport:
 - global `AGENTS.md` and the profile files already synchronized by the repository
 - installed and enabled plugins outside marketplaces named `openai` or beginning with `openai-`
 
-Capture removes OpenAI-managed plugin and marketplace declarations from the cache. A previously declared portable plugin that is absent on the current device is retained with `enabled = false`, allowing other devices to remove it after reviewed synchronization.
+Capture removes OpenAI-managed plugin and marketplace declarations from the cache. It also removes entries for portable plugins that are absent or disabled on the current device. After reviewed publication, other devices interpret the missing entry as a high-risk uninstall because `plugins.toml` is the complete desired set for declared marketplaces.
 
 When an installed plugin uses an undeclared marketplace, capture can add that marketplace only when current Codex configuration records a portable HTTPS Git source and ref. Local marketplaces, including the implicit personal marketplace, are skipped with a warning because the configuration repository does not transport plugin source code.
 
