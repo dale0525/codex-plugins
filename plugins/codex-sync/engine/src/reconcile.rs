@@ -23,6 +23,27 @@ struct PluginList {
     installed: Vec<InstalledPlugin>,
 }
 
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MarketplaceList {
+    #[serde(default)]
+    marketplaces: Vec<ConfiguredMarketplace>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ConfiguredMarketplace {
+    name: String,
+    marketplace_source: Option<ConfiguredMarketplaceSource>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ConfiguredMarketplaceSource {
+    source_type: String,
+    source: String,
+}
+
 pub fn marketplace_names() -> Result<BTreeSet<String>> {
     Ok(marketplace_roots()?.into_keys().collect())
 }
@@ -42,6 +63,20 @@ pub fn marketplace_roots() -> Result<BTreeMap<String, PathBuf>> {
         }
     }
     Ok(values)
+}
+
+fn configured_git_marketplaces() -> Result<BTreeMap<String, String>> {
+    let output = codex_output(&["plugin", "marketplace", "list", "--json"])?;
+    let parsed: MarketplaceList =
+        serde_json::from_slice(&output.stdout).context("parse Codex marketplace list")?;
+    Ok(parsed
+        .marketplaces
+        .into_iter()
+        .filter_map(|marketplace| {
+            let source = marketplace.marketplace_source?;
+            (source.source_type == "git").then_some((marketplace.name, source.source))
+        })
+        .collect())
 }
 
 pub fn remove_marketplace(name: &str) -> Result<()> {
@@ -73,6 +108,14 @@ pub fn reconcile_marketplaces(
     marketplace_root: &Path,
 ) -> Result<Vec<String>> {
     let mut configured = marketplace_roots()?;
+    let configured_git = if specs
+        .iter()
+        .any(|spec| matches!(spec, MarketplaceSpec::Git { .. }))
+    {
+        configured_git_marketplaces()?
+    } else {
+        BTreeMap::new()
+    };
     let mut messages = Vec::new();
     for spec in specs {
         match spec {
@@ -82,6 +125,11 @@ pub fn reconcile_marketplaces(
                 git_ref,
                 sparse,
             } => {
+                if configured_git.get(name).is_some_and(|source| source == url) {
+                    codex_output(&["plugin", "marketplace", "upgrade", name])?;
+                    messages.push(format!("refreshed marketplace {name}"));
+                    continue;
+                }
                 if configured.contains_key(name) {
                     codex_output(&["plugin", "marketplace", "remove", name])?;
                 }

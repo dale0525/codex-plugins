@@ -282,9 +282,20 @@ if [ -n "${CODEX_SYNC_GITHUB_TOKEN:-}" ]; then
 fi
 state="${FAKE_CODEX_STATE:?}"
 if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "list" ]; then
-  printf 'MARKETPLACE ROOT\n'
-  if [ -n "${FAKE_MARKETPLACE_STATE:-}" ] && [ -s "$FAKE_MARKETPLACE_STATE" ]; then
-    printf '%s %s\n' "${FAKE_MARKETPLACE_NAME:-market}" "$(cat "$FAKE_MARKETPLACE_STATE")"
+  if [ "${4:-}" = "--json" ]; then
+    if [ -n "${FAKE_MARKETPLACE_STATE:-}" ] && [ -s "$FAKE_MARKETPLACE_STATE" ]; then
+      printf '{"marketplaces":[{"name":"%s","root":"%s","marketplaceSource":{"sourceType":"git","source":"%s"}}]}' \
+        "${FAKE_MARKETPLACE_NAME:-market}" \
+        "$(cat "$FAKE_MARKETPLACE_STATE")" \
+        "${FAKE_MARKETPLACE_SOURCE:-https://example.com/market.git}"
+    else
+      printf '{"marketplaces":[]}'
+    fi
+  else
+    printf 'MARKETPLACE ROOT\n'
+    if [ -n "${FAKE_MARKETPLACE_STATE:-}" ] && [ -s "$FAKE_MARKETPLACE_STATE" ]; then
+      printf '%s %s\n' "${FAKE_MARKETPLACE_NAME:-market}" "$(cat "$FAKE_MARKETPLACE_STATE")"
+    fi
   fi
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "remove" ]; then
   if [ -n "${FAKE_MARKETPLACE_STATE:-}" ] && [ -s "$FAKE_MARKETPLACE_STATE" ]; then
@@ -917,6 +928,77 @@ fn removed_plugin_spec_uninstalls_managed_plugin() {
         ));
 
     assert_eq!(fs::read_to_string(plugin_state).unwrap(), "");
+}
+
+#[test]
+fn existing_git_marketplace_is_upgraded_without_destructive_reregistration() {
+    let temporary = tempfile::tempdir().unwrap();
+    let sync_home = temporary.path().join("sync");
+    let codex_home = temporary.path().join("codex");
+    fs::create_dir_all(&codex_home).unwrap();
+    fs::write(codex_home.join("config.toml"), "model = \"old\"\n").unwrap();
+    fs::write(codex_home.join("AGENTS.md"), "# Old\n").unwrap();
+
+    let marketplace = temporary.path().join("marketplace");
+    fs::create_dir_all(&marketplace).unwrap();
+    fs::write(marketplace.join("sentinel.txt"), "original\n").unwrap();
+    let codex_bin = temporary.path().join("codex-stateful");
+    let plugin_state = temporary.path().join("plugin-state");
+    let marketplace_state = temporary.path().join("marketplace-state");
+    fs::write(&plugin_state, "").unwrap();
+    fs::write(&marketplace_state, marketplace.to_string_lossy().as_bytes()).unwrap();
+    stateful_fake_codex(&codex_bin);
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_STATE", &plugin_state)
+        .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
+        .args([
+            "setup",
+            "--repository",
+            "owner/config",
+            "--device",
+            "test-device",
+        ])
+        .assert()
+        .success();
+    let (api_url, server) = serve_github(
+        "abc123",
+        repository_zip_with_managed_marketplace_and_no_plugins(),
+    );
+    let output = command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_STATE", &plugin_state)
+        .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
+        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
+        .arg("sync")
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    server.join().unwrap();
+    let plan_id = String::from_utf8(output.stdout)
+        .unwrap()
+        .lines()
+        .find_map(|line| line.strip_prefix("Plan "))
+        .and_then(|line| line.split_whitespace().next())
+        .unwrap()
+        .to_owned();
+
+    command(&sync_home, &codex_home, &codex_bin)
+        .env("FAKE_CODEX_STATE", &plugin_state)
+        .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
+        .env("FAKE_MARKETPLACE_SOURCE", "https://example.com/market.git")
+        .env("FAKE_DAMAGE_MARKETPLACE_ON_REMOVE", "1")
+        .args(["apply", &plan_id, "--approve-high-risk"])
+        .assert()
+        .success();
+
+    assert_eq!(
+        fs::read_to_string(marketplace.join("sentinel.txt")).unwrap(),
+        "original\n"
+    );
+    assert_eq!(
+        fs::read_to_string(&marketplace_state).unwrap(),
+        marketplace.to_string_lossy()
+    );
 }
 
 #[test]
