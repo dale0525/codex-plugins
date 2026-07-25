@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "corpus_id": "web-novel-craft-v1",
+  "status": "deep_distilled",
+  "evidence_note": "Every entry is based on a first-to-last transcript or ASR review. Claims record what the speaker taught or reported, not independent proof of universal truth.",
+  "sources": [
+    {
+      "id": "cYhjo5O-nfg",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 4549.14,
+      "claims": [
+        {"timestamp_sec": 556, "type": "craft_model", "level": "E1", "paraphrase": "Classic style treats prose as a clear window through which a reader sees a subject."},
+        {"timestamp_sec": 828, "type": "demonstration", "level": "E2", "paraphrase": "Protective throat-clearing can often be deleted without losing substantive meaning."},
+        {"timestamp_sec": 1012, "type": "demonstration", "level": "E2", "paraphrase": "Turning nominalizations back into actors and verbs restores visible agency."},
+        {"timestamp_sec": 1379, "type": "craft_model", "level": "E2", "paraphrase": "The curse of knowledge makes writers omit definitions, logical steps, and visible detail."},
+        {"timestamp_sec": 1512, "type": "practitioner_experience", "level": "E1", "paraphrase": "A real reader or delayed self-review exposes confusion better than imagined audience simulation."}
+      ],
+      "applicability": ["Clarity passes for narration, exposition, lore, and reader orientation."],
+      "non_applicability": ["Legal precision, deliberate ambiguity, and foregrounded literary language may require different choices."],
+      "failure_boundaries": ["Mechanical active voice and show-don't-tell can create distortion or severe pacing drag."],
+      "counterexamples": ["A low-choice journey is often clearer as brief summary than as a fully dramatized scene."],
+      "ambiguities": ["Captioned personal names and a few inaudible moderator phrases require source verification before quotation."],
+      "procedure_ids": ["classic-clarity-pass"]
+    },
+    {
+      "id": "1NCiuI6F5O0",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 4329.96,
+      "claims": [
+        {"timestamp_sec": 148, "type": "craft_model", "level": "E1", "paraphrase": "Worldbuilding and action matter more when readers care about the characters affected."},
+        {"timestamp_sec": 499, "type": "craft_model", "level": "E2", "paraphrase": "Rooting interest combines a wanted outcome, an obstacle, and personal connection to the plot."},
+        {"timestamp_sec": 645, "type": "craft_model", "level": "E2", "paraphrase": "Visible progress may occur along likeability, proactivity, competence, or a signposted mystery."},
+        {"timestamp_sec": 1559, "type": "craft_model", "level": "E1", "paraphrase": "Decisions feel false when established motivation does not support them."},
+        {"timestamp_sec": 3932, "type": "craft_model", "level": "E1", "paraphrase": "Distinct voice grows from background, rhetoric, and metaphor rather than catchphrases alone."}
+      ],
+      "applicability": ["Protagonist, antagonist, supporting-cast, motivation, arc, and voice diagnosis."],
+      "non_applicability": ["Static iconic heroes can work without conventional positive transformation."],
+      "failure_boundaries": ["Scoring sliders mechanically cannot replace scene evidence and cultural context."],
+      "counterexamples": ["A highly competent ensemble caper can succeed without making every lead insecure or rapidly changing."],
+      "ambiguities": ["Examples use the lecturer's readings of well-known works and are analytical, not canonical author intent."],
+      "procedure_ids": ["character-arc-diagnostic"]
+    },
+    {
+      "id": "zVXFNw-xz3Y",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 3739.4,
+      "claims": [
+        {"timestamp_sec": 91, "type": "craft_model", "level": "E1", "paraphrase": "An opening should establish tone, character conflict, and a mind worth following without a fixed page count."},
+        {"timestamp_sec": 628, "type": "craft_model", "level": "E2", "paraphrase": "A subplot needs its own promise, motive, and progress and should reconnect to the main story."},
+        {"timestamp_sec": 874, "type": "craft_model", "level": "E2", "paraphrase": "Strong twists enlarge or deepen conflict instead of merely canceling a prior promise."},
+        {"timestamp_sec": 1468, "type": "demonstration", "level": "E2", "paraphrase": "A chapter hook works when the new fact has inferable consequence, not when a door simply opens before a cut."},
+        {"timestamp_sec": 3194, "type": "craft_model", "level": "E1", "paraphrase": "Limited viewpoint cannot secretly withhold obvious knowledge without risking reader betrayal."}
+      ],
+      "applicability": ["POV selection, opening diagnosis, subplot integration, twists, and chapter hooks."],
+      "non_applicability": ["Experimental second person or deliberately unstable narration needs a different contract."],
+      "failure_boundaries": ["Multiple POVs spend orientation and attachment; omniscience needs an intentional narrator and transition discipline."],
+      "counterexamples": ["Opening a door and cutting before an ordinary delivery creates interruption, not earned suspense."],
+      "ambiguities": ["The lecture begins with broader plot questions before the formal viewpoint section."],
+      "procedure_ids": ["pov-subplot-diagnostic"]
+    },
+    {
+      "id": "blehVIDyuXk",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 2677.69,
+      "claims": [
+        {"timestamp_sec": 48, "type": "craft_model", "level": "E1", "paraphrase": "A short story aims at a specific emotional punch while a novel has more room for immersion."},
+        {"timestamp_sec": 212, "type": "craft_model", "level": "E2", "paraphrase": "Milieu, inquiry, character, and event threads have distinct opening and closure conditions."},
+        {"timestamp_sec": 541, "type": "demonstration", "level": "E2", "paraphrase": "Nested story threads should normally close from the innermost thread outward."},
+        {"timestamp_sec": 1148, "type": "craft_model", "level": "E2", "paraphrase": "Yes-but and no-and make attempts produce progress or worsening consequences."},
+        {"timestamp_sec": 1664, "type": "demonstration", "level": "E2", "paraphrase": "An ending should mirror opening character, place, and genre mood while showing change."}
+      ],
+      "applicability": ["Short fiction, chapter-scale story boxes, compressed openings, and thread closure."],
+      "non_applicability": ["Pure lyric fragments and intentionally unresolved experiments may reject goal-and-closure logic."],
+      "failure_boundaries": ["The MICE word-count formula is a planning heuristic, not a publication law."],
+      "counterexamples": ["Resolving a romance while never answering the murder question leaves the inquiry thread unpaid."],
+      "ambiguities": ["Several classroom fictional names and formula phrases are imperfectly captioned."],
+      "procedure_ids": ["nested-thread-box"]
+    },
+    {
+      "id": "kJ1lRlh7UQ8",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 3282.76,
+      "claims": [
+        {"timestamp_sec": 324, "type": "craft_model", "level": "E1", "paraphrase": "Drafting, narrative revision, and polishing are separate passes with different decisions."},
+        {"timestamp_sec": 400, "type": "craft_model", "level": "E1", "paraphrase": "The first draft is exploratory and should be completed through small repeatable effort."},
+        {"timestamp_sec": 893, "type": "demonstration", "level": "E1", "paraphrase": "Predictive writing derives the next scene from already planted necessity and implication."},
+        {"timestamp_sec": 1204, "type": "craft_model", "level": "E1", "paraphrase": "Character action and choice generate cause and effect that make the following scene necessary."},
+        {"timestamp_sec": 2420, "type": "practitioner_experience", "level": "E1", "paraphrase": "A final read-aloud lets the writer experience and repair the manuscript before external judgment."}
+      ],
+      "applicability": ["Separating discovery drafting, structural revision, and publication polish."],
+      "non_applicability": ["A serial already published cannot freely reorder history without change control."],
+      "failure_boundaries": ["Suspending judgment does not authorize publishing an unreviewed exploratory draft."],
+      "counterexamples": ["Polishing every sentence before discovering the real causal story wastes effort and resists necessary cuts."],
+      "ambiguities": ["Some techniques are attributed orally to other books and should not be treated as original claims."],
+      "procedure_ids": ["three-pass-revision"]
+    },
+    {
+      "id": "ihd76ijy9LU",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 4565.36,
+      "claims": [
+        {"timestamp_sec": 756, "type": "craft_model", "level": "E1", "paraphrase": "Plot can be diagnosed as promise, progress, and payoff even in discovery writing."},
+        {"timestamp_sec": 945, "type": "practitioner_experience", "level": "E1", "paraphrase": "When progress and opening promise mismatch, revising the opening may be cheaper than replacing the whole middle."},
+        {"timestamp_sec": 1160, "type": "craft_model", "level": "E1", "paraphrase": "Promises include tone, character, series structure, and central conflict, not plot facts alone."},
+        {"timestamp_sec": 2948, "type": "demonstration", "level": "E2", "paraphrase": "Mystery progress needs visible clues, exclusions, and signposts that tell readers movement is occurring."},
+        {"timestamp_sec": 3732, "type": "craft_model", "level": "E1", "paraphrase": "A satisfying payoff should be surprising in form and feel inevitable after review of its preparation."}
+      ],
+      "applicability": ["Promise ledgers, midpoint repair, multi-track progress, endings, and serialized expectation control."],
+      "non_applicability": ["The framework does not dictate one plot shape or require every payoff to be triumphant."],
+      "failure_boundaries": ["Signposting can become repetitive explanation; surprise without preparation becomes arbitrary."],
+      "counterexamples": ["An action sequence that changes no relationship, plan, information, or risk is event density without satisfying progress."],
+      "ambiguities": ["Film and novel examples represent the lecturer's critical interpretation."],
+      "procedure_ids": ["promise-progress-payoff-audit"]
+    },
+    {
+      "id": "OVYLtzwxIhQ",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 3702.2,
+      "claims": [
+        {"timestamp_sec": 343, "type": "platform_claim", "level": "E1", "paraphrase": "Serial platforms can deliver recurring posts to subscribers while retaining an author archive."},
+        {"timestamp_sec": 908, "type": "practitioner_experience", "level": "E1", "paraphrase": "Episode endings benefit from a consequential hook when access to the next installment requires another decision."},
+        {"timestamp_sec": 916, "type": "practitioner_experience", "level": "E1", "paraphrase": "Previewed first paragraphs need an immediate legible desire, disruption, or question."},
+        {"timestamp_sec": 931, "type": "platform_claim", "level": "E1", "paraphrase": "Polls and author notes can gather bounded reader reaction during serialization."},
+        {"timestamp_sec": 1800, "type": "practitioner_experience", "level": "E1", "paraphrase": "Serialized material may later be edited and packaged into other book formats."}
+      ],
+      "applicability": ["Preview-based episodic publication, subscriptions, comments, and later edition planning."],
+      "non_applicability": ["It does not prove current availability, payout, exclusivity, discoverability, or territorial access."],
+      "failure_boundaries": ["Artificial hooks, continuity-by-poll, and unverified crowd research can weaken a work."],
+      "counterexamples": ["Stopping in mid-action without a consequence is a payment interruption rather than a narrative hook."],
+      "ambiguities": ["Speaker switches and overlapping captions make exact names and historical platform terms uncertain."],
+      "procedure_ids": ["episodic-opening-and-hook"]
+    },
+    {
+      "id": "DuPNL5MGEEE",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 3349.4,
+      "claims": [
+        {"timestamp_sec": 280, "type": "practitioner_experience", "level": "E1", "paraphrase": "The speaker describes revising and expanding a project for years before entering web serialization."},
+        {"timestamp_sec": 1125, "type": "craft_model", "level": "E1", "paraphrase": "Cover, blurb, genre, and opening jointly establish promises readers later judge."},
+        {"timestamp_sec": 1235, "type": "platform_claim", "level": "E1", "paraphrase": "Subscription infrastructure can automate delivery but does not itself discover readers."},
+        {"timestamp_sec": 1440, "type": "practitioner_experience", "level": "E1", "paraphrase": "The speaker separates serialized and conventional production pipelines, including editing and beta work."},
+        {"timestamp_sec": 1530, "type": "practitioner_experience", "level": "E1", "paraphrase": "Early serialized feedback can reveal slow openings and audience mismatch before a book edition is final."}
+      ],
+      "applicability": ["Buffering, feedback-to-edition pipelines, promise testing, and separating formats."],
+      "non_applicability": ["Sales, pricing, platform features, and funnel conversion are dated self-reports."],
+      "failure_boundaries": ["Feedback quality varies and a serial test cannot prove causation or market size."],
+      "counterexamples": ["A platform with automation but no audience source solves delivery while leaving discovery untouched."],
+      "ambiguities": ["Caption overlap duplicates phrases and makes some speaker attributions uncertain."],
+      "procedure_ids": ["reader-feedback-revision"]
+    },
+    {
+      "id": "ucVPku0GmKw",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 2965.96,
+      "claims": [
+        {"timestamp_sec": 405, "type": "craft_model", "level": "E1", "paraphrase": "LitRPG makes game rules visible and operable to characters, with varying statistical density."},
+        {"timestamp_sec": 854, "type": "practitioner_experience", "level": "E1", "paraphrase": "Discovery plotting can coexist with a strict rule and mathematics reference table."},
+        {"timestamp_sec": 1174, "type": "craft_model", "level": "E1", "paraphrase": "System detail should be selected for current reader experience and medium rather than displayed by default."},
+        {"timestamp_sec": 1484, "type": "craft_model", "level": "E2", "paraphrase": "Power growth retains tension through adaptive opposition, non-numeric challenges, and real failure."},
+        {"timestamp_sec": 2148, "type": "craft_model", "level": "E1", "paraphrase": "Repeated grind should be compressed unless a scene adds a new rule, choice, cost, or variation."}
+      ],
+      "applicability": ["LitRPG, explicit systems, progression fantasy, long growth arcs, and audio-friendly stat presentation."],
+      "non_applicability": ["Genre, market, and community observations are not universal sales forecasts."],
+      "failure_boundaries": ["Improvised payoff rules, long irrelevant stat blocks, and purely numeric escalation undermine trust and tension."],
+      "counterexamples": ["A level increase that changes no available choice is bookkeeping, not narrative progression."],
+      "ambiguities": ["Names and some numerical examples in automatic captions require audio verification before quotation."],
+      "procedure_ids": ["litrpg-chapter-gate"]
+    },
+    {
+      "id": "rSZrvQ09AzU",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 2963.119,
+      "claims": [
+        {"timestamp_sec": 104.04, "type": "practitioner_experience", "level": "E1", "paraphrase": "The author treats pseudonymity as professional separation, communication preference, and irreversible safety protection."},
+        {"timestamp_sec": 841.76, "type": "practitioner_experience", "level": "E1", "paraphrase": "Reader preference is described as a weather vane rather than the steering wheel for ending direction."},
+        {"timestamp_sec": 1059.2, "type": "practitioner_experience", "level": "E1", "paraphrase": "A broad route can coexist with organic local discovery and experimentation."},
+        {"timestamp_sec": 1691.24, "type": "practitioner_experience", "level": "E1", "paraphrase": "Preparation, depression, boredom, and deadline exhaustion can present as different kinds of writing blockage."},
+        {"timestamp_sec": 2606.96, "type": "practitioner_experience", "level": "E1", "paraphrase": "A multi-day chapter pipeline uses drafting, reader or beta observation, editing, and continuity repair."}
+      ],
+      "applicability": ["Long serial planning, feedback boundaries, privacy, team editing, and sustainable chapter cycles."],
+      "non_applicability": ["Exceptional word counts and revenue mix are individual outcomes, not norms."],
+      "failure_boundaries": ["Health concerns require professional support; a workflow must not normalize chronic overload."],
+      "counterexamples": ["Changing an intended ending only because readers guessed it sacrifices causality for surprise."],
+      "ambiguities": ["The interview uses written answers read by another person, and automatic timestamps include duplicated caption fragments."],
+      "procedure_ids": ["discovery-draft-revision-loop"]
+    },
+    {
+      "id": "hav2P8-GYV4",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 890.16,
+      "claims": [
+        {"timestamp_sec": 53, "type": "practitioner_experience", "level": "E1", "paraphrase": "Long gaps between writing sessions increase loss of series details."},
+        {"timestamp_sec": 260, "type": "practitioner_experience", "level": "E1", "paraphrase": "Immediate short notes can preserve character and plot cues without exhaustive documentation."},
+        {"timestamp_sec": 351, "type": "craft_model", "level": "E1", "paraphrase": "Recording goals and trajectory helps a writer resume with current location, direction, and actor."},
+        {"timestamp_sec": 520, "type": "practitioner_experience", "level": "E1", "paraphrase": "A full-series outside reader can detect semantic continuity errors missed during local editing."},
+        {"timestamp_sec": 748, "type": "practitioner_experience", "level": "E1", "paraphrase": "Continuity deserves an independent normal-speed reading pass rather than being mixed into polish."}
+      ],
+      "applicability": ["Long series, irregular schedules, complex relationships, and continuity handoff."],
+      "non_applicability": ["A suggested short book cycle is not realistic or appropriate for every author or research-heavy project."],
+      "failure_boundaries": ["Faster production cannot replace a canonical ledger, outside review, or sustainable health limits."],
+      "counterexamples": ["A family relationship error survived author and beta review across ten volumes before a complete reader found it."],
+      "ambiguities": ["Subjective quantifiers and the closing claim that long series are better are opinions, not measured findings."],
+      "procedure_ids": ["long-form-continuity-read"]
+    },
+    {
+      "id": "BV1H8gh6JE2C",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 172.16,
+      "claims": [
+        {"timestamp_sec": 0, "type": "practitioner_experience", "level": "E1", "paraphrase": "Ongoing reading and attention to current works help a new writer calibrate expectations."},
+        {"timestamp_sec": 20.6, "type": "craft_model", "level": "E1", "paraphrase": "Expressive intent and commercial discipline should constrain each other."},
+        {"timestamp_sec": 41.68, "type": "craft_model", "level": "E1", "paraphrase": "A story goal differs from fantasies about recognition, income, or being regarded as a master."},
+        {"timestamp_sec": 81.6, "type": "practitioner_experience", "level": "E1", "paraphrase": "Trend imitation can conflict with an established writing temperament and produce an incoherent hybrid."},
+        {"timestamp_sec": 138.2, "type": "craft_model", "level": "E1", "paraphrase": "Reader reward must be embodied in the protagonist's observable action and consequence."}
+      ],
+      "applicability": ["Concept selection, trend pressure, reader reward, and diagnosing author-only fantasies."],
+      "non_applicability": ["The clip does not supply platform performance data or prove that trend following always fails."],
+      "failure_boundaries": ["Commercial calibration can become empty imitation; expressive freedom can become unreadable private symbolism."],
+      "counterexamples": ["Wanting praise for writing a prestigious-looking book gives the protagonist no actionable payoff."],
+      "ambiguities": ["ASR likely confuses 表达欲, 小白文, and several book titles; paraphrase rather than quote."],
+      "procedure_ids": ["author-fantasy-to-reader-payoff"]
+    },
+    {
+      "id": "BV1Ef4y1S7EU",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1374.49,
+      "claims": [
+        {"timestamp_sec": 1.68, "type": "craft_model", "level": "E1", "paraphrase": "A main desire needs supporting experience, loss, and a characteristic way of acting."},
+        {"timestamp_sec": 220.68, "type": "craft_model", "level": "E1", "paraphrase": "A single system-reward loop fatigues unless other long expectations change its meaning."},
+        {"timestamp_sec": 301.68, "type": "demonstration", "level": "E2", "paraphrase": "Designing the eventual settlement first helps align antagonistic pressure and emotional setup."},
+        {"timestamp_sec": 560.68, "type": "craft_model", "level": "E1", "paraphrase": "Humiliation creates anticipation only when readers can see a credible route to consequential response."},
+        {"timestamp_sec": 1015.95, "type": "demonstration", "level": "E2", "paraphrase": "A climax gains force when one decisive action settles several prepared emotional promises."}
+      ],
+      "applicability": ["Revenge, reversal, identity reveal, face-saving, and emotional climax design."],
+      "non_applicability": ["Not every conflict should promise triumphant retaliation, especially tragedy or moral compromise."],
+      "failure_boundaries": ["Pressure without a credible response path becomes prolonged misery; unrelated humiliation fragments the core."],
+      "counterexamples": ["Generic insults about ugliness offer no specific capability, secret, or action through which to settle the promise."],
+      "ambiguities": ["Book names and colloquial examples contain ASR errors and should not be cited verbatim."],
+      "procedure_ids": ["expectation-reversal-card"]
+    },
+    {
+      "id": "BV1yV411o79T",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 594.54,
+      "claims": [
+        {"timestamp_sec": 74, "type": "craft_model", "level": "E1", "paraphrase": "A mainline states what story this is rather than cataloging the world."},
+        {"timestamp_sec": 144, "type": "craft_model", "level": "E1", "paraphrase": "Supporting threads should wrap around the mainline to create conflict and expectation."},
+        {"timestamp_sec": 182, "type": "craft_model", "level": "E1", "paraphrase": "The protagonist's present desire is shaped by experience and emotion."},
+        {"timestamp_sec": 208, "type": "craft_model", "level": "E1", "paraphrase": "A mainline includes both the target and the characteristic behavior used to pursue it."},
+        {"timestamp_sec": 316, "type": "craft_model", "level": "E1", "paraphrase": "A clear drive can support many side problems when each changes progress, obstacle, cost, or relationship."}
+      ],
+      "applicability": ["One-line mainline, long outline, side-thread relevance, and protagonist drive."],
+      "non_applicability": ["A one-line mainline does not replace volume architecture, character contradiction, or ending design."],
+      "failure_boundaries": ["A stated ambition without causal experience and observable action remains a slogan."],
+      "counterexamples": ["A reborn protagonist declaring that they will become busy has no reason, strategy, or legible story direction."],
+      "ambiguities": ["Automatic transcription distorts several title and proper-name examples."],
+      "procedure_ids": ["mainline-pressure-test"]
+    },
+    {
+      "id": "BV1S64y1k7ef",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 482.25,
+      "claims": [
+        {"timestamp_sec": 0.43, "type": "craft_model", "level": "E1", "paraphrase": "An information jump occurs when familiar words combine into meaning for which the reader lacks prerequisites."},
+        {"timestamp_sec": 117.89, "type": "demonstration", "level": "E2", "paraphrase": "Unfamiliar concepts become readable when rebuilt from known categories, boundaries, and functions."},
+        {"timestamp_sec": 182.17, "type": "demonstration", "level": "E2", "paraphrase": "Explaining invented spatial terms only through more invented spatial terms accumulates confusion."},
+        {"timestamp_sec": 256.53, "type": "craft_model", "level": "E1", "paraphrase": "Large techniques feel powerful after their component concepts have been established in simpler use."},
+        {"timestamp_sec": 334.41, "type": "craft_model", "level": "E1", "paraphrase": "World information should be introduced when an action or decision makes it necessary."}
+      ],
+      "applicability": ["Worldbuilding, openings, new systems, spatial hierarchy, institutions, and compressed exposition."],
+      "non_applicability": ["The method does not require explaining common genre conventions to every expert reader."],
+      "failure_boundaries": ["Explaining everything creates encyclopedic drag; explaining nothing creates accumulating cognitive debt."],
+      "counterexamples": ["Defining one invented realm through three other undefined realms preserves every term and conveys no usable model."],
+      "ambiguities": ["ASR confuses several famous technique names and local terms; only the conceptual mechanism is retained."],
+      "procedure_ids": ["information-jump-audit"]
+    },
+    {
+      "id": "BV1nq4y1T79f",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 812.12,
+      "claims": [
+        {"timestamp_sec": 24.72, "type": "demonstration", "level": "E1", "paraphrase": "Dense events within one day do not by themselves define fast narrative pacing."},
+        {"timestamp_sec": 89.22, "type": "craft_model", "level": "E1", "paraphrase": "Fast pacing reduces ineffective information and ineffective event material."},
+        {"timestamp_sec": 109.22, "type": "demonstration", "level": "E2", "paraphrase": "An unrelated bridge scene interrupts momentum even when many events surround it."},
+        {"timestamp_sec": 428.12, "type": "demonstration", "level": "E2", "paraphrase": "A clear need and prior fact can introduce a new game phase without an information jump."},
+        {"timestamp_sec": 606.12, "type": "craft_model", "level": "E1", "paraphrase": "Small daily events can remain lively when they have focus, character contrast, and later connection."}
+      ],
+      "applicability": ["Chapter pacing, transitions, memory points, quiet bridge chapters, and removal of filler."],
+      "non_applicability": ["Atmospheric, reflective, or deliberately disorienting work may value effects other than rapid comprehension."],
+      "failure_boundaries": ["Maximizing turns creates summary-like noise; formula obsession can inhibit drafting."],
+      "counterexamples": ["A sequence of exams, fights, and victories feels slow when an unrelated segment breaks causality and carries no memory point."],
+      "ambiguities": ["ASR confuses work and character names; final timestamp slightly exceeds container duration."],
+      "procedure_ids": ["effective-pacing-audit"]
+    },
+    {
+      "id": "BV1na411v75W",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 428.2,
+      "claims": [
+        {"timestamp_sec": 5, "type": "craft_model", "level": "E1", "paraphrase": "Scene connection can be judged by low irrelevant material and smooth causal continuation."},
+        {"timestamp_sec": 71, "type": "craft_model", "level": "E1", "paraphrase": "Inserted setting information should serve the current scene's central emotion or decision."},
+        {"timestamp_sec": 108, "type": "practitioner_experience", "level": "E1", "paraphrase": "Removing all transition in pursuit of speed creates broken rhythm and writing paralysis."},
+        {"timestamp_sec": 192, "type": "demonstration", "level": "E2", "paraphrase": "A sequence feels continuous when one consequence triggers the next conflict and settlement."},
+        {"timestamp_sec": 348, "type": "craft_model", "level": "E1", "paraphrase": "When no outline exists, the next unit can grow from a live thread in the current text; no possible next event is a different blockage."}
+      ],
+      "applicability": ["Chapter-to-chapter causality, map transitions, payoff chains, and recovery from local outline gaps."],
+      "non_applicability": ["A local thread-bridging method cannot replace a missing series engine or complete creative block diagnosis."],
+      "failure_boundaries": ["Overlinear connection forbids healthy new threads; an outline can still contain unsupported character choices."],
+      "counterexamples": ["Moving to a new region only because the hero has maxed the old one supplies no present agent, motive, or cost."],
+      "ambiguities": ["ASR distorts titles, names, and a sword example; no visual diagram was reviewed."],
+      "procedure_ids": ["causal-thread-bridge"]
+    }
+  ]
+}

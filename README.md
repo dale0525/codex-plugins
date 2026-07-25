@@ -32,6 +32,12 @@ codex plugin add film-craft-orchestrator@dale0525-codex-plugins
 codex plugin add loop-guard@dale0525-codex-plugins
 ```
 
+## Install Web Novel Craft
+
+```bash
+codex plugin add web-novel-craft@dale0525-codex-plugins
+```
+
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
@@ -109,6 +115,19 @@ evidence, enforce mode can advise the model on the third identical failure and
 deny only a fourth identical tool call while allowing the task to continue with
 a different strategy.
 
+### Web Novel Craft
+
+Provides one writer/editor orchestration skill and eight focused skills for web-novel
+development, long-form structure, characters and viewpoint, progression and
+LitRPG systems, Chinese mainstream genres, scene prose, direct writing,
+evidence-based critique, revision, evaluation, and video-evidence research. It
+deliberately excludes scheduling, backlog, team, publishing, provider, and
+engineering-oriented production management. Its shared corpus deeply distills 67
+YouTube and Bilibili sources into timestamped claims, boundaries,
+counterexamples, and executable procedures without distributing raw captions.
+One source retains an explicitly excluded, uncharacterized media-tail gap rather
+than claiming unsupported transcript coverage.
+
 ## External content synchronization
 
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
@@ -139,6 +158,7 @@ plugins/apple-design/
 plugins/codex-sync/
 plugins/film-craft-orchestrator/
 plugins/loop-guard/
+plugins/web-novel-craft/
 sync-sources.toml
 ```
 

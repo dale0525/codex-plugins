@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "corpus_id": "web-novel-craft-v1",
+  "frozen_at": "2026-07-25T00:00:00+08:00",
+  "status": "deep_distilled",
+  "selection_policy": {
+    "goal": "Cover durable prose craft, character and viewpoint control, serialized structure, reader expectation, progression systems, sustainable production, continuity, and Chinese web-novel practice.",
+    "inclusion": [
+      "A primary creator, editor, institution, or clearly identified instructor",
+      "Material that can yield a reusable procedure rather than motivational advice alone",
+      "Distinct coverage not already supplied by a stronger selected source"
+    ],
+    "exclusion": [
+      "Platform-growth tactics whose claims cannot be separated from one opaque recommendation algorithm",
+      "Marketing-only courses, income promises, AI bulk-writing schemes, and unverified reposts",
+      "Videos substantially duplicating a selected source without adding a distinct method"
+    ],
+    "completion_rule": "Every selected source must have complete caption or ASR coverage, full transcript review, timestamped claims, applicability and failure boundaries, and at least one acceptance-testable procedure before the corpus may pass validation."
+  },
+  "sources": [
+    {
+      "id": "cYhjo5O-nfg",
+      "platform": "youtube",
+      "title": "Mastering Style: The Learning and Teaching of Writing",
+      "channel": "Harvard University",
+      "published": "2015-01-28",
+      "duration_sec": 4552,
+      "url": "https://www.youtube.com/watch?v=cYhjo5O-nfg",
+      "coverage": ["prose_style", "reader_model", "clarity", "revision"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "1NCiuI6F5O0",
+      "platform": "youtube",
+      "title": "Lecture #9: Characters — Brandon Sanderson on Writing Science Fiction and Fantasy",
+      "channel": "Brandon Sanderson",
+      "published": "2020-04-17",
+      "duration_sec": 4333,
+      "url": "https://www.youtube.com/watch?v=1NCiuI6F5O0",
+      "coverage": ["character", "motivation", "proactivity", "competence", "limitations"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "zVXFNw-xz3Y",
+      "platform": "youtube",
+      "title": "Lecture #4: Viewpoint and Q&A — Brandon Sanderson on Writing Science Fiction and Fantasy",
+      "channel": "Brandon Sanderson",
+      "published": "2020-02-21",
+      "duration_sec": 3742,
+      "url": "https://www.youtube.com/watch?v=zVXFNw-xz3Y",
+      "coverage": ["viewpoint", "narrative_distance", "multi_pov", "information_control"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "blehVIDyuXk",
+      "platform": "youtube",
+      "title": "Lecture #7: Short Stories — With Special Guest Instructor Mary Robinette Kowal",
+      "channel": "Brandon Sanderson",
+      "published": "2020-03-13",
+      "duration_sec": 2680,
+      "url": "https://www.youtube.com/watch?v=blehVIDyuXk",
+      "coverage": ["story_threads", "conflict", "try_fail", "compression", "openings"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "kJ1lRlh7UQ8",
+      "platform": "youtube",
+      "title": "Virtual Craft Lecture! Matt Bell presents Refuse to Be Done",
+      "channel": "Third Place Books Events",
+      "published": "2024-11-13",
+      "duration_sec": 3282,
+      "url": "https://www.youtube.com/watch?v=kJ1lRlh7UQ8",
+      "coverage": ["drafting", "generative_revision", "narrative_revision", "polish", "research"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "ihd76ijy9LU",
+      "platform": "youtube",
+      "title": "Promise, Progress, Payoff - Plot Theory: Brandon Sanderson's Writing Lecture #2 (2025)",
+      "channel": "Brandon Sanderson",
+      "published": "2025-01-24",
+      "duration_sec": 4565,
+      "url": "https://www.youtube.com/watch?v=ihd76ijy9LU",
+      "coverage": ["promise", "progress", "payoff", "plot", "expectation"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "OVYLtzwxIhQ",
+      "platform": "youtube",
+      "title": "Serialized Fiction: How Authors Are Using The Format",
+      "channel": "Authors Guild",
+      "published": "2022-09-28",
+      "duration_sec": 3705,
+      "url": "https://www.youtube.com/watch?v=OVYLtzwxIhQ",
+      "coverage": ["serialization", "episode_cut", "reader_interaction", "scheduling", "platform_variance"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "DuPNL5MGEEE",
+      "platform": "youtube",
+      "title": "Serialized Fiction: A Storytelling Revolution",
+      "channel": "Novel Marketing",
+      "published": "2025-01-22",
+      "duration_sec": 3348,
+      "url": "https://www.youtube.com/watch?v=DuPNL5MGEEE",
+      "coverage": ["serialization", "release_cadence", "backlog", "feedback_loop", "business_model"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "ucVPku0GmKw",
+      "platform": "youtube",
+      "title": "LitRPG 101 with Matt Dinniman | Writing Masterclass | SFF Addicts Ep. 190",
+      "channel": "FanFiAddict",
+      "published": "2026-02-17",
+      "duration_sec": 2977,
+      "url": "https://www.youtube.com/watch?v=ucVPku0GmKw",
+      "coverage": ["litrpg", "system_rules", "stats", "power_progression", "power_creep", "stakes"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "rSZrvQ09AzU",
+      "platform": "youtube",
+      "title": "Interview with Pirateaba - author of The Wandering Inn (spoiler free)",
+      "channel": "Matt's Fantasy Book Reviews",
+      "published": "2023-10-11",
+      "duration_sec": 2961,
+      "url": "https://www.youtube.com/watch?v=rSZrvQ09AzU",
+      "coverage": ["long_serial", "reader_feedback", "organic_planning", "chapter_experiment", "production"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "hav2P8-GYV4",
+      "platform": "youtube",
+      "title": "Keeping Continuity in your Series",
+      "channel": "Seth Ring",
+      "published": "2025-10-24",
+      "duration_sec": 888,
+      "url": "https://www.youtube.com/watch?v=hav2P8-GYV4",
+      "coverage": ["continuity", "notes", "editorial_pass", "series_memory"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "BV1H8gh6JE2C",
+      "platform": "bilibili",
+      "title": "新人创作如何区分爽点和幻觉？星河对话十组编辑姜茶，送上新人写网文的避坑小tips！",
+      "channel": "起点编辑部",
+      "published": "2026-07-24",
+      "duration_sec": 173.569,
+      "url": "https://www.bilibili.com/video/BV1H8gh6JE2C",
+      "coverage": ["reader_reward", "false_payoff", "editorial_diagnosis"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "BV1Ef4y1S7EU",
+      "platform": "bilibili",
+      "title": "飞羽教你写网文第二期（关于拉仇恨和期待感）",
+      "channel": "编辑飞羽",
+      "published": "2020-04-14",
+      "duration_sec": 1375.41,
+      "url": "https://www.bilibili.com/video/BV1Ef4y1S7EU",
+      "coverage": ["expectation", "antagonistic_pressure", "payoff", "reader_emotion"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "BV1yV411o79T",
+      "platform": "bilibili",
+      "title": "飞羽教你写小说（主线大纲）",
+      "channel": "编辑飞羽",
+      "published": "2020-04-06",
+      "duration_sec": 595.358,
+      "url": "https://www.bilibili.com/video/BV1yV411o79T",
+      "coverage": ["mainline", "outline", "goal_chain", "long_form"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "BV1S64y1k7ef",
+      "platform": "bilibili",
+      "title": "飞羽教你写网文：网文写作大忌，信息跳级",
+      "channel": "编辑飞羽",
+      "published": "2021-06-01",
+      "duration_sec": 482.881,
+      "url": "https://www.bilibili.com/video/BV1S64y1k7ef",
+      "coverage": ["information_order", "reader_context", "setup", "clarity"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "BV1nq4y1T79f",
+      "platform": "bilibili",
+      "title": "飞羽教你写网文【到底什么才叫快节奏】",
+      "channel": "编辑飞羽",
+      "published": "2021-09-02",
+      "duration_sec": 811.583,
+      "url": "https://www.bilibili.com/video/BV1nq4y1T79f",
+      "coverage": ["pacing", "state_change", "information_density", "scene_progress"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    },
+    {
+      "id": "BV1na411v75W",
+      "platform": "bilibili",
+      "title": "如何做好剧情衔接【寻找因果关系】",
+      "channel": "编辑飞羽",
+      "published": "2022-04-16",
+      "duration_sec": 429.731,
+      "url": "https://www.bilibili.com/video/BV1na411v75W",
+      "coverage": ["causality", "scene_transition", "goal_chain", "continuity"],
+      "required_status": "deep_distilled",
+      "status": "deep_distilled"
+    }
+  ],
+  "candidate_queue": [
+    {
+      "id": "k-qY0BhO7H4",
+      "reason": "Useful progression-fantasy experience, but selected Matt Dinniman and Sanderson sources already cover the durable progression questions."
+    },
+    {
+      "id": "GW60j-iKTmE",
+      "reason": "Useful Royal Road launch checklist, but too dependent on one platform's current readership and packaging conventions for the frozen core."
+    },
+    {
+      "id": "1iSg5loXfxc",
+      "reason": "Self-reported Royal Road Rising Stars case study; keep as a volatile platform experiment rather than a durable craft source."
+    }
+  ]
+}

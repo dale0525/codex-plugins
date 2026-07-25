@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "corpus_id": "web-novel-craft-extension-v1",
+  "status": "deep_distilled",
+  "sources": [
+    {
+      "id": "C2suFy1PFXA", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 3678.559,
+      "claims": [
+        {"timestamp_sec": 452, "type": "craft_model", "level": "E1", "paraphrase": "Romance beats are a flexible road map that can expose and repair a slack middle."},
+        {"timestamp_sec": 564, "type": "craft_model", "level": "E1", "paraphrase": "A romance genre contract normally culminates in HEA or HFN rather than an unannounced tragic ending."},
+        {"timestamp_sec": 754, "type": "craft_model", "level": "E1", "paraphrase": "External plot events should be braided into the relationship arc so each line changes the other."},
+        {"timestamp_sec": 1001, "type": "craft_model", "level": "E1", "paraphrase": "A multi-book romance may defer final commitment while still giving each volume a satisfying relationship stage."},
+        {"timestamp_sec": 1602, "type": "demonstration", "level": "E2", "paraphrase": "A worked beat sheet moves through meeting, interest, doubt, falling, retreat, and renewed choice."}
+      ],
+      "applicability": ["Romance-primary serials and clearly labeled romantic subplots."],
+      "non_applicability": ["Tragic love stories or erotica without a relationship-transformation promise."],
+      "failure_boundaries": ["A beat list cannot replace independent goals, causal choices, or genre labeling."],
+      "counterexamples": ["A mystery resolves independently and the leads suddenly announce love in the final chapter."],
+      "ambiguities": ["The workshop paraphrases a craft book and does not establish one mandatory beat timing."],
+      "procedure_ids": ["romance-relationship-arc"]
+    },
+    {
+      "id": "L-_RsshM54o", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 824.0,
+      "claims": [
+        {"timestamp_sec": 35, "type": "craft_model", "level": "E1", "paraphrase": "Slow burn can use many tropes, but immediate certainty weakens the promised gradual development."},
+        {"timestamp_sec": 62, "type": "craft_model", "level": "E1", "paraphrase": "Both partners need goals, fears, flaws, and lives that remain meaningful outside the romance."},
+        {"timestamp_sec": 174, "type": "demonstration", "level": "E2", "paraphrase": "Near contact and interrupted intimacy can delay payoff while still making yearning visible."},
+        {"timestamp_sec": 279, "type": "craft_model", "level": "E1", "paraphrase": "Each advance or retreat must add new consequences instead of replaying the same misunderstanding."},
+        {"timestamp_sec": 347, "type": "craft_model", "level": "E1", "paraphrase": "A lie or secret should cause a consequence, dark turn, and changed recovery rather than indefinite stalling."}
+      ],
+      "applicability": ["Gradual romance arcs where anticipation is part of the reader contract."],
+      "non_applicability": ["Stories intentionally promising immediate attraction and rapid commitment."],
+      "failure_boundaries": ["Slow pacing without new knowledge, risk, or choice is stagnation."],
+      "counterexamples": ["The same overheard sentence causes five separations while neither character changes strategy."],
+      "ambiguities": ["The source offers no universal inciting, midpoint, or confession position."],
+      "procedure_ids": ["romance-relationship-arc"]
+    },
+    {
+      "id": "GNR0g60m0EI", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 975.279,
+      "claims": [
+        {"timestamp_sec": 21, "type": "craft_model", "level": "E1", "paraphrase": "Physical clues connect a person, place, and time but still require a documented inference."},
+        {"timestamp_sec": 120, "type": "craft_model", "level": "E1", "paraphrase": "A sudden emotional or behavioral change needs a causal anchor before it supports suspicion."},
+        {"timestamp_sec": 217, "type": "craft_model", "level": "E1", "paraphrase": "Unexpected knowledge becomes useful when the story can test where and when it was acquired."},
+        {"timestamp_sec": 293, "type": "craft_model", "level": "E1", "paraphrase": "Testimony may be mistaken or deceptive and therefore needs cross-checking against independent material."},
+        {"timestamp_sec": 537, "type": "craft_model", "level": "E1", "paraphrase": "Missing emotion or knowledge changes probability but cannot by itself prove guilt."}
+      ],
+      "applicability": ["Fair-play mystery clue planning and revision."],
+      "non_applicability": ["Dream logic or openly non-rational narratives that reject solvable inference."],
+      "failure_boundaries": ["Counting clues per chapter does not guarantee that a major inference is supported."],
+      "counterexamples": ["A suspect is convicted solely because they did not cry at the expected moment."],
+      "ambiguities": ["The proposed clue categories are a planning aid rather than an exhaustive ontology."],
+      "procedure_ids": ["mystery-fair-play-ledger"]
+    },
+    {
+      "id": "GwxFM0oHhfA", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 820.279,
+      "claims": [
+        {"timestamp_sec": 0.2, "type": "craft_model", "level": "E1", "paraphrase": "A mystery solution can be designed as motive A plus connecting evidence B yielding conclusion C."},
+        {"timestamp_sec": 177, "type": "craft_model", "level": "E1", "paraphrase": "A twist reverses expectation while preserving a causal reading of the events already shown."},
+        {"timestamp_sec": 196, "type": "practitioner_experience", "level": "E1", "paraphrase": "A forced twist usually fails because earlier events were not always moving toward that result."},
+        {"timestamp_sec": 286, "type": "craft_model", "level": "E1", "paraphrase": "Strong clues and behaviors support an innocent reading before the reveal and a guilty reading after it."},
+        {"timestamp_sec": 767, "type": "demonstration", "level": "E2", "paraphrase": "Working outward from motive into a character network can generate suspects and connective evidence."}
+      ],
+      "applicability": ["Mystery reveals and retrospective-fairness audits."],
+      "non_applicability": ["Stories where surprise is not a promised experience."],
+      "failure_boundaries": ["A twist is not mandatory and cannot substitute for character or entertainment."],
+      "counterexamples": ["The culprit is a new twin introduced during the explanation with no prior trace."],
+      "ambiguities": ["The interview describes one practitioner's planning process rather than a universal method."],
+      "procedure_ids": ["mystery-fair-play-ledger"]
+    },
+    {
+      "id": "nj9MAv9INCY", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 7046.54,
+      "claims": [
+        {"timestamp_sec": 221, "type": "craft_model", "level": "E1", "paraphrase": "A comic beat often works by establishing and then interrupting a recognizable pattern."},
+        {"timestamp_sec": 513, "type": "craft_model", "level": "E1", "paraphrase": "A tag is a short additional beat after the main joke has already landed."},
+        {"timestamp_sec": 1510, "type": "craft_model", "level": "E1", "paraphrase": "A setup without a legible punchline leaves the comic premise unresolved."},
+        {"timestamp_sec": 2261, "type": "craft_model", "level": "E1", "paraphrase": "Comedy can create an assumption in the setup and shatter it at the payoff."},
+        {"timestamp_sec": 4168, "type": "demonstration", "level": "E2", "paraphrase": "A usable analogy requires both sides to remain recognizable and logically decodable."}
+      ],
+      "applicability": ["Comic scenes, narrator observations, tags, callbacks, and revision."],
+      "non_applicability": ["Direct adoption of live-stage laugh counts as prose quality metrics."],
+      "failure_boundaries": ["A joke formula cannot authorize a voice or erase character consequence."],
+      "counterexamples": ["The narrator explains why a random comparison is funny after no character reacts."],
+      "ambiguities": ["Several named comedy rules are practitioner heuristics without statistical validation."],
+      "procedure_ids": ["comedy-subtext-scene"]
+    },
+    {
+      "id": "hMMpmlraoDo", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 881.869,
+      "claims": [
+        {"timestamp_sec": 21, "type": "craft_model", "level": "E1", "paraphrase": "Subtext is meaning operating beneath literal dialogue rather than unexplained vagueness."},
+        {"timestamp_sec": 353, "type": "demonstration", "level": "E2", "paraphrase": "A polite refusal can encode relationship history and a conflict that neither speaker names."},
+        {"timestamp_sec": 451, "type": "demonstration", "level": "E2", "paraphrase": "An interrogation question can function as an accusation through context and information advantage."},
+        {"timestamp_sec": 523, "type": "demonstration", "level": "E2", "paraphrase": "A concrete object can carry an unspoken relationship crisis when the scene supplies enough context."},
+        {"timestamp_sec": 588, "type": "craft_model", "level": "E1", "paraphrase": "Omitting explicit explanation can invite inference only when observable evidence remains above the surface."}
+      ],
+      "applicability": ["Dialogue where power, history, or concealed goals matter."],
+      "non_applicability": ["Essential factual instructions that must be stated plainly."],
+      "failure_boundaries": ["Silence and fatigue cannot be assigned one hidden meaning without causal support."],
+      "counterexamples": ["Every ordinary greeting is treated as a coded threat although the scene offers no evidence."],
+      "ambiguities": ["Example interpretation depends on the supplied scene context, not isolated lines."],
+      "procedure_ids": ["comedy-subtext-scene"]
+    },
+    {
+      "id": "vnP2wpE2AOQ", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 3362.32,
+      "claims": [
+        {"timestamp_sec": 374, "type": "craft_model", "level": "E1", "paraphrase": "A nine-point map can use roughly one-eighth intervals as a flexible diagnostic rather than a mandate."},
+        {"timestamp_sec": 624, "type": "craft_model", "level": "E1", "paraphrase": "Character goal, conflict, and growth provide the causal engine for a novel's middle."},
+        {"timestamp_sec": 1027, "type": "craft_model", "level": "E1", "paraphrase": "The inciting event should create the central conflict and an actionable story goal."},
+        {"timestamp_sec": 1637, "type": "craft_model", "level": "E1", "paraphrase": "A midpoint insight can expose the truth before the protagonist is ready to abandon the old belief."},
+        {"timestamp_sec": 2137, "type": "craft_model", "level": "E1", "paraphrase": "Late escalation should not depend on an unprepared new savior, rule, or ability."}
+      ],
+      "applicability": ["Diagnosing long-form middles, mode repetition, and subplot convergence."],
+      "non_applicability": ["Mechanical enforcement of one percentage map across negative arcs or ensembles."],
+      "failure_boundaries": ["Moving a scene to a target percentage does not repair a missing cause and consequence."],
+      "counterexamples": ["Every middle chapter repeats travel, attack, victory, and reset with larger numbers."],
+      "ambiguities": ["The source's position percentages are coarse teaching landmarks."],
+      "procedure_ids": ["long-form-quarter-audit"]
+    },
+    {
+      "id": "OlwQ6xP8FRs", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 862.399,
+      "claims": [
+        {"timestamp_sec": 90, "type": "craft_model", "level": "E1", "paraphrase": "An ending that fails often reveals a structural problem planted in earlier scenes."},
+        {"timestamp_sec": 129, "type": "craft_model", "level": "E1", "paraphrase": "Opening images, questions, and goals can provide the seeds that make closure feel prepared."},
+        {"timestamp_sec": 191, "type": "craft_model", "level": "E1", "paraphrase": "At the climax the protagonist obtains, loses, or deliberately relinquishes the central goal."},
+        {"timestamp_sec": 272, "type": "demonstration", "level": "E2", "paraphrase": "Tracing inciting and major plot points tests whether the ending resolves the same causal and thematic spine."},
+        {"timestamp_sec": 536, "type": "craft_model", "level": "E1", "paraphrase": "A climax requires goal, conflict, and consequential action rather than explanatory narration alone."}
+      ],
+      "applicability": ["Ending diagnosis, closure, character-arc, and setup-payoff repair."],
+      "non_applicability": ["Stories intentionally structured as fragments with no conventional closure promise."],
+      "failure_boundaries": ["Mirroring the opening cannot compensate for an unrelated climax."],
+      "counterexamples": ["A narrator explains the theme while another character solves the central problem offstage."],
+      "ambiguities": ["Chiasmus and mirrored images are options, not required forms."],
+      "procedure_ids": ["long-form-quarter-audit"]
+    },
+    {
+      "id": "1Fkfx70_l_k", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 3062.319,
+      "claims": [
+        {"timestamp_sec": 57, "type": "craft_model", "level": "E1", "paraphrase": "The final quarter is often near one-fifth of a novel but the proportion remains approximate."},
+        {"timestamp_sec": 167, "type": "craft_model", "level": "E1", "paraphrase": "Preparation gathers resources, knowledge, allies, and commitments needed for the climax."},
+        {"timestamp_sec": 555, "type": "craft_model", "level": "E1", "paraphrase": "The approach to confrontation should create resistance and allow secondary characters to pay costs."},
+        {"timestamp_sec": 854, "type": "craft_model", "level": "E1", "paraphrase": "The confrontation presents the most demanding form of the story's central opposition."},
+        {"timestamp_sec": 1827, "type": "craft_model", "level": "E1", "paraphrase": "A sacrifice can prove the protagonist's growth by making the final choice costly and irreversible."}
+      ],
+      "applicability": ["Planning or diagnosing the climax and aftermath of a long novel."],
+      "non_applicability": ["Treating every story as a showdown with the same six separate scenes."],
+      "failure_boundaries": ["Approximate proportions and stage names cannot override the story's causal needs."],
+      "counterexamples": ["A newly introduced artifact defeats the antagonist before the protagonist must choose anything."],
+      "ambiguities": ["Frequency statements in the teaching are practitioner estimates, not corpus statistics."],
+      "procedure_ids": ["long-form-quarter-audit"]
+    },
+    {
+      "id": "q5viZmPV-so", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 1618.64,
+      "claims": [
+        {"timestamp_sec": 49, "type": "craft_model", "level": "E1", "paraphrase": "Historical-research depth should increase as a story depends more directly on real people and events."},
+        {"timestamp_sec": 177, "type": "practitioner_experience", "level": "E1", "paraphrase": "Writers may compress dates but should record the divergence instead of silently treating it as fact."},
+        {"timestamp_sec": 370, "type": "craft_model", "level": "E1", "paraphrase": "Research should build empathy and usable scene conditions rather than an encyclopedia dump."},
+        {"timestamp_sec": 625, "type": "craft_model", "level": "E1", "paraphrase": "A practical path moves from broad orientation to books, local archives, and knowledgeable people."},
+        {"timestamp_sec": 760, "type": "craft_model", "level": "E1", "paraphrase": "Primary artifacts and scholarly secondary work should be cross-read because every source has a perspective."}
+      ],
+      "applicability": ["Historical fiction research, timelines, and scene evidence."],
+      "non_applicability": ["Using a search snippet or children's overview as final authority."],
+      "failure_boundaries": ["Primary sources are not automatically unbiased or representative."],
+      "counterexamples": ["A modern institution or phrase resolves a scene decades before it existed."],
+      "ambiguities": ["Exact source quality depends on field, archive, language, and contested history."],
+      "procedure_ids": ["historical-scene-evidence"]
+    },
+    {
+      "id": "BV1mGoLYuE7i", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 1142.87,
+      "claims": [
+        {"timestamp_sec": 435, "type": "practitioner_experience", "level": "E1", "paraphrase": "The speaker uses a five-part first-chapter information checklist as an opening diagnostic."},
+        {"timestamp_sec": 455, "type": "practitioner_experience", "level": "E1", "paraphrase": "Background can be compressed when only a small amount is required for the reader's first decision."},
+        {"timestamp_sec": 470, "type": "practitioner_experience", "level": "E1", "paraphrase": "A crisis and a transmigration event may change order if reader orientation remains clear."},
+        {"timestamp_sec": 485, "type": "craft_model", "level": "E1", "paraphrase": "After displacement, the protagonist needs a thought chain that supports the next deliberate action."},
+        {"timestamp_sec": 500, "type": "craft_model", "level": "E1", "paraphrase": "A system or advantage is clearer when its usable function appears before a goal depends on it."}
+      ],
+      "applicability": ["Chinese web-novel opening orientation and first-action diagnosis."],
+      "non_applicability": ["Treating one speaker's word counts as platform rules."],
+      "failure_boundaries": ["Checking five labels cannot rescue an opening with no causal action."],
+      "counterexamples": ["The opening lists world background, crisis, system, and goal but the protagonist never chooses."],
+      "ambiguities": ["The recommended chapter length is personal capacity guidance rather than current official policy."],
+      "procedure_ids": ["chinese-opening-gate"]
+    },
+    {
+      "id": "BV1JaZ2YDEpo", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 50.72,
+      "claims": [
+        {"timestamp_sec": 4.8, "type": "platform_claim", "level": "E1", "paraphrase": "The speaker says a rapid page flip does not count the same as meaningful reading for retention."},
+        {"timestamp_sec": 11.68, "type": "platform_claim", "level": "E1", "paraphrase": "A spoken dwell-time range is presented as a historical platform heuristic, not an official durable threshold."},
+        {"timestamp_sec": 14.88, "type": "platform_claim", "level": "E1", "paraphrase": "The account says recent consumption history affected whether a reader qualified for the metric."},
+        {"timestamp_sec": 37.68, "type": "platform_claim", "level": "E1", "paraphrase": "Front-facing reader counts may mix behavior that the internal metric treats differently."},
+        {"timestamp_sec": 45.68, "type": "platform_claim", "level": "E1", "paraphrase": "Operational decisions should use current verified retention definitions rather than public counts alone."}
+      ],
+      "applicability": ["Designing a dated retention hypothesis that will be checked against current official evidence."],
+      "non_applicability": ["Hard-coding the 2025 spoken timing or eligibility account into a production rule."],
+      "failure_boundaries": ["A short historical clip cannot establish current recommendation causality."],
+      "counterexamples": ["A writer pads pages merely to maximize an outdated dwell-time threshold."],
+      "ambiguities": ["All platform statements are second-hand historical claims from April 2025."],
+      "procedure_ids": ["platform-claim-filter"]
+    },
+    {
+      "id": "BV1EyxUetEh5", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 2417.83,
+      "claims": [
+        {"timestamp_sec": 13, "type": "practitioner_experience", "level": "E1", "paraphrase": "The speaker recommends checking a complete causal story before choosing the opening cut point."},
+        {"timestamp_sec": 480, "type": "craft_model", "level": "E1", "paraphrase": "An opening event should reveal character, urgent danger, or present desire and create an emotional response."},
+        {"timestamp_sec": 720, "type": "craft_model", "level": "E1", "paraphrase": "Emotional beats need an event and a visible character response rather than summary alone."},
+        {"timestamp_sec": 960, "type": "demonstration", "level": "E2", "paraphrase": "An argument works as a hook only when it also conveys relationship, history, world, or future pressure."},
+        {"timestamp_sec": 1200, "type": "practitioner_experience", "level": "E1", "paraphrase": "First-chapter information should be necessary and scannable, while numerical limits remain personal heuristics."},
+        {"timestamp_sec": 1800, "type": "craft_model", "level": "E1", "paraphrase": "Complex world rules can emerge through viewpoint events and costs instead of an opening encyclopedia."}
+      ],
+      "applicability": ["Opening and golden-three-chapter diagnosis, especially for Chinese female-audience serials."],
+      "non_applicability": ["Treating three named characters, five hundred words, or three emotions as Jinjiang policy."],
+      "failure_boundaries": ["Dense information without protagonist action or emotional consequence remains inert."],
+      "counterexamples": ["Seven named side characters and a world encyclopedia precede the protagonist's first decision."],
+      "ambiguities": ["Local ASR has homophone risk and about five seconds of uncovered media tail."],
+      "procedure_ids": ["chinese-opening-gate"]
+    },
+    {
+      "id": "XY5Wncq5vAE", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 2716.579,
+      "claims": [
+        {"timestamp_sec": 148, "type": "demonstration", "level": "E2", "paraphrase": "A sandbox demonstration initializes twenty-five agents from compact identity and relationship descriptions."},
+        {"timestamp_sec": 184, "type": "demonstration", "level": "E2", "paraphrase": "Natural-language actions are mapped into game actions that update object state in the environment."},
+        {"timestamp_sec": 300, "type": "craft_model", "level": "E1", "paraphrase": "The agent loop plans a day, acts, reflects, and replans when events make the schedule obsolete."},
+        {"timestamp_sec": 621, "type": "craft_model", "level": "E1", "paraphrase": "Memory retrieval combines recency, importance, and relevance rather than relying on context length alone."},
+        {"timestamp_sec": 995, "type": "demonstration", "level": "E2", "paraphrase": "Observed failures include missed memories and invented details, so the architecture is not a factual database."}
+      ],
+      "applicability": ["Designing sourced character memory, reflection, planning, and candidate simulations."],
+      "non_applicability": ["Claiming deterministic behavior, factual recall, or proven novel-scale quality."],
+      "failure_boundaries": ["The full twenty-five-agent experiment was not repeatedly rerun and paths can diverge."],
+      "counterexamples": ["A reflection invents an announcement and then the draft treats it as a canonical event."],
+      "ambiguities": ["Automatic captions misrecognize several technical terms; numerical results need the paper for publication use."],
+      "procedure_ids": ["ai-long-form-writing-loop"]
+    },
+    {
+      "id": "6pSW3hEOxf4", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 955.079,
+      "claims": [
+        {"timestamp_sec": 0, "type": "business_claim", "level": "E1", "paraphrase": "The presentation reports that ordinary single-pass outputs often stop near two thousand words."},
+        {"timestamp_sec": 136, "type": "craft_model", "level": "E1", "paraphrase": "AgentWrite separates planning with segment budgets, serial writing, and later validation."},
+        {"timestamp_sec": 197, "type": "demonstration", "level": "E2", "paraphrase": "A reported demonstration expands output length from about two thousand toward twenty thousand words."},
+        {"timestamp_sec": 358, "type": "business_claim", "level": "E1", "paraphrase": "The training data contains fewer than one hundred samples near twenty thousand words."},
+        {"timestamp_sec": 398, "type": "business_claim", "level": "E1", "paraphrase": "The presentation reports that many comparison models miss requested lengths above a few thousand words."}
+      ],
+      "applicability": ["Outline-conditioned segmented drafting with explicit validation."],
+      "non_applicability": ["Treating output length as factual consistency, prose quality, or commercial viability."],
+      "failure_boundaries": ["Serial generation can accumulate drift, repetition, and boundary discontinuity."],
+      "counterexamples": ["A twenty-thousand-word output meets length while repeating the same event ten times."],
+      "ambiguities": ["The video reports paper results without independent reproduction or per-prompt success rates."],
+      "procedure_ids": ["ai-long-form-writing-loop"]
+    },
+    {
+      "id": "FPIffi9Dw60", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 898.56,
+      "claims": [
+        {"timestamp_sec": 126, "type": "craft_model", "level": "E1", "paraphrase": "Narrative planning can model author goals alongside character intentions, beliefs, and possible mistaken beliefs."},
+        {"timestamp_sec": 226, "type": "demonstration", "level": "E2", "paraphrase": "A worked example shows that multiple action plans can reach the same terminal story condition."},
+        {"timestamp_sec": 315, "type": "business_claim", "level": "E1", "paraphrase": "Belief updates can expand the search graph dramatically and motivate cheaper planning heuristics."},
+        {"timestamp_sec": 404, "type": "demonstration", "level": "E2", "paraphrase": "A structured prompt describes task, state, history, candidate actions, and a machine-readable response."},
+        {"timestamp_sec": 551, "type": "demonstration", "level": "E2", "paraphrase": "Reported benchmark domains vary widely, so one planning heuristic does not dominate every story environment."}
+      ],
+      "applicability": ["Generating and scoring candidate beats against state, belief, and intention constraints."],
+      "non_applicability": ["Using search distance as proof of dramatic or literary quality."],
+      "failure_boundaries": ["Prompt mapping, latency, and unpredictable action interpretation can invalidate a plan."],
+      "counterexamples": ["The shortest state path reaches the ending but violates the protagonist's established motive."],
+      "ambiguities": ["Claims rely on automatic-caption explanation and were not checked against code or paper."],
+      "procedure_ids": ["ai-long-form-writing-loop"]
+    },
+    {
+      "id": "trfUBIDeI1Y", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 356.58,
+      "claims": [
+        {"timestamp_sec": 42, "type": "craft_model", "level": "E1", "paraphrase": "Reference-free judging can use direct rubric scoring or pairwise comparison as distinct tasks."},
+        {"timestamp_sec": 67, "type": "demonstration", "level": "E2", "paraphrase": "A direct evaluator assigns labels against stated clarity and coherence criteria."},
+        {"timestamp_sec": 95, "type": "demonstration", "level": "E2", "paraphrase": "Pairwise evaluation compares two outputs and can aggregate comparisons into a ranking."},
+        {"timestamp_sec": 234, "type": "craft_model", "level": "E1", "paraphrase": "Known judge risks include position preference, verbosity preference, and favoring outputs from the same model family."},
+        {"timestamp_sec": 250, "type": "craft_model", "level": "E1", "paraphrase": "Swapping candidate order and using a blinded independent model can expose or reduce some judge bias."}
+      ],
+      "applicability": ["Calibrated draft review that remains subordinate to hard checks and human editing."],
+      "non_applicability": ["Automatic publication approval or replacing a human editor."],
+      "failure_boundaries": ["No complete gold-standard accuracy, significance, or cost evidence is provided."],
+      "counterexamples": ["A verbose self-generated chapter wins every comparison despite introducing a timeline contradiction."],
+      "ambiguities": ["The source is a short product explanation with automatic captions."],
+      "procedure_ids": ["writing-critique-calibration"]
+    },
+    {
+      "id": "Ear3bOk27C4", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 3443.079,
+      "claims": [
+        {"timestamp_sec": 320, "type": "business_claim", "level": "E1", "paraphrase": "Voice, translation, and textual generation involve separable permissions and commercial interests."},
+        {"timestamp_sec": 700, "type": "opinion", "level": "E1", "paraphrase": "AI translation should receive human editing and factual review, with extra caution in high-risk subjects."},
+        {"timestamp_sec": 1527, "type": "business_claim", "level": "E1", "paraphrase": "Some discussed publishing clauses permit internal AI uses while excluding generative uses."},
+        {"timestamp_sec": 1749, "type": "practitioner_experience", "level": "E1", "paraphrase": "Publishing workflows can map AI use across editorial, design, marketing, and supply-chain steps with approval points."},
+        {"timestamp_sec": 2787, "type": "opinion", "level": "E1", "paraphrase": "The organization advocates permission, consent, compensation, and disclosure while leaving authors individual choices."}
+      ],
+      "applicability": ["Building a rights, contract, consent, and disclosure checklist for publishing."],
+      "non_applicability": ["Treating an advocacy webinar as legal advice or a binding policy in every jurisdiction."],
+      "failure_boundaries": ["Provider controls, contracts, law, and organization positions can change after the recording."],
+      "counterexamples": ["Owning text rights is assumed to grant voice-cloning and model-training permission."],
+      "ambiguities": ["Legal and numerical claims require current primary sources and jurisdiction-specific review."],
+      "procedure_ids": ["ai-originality-and-source-boundary"]
+    },
+    {
+      "id": "C8QC77Lok18", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 888.8,
+      "claims": [
+        {"timestamp_sec": 31, "type": "opinion", "level": "E1", "paraphrase": "The novelist personally refuses AI-written prose and does not present that choice as a universal rule."},
+        {"timestamp_sec": 85, "type": "practitioner_experience", "level": "E1", "paraphrase": "Her stated uses are research leads, grammar cleanup of dictation, and summarizing brainstorming material."},
+        {"timestamp_sec": 139, "type": "practitioner_experience", "level": "E1", "paraphrase": "Research answers can hallucinate and medical or other consequential facts require independent verification."},
+        {"timestamp_sec": 418, "type": "practitioner_experience", "level": "E1", "paraphrase": "A grammar-only instruction can still change wording and punctuation, so a human must inspect the diff."},
+        {"timestamp_sec": 648, "type": "practitioner_experience", "level": "E1", "paraphrase": "Summarizing a long voice transcript saved this author time but remained imperfect and case-specific."}
+      ],
+      "applicability": ["Designing explicit task boundaries and human review for an author's own workflow."],
+      "non_applicability": ["Claiming these uses are legally safe, private, or efficient for every provider and author."],
+      "failure_boundaries": ["A narrow prompt does not guarantee that the model leaves creative wording untouched."],
+      "counterexamples": ["A grammar pass silently rewrites the narrator's diction and is accepted without diff review."],
+      "ambiguities": ["Tool versions, provider data policies, and comparison baselines are not fully specified."],
+      "procedure_ids": ["ai-originality-and-source-boundary"]
+    },
+    {
+      "id": "FyRNX51MI3g", "status": "deep_distilled", "full_review_complete": true, "reviewed_to_sec": 794.27,
+      "claims": [
+        {"timestamp_sec": 294, "type": "craft_model", "level": "E1", "paraphrase": "The speaker argues that fiction depends on concrete detail linking logical events with felt experience."},
+        {"timestamp_sec": 390, "type": "demonstration", "level": "E2", "paraphrase": "A single experiment moves from a supplied idea to a weak draft, human correction, and model continuation."},
+        {"timestamp_sec": 481, "type": "practitioner_experience", "level": "E1", "paraphrase": "Useful AI collaboration still requires a writer who can identify what failed and specify a repair."},
+        {"timestamp_sec": 520, "type": "opinion", "level": "E1", "paraphrase": "The speaker expects faster cycles but also raises originality, copying, and evaluation-system concerns."},
+        {"timestamp_sec": 680, "type": "opinion", "level": "E1", "paraphrase": "The speaker predicts stronger future competition while preserving human writing as an expressive act."}
+      ],
+      "applicability": ["Diagnosing abstraction, generic prose, and missing human judgment in Chinese AI-assisted drafting."],
+      "non_applicability": ["Generalizing one uncontrolled experiment to model quality or fixed productivity gains."],
+      "failure_boundaries": ["The caption track ends about 185 seconds before media duration, so no claims may be made about that gap."],
+      "counterexamples": ["A generic continuation is accepted because it is grammatical although its details do not cause one another."],
+      "ambiguities": ["Speech is reviewed through 794.27 seconds; 794.27 to 979 seconds remains explicitly uncovered."],
+      "procedure_ids": ["ai-long-form-writing-loop"]
+    }
+  ]
+}

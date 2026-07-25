@@ -1,0 +1,313 @@
+{
+  "schema_version": 1,
+  "corpus_id": "web-novel-craft-v1",
+  "procedures": [
+    {
+      "id": "classic-clarity-pass",
+      "source_ids": ["cYhjo5O-nfg"],
+      "trigger": "A reader cannot summarize a chapter even though every sentence appears grammatical.",
+      "inputs": ["draft chapter", "intended reader profile", "cold reader"],
+      "steps": [
+        {"action": "Write one sentence naming the chapter's actor, action, and consequence.", "check": "The sentence describes a world event rather than what the author plans to discuss."},
+        {"action": "Delete apologies, throat-clearing, repeated summaries, and empty controversy language.", "check": "No necessary evidence or uncertainty disappears."},
+        {"action": "Rewrite avoidable nominalizations and undefined jargon as concrete actors, verbs, images, or functions.", "check": "The cold reader can paraphrase who did what and why it matters."},
+        {"action": "Read aloud, wait if possible, then obtain a fresh read.", "check": "Remaining confusion is recorded at an exact line rather than defended from author knowledge."}
+      ],
+      "output": "A clearer chapter plus a list of unresolved knowledge gaps.",
+      "failure_signals": ["The revision becomes flat or falsely certain", "Every fact expands into a scene"],
+      "repair": ["Restore warranted uncertainty", "Use concise summary for low-choice transitions"],
+      "acceptance": ["A cold reader identifies actor, action, consequence, and current question"],
+      "example": "Replace an abstract paragraph about institutional destabilization with the official who closes the gate and the queue that forms.",
+      "counterexample": "Forcing a known-actor sentence when agency is genuinely unknown changes the claim and fails the pass."
+    },
+    {
+      "id": "character-arc-diagnostic",
+      "source_ids": ["1NCiuI6F5O0"],
+      "trigger": "A major character feels bland, annoying, passive, inconsistent, or interchangeable.",
+      "inputs": ["character scenes", "plot role", "relationship map"],
+      "steps": [
+        {"action": "Score and cite scene evidence for empathy, rooting interest, and visible progress.", "check": "Each score has a concrete action or reader-facing fact."},
+        {"action": "Map likeability, proactivity, and competence at entry and planned exit.", "check": "Static design is explicit or at least one intentional movement exists."},
+        {"action": "Write present desire, reason now, characteristic strategy, flaw, limitation, and bounded competence.", "check": "Every major decision can be explained without biography-only assertions."},
+        {"action": "Test voice after removing names and catchphrases.", "check": "Notice, syntax, metaphor, and evasion still identify the speaker."}
+      ],
+      "output": "A character diagnosis, revised motivation chain, arc turns, and voice rules.",
+      "failure_signals": ["Motivation repeats one slogan", "Competence solves every domain", "A vivid side character promises more than the outline pays"],
+      "repair": ["Add incompatible obligations and cost", "Bound competence and add counters", "Reduce emphasis or redesign the role"],
+      "acceptance": ["A reader explains what the character wants, why, how they act, and what is changing"],
+      "example": "An abrasive expert earns rooting interest through a clear rescue goal, demonstrated skill, and a costly blind spot.",
+      "counterexample": "Adding a pet-saving beat while leaving all later decisions arbitrary produces a patch, not a character."
+    },
+    {
+      "id": "pov-subplot-diagnostic",
+      "source_ids": ["zVXFNw-xz3Y"],
+      "trigger": "Readers lose track of viewpoint or call a thread an unrelated side quest.",
+      "inputs": ["chapter text", "POV rule", "character promises", "adjacent chapter summaries"],
+      "steps": [
+        {"action": "Mark each scene's viewpoint, immediate goal, knowledge boundary, and narrative distance.", "check": "No private fact leaks across minds without an established narrator."},
+        {"action": "For every subplot, record its promise, progress signal, and point of contact with the mainline.", "check": "The thread either changes the mainline or is complete enough to justify independent attention."},
+        {"action": "Inspect each twist and hook for added consequence.", "check": "It enlarges conflict or meaning rather than revoking a promise or cutting arbitrarily."}
+      ],
+      "output": "POV consistency table, subplot status, and repaired chapter hooks.",
+      "failure_signals": ["Viewpoint withholds obvious knowledge", "Switches spend more time reorienting than progressing", "Hook resolves as trivial"],
+      "repair": ["Change POV or disclose knowledge honestly", "Consolidate switches", "Move the cut to a consequential fact or choice"],
+      "acceptance": ["A reader always knows whose experience filters the scene and why the subplot matters"],
+      "example": "Opening a door onto a supposedly dead parent creates inferable consequence and a valid hook.",
+      "counterexample": "Opening a door and cutting before an ordinary food delivery is interruption without story value."
+    },
+    {
+      "id": "nested-thread-box",
+      "source_ids": ["blehVIDyuXk"],
+      "trigger": "A short story or serial chapter sprawls, ends flatly, or leaves local questions unpaid.",
+      "inputs": ["draft unit", "thread list", "target emotional effect"],
+      "steps": [
+        {"action": "Classify each active thread by milieu, inquiry, character, or event and state its closure condition.", "check": "Each thread has one observable start and end."},
+        {"action": "Order openings and close inner threads before outer threads unless a deliberate exception is recorded.", "check": "No local question remains accidentally buried under a larger ending."},
+        {"action": "Make each attempt yield yes-but, no-and, or later earned success.", "check": "Every action has a consequence and repeated attempts change strategy or cost."},
+        {"action": "Mirror opening person, place, and genre mood at the ending.", "check": "The repetition makes a changed state visible rather than copying the opening."}
+      ],
+      "output": "A bounded thread map and revised opening, middle turns, and ending.",
+      "failure_signals": ["Too many people or locations for the unit", "The goal changes without closing the initial question"],
+      "repair": ["Split the unit or remove threads", "Foreshadow the change and explicitly settle or transform the original promise"],
+      "acceptance": ["Every local thread is closed, transformed, or intentionally carried with a ledger entry"],
+      "example": "A chapter opens with entering a forbidden archive, nests a question and identity choice, then closes choice, answer, and exit in reverse order.",
+      "counterexample": "A murder inquiry turns into romance and ends without identifying what happened to the victim."
+    },
+    {
+      "id": "three-pass-revision",
+      "source_ids": ["kJ1lRlh7UQ8"],
+      "trigger": "A draft is incomplete, structurally uncertain, or being polished before its story is understood.",
+      "inputs": ["draft", "premise hypothesis", "publication state", "deadline constraints"],
+      "steps": [
+        {"action": "Finish a generative draft through concrete actions, choices, and provisional research markers.", "check": "The ending and major causal discoveries exist, even if prose is rough."},
+        {"action": "Take distance, then perform narrative revision on premise, order, causality, missing scenes, and cuts.", "check": "Each scene changes state and makes another scene necessary."},
+        {"action": "Run publication polish for clarity, continuity, rhythm, format, and read-aloud defects.", "check": "No line edit conceals an unresolved structural note."}
+      ],
+      "output": "A revised manuscript with pass-specific decision notes.",
+      "failure_signals": ["Endless first chapters", "Research never becomes story action", "Polished scenes still have no purpose"],
+      "repair": ["Write visible island scenes and derive bridges from planted necessity", "Return to narrative pass and cut or reposition the scene"],
+      "acceptance": ["The work has a complete causal shape, then a distinct polish record and clean read-aloud"],
+      "example": "A rough rescue plot reveals that the real story is a betrayal; the second pass restructures around the betrayal before sentences are polished.",
+      "counterexample": "Copyediting chapter one for months while the protagonist and ending remain unknown reverses the decision order."
+    },
+    {
+      "id": "promise-progress-payoff-audit",
+      "source_ids": ["ihd76ijy9LU"],
+      "trigger": "The middle feels stalled, the ending feels arbitrary, or readers expected a different book.",
+      "inputs": ["opening", "outline or manuscript", "genre and tone signals", "reader feedback"],
+      "steps": [
+        {"action": "Inventory promises created by tone, character, main conflict, format, questions, and attention.", "check": "Each promise states a reader-facing expectation rather than author intention."},
+        {"action": "For every promise, list visible progress signals and current status.", "check": "A reader can point to changed evidence, not merely more pages."},
+        {"action": "Design payoff as prepared consequence with a surprising form.", "check": "Retrospective evidence supports it and the magnitude matches waiting and cost."},
+        {"action": "Repair mismatches at the cheapest truthful layer.", "check": "Opening promise, middle progress, and ending now describe the same evolving experience."}
+      ],
+      "output": "Promise ledger, stalled-debt list, and repair plan.",
+      "failure_signals": ["New promises open faster than old ones progress", "Twist cancels setup", "Progress lacks signposts"],
+      "repair": ["Merge, pay, or visibly renegotiate debts", "Add preparatory evidence", "Show measurable clues, trust, resource, or decision change"],
+      "acceptance": ["Readers can name what was promised, how it moved, and why the payoff follows"],
+      "example": "A mystery tracks eliminated suspects and a missing clue before the revelation reinterprets all three.",
+      "counterexample": "A hidden power appears only in the climax and solves a conflict for which no rule or desire prepared the reader."
+    },
+    {
+      "id": "episodic-opening-and-hook",
+      "source_ids": ["OVYLtzwxIhQ"],
+      "trigger": "A web novel's opening preview or episode endings fail to create a clear, honest reason to keep reading.",
+      "inputs": ["premise", "target reader", "opening pages", "three to five drafted episodes"],
+      "steps": [
+        {"action": "Write one promise shared by cover, blurb, tags, and opening.", "check": "A cold reader names the same expected experience."},
+        {"action": "Place an observable disruption, desire, or question in the preview.", "check": "The preview offers story movement rather than only background."},
+        {"action": "End episodes on consequential choices, discoveries, or changed risk.", "check": "The following episode advances consequence instead of resolving a fake interruption."},
+        {"action": "Classify reader reactions before changing the text.", "check": "Repeated comprehension or promise problems are separated from proposed solutions and taste mismatch; author intent is not overruled by a poll."}
+      ],
+      "output": "A revised opening preview, consequential episode cuts, and a reader-reaction diagnosis.",
+      "failure_signals": ["Opening offers background instead of pressure", "Hook has no consequence", "Every episode uses the same interruption trick"],
+      "repair": ["Show the protagonist's immediate pressure", "Move the cut to a real state change", "Vary hooks through choice, discovery, cost, and changed risk"],
+      "acceptance": ["The opening and episode endings deliver one coherent promise and create story-based forward pull"],
+      "example": "A preview establishes a debt deadline and the episode ends when repayment exposes a hidden identity.",
+      "counterexample": "A paragraph ends mid-sentence behind a paywall and resumes with no change."
+    },
+    {
+      "id": "reader-feedback-revision",
+      "source_ids": ["DuPNL5MGEEE"],
+      "trigger": "Reader or editor feedback must be converted into useful revisions without surrendering the novel's intended direction.",
+      "inputs": ["manuscript", "author intent", "reader contract", "reader and editor observations"],
+      "steps": [
+        {"action": "Collect observations about promise, opening speed, comprehension, continuity, character response, and emotional payoff.", "check": "Each observation points to a passage or reading effect rather than prescribing a solution."},
+        {"action": "Group repeated observations and distinguish craft problems from individual taste or audience mismatch.", "check": "A loud comment does not outweigh the declared reader contract or the manuscript evidence."},
+        {"action": "Infer the likely cause and propose the smallest revision that solves it.", "check": "The change preserves author intent and does not break later causality, setup, or characterization."},
+        {"action": "Reread the changed passage in its surrounding chapters and compare before and after.", "check": "The target effect improves without creating a new continuity, pacing, or voice problem."}
+      ],
+      "output": "A prioritized feedback diagnosis, targeted revisions, and a before/after evaluation.",
+      "failure_signals": ["Every comment rewrites the story", "Taste mismatch is called a defect", "A local fix breaks later chapters"],
+      "repair": ["Return to the reader contract", "Ask what textual effect produced the reaction", "Reduce the edit to the smallest causal repair"],
+      "acceptance": ["Accepted changes solve evidenced reader problems, preserve intent, and remain compatible with the surrounding novel"],
+      "example": "Repeated early confusion leads the author to add one prerequisite action while preserving the causal ending.",
+      "counterexample": "Every comment is patched immediately, leaving later chapters incompatible with the rewritten opening."
+    },
+    {
+      "id": "litrpg-chapter-gate",
+      "source_ids": ["ucVPku0GmKw"],
+      "trigger": "A LitRPG or progression chapter adds stats, rewards, abilities, or a new challenge.",
+      "inputs": ["chapter", "system bible", "character desire and fear", "progression tracks"],
+      "steps": [
+        {"action": "Extract all numbers, abilities, items, and causal rules and compare them to the system bible.", "check": "No unexplained conflict or payoff-only exception remains."},
+        {"action": "Label why each displayed system block appears now.", "check": "It changes a choice, risk, meaning, or reader prediction."},
+        {"action": "Map chapter goal, opposition, outcome, and changed option space.", "check": "The ending differs by more than a number."},
+        {"action": "Add cost, counter, environment response, or non-numeric problem after growth.", "check": "A credible failure path still exists."},
+        {"action": "Compress repeated grind and read the chapter aloud.", "check": "The first instructive example remains while redundant tables do not damage audio flow."}
+      ],
+      "output": "A rule-consistent chapter, changed-option record, and power-creep note.",
+      "failure_signals": ["Rule appears only to solve climax", "Reward does not affect strategy", "Opposition only gains more health"],
+      "repair": ["Plant or revise the rule", "Tie reward to a new choice and cost", "Change challenge dimension"],
+      "acceptance": ["A reader predicts the rule, names the new option, and sees a remaining failure route"],
+      "example": "A teleport skill wins access but consumes the resource needed to rescue an ally, changing both options and cost.",
+      "counterexample": "Level 42 replaces level 41 while the character uses the same tactic against a proportionally stronger enemy."
+    },
+    {
+      "id": "discovery-draft-revision-loop",
+      "source_ids": ["rSZrvQ09AzU"],
+      "trigger": "A long novel needs enough direction to stay coherent while leaving room for discoveries made during writing.",
+      "inputs": ["broad route", "chapter goal", "character intentions", "draft", "bounded reader observations"],
+      "steps": [
+        {"action": "Set fixed route markers and list the local choices still open to discovery.", "check": "Feedback may improve expression but cannot secretly replace accepted ending causality."},
+        {"action": "Prepare the next scene through desire, obstacle, tactic, turn, and consequence, while allowing character behavior to reveal a stronger local route.", "check": "Discovery changes the route for a character-based reason rather than boredom or arbitrary surprise."},
+        {"action": "Draft the scene, then collect bounded observations from a cold reader when available.", "check": "Observations identify confusion, expectation, emotion, or continuity rather than taking control of the ending."},
+        {"action": "Revise causality and continuity before polishing prose, then update only the lightweight story facts that changed.", "check": "The chapter fits both the broad route and the character's actual choice."}
+      ],
+      "output": "A coherent chapter shaped by both long-range intent and discoveries made during drafting.",
+      "failure_signals": ["Outline obedience flattens character choice", "Comments steer the ending", "Discovery becomes uncaused drift"],
+      "repair": ["Return to route markers", "Restore the character's independent intention", "Rebuild the new direction through cause and consequence"],
+      "acceptance": ["The chapter advances the intended story while making room for earned local discovery"],
+      "example": "Beta readers flag a confusing rule; the author clarifies its introduction while preserving the planned consequence.",
+      "counterexample": "A guessed twist is replaced overnight, breaking two volumes of preparation."
+    },
+    {
+      "id": "long-form-continuity-read",
+      "source_ids": ["hav2P8-GYV4"],
+      "trigger": "A continuation, revision, or long manuscript may contradict earlier relationships, time, space, items, abilities, or knowledge.",
+      "inputs": ["draft continuation or manuscript", "lightweight story bible", "earlier text", "cold continuity reader when available"],
+      "steps": [
+        {"action": "Update short Fact, Goal, Trajectory, and ChangeLog entries when new material is created.", "check": "A resumed session can recover location, direction, and actor from the cues."},
+        {"action": "Run an author-only normal-speed continuity read focused on relationships, time, space, items, abilities, and knowledge.", "check": "Every conflict links to first and current evidence."},
+        {"action": "Ask an outside reader to read in series order with the same categories.", "check": "Semantic contradictions missed by search are merged into the issue list."},
+        {"action": "Choose the earliest safe correction, a supported causal explanation, or a deliberate story change.", "check": "The manuscript leaves one intelligible version of the fact and all affected later passages remain compatible."}
+      ],
+      "output": "A continuity diagnosis, corrected passages, and updated lightweight story notes.",
+      "failure_signals": ["Author memory is the only source", "Continuity check is mixed into line polish", "A local correction creates later contradictions"],
+      "repair": ["Externalize only the relevant facts", "Run an independent continuity pass", "Correct the earliest safe passage and reread downstream effects"],
+      "acceptance": ["All touched facts have one compatible state or a deliberate, causally explained story change"],
+      "example": "A relationship label conflict is corrected at its earliest safe source before later chapters depend on it.",
+      "counterexample": "Two different parental relationships remain in separate volumes because each sentence is locally grammatical."
+    },
+    {
+      "id": "author-fantasy-to-reader-payoff",
+      "source_ids": ["BV1H8gh6JE2C"],
+      "trigger": "A concept is described through prestige, trend, income, or resemblance to a famous work rather than protagonist experience.",
+      "inputs": ["concept pitch", "author intent", "target reader", "three opening chapter ideas"],
+      "steps": [
+        {"action": "Separate expressive desire, commercial constraint, and external success fantasy.", "check": "No story requirement depends on being praised, ranked, or called a master."},
+        {"action": "Translate each desired reward into protagonist action, result, and reader-visible consequence.", "check": "A reader can observe the payoff inside the story."},
+        {"action": "Compare trend mechanisms with the author's durable strengths and voice.", "check": "Borrowed elements serve the protagonist engine rather than replace it."},
+        {"action": "Test the first three chapters for one repeated but varied reader promise.", "check": "Each chapter progresses or pays the promise without author self-display."}
+      ],
+      "output": "An in-story payoff map and a concept free of external-status requirements.",
+      "failure_signals": ["Pitch lists famous titles but no action", "Prestige rejects a proven strength", "Trend elements form an incoherent hybrid"],
+      "repair": ["Rewrite as protagonist, desire, opposition, and consequence", "Restore the experience the author can sustain", "Remove surface imitation"],
+      "acceptance": ["Every stated reward has a protagonist behavior and observable story result"],
+      "example": "Replace 'write the next masterpiece' with a clerk using forbidden accounting skill to reverse a public accusation at personal cost.",
+      "counterexample": "Planning that readers will admire the author supplies no event, choice, or payoff for the protagonist."
+    },
+    {
+      "id": "expectation-reversal-card",
+      "source_ids": ["BV1Ef4y1S7EU"],
+      "trigger": "A revenge, humiliation, misunderstanding, or identity reveal feels oppressive or its climax feels scattered.",
+      "inputs": ["core emotional conflict", "protagonist resources", "supporting reactions", "planned climax"],
+      "steps": [
+        {"action": "Write the exact settlement action before adding pressure.", "check": "The action can answer at least two prepared emotional expectations."},
+        {"action": "Define one conflict core and rewrite each pressure beat as a variation of it.", "check": "No unrelated insult, money problem, or appearance attack opens a second story."},
+        {"action": "Order three to five beats by pressure, reader information advantage, and cost.", "check": "Readers see a credible settlement resource and do not experience only helpless abuse."},
+        {"action": "Write the climax and mark every setup it pays.", "check": "Removing a marked setup measurably weakens the settlement."}
+      ],
+      "output": "A pressure-to-settlement chain and payoff checklist.",
+      "failure_signals": ["No credible response route", "Pressure branches into unrelated cores", "Climax addresses only one setup"],
+      "repair": ["Plant a bounded capability or choice", "Consolidate pressure around one misjudgment", "Redesign settlement to combine prepared lines"],
+      "acceptance": ["Readers anticipate a specific class of response and the climax settles the promised emotions causally"],
+      "example": "A falsely stingy hero's repeated sacrifices are reinterpreted by one revealed receipt and a public choice.",
+      "counterexample": "Random strangers repeat generic insults for chapters before an unrelated lottery win."
+    },
+    {
+      "id": "mainline-pressure-test",
+      "source_ids": ["BV1yV411o79T"],
+      "trigger": "An outline contains world events and subplots but no clear story direction.",
+      "inputs": ["concept", "protagonist history", "current outline", "subplot list"],
+      "steps": [
+        {"action": "Write a short sentence stating whose story, present desire, action, and cost this is.", "check": "It describes pursuit rather than lore or a vague life condition."},
+        {"action": "List two causal experiences explaining why the desire and strategy operate now.", "check": "Each can appear through a concrete event or choice."},
+        {"action": "Give every subplot a mainline variable: progress, obstacle, cost, relationship, or interpretation.", "check": "Unattached threads are removed, merged, or promoted deliberately."},
+        {"action": "Check each chapter for desire, strategy, or pressure movement.", "check": "At least one variable changes."}
+      ],
+      "output": "A one-line mainline and subplot relevance map.",
+      "failure_signals": ["Goal is a slogan", "Behavior has no reason", "Subplots only display worldbuilding"],
+      "repair": ["Add present pressure and a characteristic strategy", "Connect action to experience", "Convert lore into obstacle or delete it"],
+      "acceptance": ["A reader can explain what the protagonist pursues and why each active thread changes that pursuit"],
+      "example": "A disgraced champion rebuilds a team to reclaim a title, so recruitment, rivalry, and training each change that effort.",
+      "counterexample": "A reborn hero decides to be busy, then visits unrelated institutions without a present reason."
+    },
+    {
+      "id": "information-jump-audit",
+      "source_ids": ["BV1S64y1k7ef"],
+      "trigger": "Readers understand individual words but cannot construct the scene, rule, hierarchy, or action.",
+      "inputs": ["chapter", "target reader knowledge", "invented-term list"],
+      "steps": [
+        {"action": "Mark every unfamiliar term, compressed inference, spatial level, and skipped action.", "check": "The target reader knows each item's category at first use."},
+        {"action": "For unknowns, provide the minimum category, boundary or relation, and function or cost.", "check": "At least two elements connect to already known evidence."},
+        {"action": "Bind explanation to the action that needs it and defer unused history.", "check": "Removing the explanation would make the current choice unclear; otherwise postpone it."},
+        {"action": "Ask a new reader to restate who is where, doing what, and why it matters.", "check": "No chain of unresolved basic questions accumulates."}
+      ],
+      "output": "A prerequisite map and minimally sufficient explanation revision.",
+      "failure_signals": ["Unknown explained only by unknowns", "Encyclopedic pause", "Named concept never affects choice"],
+      "repair": ["Return to a known category or demonstration", "Split and defer", "Delete the unused term"],
+      "acceptance": ["A new reader reconstructs location, action, rule function, and current stakes without a glossary detour"],
+      "example": "Introduce an academy as the only place licensing the spell needed for today's rescue, then explain rank when admission blocks the hero.",
+      "counterexample": "Three invented realms define one another before any character acts."
+    },
+    {
+      "id": "effective-pacing-audit",
+      "source_ids": ["BV1nq4y1T79f"],
+      "trigger": "A chapter is called slow or watery despite containing many events.",
+      "inputs": ["target chapter", "adjacent chapters", "reader promise", "event list"],
+      "steps": [
+        {"action": "Label each segment by event, information, emotion, and one-sentence focus.", "check": "Every retained segment has a reader-facing purpose."},
+        {"action": "Remove repeated reaction, travel, or unrelated bridges that add no contrast or future connection.", "check": "Causality stays intact and information loss is intentional."},
+        {"action": "Draw previous cause to current action to consequence or new question.", "check": "Adjacent segments share goal, cause, or an unresolved thread."},
+        {"action": "Add or sharpen a memorable contrast, character reaction, payoff, or clue in quiet transitions.", "check": "The chapter remains varied without turning every beat into confrontation."},
+        {"action": "Place the chapter cut after a payoff and at the birth of consequential next pressure.", "check": "It produces anticipation rather than emotional truncation."}
+      ],
+      "output": "A revised chapter, cause chain, memory-point list, and next-pressure cut.",
+      "failure_signals": ["More events but less comprehension", "Every beat shouts", "Cut occurs before earned local reward"],
+      "repair": ["Reduce and reconnect", "Restore quiet consequential detail", "Move cut after consequence"],
+      "acceptance": ["A reader retells the causal order and remembers at least one meaningful detail or emotion"],
+      "example": "No account leads to a gifted old account, which makes a new server opening immediately relevant.",
+      "counterexample": "An exam, unrelated playground gag, and match victory appear rapidly but share no causal or emotional line."
+    },
+    {
+      "id": "causal-thread-bridge",
+      "source_ids": ["BV1na411v75W"],
+      "trigger": "A chapter or map is ending and the next plot movement feels abrupt, random, or unwritten.",
+      "inputs": ["previous unit", "candidate next unit", "character goal", "open thread list", "current emotional core"],
+      "steps": [
+        {"action": "Extract prior state changes, unresolved questions, people, objects, promises, and threats.", "check": "At least one live thread can be cited from the text; otherwise diagnose broader creative block."},
+        {"action": "Write trigger, character choice, direct consequence, and new question for the candidate unit.", "check": "Every arrow points to a prior fact instead of author convenience."},
+        {"action": "Test inserted setting or dialogue against current emotion and choice.", "check": "Material that changes neither is delayed or removed."},
+        {"action": "For a map change, answer why now, who drives it, and what is gained or lost.", "check": "All three answers have textual evidence."},
+        {"action": "Update setup and payoff records.", "check": "New setups have a planned window and old ones do not disappear."}
+      ],
+      "output": "A causal bridge, transition passage, and updated thread ledger.",
+      "failure_signals": ["Suddenly or coincidentally without setup", "New character exists only to deliver information", "No possible next event can be generated"],
+      "repair": ["Return to the nearest live thread and add a choice with cost", "If no thread exists, stop bridging and repair the mainline or series engine"],
+      "acceptance": ["A blind reader states because X, therefore Y and identifies the next pressure"],
+      "example": "Removing a sealing sword frees prisoners, so the escape and pursuit grow from the protagonist's earlier action.",
+      "counterexample": "The hero jumps to a new region because the old zone is complete, with no agent, obligation, or cost."
+    }
+  ]
+}

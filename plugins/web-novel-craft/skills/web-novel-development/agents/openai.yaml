@@ -1,0 +1,6 @@
+interface:
+  display_name: "Web Novel Development"
+  short_description: "Position premises, readers, genres, and platforms"
+  default_prompt: "Use $web-novel-development to develop this web novel premise for its intended readers."
+policy:
+  allow_implicit_invocation: true

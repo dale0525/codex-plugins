@@ -1,0 +1,6 @@
+interface:
+  display_name: "Web Novel Prose Craft"
+  short_description: "Write vivid Chinese web-novel scenes with controlled viewpoint and rhythm"
+  default_prompt: "Use $web-novel-prose-craft to turn this scene intent into clear action, sensation, emotion, dialogue, and sentence-level rhythm."
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Web Novel Progression"
+  short_description: "Design earned growth, rewards, systems, and stakes"
+  default_prompt: "Use $web-novel-progression to design an earned progression and reward system."
+policy:
+  allow_implicit_invocation: true

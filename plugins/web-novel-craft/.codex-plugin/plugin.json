@@ -1,0 +1,49 @@
+{
+  "name": "web-novel-craft",
+  "version": "0.2.0",
+  "description": "An evidence-grounded AI web novelist for ideation, writing, critique, revision, and evaluation.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/web-novel-craft",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "web-novel",
+    "serialized-fiction",
+    "progression-fantasy",
+    "litrpg",
+    "writing",
+    "revision",
+    "romance",
+    "mystery",
+    "ai-writing"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Web Novel Craft",
+    "shortDescription": "Ideate, write, critique, and revise compelling web novels.",
+    "longDescription": "Nine coordinated skills make Codex a capable web novelist and editor: developing premises, characters, worlds, causal long-form structure, progression, Chinese mainstream genre craft, scene prose, direct chapter writing, critique, revision, evaluation, and timestamped video evidence research.",
+    "developerName": "Logic Tan",
+    "category": "Writing",
+    "capabilities": [
+      "Web-novel premise and reader-contract development",
+      "Direct chapter, scene, dialogue, action, and emotional writing",
+      "Long-form structure, causality, pacing, setup, and payoff",
+      "Character, relationship, viewpoint, and voice design",
+      "Romance, mystery, comedy, subtext, historical, climax, and ending craft",
+      "Progression-fantasy and LitRPG rule systems",
+      "Evidence-based manuscript critique, revision, and comparative evaluation",
+      "Lightweight long-form continuity without project-management overhead",
+      "Chinese scene prose, narrative distance, action, sensation, emotion, dialogue, and sentence rhythm",
+      "Timestamped YouTube and Bilibili craft-evidence distillation"
+    ],
+    "defaultPrompt": [
+      "Develop this web-novel idea into a strong premise, cast, world, structure, and opening chapter.",
+      "Write or continue this chapter while preserving character, viewpoint, genre promises, and prose quality.",
+      "Read this manuscript closely, give evidence-based editorial feedback, revise it, and judge whether the revision is better."
+    ]
+  }
+}
