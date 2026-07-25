@@ -26,6 +26,12 @@ codex plugin add codex-sync@dale0525-codex-plugins
 codex plugin add film-craft-orchestrator@dale0525-codex-plugins
 ```
 
+## Install Loop Guard
+
+```bash
+codex plugin add loop-guard@dale0525-codex-plugins
+```
+
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
@@ -91,6 +97,14 @@ continuity and quality control, editing and sound, and timestamped video-evidenc
 research. Shared templates, evidence corpora, compilers, and deterministic
 validators remain in one canonical skill root so the focused skills do not drift.
 
+### Loop Guard
+
+Observes exact repeated tool failures with privacy-safe keyed fingerprints and
+no generic call limits. It ships in observe-only mode. After reviewed local
+evidence, enforce mode can advise the model on the third identical failure and
+deny only a fourth identical tool call while allowing the task to continue with
+a different strategy.
+
 ## External content synchronization
 
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
@@ -120,6 +134,7 @@ destination must remain inside this repository.
 plugins/apple-design/
 plugins/codex-sync/
 plugins/film-craft-orchestrator/
+plugins/loop-guard/
 sync-sources.toml
 ```
 

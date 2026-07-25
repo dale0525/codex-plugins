@@ -1,0 +1,43 @@
+{
+  "description": "Observe repeated explicit tool failures and optionally prevent an identical fourth attempt.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/scripts/loop_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\scripts\\loop_guard.py\"",
+            "timeout": 2
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/scripts/loop_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\scripts\\loop_guard.py\"",
+            "timeout": 2
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$PLUGIN_ROOT/scripts/loop_guard.py\"",
+            "commandWindows": "py -3 \"%PLUGIN_ROOT%\\scripts\\loop_guard.py\"",
+            "timeout": 2
+          }
+        ]
+      }
+    ]
+  }
+}
