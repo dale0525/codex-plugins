@@ -1,0 +1,1880 @@
+{
+  "schema_version": 1,
+  "corpus_id": "web-novel-craft-priority-234-v1",
+  "status": "deep_distilled",
+  "evidence_note": "Each entry follows a complete first-to-last transcript or ASR review. E1/E2 records what the source teaches or demonstrates; it does not independently prove platform, legal, commercial, retention, or universal craft effects. E3/E4 remain synthesis or project hypotheses.",
+  "sources": [
+    {
+      "id": "8mtMuJ61dls",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1962.279,
+      "coverage_boundary": "seg-00001 through seg-00719; first 1.880 s, last 1962.279 s; music at 1959.94-1962.279 s",
+      "claims": [
+        {
+          "timestamp_sec": 263.28,
+          "type": "practitioner_experience",
+          "level": "E2",
+          "paraphrase": "从读者正在消费的相邻类型反推类型定位，并写清等级、经验、怪物等级及角色操纵系统等可观察规则。"
+        },
+        {
+          "timestamp_sec": 421.8,
+          "type": "practitioner_experience",
+          "level": "E2",
+          "paraphrase": "跨文化改写应从熟悉作品的主题缺口出发，把家庭、传统和道德冲突转译为角色与情节选择。"
+        },
+        {
+          "timestamp_sec": 1038.439,
+          "type": "business_claim",
+          "level": "E2",
+          "paraphrase": "以约两千字日产能和年度字数估算系列规模，但应以可持续实测而非固定个人指标安排出版。"
+        },
+        {
+          "timestamp_sec": 1096.12,
+          "type": "business_claim",
+          "level": "E2",
+          "paraphrase": "独家或广泛发行应按系列目标选择，并分别核对电子、纸书和有声书渠道及合同权利。"
+        },
+        {
+          "timestamp_sec": 1235.12,
+          "type": "business_claim",
+          "level": "E2",
+          "paraphrase": "营销审计同时检查价格、产品封面、分发和促销四要素，促销无效时先定位组合中的瓶颈。"
+        }
+      ],
+      "applicability": [
+        "独立作者的LitRPG、升级流、仙侠及跨文化类型定位"
+      ],
+      "non_applicability": [
+        "不能把嘉宾个人销量或平台条款当作普遍市场规律"
+      ],
+      "failure_boundaries": [
+        "2000字日和4-8本年不是普适KPI；过劳会使计划失真"
+      ],
+      "counterexamples": [
+        "嘉宾早期每周工作70-80小时，说明高产建立在长期过劳上不可复制"
+      ],
+      "ambiguities": [
+        "ASR对专名和数字有误识，需按时间码回听；访谈未提供统计因果数据"
+      ],
+      "procedure_ids": [
+        "proc-8mtMuJ61dls"
+      ]
+    },
+    {
+      "id": "IIGSFZPTCXA",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 4437.399,
+      "coverage_boundary": "seg-00001 through seg-01793; first 0.680 s, last 4437.399 s",
+      "claims": [
+        {
+          "timestamp_sec": 174.12,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "先区分读者已知的类型共识与原创差异，再决定核心概念的学习曲线和首次解释场景。"
+        },
+        {
+          "timestamp_sec": 249.28,
+          "type": "practitioner_experience",
+          "level": "E2",
+          "paraphrase": "现实地点和战争细节需要研究及专家或读者校验，可让角色承认不懂但不能用无知掩盖错误。"
+        },
+        {
+          "timestamp_sec": 408.199,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "文化借用要先研究并征求相关文化反馈，明确视角、使用理由、潜在伤害和修订责任。"
+        },
+        {
+          "timestamp_sec": 759.399,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "第三人称限知场景应以首个被点名者锁定POV，使用角色感知和独特比喻保持视角声音。"
+        },
+        {
+          "timestamp_sec": 3163.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "用scene-sequel交替表示状态变化与角色回应，连续高张力需要在中点或近尾声安排喘息。"
+        }
+      ],
+      "applicability": [
+        "奇幻、科幻、历史混合世界及长篇系列的视角、连续性和节奏管理"
+      ],
+      "non_applicability": [
+        "先研究到50%不适用于医学、法律、创伤或在世文化等高风险主题"
+      ],
+      "failure_boundaries": [
+        "后期突然加入无预告新元素会削弱高潮；强行show会超出字数预算"
+      ],
+      "counterexamples": [
+        "Aon初稿四分之三处加入可删除的国王儿子并持续约两万字"
+      ],
+      "ambiguities": [
+        "ASR专名有误拼；讲者案例没有实验样本，不能当定量事实"
+      ],
+      "procedure_ids": [
+        "proc-IIGSFZPTCXA"
+      ]
+    },
+    {
+      "id": "Mm2xZwj6aVI",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 2472.079,
+      "coverage_boundary": "1022 segments; first 0.160 s, last 2472.079 s",
+      "claims": [
+        {
+          "timestamp_sec": 38.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "哥特恐怖把诡异、情感、超自然和心理交织，以持续且不可逃避的恐惧取代杀死怪物即胜利。"
+        },
+        {
+          "timestamp_sec": 466.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "历史线提示先选择暗示解释或感官过度的主次关系，再用另一端制造有层次的张力。"
+        },
+        {
+          "timestamp_sec": 707.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "废墟、隔绝、执念、禁忌知识和罪疚等母题必须绑定人物选择与代价，意象不能只是装饰。"
+        },
+        {
+          "timestamp_sec": 1104.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "房屋、走廊、锁门、肖像、荒原和天气应承载记忆创伤并反馈角色心理，而非静态背景。"
+        },
+        {
+          "timestamp_sec": 2176.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "结构可按抵达惊异、隔绝困住、剥开秘密、执念升级、对峙和带代价结局六阶段收紧。"
+        }
+      ],
+      "applicability": [
+        "封闭场所、家族秘密、暧昧超自然和悲剧性结局的小说或叙事游戏"
+      ],
+      "non_applicability": [
+        "纯跳吓、快速怪物猎杀或要求谜底完全客观且人物不受改变的项目"
+      ],
+      "failure_boundaries": [
+        "可一次击杀且让世界复原的反派不会留下哥特余波"
+      ],
+      "counterexamples": [
+        "把所有超自然解释为幻觉会削弱真实与想象之间的张力"
+      ],
+      "ambiguities": [
+        "书名人名有听写误差；六阶段是建议模板而非必要结构"
+      ],
+      "procedure_ids": [
+        "proc-Mm2xZwj6aVI"
+      ]
+    },
+    {
+      "id": "Y8ZMbqyD9tY",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 980.079,
+      "coverage_boundary": "377 segments; first 0.359 s, last 980.079 s",
+      "claims": [
+        {
+          "timestamp_sec": 45.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "派系是共同目标组织的群体，可嵌在王国或帝国中并包含非正式子派系；建模要画层级和权限边界。"
+        },
+        {
+          "timestamp_sec": 216.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "子派系保留母体共同目标并追求分歧次目标，退出通常会削弱谈判能力，需记录资源收益和退出成本。"
+        },
+        {
+          "timestamp_sec": 311.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "干旱、战争和无能统治等环境事件会催生派系，时间线应映射招募、政策和领导更替。"
+        },
+        {
+          "timestamp_sec": 492.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "公会设计必须解释资源、政治影响、地理容忍度和专业分工，不能无语境复制商人或战士模板。"
+        },
+        {
+          "timestamp_sec": 557.0,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Where、Why、Who、What、How五问用于填写地点资源、理由、成员、目标权力和运作方式证据。"
+        }
+      ],
+      "applicability": [
+        "小说、剧本、桌游和RPG中的多派系政治经济网络"
+      ],
+      "non_applicability": [
+        "只需一行背景标签或完全无组织性的个人角色"
+      ],
+      "failure_boundaries": [
+        "没有内部冲突、资源链和新派系反馈的组织会变成静态标签"
+      ],
+      "counterexamples": [
+        "临时联盟目标完成后仍无理由维持；一个战士公会无成本承担三种专业"
+      ],
+      "ambiguities": [
+        "视频对国家是否算派系的粒度不一，项目需先声明建模边界"
+      ],
+      "procedure_ids": [
+        "proc-Y8ZMbqyD9tY"
+      ]
+    },
+    {
+      "id": "1_VtZYDDSU8",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 647.48,
+      "coverage_boundary": "235 segments; first 0.359 s, final subtitle end 647.480 s (last segment 10:47.480)",
+      "claims": [
+        {
+          "timestamp_sec": 88.84,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "用情绪、偶然和国家政策三栏拆解战争起因，并要求三栏之间存在因果传递。"
+        },
+        {
+          "timestamp_sec": 199.48,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "民族主义教育、宣传、军备竞赛和领袖自尊等机制必须通过动员投票或拒绝降级等行为可观察。"
+        },
+        {
+          "timestamp_sec": 321.639,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "先铺设联盟、边界和代理人等长期紧张，再设置改变时间线的事故或误判作为点火器。"
+        },
+        {
+          "timestamp_sec": 405.24,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "双方对同一地区或资源的政策目标要互斥，并记录最后通牒、秘密动员等升级步骤。"
+        },
+        {
+          "timestamp_sec": 488.199,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "升级链按事件、情报误读、内部争论、公开行动和对手反应记录，直到降级成本高于开战成本。"
+        }
+      ],
+      "applicability": [
+        "国家战争、内战和联盟冲突的历史、奇幻或科幻世界观建模"
+      ],
+      "non_applicability": [
+        "纯个人决斗、无政治主体灾害或刻意追求神谕式不可解释战争"
+      ],
+      "failure_boundaries": [
+        "只有偶然事故没有长期火药桶会显得任意，只有长期矛盾没有点火器则缺少时点可信度"
+      ],
+      "counterexamples": [
+        "只写邪恶领主征服世界，未写政策利益、民众激励和升级步骤"
+      ],
+      "ambiguities": [
+        "三项力量会相互影响而非严格独立；一战起因仍有争议"
+      ],
+      "procedure_ids": [
+        "proc-1_VtZYDDSU8"
+      ]
+    },
+    {
+      "id": "ATNvOk5rIJA",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 4347.499,
+      "coverage_boundary": "1783 segments; first 0.000 s, last subtitle end 4347.499 s",
+      "claims": [
+        {
+          "timestamp_sec": 376.509,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "魔法解决关键问题前要展示能力、条件和代价，使高潮调用在事后可由读者指出预示线索。"
+        },
+        {
+          "timestamp_sec": 658.3,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "硬魔法适合可预测解题，软魔法适合神秘与敬畏；并存时可保留规则工具和未知力量。"
+        },
+        {
+          "timestamp_sec": 209.17,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "不得在故事九成处首次引入直接消除核心冲突的能力，除非能力或救援角色已提前埋设。"
+        },
+        {
+          "timestamp_sec": 1920.13,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "把规则教学嵌入盗窃、实验或追逐等带风险行动，让角色边失败边学习并控制认知负荷。"
+        },
+        {
+          "timestamp_sec": 2372.119,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "每项能力都应有不可修复限制、可成长缺陷和可量化代价，稀缺资源代价还要进入经济与阶级结构。"
+        }
+      ],
+      "applicability": [
+        "奇幻、科幻、游戏中的魔法或超能力解题、角色弧与世界展示"
+      ],
+      "non_applicability": [
+        "纯追求不可预测神秘且能力不承担解题责任的超自然叙事"
+      ],
+      "failure_boundaries": [
+        "无预示的后期能力会成为deus ex machina；术语塞入动作会造成认知过载"
+      ],
+      "counterexamples": [
+        "无限新增系统和万年历史会造成海洋一英寸深的浅层百科"
+      ],
+      "ambiguities": [
+        "硬软魔法是连续光谱；这些法则是讲者个人创作工具而非行业规范"
+      ],
+      "procedure_ids": [
+        "proc-ATNvOk5rIJA"
+      ]
+    },
+    {
+      "id": "PEE6dzHJocw",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1053.77,
+      "claims": [
+        {
+          "timestamp_sec": 72.68,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "角色功能、世界位置、背景与目标动机构成贴合原作的四栏角色表。"
+        },
+        {
+          "timestamp_sec": 109.719,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "改编前先确认叙事职能，改变关键事件需给出具体阻止因果。"
+        },
+        {
+          "timestamp_sec": 206.28,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "职业关系与社会职责限制角色接触、压力和可行行动路径。"
+        },
+        {
+          "timestamp_sec": 328.8,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "目标动机、外部阻碍与自身缺陷应组成可追溯的因果链。"
+        },
+        {
+          "timestamp_sec": 466.12,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "正典留白可以提出多种解释，但新增设定必须解释已知行为。"
+        },
+        {
+          "timestamp_sec": 679.92,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "用需要什么才会这样测试越界行为，逐项施压最痛处和不可失去之物。"
+        }
+      ],
+      "applicability": [
+        "同人角色表、正典兼容故事及AU重构"
+      ],
+      "non_applicability": [
+        "不能把写作启发当作心理诊断或作者意图证明"
+      ],
+      "failure_boundaries": [
+        "没有文本证据时不得把headcanon声称为正典"
+      ],
+      "counterexamples": [
+        "只复制口头禅服装却没有目标背景因果，会造成表层模仿"
+      ],
+      "ambiguities": [
+        "ASR中的角色专名需以原视频或可靠资料核对"
+      ],
+      "procedure_ids": [
+        "canon-character-consistency"
+      ]
+    },
+    {
+      "id": "c4OZ2fWZLBE",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1942.799,
+      "claims": [
+        {
+          "timestamp_sec": 4.48,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "分析复仇故事应先列出性别、正义框架、暴力方式与被牺牲者。"
+        },
+        {
+          "timestamp_sec": 166.319,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "检查受害女性是否仅作为男性复仇旅程的燃料而失去行动权。"
+        },
+        {
+          "timestamp_sec": 534.959,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "用镜头时长、裸露、凝视、声音暗示与创伤余波区分呈现和猎奇。"
+        },
+        {
+          "timestamp_sec": 786.72,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "复仇目标可扩展到心理、社会揭露和象征夺回，不限于身体伤害。"
+        },
+        {
+          "timestamp_sec": 1295.2,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "公开罪行、牺牲、幻想或不闭合结局都可能构成复仇结果。"
+        },
+        {
+          "timestamp_sec": 1514.88,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "复仇应保留愤怒、同情、恐惧和法律风险等矛盾后果。"
+        }
+      ],
+      "applicability": [
+        "女性或酷儿复仇叙事的类型与伦理审查"
+      ],
+      "non_applicability": [
+        "评论立场不是性别创作能力或观众心理的普遍定律"
+      ],
+      "failure_boundaries": [
+        "不得把性暴力细节作为猎奇素材或把无杀戮自动当作进步"
+      ],
+      "counterexamples": [
+        "女性身体受伤被长时间性化呈现却不展示生活余波"
+      ],
+      "ambiguities": [
+        "片名、专名和敏感词存在ASR误听，需片源复核"
+      ],
+      "procedure_ids": [
+        "ethical-revenge-audit"
+      ]
+    },
+    {
+      "id": "Yh5wZVSW89s",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1170.72,
+      "claims": [
+        {
+          "timestamp_sec": 90.119,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "自由间接引语混合客观叙述与人物词汇而不必反复标注他想。"
+        },
+        {
+          "timestamp_sec": 644.44,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "同一事件写直接、间接和自由间接三版可校准叙述距离。"
+        },
+        {
+          "timestamp_sec": 519.599,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "让人物词汇制造反讽，并在事实层埋入可验证的冲突线索。"
+        },
+        {
+          "timestamp_sec": 890.8,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "比喻应来自人物经验而非作者百科知识，避免不可能知道的参照。"
+        },
+        {
+          "timestamp_sec": 724.68,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "外部可观察事实与人物自评相邻，能保持第三人称距离。"
+        },
+        {
+          "timestamp_sec": 1109.2,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "人物认知与外部事实的差异可构成不可靠叙述，但必须后文回收。"
+        }
+      ],
+      "applicability": [
+        "第三人称限知、多POV和中文网文叙述距离控制"
+      ],
+      "non_applicability": [
+        "法律条文、规则公告等必须绝对客观的信息不宜混入人物声音"
+      ],
+      "failure_boundaries": [
+        "中文不能机械照搬英语时态和代词标记，串脑时需锚点"
+      ],
+      "counterexamples": [
+        "同段无切换标记地混入多个POV会使读者无法判断谁在感受"
+      ],
+      "ambiguities": [
+        "文学术语史和书名人名字幕有误识，不能照抄"
+      ],
+      "procedure_ids": [
+        "free-indirect-distance-pass"
+      ]
+    },
+    {
+      "id": "qMSYAxJeCu4",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1987.26,
+      "claims": [
+        {
+          "timestamp_sec": 1.159,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "地点描写先指定定位、气氛、主题或伏笔中的唯一主功能。"
+        },
+        {
+          "timestamp_sec": 365.419,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "新地点至少提供一个可复述的感官锚点并说明其影响。"
+        },
+        {
+          "timestamp_sec": 477.12,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "动词选择携带占有、侵入或衰败关系含义，应与主题一致。"
+        },
+        {
+          "timestamp_sec": 601.5,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "越出人意料的道具越需要提前设置并登记回收线索。"
+        },
+        {
+          "timestamp_sec": 1290.419,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "把环境信息嵌入角色动作和阻力，避免描写让重要冲突停车。"
+        },
+        {
+          "timestamp_sec": 1022.339,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "陌生宏大地点可先给尺度方向和一条规则，再留白让读者补全。"
+        }
+      ],
+      "applicability": [
+        "中文网文建景、战斗定位、日常质感及伏笔设置"
+      ],
+      "non_applicability": [
+        "信息密集类型有时仍需清晰物件列表和方位说明"
+      ],
+      "failure_boundaries": [
+        "过度隐喻或生僻词会拖慢节奏并制造误导"
+      ],
+      "counterexamples": [
+        "把百科式地标尺寸堆满段落却没有人物体验或行动影响"
+      ],
+      "ambiguities": [
+        "对读者记忆机制的判断属于作者经验，需中文试读验证"
+      ],
+      "procedure_ids": [
+        "functional-scene-description"
+      ]
+    },
+    {
+      "id": "SIaB0Yvt-wo",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 3403.2,
+      "claims": [
+        {
+          "timestamp_sec": 317.199,
+          "type": "practitioner_experience",
+          "level": "E1",
+          "paraphrase": "先找到能持续产出句子的声音，再让结构选择随之形成。"
+        },
+        {
+          "timestamp_sec": 674.32,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "碎片化写法仍需逐句承担事实、情绪或节奏功能。"
+        },
+        {
+          "timestamp_sec": 1784.159,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "对白可从冲突中段切入，省略问候和机械收尾以保持谈话感。"
+        },
+        {
+          "timestamp_sec": 1920.96,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "无引号排版改变对白节奏，必须持续核对说话者归属。"
+        },
+        {
+          "timestamp_sec": 2288.24,
+          "type": "practitioner_experience",
+          "level": "E1",
+          "paraphrase": "旁听应观察音量词汇语调和社交意图，并脱敏改写而非复制原话。"
+        },
+        {
+          "timestamp_sec": 2683.28,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "人物差异来自具体经验、欲望和矛盾选择，不靠口音标签。"
+        }
+      ],
+      "applicability": [
+        "第一人称、碎片化小说、对白潜台词和多声部角色设计"
+      ],
+      "non_applicability": [
+        "访谈经验不能作为所有体裁的硬规则或画面事实"
+      ],
+      "failure_boundaries": [
+        "旁听素材须遵守当地隐私和录音法规，中文不能照搬英语标点节奏"
+      ],
+      "counterexamples": [
+        "喜欢的形式被强行套入故事，朋友指出整体重写仍无效"
+      ],
+      "ambiguities": [
+        "仅字幕无法确认演员语气、镜头和观众反应，专名需回看"
+      ],
+      "procedure_ids": [
+        "voice-dialogue-integrity"
+      ]
+    },
+    {
+      "id": "YAKcbvioxFk",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1637.38,
+      "claims": [
+        {
+          "timestamp_sec": 58.8,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "Show与tell应按节奏分工，telling可压缩时间和低价值背景。"
+        },
+        {
+          "timestamp_sec": 352.56,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "抽象判断要配可观察行为、物件或对白证据供读者推断。"
+        },
+        {
+          "timestamp_sec": 442.8,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "具体动作和感官效果比直接情绪标签更能传递体验。"
+        },
+        {
+          "timestamp_sec": 729.04,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "通用握拳咬牙等肢体语言应替换为角色特有念头和选择。"
+        },
+        {
+          "timestamp_sec": 932.079,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "对白词语音量和动作可展示情绪，减少重复副词和标签。"
+        },
+        {
+          "timestamp_sec": 1170.4,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "信息若只为读者而双方都已知，通常应删改为冲突或真正未知提问。"
+        }
+      ],
+      "applicability": [
+        "小说重写、情绪感官、POV过滤与对白打磨"
+      ],
+      "non_applicability": [
+        "不能把show绝对化而抹除有价值的叙述声音和规则摘要"
+      ],
+      "failure_boundaries": [
+        "英语thought verb诊断不可机械套用中文句法，需目标语读者验证"
+      ],
+      "counterexamples": [
+        "完全show会使过场和重复日常冗长到破坏节奏"
+      ],
+      "ambiguities": [
+        "示例书名作者和引文字幕有误识，不能据此确认原文版本"
+      ],
+      "procedure_ids": [
+        "show-tell-evidence-pass"
+      ]
+    },
+    {
+      "id": "hhVic18H4u4",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 694.64,
+      "claims": [
+        {
+          "timestamp_sec": 55.2,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "先区分语义流与句法流，编辑时先检查句内结构再检查段落衔接。"
+        },
+        {
+          "timestamp_sec": 125.76,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "在句首加入准确过渡词可显式标注起始、转折、例证或扩展关系。"
+        },
+        {
+          "timestamp_sec": 210.56,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "过渡词是低成本处理指令，应在读者缺线索时使用而非装饰性堆叠。"
+        },
+        {
+          "timestamp_sec": 250.88,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "把背景、条件或让步降为从属分句，可将连续硬台阶改成平滑坡道。"
+        },
+        {
+          "timestamp_sec": 418.64,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "用修饰语或连动结构合并同一施事者的连续动作，减少句号重启。"
+        },
+        {
+          "timestamp_sec": 546.96,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "过渡、从属和修饰应轮换使用，并保留短独立句提供节拍质感。"
+        }
+      ],
+      "applicability": [
+        "中文网文叙述、说明和动作段落的二审句法流检查"
+      ],
+      "non_applicability": [
+        "对话、刻意留白、喜剧节拍和需要冲击停顿的战斗句"
+      ],
+      "failure_boundaries": [
+        "过渡词堆叠会机械，长链从属会增加工作记忆负担"
+      ],
+      "counterexamples": [
+        "悬疑或冲击场景中的短独立句可能是有意节奏，不应强行合并"
+      ],
+      "ambiguities": [
+        "英文分词规则不能机械迁移中文，需人工回读主语和体貌"
+      ],
+      "procedure_ids": [
+        "sentence-flow-zh-pass"
+      ]
+    },
+    {
+      "id": "BV1EN4y1U757",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 603.9,
+      "claims": [
+        {
+          "timestamp_sec": 41.8,
+          "type": "practitioner_experience",
+          "level": "E2",
+          "paraphrase": "面向玄幻仙侠新人的选题建议强调明确金手指、快速节奏并尽早展示系统。"
+        },
+        {
+          "timestamp_sec": 48.2,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "少量诡异元素可嵌入仙侠，但身份与日常劳动应和成长线绑定而非套用门派模板。"
+        },
+        {
+          "timestamp_sec": 102.7,
+          "type": "practitioner_experience",
+          "level": "E2",
+          "paraphrase": "科学解释修仙需要相应知识积累，缺乏宗教哲学或物理基础时不宜贸然采用。"
+        },
+        {
+          "timestamp_sec": 161.7,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "蒸汽朋克、神秘学或克苏鲁等借用元素必须与身份冲突和主线因果融合。"
+        },
+        {
+          "timestamp_sec": 262.7,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "种田领地开局可同时给出荒芜资源、现实危机和扩张回报以驱动发展。"
+        },
+        {
+          "timestamp_sec": 398.5,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "科幻学霸或黑科技设定应把专业知识转成可理解爽点，并由系统服务主线。"
+        }
+      ],
+      "applicability": [
+        "中文网文新人选题、首章定位与能力体系检查"
+      ],
+      "non_applicability": [
+        "平台流量保证、销量预测及已有成熟读者群的作者决策"
+      ],
+      "failure_boundaries": [
+        "系统或神秘学只作装饰会有皮无肉，神话考据过深会让普通读者失去理解"
+      ],
+      "counterexamples": [
+        "传统仙侠或末世军工被讲者列为新人高风险方向，不应照抄为成功公式"
+      ],
+      "ambiguities": [
+        "ASR同音误识和平台经验判断缺少样本量，应保持经验性等级"
+      ],
+      "procedure_ids": [
+        "xianxia-positioning-gate"
+      ]
+    },
+    {
+      "id": "BV1764y1L7ZY",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 1224.54,
+      "claims": [
+        {
+          "timestamp_sec": 64.94,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "设计幻想能力前先回答能力来源、媒介、限制与可变异点，避免单一本源造成同质化。"
+        },
+        {
+          "timestamp_sec": 310.24,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "从一至三条读者可把握的公理出发，逐步推导技能为何可能。"
+        },
+        {
+          "timestamp_sec": 510.98,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "将能力视为可聚合与可分离的基础单元组合，数量和种类差异产生表现。"
+        },
+        {
+          "timestamp_sec": 571.2,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "同类基础单元的排列组合可解释能力差异，新增分类前应先穷举已有组合。"
+        },
+        {
+          "timestamp_sec": 607.2,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "属性覆盖需要优先级和补偿成本，额外单元可重新暴露被覆盖效果。"
+        },
+        {
+          "timestamp_sec": 766.37,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "新性质可由角色实践、重复验证并注册进符号体系，升级不只是数值膨胀。"
+        },
+        {
+          "timestamp_sec": 922.9,
+          "type": "opinion",
+          "level": "E3",
+          "paraphrase": "讲者明确这是个人推演而非原作者正典，复杂性也未被实际操作验证。"
+        }
+      ],
+      "applicability": [
+        "玄幻仙侠异能的能力本体、组合、资源成本和升级一致性审查"
+      ],
+      "non_applicability": [
+        "原作正典、哲学定论、科学实证及读者市场偏好结论"
+      ],
+      "failure_boundaries": [
+        "属性覆盖无成本会无限叠加，只有名词没有实践注册会失去因果闭环"
+      ],
+      "counterexamples": [
+        "治疗属性仍可构建低效率毒招，水属性也可经实践注册攻击性质"
+      ],
+      "ambiguities": [
+        "道衡、蛊虫和符号术语受ASR及图示缺失影响，需保留二创解释标记"
+      ],
+      "procedure_ids": [
+        "ability-system-consistency"
+      ]
+    },
+    {
+      "id": "BV1Li42127Kd",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 754.68,
+      "claims": [
+        {
+          "timestamp_sec": 0,
+          "type": "practitioner_experience",
+          "level": "E3",
+          "paraphrase": "规则怪谈常见世界观把国运、直播和多名玩家绑定，以便形成代入、对比和情绪反馈。"
+        },
+        {
+          "timestamp_sec": 100,
+          "type": "platform_claim",
+          "level": "E3",
+          "paraphrase": "讲者将模拟器流退潮等判断作为番茄读者风向经验，不能当作平台统计。"
+        },
+        {
+          "timestamp_sec": 300,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "规则应保留未解空间和可推理后果，开局就解释完谜底会削弱后续副本动力。"
+        },
+        {
+          "timestamp_sec": 400,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "隐藏内情可通过NPC或笔记逐步揭示，让主角通关线与信息获取步骤绑定。"
+        },
+        {
+          "timestamp_sec": 500,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "标题和规则中的核心概念应让读者看懂，避免自创名词造成理解门槛。"
+        },
+        {
+          "timestamp_sec": 600,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "番茄式开局建议快速交代主角、金手指和身份，再在约千字内落下首个危机。"
+        },
+        {
+          "timestamp_sec": 700,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "智囊团可补充推理与情绪，弹幕主要用于吐槽和调动情绪且不宜过量。"
+        }
+      ],
+      "applicability": [
+        "规则怪谈副本的规则设计、信息节奏和开局结构"
+      ],
+      "non_applicability": [
+        "平台推荐、读者规模或风口趋势的普遍保证"
+      ],
+      "failure_boundaries": [
+        "规则完全揭底会取消推理，弹幕过多会淹没主线和解题"
+      ],
+      "counterexamples": [
+        "主角身份若本身就是邪神等反规则存在可以明示，但仍需让读者理解"
+      ],
+      "ambiguities": [
+        "平台风向和读者特征为个人观察，ASR术语需回听核对"
+      ],
+      "procedure_ids": [
+        "rule-horror-puzzle-gate"
+      ]
+    },
+    {
+      "id": "BV1G7411B7Bd",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 615.42,
+      "claims": [
+        {
+          "timestamp_sec": 100,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "群像作品的多人物情感塑造可以成立，但需要明确各人物进入剧情的功能。"
+        },
+        {
+          "timestamp_sec": 200,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "单一主角更容易提供读者代入，群像则需管理多条情感与视角入口。"
+        },
+        {
+          "timestamp_sec": 300,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "群像大纲必须决定剧情比例、转场时机以及按时间线人物上场或世界发展推进。"
+        },
+        {
+          "timestamp_sec": 400,
+          "type": "practitioner_experience",
+          "level": "E2",
+          "paraphrase": "不要直接模仿大佬群像操作，作者能力和读者耐心可能不足以支撑慢热全局。"
+        },
+        {
+          "timestamp_sec": 500,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "大背景与群体应有明显冲突，并选定人性欲望或情感主题作为核心。"
+        },
+        {
+          "timestamp_sec": 540,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "群像剧情分配应尽量均匀，避免某一人物长期吞噬叙事资源。"
+        }
+      ],
+      "applicability": [
+        "多主角网文的人物登场、视角切换、主题和剧情配额规划"
+      ],
+      "non_applicability": [
+        "把名作群像结构直接复制到不同篇幅、题材或读者耐心环境"
+      ],
+      "failure_boundaries": [
+        "没有核心冲突会让人物线并行漂移，转场失控会削弱代入"
+      ],
+      "counterexamples": [
+        "强单主角作品可依靠单一入口建立稳定代入，不必强行增加群像"
+      ],
+      "ambiguities": [
+        "视频案例与术语受ASR影响，具体作品评价属于讲者经验"
+      ],
+      "procedure_ids": [
+        "ensemble-plot-allocation"
+      ]
+    },
+    {
+      "id": "BV1Er4y127EB",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 593.53,
+      "claims": [
+        {
+          "timestamp_sec": 121.41,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "无敌应定义为当前阶段相对无敌，升级用于进入更大舞台而非永久取消冲突。"
+        },
+        {
+          "timestamp_sec": 173.29,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "先展示敌方最强处，再让主角在该优势领域直接胜出，形成可见反差。"
+        },
+        {
+          "timestamp_sec": 227.21,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "都市连续性依靠配角漩涡：主角经过触发事件、关系升级并驶向下一漩涡。"
+        },
+        {
+          "timestamp_sec": 264.53,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "情绪低谷可放在朋友或盟友受压，主角保持从容并延迟介入后反击。"
+        },
+        {
+          "timestamp_sec": 303.17,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "金手指应服务成名、扩张或科研等持续动机，并带来资源和社会关系后果。"
+        },
+        {
+          "timestamp_sec": 399.01,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "以一条专精主线配一至两条支线编织商战、文娱或学霸路线，超出则合并延后。"
+        },
+        {
+          "timestamp_sec": 510.93,
+          "type": "practitioner_experience",
+          "level": "E3",
+          "paraphrase": "第二幕后段需加入压力或小高潮，三幕中点只是教学近似而非固定公式。"
+        }
+      ],
+      "applicability": [
+        "重生商战、穿越文娱、系统学霸等都市爽文的卷纲与冲突排序"
+      ],
+      "non_applicability": [
+        "绝对无敌保证、平台收益预测及未经核验的行业事实"
+      ],
+      "failure_boundaries": [
+        "敌方优势没有铺垫或主角胜利无代价会变成无脑装逼，单一爽点会使读者疲劳"
+      ],
+      "counterexamples": [
+        "配角像玄幻工具人一样跨卷消失会破坏都市漩涡的连续积累"
+      ],
+      "ambiguities": [
+        "商战具体事件未给出，市场和赚钱判断仅为讲者个人经验"
+      ],
+      "procedure_ids": [
+        "urban-relative-invincibility"
+      ]
+    },
+    {
+      "id": "BV1Ya9gBSEMA",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 999.34,
+      "claims": [
+        {
+          "timestamp_sec": 60,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "Open with a visible disaster, personal stake and immediate action rather than background."
+        },
+        {
+          "timestamp_sec": 390,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "Countable water, food, fuel and medicine make faction survival concrete and alter bargains."
+        },
+        {
+          "timestamp_sec": 345,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Every extraordinary disaster rule needs trigger, harm and response."
+        },
+        {
+          "timestamp_sec": 430,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Abilities need costs, growth gates and counters to preserve long-term tension."
+        },
+        {
+          "timestamp_sec": 500,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "A 1/3/10 chapter rhythm links local conflict, minor climax and major turn."
+        },
+        {
+          "timestamp_sec": 610,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Escalate goals from individual survival to team, safe-zone politics and civilization."
+        }
+      ],
+      "applicability": [
+        "wasteland, disaster, faction-survival serials"
+      ],
+      "non_applicability": [
+        "pure exposition openings or intentionally consequence-free power fantasy"
+      ],
+      "failure_boundaries": [
+        "1/3/10 is a heuristic, not a platform law",
+        "fictional numbers require plausibility checks"
+      ],
+      "counterexamples": [
+        "Unlimited supplies and instant kills erase resource conflict",
+        "A rule that changes between sunlight scenes breaks continuity"
+      ],
+      "ambiguities": [
+        "ASR homophones for disaster terms; numerical examples are fictional templates"
+      ],
+      "procedure_ids": [
+        "wasteland-faction-survival"
+      ]
+    },
+    {
+      "id": "BV18z411q7VU",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 866.68,
+      "claims": [
+        {
+          "timestamp_sec": 50,
+          "type": "opinion",
+          "level": "E3",
+          "paraphrase": "Classify fan work as adaptation-dependent or independent before rights review."
+        },
+        {
+          "timestamp_sec": 100,
+          "type": "opinion",
+          "level": "E3",
+          "paraphrase": "Adaptation, integrity, attribution and permission scope must be documented before release."
+        },
+        {
+          "timestamp_sec": 180,
+          "type": "opinion",
+          "level": "E3",
+          "paraphrase": "Commercial use of a famous work's attraction can raise unfair-competition risk even where names alone are not protected."
+        },
+        {
+          "timestamp_sec": 270,
+          "type": "opinion",
+          "level": "E3",
+          "paraphrase": "An adapted work may have new expression rights while exercise remains subject to the source work; verify current law."
+        },
+        {
+          "timestamp_sec": 370,
+          "type": "opinion",
+          "level": "E3",
+          "paraphrase": "Real-person identification requires multidimensional similarity, privacy and reputation review; disclaimers do not automatically excuse defamation."
+        },
+        {
+          "timestamp_sec": 705,
+          "type": "opinion",
+          "level": "E2",
+          "paraphrase": "Complaints and infringement findings belong to the person or court, not unauthorized fan campaigns."
+        }
+      ],
+      "applicability": [
+        "fan fiction, real-person fiction, commercial publication screening"
+      ],
+      "non_applicability": [
+        "jurisdiction-free legal conclusions"
+      ],
+      "failure_boundaries": [
+        "Video is not legal advice",
+        "case amounts and statutory articles require current jurisdictional verification"
+      ],
+      "counterexamples": [
+        "Changing a name but retaining unique occupation, events and objects can still identify a person",
+        "A pure-fiction disclaimer cannot cure a defamatory depiction"
+      ],
+      "ambiguities": [
+        "ASR and speaker examples; cited judgment amount needs primary decision"
+      ],
+      "procedure_ids": [
+        "source-transformation-boundary"
+      ]
+    },
+    {
+      "id": "BV1kEbWzbEL3",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 411.0,
+      "claims": [
+        {
+          "timestamp_sec": 20,
+          "type": "practitioner_experience",
+          "level": "E3",
+          "paraphrase": "Choose a specific period and place, then make restrictions and an inversion premise explicit."
+        },
+        {
+          "timestamp_sec": 75,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "A male-oriented era story often uses opportunity, investment, obstacle, first gain and expansion as a causal chain."
+        },
+        {
+          "timestamp_sec": 95,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "A female-oriented era story can center improved living conditions and family reconciliation while preserving boundaries."
+        },
+        {
+          "timestamp_sec": 125,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "The first 6000 words should establish identity, hardship, bounded advantage and a visible action."
+        },
+        {
+          "timestamp_sec": 175,
+          "type": "practitioner_experience",
+          "level": "E3",
+          "paraphrase": "A small enterprise must match period resources, policy, technology, prices and channels."
+        },
+        {
+          "timestamp_sec": 380,
+          "type": "platform_claim",
+          "level": "E4",
+          "paraphrase": "The four early checkpoints (conflict, early advantage, clear goal, plain language) are speaker heuristics, not platform rules."
+        }
+      ],
+      "applicability": [
+        "period-rebirth and era-business/family serial openings"
+      ],
+      "non_applicability": [
+        "gender preference as universal law or unverified economic history"
+      ],
+      "failure_boundaries": [
+        "All policy, prices, products and medical practices require independent historical verification",
+        "platform signing claims are not official requirements"
+      ],
+      "counterexamples": [
+        "A modern product unavailable in the chosen year breaks immersion",
+        "An unlimited cheat removes the resource and family stakes"
+      ],
+      "ambiguities": [
+        "ASR misrecognizes a television/product term; decade range is a broad teaching summary"
+      ],
+      "procedure_ids": [
+        "era-rebirth-20k-gate"
+      ]
+    },
+    {
+      "id": "BV1Eu4y1i749",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 227.2,
+      "claims": [
+        {
+          "timestamp_sec": 10,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "Give rebirth a purpose such as repair, regret or a concrete objective and a thematic question."
+        },
+        {
+          "timestamp_sec": 60,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Ability growth needs shown learning or training, failure and improvement rather than unexplained omniscience."
+        },
+        {
+          "timestamp_sec": 105,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "Show changed behavior through observable choices and consequences instead of supporting-character announcements."
+        },
+        {
+          "timestamp_sec": 140,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Early reunions should retain familiar/strange friction that affects decisions."
+        },
+        {
+          "timestamp_sec": 175,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Prior knowledge must meet costs, opponents and butterfly effects; at least one forecast should fail."
+        },
+        {
+          "timestamp_sec": 210,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "The ending should answer what changing a cause produced and what ethical or emotional cost followed."
+        }
+      ],
+      "applicability": [
+        "regression, rebirth and second-chance character arcs"
+      ],
+      "non_applicability": [
+        "stories without memory reset or deliberately consequence-free time travel"
+      ],
+      "failure_boundaries": [
+        "Foreknowledge is not an infallible script",
+        "theme cannot replace causal scene evidence"
+      ],
+      "counterexamples": [
+        "A protagonist who instantly masters every skill has no earned growth",
+        "A forecast that never changes removes butterfly-effect tension"
+      ],
+      "ambiguities": [
+        "Examples are teaching abstractions; no external historical claims supplied"
+      ],
+      "procedure_ids": [
+        "rebirth-causality-audit"
+      ]
+    },
+    {
+      "id": "BV117411c7PT",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 610.52,
+      "claims": [
+        {
+          "timestamp_sec": 60,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Choose fight style, pleasure point and target length by genre before drafting."
+        },
+        {
+          "timestamp_sec": 180,
+          "type": "demonstration",
+          "level": "E2",
+          "paraphrase": "Action paragraphs make movement, speech and expression legible, including positions and results."
+        },
+        {
+          "timestamp_sec": 300,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Use attack, defense or counterattack and a stance-bearing line as a repeating exchange."
+        },
+        {
+          "timestamp_sec": 380,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Environmental damage provides a comparative scale for an opponent's durability."
+        },
+        {
+          "timestamp_sec": 460,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "After an environmental peak, state the winner and cost rather than delaying the result indefinitely."
+        },
+        {
+          "timestamp_sec": 540,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Sensory foreshadowing and a visual/auditory result prevent an unprepared fight from reading as filler."
+        }
+      ],
+      "applicability": [
+        "Chinese web-fiction combat scenes"
+      ],
+      "non_applicability": [
+        "purely abstract combat or choreography unconcerned with reader orientation"
+      ],
+      "failure_boundaries": [
+        "Word-count suggestions are heuristics",
+        "adjective-only power claims do not establish force"
+      ],
+      "counterexamples": [
+        "One-sided unbroken combos remove opposition and choice",
+        "Long environmental description without result stalls pacing"
+      ],
+      "ambiguities": [
+        "ASR examples and exact word counts require source audio confirmation"
+      ],
+      "procedure_ids": [
+        "webfight-exchange-gate"
+      ]
+    },
+    {
+      "id": "BV1cM4y1c7ky",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 710.36,
+      "claims": [
+        {
+          "timestamp_sec": 70,
+          "type": "craft_model",
+          "level": "E1",
+          "paraphrase": "Emotional hurt works when characters' choices and helplessness make the outcome feel inevitable rather than arbitrary."
+        },
+        {
+          "timestamp_sec": 115,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Build empathy through character detail, relationship dependence and foreshadowed constraints before the break."
+        },
+        {
+          "timestamp_sec": 240,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Internal desire, mistaken cognition, conflict and action create a sustained moral dilemma."
+        },
+        {
+          "timestamp_sec": 370,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Delay the strike until emotional attachment and apparent calm are strongest; contrast sweetness with pain."
+        },
+        {
+          "timestamp_sec": 550,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Represent pain through events, behavior, viewpoint and short lines rather than exhaustive author explanation."
+        },
+        {
+          "timestamp_sec": 650,
+          "type": "craft_model",
+          "level": "E2",
+          "paraphrase": "Do not pre-spoil whether the ending is tragic or happy; let the story's arc and consequences carry the wound."
+        }
+      ],
+      "applicability": [
+        "relationship tragedy, angst and high-emotion web-fiction arcs"
+      ],
+      "non_applicability": [
+        "gratuitous shock, gore-only horror or stories intentionally refusing empathy"
+      ],
+      "failure_boundaries": [
+        "Pain formulas cannot replace character causality",
+        "sponsorship/health claims in the recording are not medical advice"
+      ],
+      "counterexamples": [
+        "Killing a character without attachment is a shock, not earned heartbreak",
+        "A long monologue naming every feeling can limit reader participation"
+      ],
+      "ambiguities": [
+        "ASR has many homophones; a mid-video commercial segment is outside craft evidence"
+      ],
+      "procedure_ids": [
+        "emotional-knife-arc"
+      ]
+    },
+    {
+      "id": "BV1up4y1V74N",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 792.34,
+      "claims": [
+        {
+          "timestamp_sec": 22.2,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "交替使用对白标记、动作和纯引号可帮助读者追踪说话人。"
+        },
+        {
+          "timestamp_sec": 134.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "无标签对白需要称谓、上下文或说话习惯作为归属锚点。"
+        },
+        {
+          "timestamp_sec": 195.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "每句对白至少应承担信息、情节、人物或冲突中的一项功能。"
+        },
+        {
+          "timestamp_sec": 282.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "旁白和行动应穿插对白，避免整段对白遮蔽空间与感官。"
+        },
+        {
+          "timestamp_sec": 344.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "解释性台词可改写为视角可见的动作和反应，只保留必要背景。"
+        },
+        {
+          "timestamp_sec": 534.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "对白应符合角色年龄、身份、地位、性格和表达习惯。"
+        },
+        {
+          "timestamp_sec": 731.0,
+          "type": "demonstration",
+          "level": "E4",
+          "paraphrase": "表层回答与潜台词错位的短对白能够呈现关系张力。"
+        }
+      ],
+      "applicability": [
+        "中文网文对白编辑与场景改写"
+      ],
+      "non_applicability": [
+        "剧本体、短信体或刻意纯对白实验"
+      ],
+      "failure_boundaries": [
+        "标记方式不是必须轮换的格式规则"
+      ],
+      "counterexamples": [
+        "寒暄有关系功能时不应机械删除"
+      ],
+      "ambiguities": [
+        "仅有ASR且示例逐字需回看原作"
+      ],
+      "procedure_ids": [
+        "dialogue-voice-function-gate"
+      ]
+    },
+    {
+      "id": "BV1DyKp6AEVN",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 903.3,
+      "claims": [
+        {
+          "timestamp_sec": 8.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "概述负责压缩时间和搭建脉络，戏剧负责现场冲突、细节与情绪。"
+        },
+        {
+          "timestamp_sec": 142.9,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "戏剧段可用动作、声音和触感承载情绪，少用直接情绪判词。"
+        },
+        {
+          "timestamp_sec": 192.9,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "跨年份背景宜用概述，关键冲突和抉择宜接近实时展开。"
+        },
+        {
+          "timestamp_sec": 255.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "非关键谈话可转述，改变局势的互动应保留原生对白。"
+        },
+        {
+          "timestamp_sec": 303.4,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "戏剧段应有明确场景边界，并按视角限制可知信息。"
+        },
+        {
+          "timestamp_sec": 462.1,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "低抽象、连续行动链能让戏剧段落保持可感知和因果连贯。"
+        }
+      ],
+      "applicability": [
+        "需要在长时间跨度与关键场面间切换的叙事"
+      ],
+      "non_applicability": [
+        "纯说明文或有意全知的实验文本"
+      ],
+      "failure_boundaries": [
+        "被压缩的时间段若含关键因果不可一笔带过"
+      ],
+      "counterexamples": [
+        "全程戏剧描写无冲突事件会拖慢节奏"
+      ],
+      "ambiguities": [
+        "全知视角是合法选择，非质量错误"
+      ],
+      "procedure_ids": [
+        "summary-drama-switch"
+      ]
+    },
+    {
+      "id": "BV1xs6SBDE6W",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 513.4,
+      "claims": [
+        {
+          "timestamp_sec": 20.3,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "删除支线前检查其对主角性格、信念、能力资源和命运选择的影响。"
+        },
+        {
+          "timestamp_sec": 150.1,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "高压段后可安排恢复动作，同时推进关系或策略并留下新问题。"
+        },
+        {
+          "timestamp_sec": 281.6,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "冲突升级应改变目标、代价或策略，而非只提高声量和规模。"
+        },
+        {
+          "timestamp_sec": 346.2,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "大纲路标可用于检查章节压力曲线和转折位置。"
+        },
+        {
+          "timestamp_sec": 366.9,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "动作、感官和心理反应应形成连续链条，避免抽象标签堆叠。"
+        },
+        {
+          "timestamp_sec": 490.4,
+          "type": "practitioner_experience",
+          "level": "E4",
+          "paraphrase": "平台留存或读者下车说法只能作为待验证假设，不能由本课证明。"
+        }
+      ],
+      "applicability": [
+        "章节级节奏诊断与删改"
+      ],
+      "non_applicability": [
+        "意识流、散文或刻意违背匀速的喜剧停顿"
+      ],
+      "failure_boundaries": [
+        "伏笔当场无影响时应记录回收点而非直接删除"
+      ],
+      "counterexamples": [
+        "安全屋只重复疲劳而无关系或策略变化属于拖速"
+      ],
+      "ambiguities": [
+        "ASR长段和错字需人工复核"
+      ],
+      "procedure_ids": [
+        "pace-pressure-curve"
+      ]
+    },
+    {
+      "id": "BV128EizVE4X",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 248.7,
+      "claims": [
+        {
+          "timestamp_sec": 42.2,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "有限视角应只写体验者可获得的信息，避免无授权上帝视角。"
+        },
+        {
+          "timestamp_sec": 85.2,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "感官描写可直接呈现所见所闻，不必反复使用他看见或他听见。"
+        },
+        {
+          "timestamp_sec": 186.7,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "外在刺激、身体反应、内在意识和行动动机组成可共情链。"
+        },
+        {
+          "timestamp_sec": 151.3,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "人物目标和顾虑应先于模板化的生气、发抖等情绪词。"
+        },
+        {
+          "timestamp_sec": 216.7,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "鲁莽或克制行动需呈现风险评估、社会处境和忍耐历史。"
+        },
+        {
+          "timestamp_sec": 110.1,
+          "type": "demonstration",
+          "level": "E4",
+          "paraphrase": "按空间顺序放置少量环境物件并让刺激打断动作可减少感官标签。"
+        }
+      ],
+      "applicability": [
+        "第一或第三人称有限视角的共情场景"
+      ],
+      "non_applicability": [
+        "有意全知的史诗、盲聋角色未经调整的感官描写"
+      ],
+      "failure_boundaries": [
+        "短促惊吓可暂时没有完整心理链"
+      ],
+      "counterexamples": [
+        "全知叙事不应被误判为视角错误"
+      ],
+      "ambiguities": [
+        "示例及带入感倍数为ASR口述评价"
+      ],
+      "procedure_ids": [
+        "sensory-motivation-chain"
+      ]
+    },
+    {
+      "id": "BV16U4y117uh",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 834.64,
+      "claims": [
+        {
+          "timestamp_sec": 63.7,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "长句改短句先找动词主干，再确定动作发出者和接受者。"
+        },
+        {
+          "timestamp_sec": 151.9,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "地点、时间和频率等状语应挂接到唯一中心动词并按现代汉语顺序前置。"
+        },
+        {
+          "timestamp_sec": 318.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "合成长句时区分特征定语与作用谓语，以决定信息焦点。"
+        },
+        {
+          "timestamp_sec": 504.0,
+          "type": "demonstration",
+          "level": "E4",
+          "paraphrase": "原句改句比较可记录词序、句法角色、焦点、节奏和风格差异。"
+        },
+        {
+          "timestamp_sec": 583.6,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "整句与散句可按多句句式、字数和步调是否相似来区分。"
+        },
+        {
+          "timestamp_sec": 632.6,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "散句改整句前先依据上下文恢复并列项目顺序，再统一句式。"
+        }
+      ],
+      "applicability": [
+        "中文网文句法拆分、合句和并列节奏编辑"
+      ],
+      "non_applicability": [
+        "把语文教学规则当作网文传播效果证明"
+      ],
+      "failure_boundaries": [
+        "无上下文锚点时不可为整齐牺牲因果和时序"
+      ],
+      "counterexamples": [
+        "无主句、兼语句和倒装不能机械套主谓宾拆分"
+      ],
+      "ambiguities": [
+        "ASR同音误识和古汉语状语提示需复核"
+      ],
+      "procedure_ids": [
+        "syntax-structure-transfer"
+      ]
+    },
+    {
+      "id": "BV1y5411p7yb",
+      "status": "deep_distilled",
+      "full_review_complete": true,
+      "reviewed_to_sec": 585.0,
+      "claims": [
+        {
+          "timestamp_sec": 106.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "发布前先检查错别字，频繁错字会造成阅读顿挫。"
+        },
+        {
+          "timestamp_sec": 156.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "排版和段落组织会影响读者进入文本的速度，应避免人名机械作为自然段开头。"
+        },
+        {
+          "timestamp_sec": 250.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "开篇黄金段落连续大段无功能对白可能让读者无法辨认主角。"
+        },
+        {
+          "timestamp_sec": 277.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "避免重复形容和生僻炫技词，优先保证剧情与人物命运清晰。"
+        },
+        {
+          "timestamp_sec": 366.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "阅读时记录有效词语和句式并模仿结构，是讲者建议的练习方法。"
+        },
+        {
+          "timestamp_sec": 401.0,
+          "type": "craft_model",
+          "level": "E4",
+          "paraphrase": "场景描写应服务剧情过渡和人物刻画，不以堆砌华丽形容词为目标。"
+        },
+        {
+          "timestamp_sec": 464.0,
+          "type": "platform_claim",
+          "level": "E4",
+          "paraphrase": "关于一万至三万字节奏和付费节点是个人平台经验，不能证明网文留存或收入因果。"
+        }
+      ],
+      "applicability": [
+        "中文网文初稿校对、排版和节奏自查"
+      ],
+      "non_applicability": [
+        "把课程经验当作平台规范或效果保证"
+      ],
+      "failure_boundaries": [
+        "段落长度和重复次数不是跨平台硬阈值"
+      ],
+      "counterexamples": [
+        "有意重复可构成风格或修辞时不应机械删除"
+      ],
+      "ambiguities": [
+        "ASR存在大量错字，示例版式未取得画面证据"
+      ],
+      "procedure_ids": [
+        "webnovel-final-prose-pass"
+      ]
+    }
+  ]
+}

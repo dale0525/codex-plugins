@@ -1,0 +1,6 @@
+interface:
+  display_name: "Web Novel Genre Craft"
+  short_description: "Design genre-specific reader contracts and story mechanisms"
+  default_prompt: "Use $web-novel-genre-craft to design and validate this novel within its genre contract."
+policy:
+  allow_implicit_invocation: true

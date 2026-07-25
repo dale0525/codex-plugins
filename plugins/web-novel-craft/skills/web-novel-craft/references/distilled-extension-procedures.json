@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "corpus_id": "web-novel-craft-extension-v1",
+  "procedures": [
+    {
+      "id": "romance-relationship-arc",
+      "source_ids": ["C2suFy1PFXA", "L-_RsshM54o"],
+      "trigger": "A romance or romantic subplot has attraction but no durable relationship movement.",
+      "inputs": ["genre contract", "two character profiles", "external plot map", "volume boundaries"],
+      "steps": [
+        {"action": "Declare romance-primary or subplot and record the promised ending state.", "check": "Marketing, tone, and planned ending do not make contradictory promises."},
+        {"action": "Write each partner's independent goal, fear, misbelief, boundary, and characteristic strategy.", "check": "Either person can take meaningful action when the other is absent."},
+        {"action": "Map meeting, interest, doubt, falling, retreat, choice, and commitment as flexible states.", "check": "Every transition has a new action, information change, cost, and trust delta."},
+        {"action": "Connect external events to relationship decisions and give each volume a local stage payoff.", "check": "Deleting either line changes the climax and each volume satisfies its stated scope."}
+      ],
+      "output": "A relationship-state table with external-plot links and volume payoffs.",
+      "failure_signals": ["Repeated misunderstanding", "One partner has no independent goal", "Sudden final commitment"],
+      "repair": ["Replace repetition with a consequence", "Restore independent choices", "Rebuild the climax around trust and external stakes"],
+      "acceptance": ["Every stage has behavioral evidence", "Slow burn has causal momentum", "The ending matches the declared contract"],
+      "example": "A shared investigation changes trust at every clue and the final accusation also tests whether each partner respects the other's boundary.",
+      "counterexample": "The leads flirt between unrelated battles and declare eternal love after the villain dies."
+    },
+    {
+      "id": "mystery-fair-play-ledger",
+      "source_ids": ["GNR0g60m0EI", "GwxFM0oHhfA"],
+      "trigger": "A mystery solution feels arbitrary, obvious, or impossible to reconstruct.",
+      "inputs": ["solution", "suspect motives", "chapter evidence", "POV knowledge ledger"],
+      "steps": [
+        {"action": "Express the reveal as motive A plus connection B yielding conclusion C.", "check": "A and B can exist before the reveal without stating C."},
+        {"action": "Classify each clue and record its exact proposition contribution and alternate explanation.", "check": "Emotion and absence adjust probability but never prove guilt alone."},
+        {"action": "Cross-check testimony, provenance, knowledge source, time, means, and opportunity.", "check": "Every major inference has at least one motive and one connection path."},
+        {"action": "Reread all clue scenes under innocent and guilty interpretations and run a rival-suspect refutation.", "check": "The answer recontextualizes visible facts and introduces no decisive late evidence."}
+      ],
+      "output": "A clue-proposition ledger, reveal proof chain, and fairness report.",
+      "failure_signals": ["Late twin or new rule", "Uncross-checked confession", "Absence used as proof"],
+      "repair": ["Plant a dual-reading clue", "Add independent corroboration", "Downgrade weak evidence to suspicion"],
+      "acceptance": ["The reveal is surprising but retrospectively reconstructable", "Competing explanations fail on existing evidence"],
+      "example": "A copied key, unusual schedule knowledge, and motive jointly identify the culprit while each detail previously had an innocent explanation.",
+      "counterexample": "The detective names a stranger whose existence and motive appear only in the final speech."
+    },
+    {
+      "id": "comedy-subtext-scene",
+      "source_ids": ["nj9MAv9INCY", "hMMpmlraoDo"],
+      "trigger": "Dialogue is literal and flat, or comic beats feel detached from character and consequence.",
+      "inputs": ["scene goal", "speaker goals", "power and information map", "draft dialogue"],
+      "steps": [
+        {"action": "For each exchange record surface intent, true goal, concealed fact, power, and tactic.", "check": "The intended inference has contextual evidence rather than author-only knowledge."},
+        {"action": "For a comic beat establish a decodable setup and the reader's likely assumption.", "check": "The setup is concise and the assumed pattern is specific."},
+        {"action": "Break or reframe the assumption with the shortest effective punch, then add only earned tags or callbacks.", "check": "The analogy remains true on both sides and no explanation is needed."},
+        {"action": "End the exchange with a change in information, power, plan, status, or relationship.", "check": "The voice belongs to the narrator or character making the observation."}
+      ],
+      "output": "A dialogue/subtext card and comic beat with a tracked scene consequence.",
+      "failure_signals": ["Arbitrary hidden meaning", "Explained joke", "Tags longer than the payoff", "Interchangeable speakers"],
+      "repair": ["Restore causal context", "Shorten to setup and punch", "Tie diction and tactic to character goals"],
+      "acceptance": ["A reader infers the hidden pressure", "The comic turn is decodable", "The scene state changes"],
+      "example": "A polite offer to help is refused through a joke about spare keys, revealing distrust and shifting control of the room.",
+      "counterexample": "The narrator inserts an unrelated pun and then explains that it should make the reader laugh."
+    },
+    {
+      "id": "long-form-quarter-audit",
+      "source_ids": ["vnP2wpE2AOQ", "OlwQ6xP8FRs", "1Fkfx70_l_k"],
+      "trigger": "A long novel stalls in the middle or its climax and ending feel disconnected.",
+      "inputs": ["inciting event", "middle outline", "character arc", "promise ledger", "planned ending"],
+      "steps": [
+        {"action": "Map goal, obstacle mode, strategy, belief update, cost, and next pressure at major points.", "check": "Adjacent units connect through cause, effect, and consequence rather than sequence alone."},
+        {"action": "Find repeated scene formats and upgrade a different dimension or converge a subplot.", "check": "The change alters available choices and does not merely increase magnitude."},
+        {"action": "Trace the ending backward through opening seed, inciting event, midpoint, and late threshold.", "check": "The same causal spine and thematic question remain visible or change by approved choice."},
+        {"action": "Audit preparation, approach, confrontation, surprise, sacrifice, and aftermath.", "check": "The protagonist acts, the surprise is prepared, old material pays off, and the aftermath shows a new state."}
+      ],
+      "output": "A repaired middle escalation map and climax-to-opening payoff trace.",
+      "failure_signals": ["Repeated strategy", "Explanatory climax", "Unprepared savior", "No aftermath"],
+      "repair": ["Change goal or understanding", "Move setup earlier", "Make the protagonist pay the decisive cost", "Add concrete aftermath"],
+      "acceptance": ["Each major point changes state irreversibly", "The ending resolves the established goal and promises", "No percentage is enforced mechanically"],
+      "example": "A midpoint truth changes alliance strategy, the former side plot supplies a costly approach, and an early promise becomes the sacrifice mechanism.",
+      "counterexample": "At an exact eighty-percent mark a new wizard arrives, explains the theme, and defeats the antagonist."
+    },
+    {
+      "id": "historical-scene-evidence",
+      "source_ids": ["q5viZmPV-so"],
+      "trigger": "A historical scene depends on a period fact, procedure, institution, or social norm.",
+      "inputs": ["scene question", "time and place", "character social position", "candidate sources"],
+      "steps": [
+        {"action": "Define the exact scene claim and use broad sources to learn vocabulary and disputes.", "check": "The research question can change an obstacle, affordance, procedure, or choice."},
+        {"action": "Locate scholarly secondary work, relevant primary artifacts, local archives, or experts.", "check": "Provenance, date, perspective, and source tier are recorded."},
+        {"action": "Cross-check key claims and build a timeline for travel, news, law, technology, and language.", "check": "Primary-source bias and disagreement remain visible."},
+        {"action": "Convert verified material into scene conditions and mark compression or invented gaps.", "check": "The prose does not present uncertainty or fictionalization as documented fact."}
+      ],
+      "output": "A sourced historical scene card, timeline checks, and explicit uncertainty record.",
+      "failure_signals": ["Source dump", "Untraceable fact", "Modern institution or phrase", "Primary source treated as neutral truth"],
+      "repair": ["Narrow the question", "Add critical secondary corroboration", "Change the scene or mark the gap fictional"],
+      "acceptance": ["Key claims are traceable", "Period constraints change character action", "Anachronism checks pass"],
+      "example": "Travel time and newspaper delay force a character to act on incomplete information rather than receive instant news.",
+      "counterexample": "A search snippet supplies a modern legal procedure that the scene uses decades before enactment."
+    },
+    {
+      "id": "chinese-opening-gate",
+      "source_ids": ["BV1mGoLYuE7i", "BV1EyxUetEh5"],
+      "trigger": "A Chinese web-novel opening is confusing, inert, overloaded, or emotionally remote.",
+      "inputs": ["causal story summary", "first three to five chapters", "protagonist desire and crisis", "necessary world rules"],
+      "steps": [
+        {"action": "Verify the opening belongs to a causal story with a plausible outcome and decisive protagonist path.", "check": "The opening is not only a clever cut point disconnected from the ending."},
+        {"action": "Show character, urgent crisis, or present desire through an event and visible response.", "check": "A cold reader can name the protagonist's current pressure and likely next action."},
+        {"action": "Deliver only prerequisite background, system functions, and relationships through action or consequential dialogue.", "check": "Removing a detail would either harm comprehension or later payoff."},
+        {"action": "Run scan-read and close-read checks, then preview names, logic, formatting, and typos.", "check": "Numerical heuristics remain testable budgets rather than platform rules."}
+      ],
+      "output": "An opening information map, emotional beat trace, first-action chain, and dated hypotheses.",
+      "failure_signals": ["Encyclopedic opening", "No protagonist reaction", "Argument with no information", "Personal word count treated as policy"],
+      "repair": ["Move background into consequences", "Restore thought-to-action chain", "Reduce names and emphasize functional relationships"],
+      "acceptance": ["Readers can restate who, pressure, relevant rule, choice, and next question", "The opening contains no unsupported platform threshold"],
+      "example": "A tax collection threatens the protagonist's home, revealing social structure while forcing a first risky decision.",
+      "counterexample": "The first chapter lists factions, systems, and seven named friends before any character must act."
+    },
+    {
+      "id": "platform-claim-filter",
+      "source_ids": ["BV1JaZ2YDEpo"],
+      "trigger": "A retention, recommendation, signing, or word-count claim is about to be treated as a writing rule.",
+      "inputs": ["claim with date", "platform and context", "current official documentation when available", "opening manuscript"],
+      "steps": [
+        {"action": "Record the exact historical claim, publication date, speaker role, and unverified thresholds.", "check": "The claim is labeled platform_claim rather than a craft fact."},
+        {"action": "Find current official definitions, eligibility, measurement windows, and policy changes.", "check": "Operational thresholds come only from current authoritative material."},
+        {"action": "Translate any still-relevant claim into a tentative craft question about comprehension, promise, pressure, or forward pull.", "check": "The question does not require filler, deception, or damage to the reader contract."},
+        {"action": "Judge the opening first as prose and story, and label any platform-specific inference as uncertain.", "check": "A metric claim never substitutes for evidence that readers can understand the setup and want the next consequence."}
+      ],
+      "output": "A dated claim assessment and a story-first opening diagnosis.",
+      "failure_signals": ["Hard-coded old dwell time", "Public count mistaken for internal quality", "Metric optimization harms the chapter"],
+      "repair": ["Return to official documentation", "Retire the threshold", "Restore story-first criteria"],
+      "acceptance": ["Every stated platform fact is current and sourced", "The writing advice remains useful even if the historical metric is false or obsolete"],
+      "example": "A 2025 spoken metric becomes a hypothesis until a current official help page and cohort test support use.",
+      "counterexample": "The author adds filler so readers cannot flip quickly enough to miss an obsolete threshold."
+    },
+    {
+      "id": "ai-long-form-writing-loop",
+      "source_ids": ["XY5Wncq5vAE", "6pSW3hEOxf4", "FPIffi9Dw60", "FyRNX51MI3g"],
+      "trigger": "AI will plan or draft a chapter in an ongoing long-form project.",
+      "inputs": ["author intent", "existing manuscript", "lightweight story bible", "POV knowledge", "open promises", "chapter goal"],
+      "steps": [
+        {"action": "Read the relevant manuscript and lightweight story bible, then select only facts the viewpoint character and current scene need.", "check": "The selected context preserves established events, knowledge limits, relationships, rules, injuries, objects, and open promises without replacing the manuscript with a summary."},
+        {"action": "Propose several scene directions from the chapter goal, character intentions, beliefs, obstacles, and consequences.", "check": "Each direction contains observable action, a causal predecessor, a meaningful choice, and a changed situation."},
+        {"action": "Choose the direction that best fits character and story causality, then draft in coherent scene-sized segments.", "check": "Each segment advances the same dramatic line while preserving spatial, temporal, emotional, and POV continuity."},
+        {"action": "Reread the draft for drift, abstraction, repetition, generic character behavior, unsupported new facts, and weak scene change; revise the failed passages.", "check": "The final chapter is concrete, causally connected, character-specific, and compatible with the established story."}
+      ],
+      "output": "A chapter draft or continuation, a concise diagnosis of remaining risks, and updated lightweight story notes when needed.",
+      "failure_signals": ["Unsourced fact", "Memory hallucination", "Length padding", "Character genericity", "State drift"],
+      "repair": ["Return to the last established manuscript fact", "Narrow context and segment", "Restore concrete action and independent character goals", "Remove or rewrite unsupported reflection"],
+      "acceptance": ["The chapter changes the story state", "Character choices and POV knowledge remain credible", "New facts are earned, necessary, and consistent"],
+      "example": "A scene reads only facts known to the viewpoint character, considers two causal directions, drafts the stronger one, and revises a generic reaction into a character-specific costly choice.",
+      "counterexample": "A model-generated reflection invents a marriage and later chapters accept it because it appeared in the long context."
+    },
+    {
+      "id": "writing-critique-calibration",
+      "source_ids": ["trfUBIDeI1Y"],
+      "trigger": "An LLM reviewer will score or compare chapter candidates.",
+      "inputs": ["declared reader contract", "evaluation criteria with examples", "candidate drafts", "independent human judgments when available"],
+      "steps": [
+        {"action": "Separate observable textual problems from qualitative effects and define criteria with concrete examples.", "check": "A high overall impression cannot erase a continuity break, broken promise, or incoherent character choice."},
+        {"action": "Review each draft directly and, when comparing drafts, swap pair order and quote the passages that determine the judgment.", "check": "Length, formatting, author identity, and presentation do not decide the winner by themselves."},
+        {"action": "Check for position bias, verbosity bias, self-preference, generic praise, and disagreement with informed human readers.", "check": "The critique distinguishes textual evidence, reader effect, causal diagnosis, and proposed repair."},
+        {"action": "When evidence is close or criteria conflict, state uncertainty and explain the tradeoff instead of forcing a score.", "check": "The evaluation helps an author decide what to revise and does not pretend taste is an objective rule."}
+      ],
+      "output": "An evidence-based critique or comparison that identifies strengths, high-impact problems, repair options, and uncertainty.",
+      "failure_signals": ["Order-sensitive winner", "Verbose output always wins", "Self-model preference", "No human agreement data"],
+      "repair": ["Swap order", "Control irrelevant length differences", "Use an independent blind reading", "Rewrite vague criteria around quoted examples"],
+      "acceptance": ["Every major judgment cites textual evidence", "Known biases are actively checked", "The conclusion explains for whom and under which reader contract the text works"],
+      "example": "Two similar chapters are compared in both orders; the critique cites the decisive passages and explains why one creates a clearer character choice despite being shorter.",
+      "counterexample": "The same model writes and judges a longer chapter, awards itself the top score, and offers no textual evidence."
+    },
+    {
+      "id": "ai-originality-and-source-boundary",
+      "source_ids": ["Ear3bOk27C4", "C8QC77Lok18"],
+      "trigger": "AI-assisted writing or revision draws on source material, another author's work, or uncertain claims about the manuscript.",
+      "inputs": ["author's manuscript and intent", "source material", "requested transformation", "uncertain facts or attributions"],
+      "steps": [
+        {"action": "Classify what comes from the user's manuscript, documented source material, general craft knowledge, or AI inference.", "check": "Inferences and generated possibilities are never presented as facts from the manuscript or source."},
+        {"action": "Extract transferable craft mechanisms instead of imitating a living author's distinctive style or copying protected expression.", "check": "The proposed writing can be explained through general choices such as distance, syntax, scene pressure, imagery, or dialogue tactic."},
+        {"action": "When editing, inspect the actual wording changes for altered meaning, voice, attribution, and invented facts.", "check": "A cleanup request does not silently become a creative rewrite."},
+        {"action": "Flag unresolved source uncertainty and preserve the user's authorship decisions.", "check": "The final text has an independent dramatic purpose and the author can identify what was retained, transformed, or newly invented."}
+      ],
+      "output": "A source-aware draft or edit with clear boundaries between original material, transformation, and uncertain inference.",
+      "failure_signals": ["Source wording passed off as original", "Living-author style imitation", "AI inference treated as manuscript fact", "Unreviewed voice-changing rewrite"],
+      "repair": ["Remove copied expression", "Translate the desired effect into general craft mechanisms", "Restore the author's original meaning and voice", "Label or verify uncertain facts"],
+      "acceptance": ["No source is misrepresented", "The prose has an independent purpose and voice", "Meaningful edits preserve or deliberately change author intent"],
+      "example": "An author asks for stronger tension using a reference novel; the response identifies delayed disclosure and conflicting goals, then creates a new scene with different language, events, and character dynamics.",
+      "counterexample": "The response reproduces a living novelist's signature diction and claims invented backstory was present in the user's draft."
+    }
+  ]
+}

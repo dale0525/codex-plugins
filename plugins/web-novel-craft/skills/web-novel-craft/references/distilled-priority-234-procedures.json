@@ -1,0 +1,1518 @@
+{
+  "schema_version": 1,
+  "corpus_id": "web-novel-craft-priority-234-v1",
+  "procedures": [
+    {
+      "id": "proc-8mtMuJ61dls",
+      "source_ids": [
+        "8mtMuJ61dls"
+      ],
+      "trigger": "规划独立作者的类型、系列产能、渠道和首章时",
+      "inputs": [
+        "读者与相邻类型资料",
+        "规则和文化来源卡",
+        "四周产能记录",
+        "渠道合同条款"
+      ],
+      "steps": [
+        {
+          "action": "建立类型—读者—规则—主题表，并写出规则利用、限制和代价。",
+          "check": "首章500字内出现目标或危险，且规则通过动作可见。",
+          "output": "一页规则卡和首章验收记录。",
+          "failure_signals": [
+            "规则只靠说明段出现",
+            "文化元素没有来源或视角"
+          ],
+          "repair": "补写来源、敏感点和动作化场景，并邀请熟悉该文化的读者审阅。",
+          "acceptance": "编辑和目标读者都能复述目标、规则和未解决钩子。",
+          "example": "用雷暴、渡劫和身体重塑的感官动作展示升级规则。",
+          "counterexample": "只投广告而不检查价格、封面、分发和产品定位。"
+        },
+        {
+          "action": "以四周实测字数更新年度计划，填写独家/广泛发行及电子、纸书、有声渠道矩阵。",
+          "check": "合同期限、地域、版税和权利冲突已核验。",
+          "output": "可持续写作和发布清单。",
+          "failure_signals": [
+            "连续两周低于目标仍透支健康",
+            "渠道权利重叠"
+          ],
+          "repair": "缩小范围、加入编辑缓冲并重新核查平台条款。",
+          "acceptance": "计划含休息缓冲且每月复盘销售、留存和健康指标。",
+          "example": "按个人实测而非固定2000字日指标安排出版。",
+          "counterexample": "把嘉宾4-8本年经验当普适KPI。"
+        }
+      ],
+      "output": "一页规则卡和首章验收记录。；可持续写作和发布清单。",
+      "repair": "补写来源、敏感点和动作化场景，并邀请熟悉该文化的读者审阅。；缩小范围、加入编辑缓冲并重新核查平台条款。",
+      "acceptance": "编辑和目标读者都能复述目标、规则和未解决钩子。；计划含休息缓冲且每月复盘销售、留存和健康指标。",
+      "example": "用雷暴、渡劫和身体重塑的感官动作展示升级规则。；按个人实测而非固定2000字日指标安排出版。",
+      "counterexample": "只投广告而不检查价格、封面、分发和产品定位。；把嘉宾4-8本年经验当普适KPI。",
+      "failure_signals": [
+        "规则只靠说明段出现",
+        "文化元素没有来源或视角",
+        "连续两周低于目标仍透支健康",
+        "渠道权利重叠"
+      ]
+    },
+    {
+      "id": "proc-IIGSFZPTCXA",
+      "source_ids": [
+        "IIGSFZPTCXA"
+      ],
+      "trigger": "设计有复杂世界观、第三人称POV、战斗和系列连续性的项目时",
+      "inputs": [
+        "类型读者画像",
+        "世界规则表",
+        "POV卡",
+        "研究日志",
+        "本地Wiki",
+        "scene-sequel节拍表"
+      ],
+      "steps": [
+        {
+          "action": "写现实相同/不同的一句话pitch，并为每个POV写首句锚点、关注对象和比喻词库。",
+          "check": "删掉角色名后仍能从措辞辨认POV。",
+          "output": "对比pitch和视角卡。",
+          "failure_signals": [
+            "关键设定只在题词或序章",
+            "视角句无法归属角色"
+          ],
+          "repair": "把设定放入角色在意的目标或强制学习事件，并补前置伏笔。",
+          "acceptance": "盲测者跳过题词仍理解主线因果。",
+          "example": "用角色感知而非作者百科描述地点。",
+          "counterexample": "四分之三处突然加入可删除的国王儿子。"
+        },
+        {
+          "action": "按事件—误读—争论—行动—反应记录升级，并逐场标注scene变化或sequel回应。",
+          "check": "连续三场无回应或新元素无两次暗示即暂停。",
+          "output": "连续性Wiki和节拍表。",
+          "failure_signals": [
+            "连续高张力无喘息",
+            "低置信度事实成为不可逆支点"
+          ],
+          "repair": "找实践者审阅高风险事实，合并或重写无回应场景。",
+          "acceptance": "随机角色的一分钟内可查到首次描述、状态和矛盾。",
+          "example": "战斗表列资源、补给、地形、移动和角色代价。",
+          "counterexample": "把先研究50%套用于医学或在世文化主题。"
+        }
+      ],
+      "output": "对比pitch和视角卡。；连续性Wiki和节拍表。",
+      "repair": "把设定放入角色在意的目标或强制学习事件，并补前置伏笔。；找实践者审阅高风险事实，合并或重写无回应场景。",
+      "acceptance": "盲测者跳过题词仍理解主线因果。；随机角色的一分钟内可查到首次描述、状态和矛盾。",
+      "example": "用角色感知而非作者百科描述地点。；战斗表列资源、补给、地形、移动和角色代价。",
+      "counterexample": "四分之三处突然加入可删除的国王儿子。；把先研究50%套用于医学或在世文化主题。",
+      "failure_signals": [
+        "关键设定只在题词或序章",
+        "视角句无法归属角色",
+        "连续高张力无喘息",
+        "低置信度事实成为不可逆支点"
+      ]
+    },
+    {
+      "id": "proc-Mm2xZwj6aVI",
+      "source_ids": [
+        "Mm2xZwj6aVI"
+      ],
+      "trigger": "构建哥特恐怖的封闭场所、谜团和悲剧结局时",
+      "inputs": [
+        "当代恐惧清单",
+        "主人公缺陷与欲望",
+        "场所和天气元素",
+        "反派主题",
+        "六阶段节拍"
+      ],
+      "steps": [
+        {
+          "action": "为恐惧写人物代价，选择暗示/解释或感官过度的主次，并为房屋、锁门、肖像和天气指定象征功能。",
+          "check": "至少三处场景会反馈角色选择而非静态装饰。",
+          "output": "场所功能表与主题因果链。",
+          "failure_signals": [
+            "意象不改变选择",
+            "谜团没有人物利害关系"
+          ],
+          "repair": "让空间揭示秘密或迫使背叛、牺牲和不可逆选择。",
+          "acceptance": "读者能把环境变化与人物缺陷和社会焦虑相连。",
+          "example": "雾模糊现实，月光暴露秘密，隐藏空间承载家族创伤。",
+          "counterexample": "堆砌城堡、雾和肖像但人物行动不受影响。"
+        },
+        {
+          "action": "按抵达、隔绝、秘密、执念、对峙、带代价结局安排递进揭示，并保留反派余波。",
+          "check": "预示只暗示有东西在等着，读者不能提前拼完答案。",
+          "output": "六阶段大纲和不可逆损失记录。",
+          "failure_signals": [
+            "反派一次击杀后世界复原",
+            "结尾无死亡、疯狂、创伤或持续阴影"
+          ],
+          "repair": "增加内部/外部高潮的道德代价及历史记忆残留。",
+          "acceptance": "每阶段危险收紧且结局损失可回溯到入门场景。",
+          "example": "日记或书信逐层揭示核心谜团。",
+          "counterexample": "把所有超自然解释为幻觉并给无代价幸福收束。"
+        }
+      ],
+      "output": "场所功能表与主题因果链。；六阶段大纲和不可逆损失记录。",
+      "repair": "让空间揭示秘密或迫使背叛、牺牲和不可逆选择。；增加内部/外部高潮的道德代价及历史记忆残留。",
+      "acceptance": "读者能把环境变化与人物缺陷和社会焦虑相连。；每阶段危险收紧且结局损失可回溯到入门场景。",
+      "example": "雾模糊现实，月光暴露秘密，隐藏空间承载家族创伤。；日记或书信逐层揭示核心谜团。",
+      "counterexample": "堆砌城堡、雾和肖像但人物行动不受影响。；把所有超自然解释为幻觉并给无代价幸福收束。",
+      "failure_signals": [
+        "意象不改变选择",
+        "谜团没有人物利害关系",
+        "反派一次击杀后世界复原",
+        "结尾无死亡、疯狂、创伤或持续阴影"
+      ]
+    },
+    {
+      "id": "proc-Y8ZMbqyD9tY",
+      "source_ids": [
+        "Y8ZMbqyD9tY"
+      ],
+      "trigger": "设计小说、剧本、RPG中的组织或多派系网络时",
+      "inputs": [
+        "派系粒度声明",
+        "地点资源与环境事件",
+        "五问表",
+        "成员技能和利益",
+        "关系矩阵"
+      ],
+      "steps": [
+        {
+          "action": "画母体—子派系—临时小组层级，填写共同目标、分歧目标、资源收益和退出成本。",
+          "check": "权限边界与退出后的谈判能力可解释。",
+          "output": "派系层级图和五问草表。",
+          "failure_signals": [
+            "只有名称口号",
+            "把王国直接当单一派系"
+          ],
+          "repair": "补资源链、地理容忍度、招募和部门专业分工。",
+          "acceptance": "Where/Why/Who/What/How每问都有可追踪证据。",
+          "example": "护送、赏金和私军拆成不同部门并核算物流。",
+          "counterexample": "一个战士公会无成本高效承担三种服务。"
+        },
+        {
+          "action": "建立同盟、竞争、依附、渗透关系矩阵，并模拟新派系或外部事件的连锁反应。",
+          "check": "至少一项内部利益、价值或策略冲突导致妥协或犯错。",
+          "output": "关系矩阵与临时派系解散条件。",
+          "failure_signals": [
+            "临时联盟目标完成后仍无理由维持",
+            "成员像无失误蜂群"
+          ],
+          "repair": "写触发、达成条件和解散/转型机制，加入成员错误成本。",
+          "acceptance": "新增派系改变既有势力关系且可在剧情中验证。",
+          "example": "干旱或战争触发招募和领导更替时间线。",
+          "counterexample": "孤立主义国家无解释容忍外来商会。"
+        }
+      ],
+      "output": "派系层级图和五问草表。；关系矩阵与临时派系解散条件。",
+      "repair": "补资源链、地理容忍度、招募和部门专业分工。；写触发、达成条件和解散/转型机制，加入成员错误成本。",
+      "acceptance": "Where/Why/Who/What/How每问都有可追踪证据。；新增派系改变既有势力关系且可在剧情中验证。",
+      "example": "护送、赏金和私军拆成不同部门并核算物流。；干旱或战争触发招募和领导更替时间线。",
+      "counterexample": "一个战士公会无成本高效承担三种服务。；孤立主义国家无解释容忍外来商会。",
+      "failure_signals": [
+        "只有名称口号",
+        "把王国直接当单一派系",
+        "临时联盟目标完成后仍无理由维持",
+        "成员像无失误蜂群"
+      ]
+    },
+    {
+      "id": "proc-1_VtZYDDSU8",
+      "source_ids": [
+        "1_VtZYDDSU8"
+      ],
+      "trigger": "解释国家间战争、内战或联盟冲突为何在特定时点爆发时",
+      "inputs": [
+        "派系和人口层级",
+        "资源或疆域争议",
+        "情绪/偶然/政策三栏",
+        "升级事件时间线"
+      ],
+      "steps": [
+        {
+          "action": "为每方填写暴力情绪、偶然点火器和国家政策，并给情绪至少两项可观察社会机制。",
+          "check": "三栏之间有事件和行为构成的因果传递。",
+          "output": "战争起因三位一体表。",
+          "failure_signals": [
+            "只写邪恶领主征服世界",
+            "所有人共享同一动机"
+          ],
+          "repair": "加入宣传、军备竞赛、荣誉或福利承诺，并区分精英与大众。",
+          "acceptance": "读者可指出每栏至少一个行为证据。",
+          "example": "长期联盟和边界争议后，误判或事故改变战争时点。",
+          "counterexample": "只有一次刺杀事故却没有长期火药桶。"
+        },
+        {
+          "action": "按事件、情报误读、内部争论、公开行动和对手反应写至少五个升级节点，并逐节点尝试降级。",
+          "check": "双方政策目标互斥，且降级失败原因明确。",
+          "output": "可追溯升级链和公开/私下目标对照。",
+          "failure_signals": [
+            "没有最后通牒、动员或宣传节点",
+            "开战像剧情开关"
+          ],
+          "repair": "补秘密动员、授权印章或拒绝最后通牒等可见节点。",
+          "acceptance": "删除任一栏即可定位因果链断点。",
+          "example": "最后通牒被拒后秘密动员使降级成本高于开战。",
+          "counterexample": "把一战起因争议中的单一解释当成历史定律。"
+        }
+      ],
+      "output": "战争起因三位一体表。；可追溯升级链和公开/私下目标对照。",
+      "repair": "加入宣传、军备竞赛、荣誉或福利承诺，并区分精英与大众。；补秘密动员、授权印章或拒绝最后通牒等可见节点。",
+      "acceptance": "读者可指出每栏至少一个行为证据。；删除任一栏即可定位因果链断点。",
+      "example": "长期联盟和边界争议后，误判或事故改变战争时点。；最后通牒被拒后秘密动员使降级成本高于开战。",
+      "counterexample": "只有一次刺杀事故却没有长期火药桶。；把一战起因争议中的单一解释当成历史定律。",
+      "failure_signals": [
+        "只写邪恶领主征服世界",
+        "所有人共享同一动机",
+        "没有最后通牒、动员或宣传节点",
+        "开战像剧情开关"
+      ]
+    },
+    {
+      "id": "proc-ATNvOk5rIJA",
+      "source_ids": [
+        "ATNvOk5rIJA"
+      ],
+      "trigger": "设计魔法或超能力承担解题、角色弧和世界展示时",
+      "inputs": [
+        "核心酷点子",
+        "能力规则表",
+        "伏笔场景",
+        "限制/缺陷/代价",
+        "资源经济结构"
+      ],
+      "steps": [
+        {
+          "action": "为能力写可预测范围、限制、缺陷、代价和不可知部分，并标注每次展示与伏笔。",
+          "check": "高潮调用前至少有可回溯线索，且代价真正消耗资源或关系。",
+          "output": "能力规则与伏笔表。",
+          "failure_signals": [
+            "九成处才出现核心救援能力",
+            "规则解释造成动作认知过载"
+          ],
+          "repair": "提前引入能力或救援角色，将教学嵌入带风险行动并删减术语。",
+          "acceptance": "盲测者在结局前能提出合理解法并解释为何未用另一能力。",
+          "example": "盗窃或追逐中让角色边失败边学习魔法规则。",
+          "counterexample": "无预示的后期能力直接消除核心冲突。"
+        },
+        {
+          "action": "在新增系统前列出现有元素的三种深化后果，并把稀缺资源接入经济、阶级或关系。",
+          "check": "新增系统不是替代已有因果，断供或失控时剧情仍成立。",
+          "output": "扩展优先审查和空心冰山细节表。",
+          "failure_signals": [
+            "无限新增语言、宗教和万年历史",
+            "趣味能力能解决主线却无解释"
+          ],
+          "repair": "删除浅层系统，深化少数元素并补充未使用能力的理由。",
+          "acceptance": "正文有准确小细节和未展示背景，不倾倒百科。",
+          "example": "先写想看的魔法动力甲，再倒推其资源和规则合理性。",
+          "counterexample": "十个系统各写一英寸深，形成浅层百科。"
+        }
+      ],
+      "output": "能力规则与伏笔表。；扩展优先审查和空心冰山细节表。",
+      "repair": "提前引入能力或救援角色，将教学嵌入带风险行动并删减术语。；删除浅层系统，深化少数元素并补充未使用能力的理由。",
+      "acceptance": "盲测者在结局前能提出合理解法并解释为何未用另一能力。；正文有准确小细节和未展示背景，不倾倒百科。",
+      "example": "盗窃或追逐中让角色边失败边学习魔法规则。；先写想看的魔法动力甲，再倒推其资源和规则合理性。",
+      "counterexample": "无预示的后期能力直接消除核心冲突。；十个系统各写一英寸深，形成浅层百科。",
+      "failure_signals": [
+        "九成处才出现核心救援能力",
+        "规则解释造成动作认知过载",
+        "无限新增语言、宗教和万年历史",
+        "趣味能力能解决主线却无解释"
+      ]
+    },
+    {
+      "id": "canon-character-consistency",
+      "source_ids": [
+        "PEE6dzHJocw"
+      ],
+      "trigger": "同人或AU角色行为看起来像表层模仿或缺少正典因果。",
+      "inputs": [
+        "正典片段",
+        "四栏角色表",
+        "故事目标与阻碍",
+        "AU设定"
+      ],
+      "steps": [
+        {
+          "action": "按叙事职能、世界位置、背景、目标动机建证据表。",
+          "check": "每栏都有时间码证据或明确留白标签。"
+        },
+        {
+          "action": "绘制触发、选择、代价、变化因果链并列出不可失去之物。",
+          "check": "重大偏离含外部压力、内部缺陷和不可逆代价。"
+        },
+        {
+          "action": "AU先锁定保留气质，再反推新背景、位置和目标。",
+          "check": "新设定能产生可识别举止与相似成长弧。"
+        },
+        {
+          "action": "让盲读者复述角色并进行一致性审读。",
+          "check": "职业、关系、知识、习惯和后果互不矛盾。"
+        }
+      ],
+      "output": "带证据、留白标记和压力测试的角色一致性卡。",
+      "failure_signals": [
+        "只复制口头禅",
+        "行为无触发因果",
+        "把headcanon写成正典"
+      ],
+      "repair": [
+        "补齐四栏证据",
+        "增加具体阻止或施压条件",
+        "标注AU并删除无证据断言"
+      ],
+      "acceptance": [
+        "四组件均可追溯",
+        "每个越界行为有代价",
+        "盲读者识别角色且认为其连贯"
+      ],
+      "example": "角色为保护家人交出神器，但先展示威胁、恐惧与替代方案失败。",
+      "counterexample": "角色突然带危险神器回家，只因作者声明他会这么做。"
+    },
+    {
+      "id": "ethical-revenge-audit",
+      "source_ids": [
+        "c4OZ2fWZLBE"
+      ],
+      "trigger": "复仇故事可能把受害者物化或把杀戮当唯一胜利。",
+      "inputs": [
+        "作品卡",
+        "伤害镜头时间码",
+        "行动权表",
+        "现实/幻想线",
+        "结局方案"
+      ],
+      "steps": [
+        {
+          "action": "记录受害者、施害者、复仇者、资源不对称和传统模板。",
+          "check": "明确谁承受伤害、谁作决定、谁承担风险。"
+        },
+        {
+          "action": "逐镜头登记时长、裸露、凝视、声音暗示和余波。",
+          "check": "能区分创伤呈现与身体毁坏猎奇。"
+        },
+        {
+          "action": "比较身体、心理、社会、象征及幻想策略及法律安全成本。",
+          "check": "每种策略与角色资源和价值排序相符。"
+        },
+        {
+          "action": "编写致命/非致命及闭合/不闭合结局并敏感度审读。",
+          "check": "受害者主体性和现实后果不被抹除。"
+        }
+      ],
+      "output": "复仇伦理审计表及多结局比较。",
+      "failure_signals": [
+        "女性仅作男性燃料",
+        "长时间性化伤害",
+        "幻想被误读为现实"
+      ],
+      "repair": [
+        "恢复受害者选择和余波",
+        "删减非必要细节并加警示",
+        "标记现实与幻想切换"
+      ],
+      "acceptance": [
+        "行动权可见",
+        "至少一种非致命或不闭合结局成立",
+        "身份仅作语境变量"
+      ],
+      "example": "角色以公开罪行和社会揭露夺回尊严，同时承担法律与关系后果。",
+      "counterexample": "镜头反复展示受害身体，结尾男性杀敌后故事立即结束。"
+    },
+    {
+      "id": "free-indirect-distance-pass",
+      "source_ids": [
+        "Yh5wZVSW89s"
+      ],
+      "trigger": "第三人称段落需要亲密情绪但出现POV串线或解释过度。",
+      "inputs": [
+        "章节草稿",
+        "POV知识表",
+        "外部事实表",
+        "直接/间接改写样例"
+      ],
+      "steps": [
+        {
+          "action": "标注当前POV、可见事实和人物已知信息。",
+          "check": "章节首末POV及切换锚点可定位。"
+        },
+        {
+          "action": "同一事件写直接、间接和自由间接三版。",
+          "check": "选定版本同时保持语法距离和人物情绪。"
+        },
+        {
+          "action": "删除不必要的他想/她觉得并替换为经验可得的词汇和比喻。",
+          "check": "每个判断符合年龄、阶层、职业与记忆。"
+        },
+        {
+          "action": "建立认知与事实差异表，交读者盲测。",
+          "check": "反讽有外部证据且后文可回收，读者能指出POV。"
+        }
+      ],
+      "output": "叙述距离修订稿、事实差异表和盲测记录。",
+      "failure_signals": [
+        "两句内无法判断谁在感受",
+        "作者知识越界",
+        "反讽无证据"
+      ],
+      "repair": [
+        "增加段落锚点或明确心理句",
+        "改用人物经验参照",
+        "补回收线索"
+      ],
+      "acceptance": [
+        "POV稳定",
+        "主观比喻可追溯",
+        "中文读者验证通过"
+      ],
+      "example": "把餐厅写成‘绝对配不上桌子’并让读者从账单看出判断可能错误。",
+      "counterexample": "同段混入两个角色内心且没有切换标记。"
+    },
+    {
+      "id": "functional-scene-description",
+      "source_ids": [
+        "qMSYAxJeCu4"
+      ],
+      "trigger": "环境描写冗长、无情绪焦点或没有后文回收。",
+      "inputs": [
+        "地点草稿",
+        "段落主功能",
+        "体验目标",
+        "伏笔设置回收表"
+      ],
+      "steps": [
+        {
+          "action": "为段落选择定位、气氛、人物心理、主题或伏笔中的一个主功能。",
+          "check": "细节删除后不会留下多个互相冲突的目标。"
+        },
+        {
+          "action": "选一至三个可感官验证的锚点并记录情绪关系。",
+          "check": "读者能复述地点最重要体验。"
+        },
+        {
+          "action": "建立道具设置—回收表并按意外程度补线索。",
+          "check": "危机中的关键道具不凭空出现。"
+        },
+        {
+          "action": "把信息嵌入移动、触碰、阻力和选择，朗读计时。",
+          "check": "不重要地点压缩，战斗方位和障碍仍清楚。"
+        }
+      ],
+      "output": "功能化场景卡、锚点清单和伏笔回收表。",
+      "failure_signals": [
+        "百科名词列表",
+        "生僻词堆叠",
+        "描写让冲突停车"
+      ],
+      "repair": [
+        "删无功能细节",
+        "换具体动词和日常感官",
+        "恢复动作方位句"
+      ],
+      "acceptance": [
+        "唯一主功能明确",
+        "至少一个可复述锚点",
+        "环境改变行动或预期"
+      ],
+      "example": "潮湿走廊的油腻门把使角色改变进入路线并埋下后续线索。",
+      "counterexample": "列出城墙尺寸和地标名称，却不影响角色行动。"
+    },
+    {
+      "id": "voice-dialogue-integrity",
+      "source_ids": [
+        "SIaB0Yvt-wo"
+      ],
+      "trigger": "小说声音不稳定、碎片化只剩漂亮句子或对白说话者难辨。",
+      "inputs": [
+        "事件样本",
+        "多版本人称/时态",
+        "对白草稿",
+        "角色经验表",
+        "隐私规则"
+      ],
+      "steps": [
+        {
+          "action": "写同一事件三种声音版本并朗读。",
+          "check": "选定版本可持续产出句子且与体裁格式相容。"
+        },
+        {
+          "action": "逐句标注事实、情绪或节奏功能并删除三者皆无句子。",
+          "check": "删转场后因果、时间和空间仍可复原。"
+        },
+        {
+          "action": "对白从冲突中段切入并进行说话者追踪。",
+          "check": "每段发言无需回读即可归属，必要时恢复标签或引号。"
+        },
+        {
+          "action": "记录脱敏旁听节奏并写五栏人物差异表。",
+          "check": "不含可识别个人信息，身份不靠口音刻板化。"
+        }
+      ],
+      "output": "稳定声音样本、对白追踪稿和脱敏角色语域表。",
+      "failure_signals": [
+        "读者认不出说话者",
+        "碎片无场景功能",
+        "旁听笔记可识别个人"
+      ],
+      "repair": [
+        "加入最小叙述连接和动作标签",
+        "恢复引号或说话者锚点",
+        "改写并删除敏感细节"
+      ],
+      "acceptance": [
+        "声音持续一致",
+        "对白改变关系或信息",
+        "隐私与跨语种边界记录完整"
+      ],
+      "example": "从争执中段切入，用动作区分A/B并以一句新信息改变计划。",
+      "counterexample": "省略引号后连续三段无人知道是谁在说话。"
+    },
+    {
+      "id": "show-tell-evidence-pass",
+      "source_ids": [
+        "YAKcbvioxFk"
+      ],
+      "trigger": "草稿情绪靠标签、对白解释过多或show/tell节奏失衡。",
+      "inputs": [
+        "150–300字草稿",
+        "POV角色资料",
+        "抽象词与副词扫描",
+        "盲读反馈"
+      ],
+      "steps": [
+        {
+          "action": "标出核心情感转折，决定哪些段落show、哪些过场tell。",
+          "check": "telling仅压缩时间、规则、重复日常或有意叙述声音。"
+        },
+        {
+          "action": "为抽象判断补一个行为、物件或台词证据。",
+          "check": "盲读者能推断目标情绪而不见标签句。"
+        },
+        {
+          "action": "替换通用肢体语言，加入角色特有念头、选择和感官。",
+          "check": "同地点不同POV在注意点和比喻上可区分。"
+        },
+        {
+          "action": "做信息拥有者测试并朗读节奏。",
+          "check": "双方都知道的信息改为冲突/未知提问，删改后因果不裂。"
+        }
+      ],
+      "output": "show/tell证据修订稿、POV对照和盲读报告。",
+      "failure_signals": [
+        "每句堆感官形容词",
+        "握拳咬牙重复",
+        "对白变成作者讲解"
+      ],
+      "repair": [
+        "恢复最小必要tell",
+        "改用角色因果动作",
+        "将信息转为当下冲突"
+      ],
+      "acceptance": [
+        "情绪有可定位证据",
+        "副词删除后语气清楚",
+        "时间与世界规则仍可理解"
+      ],
+      "example": "不写‘她很害怕’，而写她数门锁并因冷空气改变路线。",
+      "counterexample": "把所有时间跳跃都逐场展示，导致故事冗长失去节奏。"
+    },
+    {
+      "id": "sentence-flow-zh-pass",
+      "source_ids": [
+        "hhVic18H4u4"
+      ],
+      "trigger": "段落出现连续同构短句、关系需读者猜测或背景打断动作时。",
+      "inputs": [
+        "原段落",
+        "目标读者与语体",
+        "移动端朗读结果"
+      ],
+      "steps": [
+        {
+          "action": "标出每句主张、背景、转折、例证、结果和刻意节拍。",
+          "check": "每句均有信息功能标签。"
+        },
+        {
+          "action": "仅在关系缺线索处加入一个准确中文过渡词。",
+          "check": "过渡词与真实关系一致且未堆叠。"
+        },
+        {
+          "action": "把背景、条件或让步降为从属分句，并测试句首与句尾位置。",
+          "check": "主句重心清楚，主语和因果未漂移。"
+        },
+        {
+          "action": "对同一施事者的动作使用连动或修饰合并，必要时重复主语。",
+          "check": "无悬垂修饰，移动端一口气可读。"
+        },
+        {
+          "action": "恢复必要短句并交替三种技术后盲读。",
+          "check": "节拍保留且读者能复述关系。"
+        }
+      ],
+      "output": "一版关系清晰、节奏有变化的中文段落。",
+      "failure_signals": [
+        "过渡词机械堆叠",
+        "主语漂移或欧化长句",
+        "刻意冲击被抹平"
+      ],
+      "repair": "拆回独立句，删去误导过渡，重新标注施事者和节拍。",
+      "acceptance": "关系可直接识别；至少一处合理合并；无悬垂修饰；事实因果视角与原稿一致。",
+      "example": "将‘他拿锅。他打蛋。他搅拌。’改为同一施事者的连动动作链，并保留关键短句。",
+      "counterexample": "把战斗中的‘砰！停！’合并成长从句，导致冲击节拍消失。"
+    },
+    {
+      "id": "xianxia-positioning-gate",
+      "source_ids": [
+        "BV1EN4y1U757"
+      ],
+      "trigger": "新人确定玄幻、仙侠、异能或科幻网文题材时。",
+      "inputs": [
+        "题材草案",
+        "金手指和能力表",
+        "知识来源清单",
+        "首章大纲"
+      ],
+      "steps": [
+        {
+          "action": "写出金手指用途、主角身份、核心目标及首章展示位置。",
+          "check": "读者能复述金手指和目标。"
+        },
+        {
+          "action": "为借用元素绑定身份冲突与主线因果。",
+          "check": "每个元素至少有一条冲突和一条因果。"
+        },
+        {
+          "action": "列出宗教、物理或神话术语来源并标记无法核查项。",
+          "check": "不把个人市场经验冒充数据。"
+        },
+        {
+          "action": "给开局任务配置资源、危机和扩张回报。",
+          "check": "首个任务同时具备三项。"
+        },
+        {
+          "action": "在首章试读中检查节奏和设定理解。",
+          "check": "系统/身份/危机出现顺序清楚。"
+        }
+      ],
+      "output": "带证据边界的题材定位表和首章检查表。",
+      "failure_signals": [
+        "系统只作装饰",
+        "考据让读者不懂",
+        "市场判断被写成保证"
+      ],
+      "repair": "删除无因果元素，改用可理解冲突，并标注建议为经验性。",
+      "acceptance": "金手指、身份、目标和危机可复述；元素均有因果绑定；知识来源可追溯。",
+      "example": "将神秘学系统与主角身份冲突绑定，并让首章危机迫使其使用系统。",
+      "counterexample": "标题堆砌克苏鲁名词却没有角色冲突或剧情后果。"
+    },
+    {
+      "id": "ability-system-consistency",
+      "source_ids": [
+        "BV1764y1L7ZY"
+      ],
+      "trigger": "创建或审查幻想能力体系及升级规则时。",
+      "inputs": [
+        "能力清单",
+        "世界公理",
+        "属性组合表",
+        "实践与注册记录"
+      ],
+      "steps": [
+        {
+          "action": "为每项能力记录来源、媒介、限制和可变异点。",
+          "check": "没有能力缺少来源或代价。"
+        },
+        {
+          "action": "写出一至三条公理并推导技能可能性。",
+          "check": "技能可由公理链解释。"
+        },
+        {
+          "action": "穷举已有基础单元的聚合、分离和排列组合。",
+          "check": "新增分类前已有组合已检查。"
+        },
+        {
+          "action": "建立属性覆盖优先级、效率折损和补偿成本。",
+          "check": "跨属性技能有明确成本。"
+        },
+        {
+          "action": "记录新招首次实践、重复验证和符号注册条件。",
+          "check": "升级由实践证据触发而非凭空加数值。"
+        },
+        {
+          "action": "将讲者模型与原作硬事实分栏。",
+          "check": "二创推演不被标成正典。"
+        }
+      ],
+      "output": "可推导、可付费且可审计的能力系统表。",
+      "failure_signals": [
+        "单一本源导致同质化",
+        "属性无限叠加",
+        "只有名词没有实践闭环"
+      ],
+      "repair": "补写公理和限制，增加成本，回退未经证实的分类。",
+      "acceptance": "每项能力可追溯来源和组合；覆盖有成本；新性质有实践注册记录；正典与推演分离。",
+      "example": "治疗单元组合出低效率毒招，并记录额外单元和效率折损。",
+      "counterexample": "声明属性相克绝对禁止一切跨属性效果，忽略视频中的低效率反例。"
+    },
+    {
+      "id": "rule-horror-puzzle-gate",
+      "source_ids": [
+        "BV1Li42127Kd"
+      ],
+      "trigger": "设计规则怪谈副本、规则文本和直播叙事时。",
+      "inputs": [
+        "副本目标",
+        "规则清单",
+        "隐藏内情",
+        "解题线",
+        "直播与弹幕计划"
+      ],
+      "steps": [
+        {
+          "action": "确定规则表层、可推理后果和未解内情。",
+          "check": "规则未在开局完全揭底。"
+        },
+        {
+          "action": "为主角设置获取NPC/笔记信息的步骤。",
+          "check": "信息获取改变通关线。"
+        },
+        {
+          "action": "配置首章主角、身份、金手指和首个危机。",
+          "check": "开局信息顺序可复述。"
+        },
+        {
+          "action": "给多玩家和国家/直播关系写清楚可见对比功能。",
+          "check": "每个玩家事件服务恐怖或推理。"
+        },
+        {
+          "action": "限制弹幕为情绪与吐槽，并交稿前检查篇幅占比。",
+          "check": "弹幕不遮蔽规则和解题。"
+        }
+      ],
+      "output": "保留推理空间且节奏可验收的规则怪谈副本大纲。",
+      "failure_signals": [
+        "规则读完即知谜底",
+        "弹幕淹没解题",
+        "平台风向被当成事实"
+      ],
+      "repair": "隐藏关键因果并增加分步证据，删减弹幕，降级平台判断。",
+      "acceptance": "读者能复述规则目标但不能提前得出全部内情；每条线索有后续用途；弹幕占比受控。",
+      "example": "规则只写表层禁忌，主角从NPC笔记拼出隐藏动机后完成通关。",
+      "counterexample": "规则段落直接解释怪物身份和所有结局，后续仅重复执行。"
+    },
+    {
+      "id": "ensemble-plot-allocation",
+      "source_ids": [
+        "BV1G7411B7Bd"
+      ],
+      "trigger": "规划多主角或群像网文的视角、人物登场和剧情配额时。",
+      "inputs": [
+        "人物表",
+        "核心主题与背景冲突",
+        "时间线",
+        "章节配额表"
+      ],
+      "steps": [
+        {
+          "action": "为每个主要人物写目标、登场功能和情感入口。",
+          "check": "无人物只占名额却无剧情功能。"
+        },
+        {
+          "action": "选择按时间线、人物上场或世界发展组织章节。",
+          "check": "转场规则在大纲中一致。"
+        },
+        {
+          "action": "确定人性欲望或情感主题作为核心冲突。",
+          "check": "主要人物线都能回扣核心。"
+        },
+        {
+          "action": "分配视角和章节比例，设置转场节点。",
+          "check": "无单一人物长期吞噬资源。"
+        },
+        {
+          "action": "以小规模试读验证代入和读者耐心。",
+          "check": "读者能辨认人物并理解当前冲突。"
+        }
+      ],
+      "output": "具备主题核心和均衡视角配额的群像大纲。",
+      "failure_signals": [
+        "人物轮换无功能",
+        "转场让读者迷失",
+        "没有核心冲突"
+      ],
+      "repair": "合并重复人物，减少视角，重新绑定主题并调整配额。",
+      "acceptance": "每个主要人物有目标和入口；比例可追踪；转场可解释；读者能辨认视角。",
+      "example": "先用单主角建立代入，再按固定节点引入具有独立目标的配角群。",
+      "counterexample": "为模仿名作一次引入十个角色，却没有主题或进入剧情的理由。"
+    },
+    {
+      "id": "urban-relative-invincibility",
+      "source_ids": [
+        "BV1Er4y127EB"
+      ],
+      "trigger": "规划都市商战、文娱、学霸等阶段性碾压爽文卷纲时。",
+      "inputs": [
+        "主角与敌方优势",
+        "资源和地位差距",
+        "配角路线表",
+        "三档冲突清单"
+      ],
+      "steps": [
+        {
+          "action": "定义本阶段可碾压对象和仍不可及的新舞台。",
+          "check": "主角不是绝对无敌且升级有去处。"
+        },
+        {
+          "action": "为低、中、高三档冲突先写敌方最强证据再写主角胜法。",
+          "check": "胜利发生在敌方优势领域且有解释。"
+        },
+        {
+          "action": "建立一条主线和一至两条专精支线，给配角写漩涡事件与回访条件。",
+          "check": "支线数量受控，配角不会无故消失。"
+        },
+        {
+          "action": "把低谷交给盟友，安排主角延迟介入和明确反击。",
+          "check": "情绪压力存在但未强行降智主角。"
+        },
+        {
+          "action": "检查金手指是否带来动机、资源和社会关系后果，并在第二幕末加压。",
+          "check": "爽点不单一，结尾有可回收压力。"
+        }
+      ],
+      "output": "具有相对无敌边界、配角连续性和可排序冲突的都市卷纲。",
+      "failure_signals": [
+        "敌方弱且无铺垫",
+        "金手指只有震惊没有后果",
+        "爽点重复导致疲劳"
+      ],
+      "repair": "补强敌方优势证据，增加资源门槛，改换爽点类型并恢复配角回访。",
+      "acceptance": "三档冲突可解释；主线与支线可追踪；每次金手指有社会后果；阶段边界和第二幕压力明确。",
+      "example": "学霸先以专业课满分触发实验事故，再进入高难竞赛，难度逐档上升。",
+      "counterexample": "主角永久全能、敌人没有优势、配角每卷重置且只重复打脸。"
+    },
+    {
+      "id": "wasteland-faction-survival",
+      "source_ids": [
+        "BV1Ya9gBSEMA"
+      ],
+      "trigger": "A disaster/faction serial needs a credible first arc and long-term escalation.",
+      "inputs": [
+        "disaster rules",
+        "resource ledger",
+        "ability cards",
+        "faction map",
+        "30-chapter outline"
+      ],
+      "steps": [
+        {
+          "action": "Write a visible danger, personal stake, countdown and protagonist action in the first 300 words.",
+          "check": "The opening contains an observable hazard and a new question."
+        },
+        {
+          "action": "Record each disaster as trigger, harm and response; ledger countable supplies and every event consumption.",
+          "check": "No rule contradicts a prior scene and resources reconcile."
+        },
+        {
+          "action": "Bound every ability with cost, growth gate, failure price and counter.",
+          "check": "At least one credible failure path remains."
+        },
+        {
+          "action": "Map 1/3/10 chapter beats and escalate goals from person to team, safe zone and civilization.",
+          "check": "Chapters 3, 10, 20 and 30 change conflict, resources or organization."
+        },
+        {
+          "action": "Register side-character goals and foreshadowing with first appearance, misdirection and payoff.",
+          "check": "Each major thread has a planned recovery."
+        }
+      ],
+      "output": "A 30-chapter survival-faction outline, ledgers and rule cards.",
+      "failure_signals": [
+        "Exposition precedes danger",
+        "Unlimited supplies or powers",
+        "Unrecovered clues"
+      ],
+      "repair": [
+        "Move rules into consequential action",
+        "Add costs and counters",
+        "Schedule an explicit reveal or remove the clue"
+      ],
+      "acceptance": [
+        "Cold reader can name current danger, resource gap and next hook",
+        "All rules and costs remain consistent"
+      ],
+      "example": "A 72-hour preparation arc spends fuel and medicine, creates a temporary safe zone, then reveals a permanent-zone objective by chapter 30.",
+      "counterexample": "A protagonist conjures food and kills every rival without preparation, cost or faction response."
+    },
+    {
+      "id": "source-transformation-boundary",
+      "source_ids": [
+        "BV18z411q7VU"
+      ],
+      "trigger": "A fan work, adaptation-dependent story, or real-person-inspired manuscript must become creatively coherent without misrepresenting its source boundary.",
+      "inputs": [
+        "manuscript",
+        "source-work comparison",
+        "author intent",
+        "borrowed character and world elements",
+        "new dramatic purpose"
+      ],
+      "steps": [
+        {
+          "action": "Classify adaptation-dependent versus independent use and list borrowed elements.",
+          "check": "The work can be read independently only when the classification says so."
+        },
+        {
+          "action": "Identify which character functions, relationships, rules, themes, and language come from the source and which are newly created.",
+          "check": "The analysis does not mistake commentary, fan consensus, or AI inference for facts in the source."
+        },
+        {
+          "action": "Give the new story an independent desire, conflict, causal chain, and thematic question.",
+          "check": "The manuscript does more than rename source characters or replay famous scenes."
+        },
+        {
+          "action": "For source-dependent constraints, distinguish creative advice from legal uncertainty and avoid claiming permission or safety.",
+          "check": "High-risk publication questions are explicitly left to current primary sources or qualified legal review."
+        },
+        {
+          "action": "For real-person inspiration, remove unnecessary identifying details and convert biography into independently motivated fiction.",
+          "check": "The character is not a thinly disguised vehicle for unsupported private or reputational claims."
+        }
+      ],
+      "output": "A source-boundary analysis and a more independent, causally coherent story design.",
+      "failure_signals": [
+        "Disclaimer treated as creative independence",
+        "Name-only renaming",
+        "Fan campaign substitutes for claimant/court"
+      ],
+      "repair": [
+        "Replace copied expression with a new dramatic solution",
+        "Remove unnecessary identifying details",
+        "Verify uncertain source claims or label them as invention"
+      ],
+      "acceptance": [
+        "Source facts, interpretation, and invention remain distinguishable",
+        "The new work has its own causal engine, choices, and voice"
+      ],
+      "example": "A fan story preserves a source character's established motive but creates a new conflict whose choices, consequences, scenes, and language are independently developed.",
+      "counterexample": "A famous plot is replayed with renamed characters while commentary claims and invented private details are presented as source facts."
+    },
+    {
+      "id": "era-rebirth-20k-gate",
+      "source_ids": [
+        "BV1kEbWzbEL3"
+      ],
+      "trigger": "Planning the first 20,000 words of a historical/era rebirth serial.",
+      "inputs": [
+        "year/place",
+        "period source packet",
+        "protagonist hardship",
+        "bounded advantage",
+        "business/family ledger"
+      ],
+      "steps": [
+        {
+          "action": "Fix year, place, institutional and material constraints, then state the inversion and goal.",
+          "check": "Every opportunity is possible in the selected period or flagged for research."
+        },
+        {
+          "action": "Draft 0-6000 words with identity, old debt, advantage rules and one immediate action.",
+          "check": "Advantage has cost and produces a visible result."
+        },
+        {
+          "action": "Draft a low-barrier enterprise or urgent family improvement with income, cost, supply, policy and season records.",
+          "check": "Historical prices, products, medicine and permissions are independently sourced."
+        },
+        {
+          "action": "Introduce resistance with an opponent demand and a negotiated/indirect response.",
+          "check": "Conflict changes resources or relationships without arbitrary violence."
+        },
+        {
+          "action": "At 10-20k, show first gain, visible household change and a risk-bearing hook; run the four checkpoint review.",
+          "check": "The checkpoint labels are treated as heuristics, not official platform rules."
+        }
+      ],
+      "output": "A historically checked 20k-word opening plan and ledgers.",
+      "failure_signals": [
+        "Anachronistic product/policy",
+        "Instant wealth",
+        "Platform rule asserted as fact"
+      ],
+      "repair": [
+        "Consult period primary/secondary sources",
+        "Reduce scale and add costs",
+        "Re-label as a testable hypothesis"
+      ],
+      "acceptance": [
+        "Every business and family turn has period-credible cause/effect",
+        "Reader sees hardship, action, gain and next risk"
+      ],
+      "example": "A 1980s market stall records supply, permit, price and seasonal demand before first profit changes the household.",
+      "counterexample": "A protagonist sells an unavailable modern device and cites a creator's 'three-chapter signing rule' as law."
+    },
+    {
+      "id": "rebirth-causality-audit",
+      "source_ids": [
+        "BV1Eu4y1i749"
+      ],
+      "trigger": "A second-chance protagonist feels omniscient or the ending lacks thematic payoff.",
+      "inputs": [
+        "rebirth purpose",
+        "memory timeline",
+        "training scenes",
+        "forecast ledger",
+        "ending"
+      ],
+      "steps": [
+        {
+          "action": "State whether rebirth repairs an error, fulfills a goal or tests a theme.",
+          "check": "Major flashbacks and choices point to that purpose."
+        },
+        {
+          "action": "Show at least three learn-fail-improve sequences with time and resource costs.",
+          "check": "Ability changes are observable and proportional."
+        },
+        {
+          "action": "Write reunion scenes with memory trigger, emotion and present action.",
+          "check": "Familiar/strange friction alters a decision."
+        },
+        {
+          "action": "List three forecasts and deliberately invalidate at least one through intervention.",
+          "check": "The protagonist investigates the divergence rather than author fiat."
+        },
+        {
+          "action": "Trace the ending from changed cause to consequence and ethical cost.",
+          "check": "The final choice answers both character regret and thematic question."
+        }
+      ],
+      "output": "A rebirth causality ledger and repaired arc.",
+      "failure_signals": [
+        "Instant mastery",
+        "Unchanged timeline",
+        "Revenge-only resolution"
+      ],
+      "repair": [
+        "Insert training and failure",
+        "Model butterfly effects",
+        "Tie payoff to a changed causal chain"
+      ],
+      "acceptance": [
+        "Growth and divergence are scene-evidenced",
+        "Ending names benefit and cost of intervention"
+      ],
+      "example": "A failed forecast forces new research, saving one relationship while creating a different obligation.",
+      "counterexample": "Future knowledge predicts every event and the finale merely counts revenge victims."
+    },
+    {
+      "id": "webfight-exchange-gate",
+      "source_ids": [
+        "BV117411c7PT"
+      ],
+      "trigger": "Drafting or revising a Chinese web-fiction fight scene.",
+      "inputs": [
+        "genre and pleasure point",
+        "target length",
+        "fighter abilities",
+        "arena map",
+        "pre-fight threat"
+      ],
+      "steps": [
+        {
+          "action": "Choose pace, difficulty and target length appropriate to genre.",
+          "check": "Each beat serves the declared pleasure point."
+        },
+        {
+          "action": "Write each exchange with action, audible speech, expression, position and result.",
+          "check": "A reader can track who is where and what changed."
+        },
+        {
+          "action": "Cycle attack→defense/counter→stance-bearing line.",
+          "check": "Both fighters retain agency and strategy."
+        },
+        {
+          "action": "Define environmental damage scale and compare it with opponent effect.",
+          "check": "Power is shown through a concrete object or consequence."
+        },
+        {
+          "action": "After one environmental peak, state winner and cost; close with sensory payoff and foreshadow recovery.",
+          "check": "Outcome and price are unambiguous."
+        }
+      ],
+      "output": "A readable, paced combat scene with exchange and consequence table.",
+      "failure_signals": [
+        "Unbroken one-sided combo",
+        "Adjective-only strength",
+        "Environment delays result"
+      ],
+      "repair": [
+        "Restore counterplay",
+        "Replace adjectives with damage evidence",
+        "Cut to outcome after peak"
+      ],
+      "acceptance": [
+        "Every exchange has a reaction and changed position",
+        "Sensory setup pays off"
+      ],
+      "example": "A metal baton swing meets a calm one-hit counter; a cracked wall measures force and the wound states the cost.",
+      "counterexample": "Two thousand words of rubble description end without saying who won."
+    },
+    {
+      "id": "emotional-knife-arc",
+      "source_ids": [
+        "BV1cM4y1c7ky"
+      ],
+      "trigger": "A relationship tragedy or angst arc feels manipulative, painless or prematurely spoiled.",
+      "inputs": [
+        "character goals and flaws",
+        "relationship history",
+        "foreshadow ledger",
+        "emotional high point",
+        "ending options"
+      ],
+      "steps": [
+        {
+          "action": "Define each character's desire, constraint, wound and relationship dependence.",
+          "check": "The later break follows established choices, not an arbitrary author wish."
+        },
+        {
+          "action": "Seed private details, shared joy and external/internal obstacles before the rupture.",
+          "check": "A reader can understand why the bond matters."
+        },
+        {
+          "action": "Build desire→belief→inner conflict→action→missed opportunity and moral cost.",
+          "check": "Contradictory cognition produces a decision with consequence."
+        },
+        {
+          "action": "Strike at the emotional peak using events, behavior, viewpoint and short lines; contrast pain with remembered sweetness.",
+          "check": "The scene does not explain every feeling or rely on death alone."
+        },
+        {
+          "action": "Withhold a tragic/HE label until the earned turn and audit the aftermath for character/world change.",
+          "check": "The wound changes goals, not just reader mood."
+        }
+      ],
+      "output": "A causally foreshadowed emotional-break arc and aftermath plan.",
+      "failure_signals": [
+        "Death used as sole shock",
+        "Long feeling monologue",
+        "Ending spoiled in advance"
+      ],
+      "repair": [
+        "Restore attachment scenes and constraints",
+        "Externalize pain through action and precise short lines",
+        "Delay outcome labeling"
+      ],
+      "acceptance": [
+        "Reader can trace choice to loss and identify changed stakes",
+        "Pain is followed by consequence or repair path"
+      ],
+      "example": "A couple's private promise becomes impossible when a duty is chosen at the moment reunion seems certain; the aftermath changes both goals.",
+      "counterexample": "An unintroduced character dies solely to make the protagonist cry, then the plot resets."
+    },
+    {
+      "id": "dialogue-voice-function-gate",
+      "source_ids": [
+        "BV1up4y1V74N"
+      ],
+      "trigger": "对白说话人不清、功能为空或缺少张力时。",
+      "inputs": [
+        "场景目标",
+        "角色卡",
+        "对白草稿",
+        "视角限制"
+      ],
+      "steps": [
+        {
+          "action": "为角色建立身份、语气和词汇卡并选择对白标记",
+          "check": "删除标签后两句内仍能辨认说话人"
+        },
+        {
+          "action": "逐句标注信息、推进、人物、情绪或冲突功能",
+          "check": "无功能句被删除或改成带选择/阻碍的句子"
+        },
+        {
+          "action": "在对白间加入可观察动作、感官和空间锚点",
+          "check": "连续对白没有遮蔽场景变化"
+        },
+        {
+          "action": "设计表层回答与潜台词错位并朗读盲测",
+          "check": "对白改变关系、选择或风险"
+        }
+      ],
+      "output": "对白功能表、说话人锚点和张力修订稿",
+      "failure_signals": [
+        "说话人混淆",
+        "整页对白流",
+        "解释性台词",
+        "角色声音可互换"
+      ],
+      "repair": [
+        "补动作/称谓锚点",
+        "转写必要背景为可见反应",
+        "删改无功能句"
+      ],
+      "acceptance": [
+        "两句内可辨人",
+        "每段有功能",
+        "末段状态改变"
+      ],
+      "example": "棋局问答以含蓄拒答改变关系。",
+      "counterexample": "双方连续寒暄且无新信息。"
+    },
+    {
+      "id": "summary-drama-switch",
+      "source_ids": [
+        "BV1DyKp6AEVN"
+      ],
+      "trigger": "长时间跨度叙事空洞或关键场面拖沓时。",
+      "inputs": [
+        "时间线",
+        "事件因果表",
+        "场景草稿",
+        "POV人物"
+      ],
+      "steps": [
+        {
+          "action": "标记跨度/背景与冲突/抉择段",
+          "check": "每个标记都有时间或场景边界"
+        },
+        {
+          "action": "跨度用带锚点概述，冲突用动作和原生对白展开",
+          "check": "读者能回答何时为何到此"
+        },
+        {
+          "action": "把情绪判词改为动作、声音或触感",
+          "check": "动作由当下刺激触发"
+        },
+        {
+          "action": "回读并检查视角权限及场景切换",
+          "check": "无越权心理句和空间误判"
+        }
+      ],
+      "output": "概述—戏剧切换表与一场可复述冲突",
+      "failure_signals": [
+        "全篇概述空洞",
+        "全篇细节拖沓",
+        "心理越权",
+        "场景边界模糊"
+      ],
+      "repair": [
+        "在关键抉择处定格",
+        "用概述桥接转场",
+        "补视角可见证据"
+      ],
+      "acceptance": [
+        "时间线清楚",
+        "关键冲突可复述",
+        "感官细节有因果"
+      ],
+      "example": "先概述数年迁徙，再定格车站离别。",
+      "counterexample": "五年关键因果被一句话带过。"
+    },
+    {
+      "id": "pace-pressure-curve",
+      "source_ids": [
+        "BV1xs6SBDE6W"
+      ],
+      "trigger": "章节压力曲线平直、支线臃肿或高压后失去方向时。",
+      "inputs": [
+        "章节大纲",
+        "压力峰值记录",
+        "支线回收表",
+        "读者盲测"
+      ],
+      "steps": [
+        {
+          "action": "逐场记录目标、压力、峰值、恢复和新问题",
+          "check": "每场末有状态或决策变化"
+        },
+        {
+          "action": "对支线做性格/信念/能力/命运四列删改测试",
+          "check": "伏笔记录回收点后再决定保留"
+        },
+        {
+          "action": "高压后加入恢复动作、关系/策略变化和新问题",
+          "check": "恢复段同时产出三项结果"
+        },
+        {
+          "action": "复测冲突升级是否改变策略而非只增规模",
+          "check": "读者能指出峰值、恢复和下一问题"
+        }
+      ],
+      "output": "压力曲线、支线取舍表和节奏修订稿",
+      "failure_signals": [
+        "重复策略",
+        "纯休息段",
+        "水剧情",
+        "平台指标被当因果"
+      ],
+      "repair": [
+        "改变目标或理解",
+        "压缩无功能恢复",
+        "标记待验证假设"
+      ],
+      "acceptance": [
+        "每个转折改变状态",
+        "伏笔有回收点",
+        "不以固定字数裁切"
+      ],
+      "example": "追逐后包扎并交换新线索，结尾出现倒计时。",
+      "counterexample": "安全屋只重复疲劳。"
+    },
+    {
+      "id": "sensory-motivation-chain",
+      "source_ids": [
+        "BV128EizVE4X"
+      ],
+      "trigger": "感官标签堆叠、情绪模板化或行动动机不可信时。",
+      "inputs": [
+        "POV人物",
+        "环境物件",
+        "角色目标与顾虑",
+        "动作草稿"
+      ],
+      "steps": [
+        {
+          "action": "固定POV并列出可见/听见/触到输入",
+          "check": "无作者越权信息"
+        },
+        {
+          "action": "将感官标签改为直接现象并按空间顺序排列",
+          "check": "每个刺激指向注意或动作"
+        },
+        {
+          "action": "补身体反应、相关意识和风险评估",
+          "check": "读者能回答为何此刻行动"
+        },
+        {
+          "action": "删除重复感官并检查角色差异",
+          "check": "换人物后反应不会完全相同"
+        }
+      ],
+      "output": "感官—意识—行动链和有限视角场景",
+      "failure_signals": [
+        "他看见/他听见堆叠",
+        "情绪词替代动机",
+        "无授权上帝视角",
+        "鲁莽行动无约束"
+      ],
+      "repair": [
+        "补感知来源",
+        "加入社会处境和代价",
+        "保留必要内心独白"
+      ],
+      "acceptance": [
+        "刺激与动作因果清楚",
+        "感官点不超需要",
+        "信息权限一致"
+      ],
+      "example": "臭味触发旧怨意识后角色关门求助。",
+      "counterexample": "作者直接宣布他人内心。"
+    },
+    {
+      "id": "syntax-structure-transfer",
+      "source_ids": [
+        "BV16U4y117uh"
+      ],
+      "trigger": "长句动作链混乱、焦点不明或并列句不齐时。",
+      "inputs": [
+        "原句",
+        "上下文",
+        "动词清单",
+        "读者盲测"
+      ],
+      "steps": [
+        {
+          "action": "圈出谓语并为每个动词补动作发出者/接受者",
+          "check": "每个主干主体可复原"
+        },
+        {
+          "action": "把地点时间频率挂接中心动词并前置",
+          "check": "修饰语不误当主干"
+        },
+        {
+          "action": "标注特征与作用后决定定语或谓语位置",
+          "check": "焦点变化可解释"
+        },
+        {
+          "action": "依据上下文顺序统一并列模板并比较原改句",
+          "check": "语义时序和风格未被整齐破坏"
+        }
+      ],
+      "output": "句法成分图、原改差异表和并列修订稿",
+      "failure_signals": [
+        "主语丢失",
+        "状语错挂",
+        "焦点漂移",
+        "为押整齐改乱时序"
+      ],
+      "repair": [
+        "拆成最小分句",
+        "恢复上下文顺序",
+        "保留必要省略"
+      ],
+      "acceptance": [
+        "读者复原动作主体",
+        "焦点可说明",
+        "不声称网文效果因果"
+      ],
+      "example": "战斗长句拆成连续主谓宾动作。",
+      "counterexample": "把兼语句硬拆成两个错误主语。"
+    },
+    {
+      "id": "webnovel-final-prose-pass",
+      "source_ids": [
+        "BV1y5411p7yb"
+      ],
+      "trigger": "初稿存在错字、排版噪声、重复形容或开篇水对白时。",
+      "inputs": [
+        "章节稿",
+        "错字检查器",
+        "排版预览",
+        "节奏与场景表"
+      ],
+      "steps": [
+        {
+          "action": "逐章校对错别字并记录高频错误",
+          "check": "错字不造成阅读顿挫"
+        },
+        {
+          "action": "预览段落和对白排版，避免人名机械起段",
+          "check": "读者能快速定位主角与说话人"
+        },
+        {
+          "action": "检查开篇对白是否提供身份、目标或冲突",
+          "check": "黄金开头没有连续无功能对白"
+        },
+        {
+          "action": "去除重复/生僻炫技词并让场景服务剧情人物",
+          "check": "每段形容或场景描写都有可见叙事作用"
+        },
+        {
+          "action": "将一万至三万字节奏说法标为经验并另做数据验证",
+          "check": "不把平台经验写成留存或收入保证"
+        }
+      ],
+      "output": "校对清单、可读性预览和最终文字修订稿",
+      "failure_signals": [
+        "高频错字",
+        "人名段落墙",
+        "开篇水对白",
+        "形容词堆叠",
+        "平台阈值被硬编码"
+      ],
+      "repair": [
+        "人工复校并统一术语",
+        "重排段落",
+        "补动作和剧情节点",
+        "删除重复词"
+      ],
+      "acceptance": [
+        "错字检查通过",
+        "主角和场景可定位",
+        "每千字有可验证事件推进",
+        "经验声明有证据等级"
+      ],
+      "example": "将开篇500字对白改为动作锚点加冲突信息。",
+      "counterexample": "因个人经验强制每万字付费节点。"
+    }
+  ]
+}

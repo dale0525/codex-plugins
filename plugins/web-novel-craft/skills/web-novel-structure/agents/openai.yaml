@@ -1,0 +1,6 @@
+interface:
+  display_name: "Web Novel Structure"
+  short_description: "Build long-form arcs, volumes, and payoffs"
+  default_prompt: "Use $web-novel-structure to design the arcs, volumes, and ending of this web novel."
+policy:
+  allow_implicit_invocation: true

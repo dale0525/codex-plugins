@@ -1,0 +1,6 @@
+interface:
+  display_name: "Web Novel Revision"
+  short_description: "Diagnose retention and revise from structure to prose"
+  default_prompt: "Use $web-novel-revision to diagnose this draft and produce a prioritized revision plan."
+policy:
+  allow_implicit_invocation: true
