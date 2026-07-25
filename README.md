@@ -40,8 +40,10 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
-Codex Sync 0.3.3 refreshes an unchanged Git marketplace in place instead of
-destructively unregistering it first, preserving installed plugin paths during
+Codex Sync 0.3.4 runs Codex child processes from a stable configuration
+directory so refreshing the marketplace that contains Codex Sync cannot invalidate
+their working directory. Codex Sync 0.3.3 refreshes an unchanged Git marketplace
+in place instead of destructively unregistering it first, preserving installed plugin paths during
 configuration apply. Codex Sync 0.3.2 made agent-driven onboarding non-blocking:
 the device-login URL and one-time code are flushed before authorization polling begins. On
 Windows, the engine probes `codex.exe`, `codex.cmd`, and `codex.bat` launchers,

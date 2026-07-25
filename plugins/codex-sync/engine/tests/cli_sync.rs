@@ -308,6 +308,9 @@ elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "re
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "add" ]; then
   printf '%s' "${4:-}" > "${FAKE_MARKETPLACE_STATE:?}"
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "upgrade" ]; then
+  if [ -n "${FAKE_REMOVE_CWD_ON_UPGRADE:-}" ]; then
+    rm -rf -- "$FAKE_REMOVE_CWD_ON_UPGRADE"
+  fi
   :
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ]; then
   if [ -s "$state" ]; then
@@ -940,7 +943,9 @@ fn existing_git_marketplace_is_upgraded_without_destructive_reregistration() {
     fs::write(codex_home.join("AGENTS.md"), "# Old\n").unwrap();
 
     let marketplace = temporary.path().join("marketplace");
+    let launch_directory = temporary.path().join("installed-plugin");
     fs::create_dir_all(&marketplace).unwrap();
+    fs::create_dir_all(&launch_directory).unwrap();
     fs::write(marketplace.join("sentinel.txt"), "original\n").unwrap();
     let codex_bin = temporary.path().join("codex-stateful");
     let plugin_state = temporary.path().join("plugin-state");
@@ -983,14 +988,17 @@ fn existing_git_marketplace_is_upgraded_without_destructive_reregistration() {
         .to_owned();
 
     command(&sync_home, &codex_home, &codex_bin)
+        .current_dir(&launch_directory)
         .env("FAKE_CODEX_STATE", &plugin_state)
         .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
         .env("FAKE_MARKETPLACE_SOURCE", "https://example.com/market.git")
         .env("FAKE_DAMAGE_MARKETPLACE_ON_REMOVE", "1")
+        .env("FAKE_REMOVE_CWD_ON_UPGRADE", &launch_directory)
         .args(["apply", &plan_id, "--approve-high-risk"])
         .assert()
         .success();
 
+    assert!(!launch_directory.exists());
     assert_eq!(
         fs::read_to_string(marketplace.join("sentinel.txt")).unwrap(),
         "original\n"

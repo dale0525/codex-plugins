@@ -396,7 +396,26 @@ fn codex_candidate_works(path: &Path) -> bool {
 fn codex_command(binary: &Path) -> Command {
     let mut command = Command::new(binary);
     command.env_remove("CODEX_SYNC_GITHUB_TOKEN");
+    if let Some(directory) = stable_codex_working_directory() {
+        command.current_dir(directory);
+    }
     command
+}
+
+fn stable_codex_working_directory() -> Option<PathBuf> {
+    let configured = std::env::var_os("CODEX_HOME").map(PathBuf::from);
+    let home = if cfg!(windows) {
+        std::env::var_os("USERPROFILE").map(PathBuf::from)
+    } else {
+        std::env::var_os("HOME").map(PathBuf::from)
+    };
+    configured
+        .or_else(|| home.map(|path| path.join(".codex")))
+        .filter(|path| path.is_dir())
+        .or_else(|| {
+            let temporary = std::env::temp_dir();
+            temporary.is_dir().then_some(temporary)
+        })
 }
 
 fn codex_output(arguments: &[&str]) -> Result<Output> {
