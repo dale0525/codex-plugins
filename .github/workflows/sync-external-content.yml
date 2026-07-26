@@ -35,6 +35,9 @@ jobs:
         run: pixi run sync
 
       - name: Validate synchronized repository
+        env:
+          CC: /usr/bin/cc
+          CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER: /usr/bin/cc
         run: pixi run check
 
       - name: Detect changes
