@@ -56,6 +56,43 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 validation.errors,
             )
 
+    def test_fastctx_windows_runtime_rejects_untrusted_asset_metadata(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="fastctx-runtime-validator-test-") as temporary:
+            root = Path(temporary)
+            metadata = root / "plugins/fastctx/windows-bash-runtime.json"
+            metadata.parent.mkdir(parents=True)
+            metadata.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "repository": "git-for-windows/git",
+                        "version": "2.55.0.3",
+                        "tag": "v2.55.0.windows.3",
+                        "release_id": 1,
+                        "published_at": "2026-07-14T18:41:31Z",
+                        "asset": {
+                            "name": "PortableGit-2.55.0.3-64-bit.7z.exe",
+                            "url": "https://example.com/untrusted.exe",
+                            "size": 1,
+                            "sha256": "invalid",
+                        },
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_fastctx_windows_runtime(validation)
+            self.assertIn(
+                "FastCtx Windows Bash runtime: invalid asset URL",
+                validation.errors,
+            )
+            self.assertIn(
+                "FastCtx Windows Bash runtime: invalid asset digest",
+                validation.errors,
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
