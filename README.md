@@ -111,7 +111,7 @@ FastCtx and Codex Sync have explicit ownership boundaries:
 
 | Location | Owner | Managed content |
 | --- | --- | --- |
-| `~/.codex/config.toml` | FastCtx | `mcp_servers.fastctx`, its token-budget environment, the `mcp__fastctx` member of `features.code_mode.direct_only_tool_namespaces`, and `tool_output_token_limit` |
+| `~/.codex/config.toml` | FastCtx + FastCtx plugin | FastCtx owns `mcp_servers.fastctx`, its token-budget environment, the `mcp__fastctx` member of `features.code_mode.direct_only_tool_namespaces`, and `tool_output_token_limit`; the plugin adds only the device-local `mcp_servers.fastctx.env.FASTCTX_BASH` path on Windows |
 | `~/.codex/AGENTS.md` | Codex Sync + FastCtx | Codex Sync owns the canonical base; FastCtx owns only `<!-- fastctx:begin -->` through `<!-- fastctx:end -->` |
 | `~/.fastctx/bin/fastctx` | FastCtx | The checksum-verified native executable |
 | `~/.fastctx/config.toml` | FastCtx | Shell enablement, tier and budgets, update preferences, and Apply rollback metadata |
@@ -128,7 +128,10 @@ When no standalone Git Bash exists, the plugin downloads the locked Git for
 Windows `tar.bz2` runtime recorded in `windows-bash-runtime.json`, verifies its
 size and SHA-256 digest, and installs it under `~/.fastctx` instead of a project
 `.tool/` directory or a system-wide location. The bzip2 format avoids the LZMA
-compatibility gap in older Windows `tar.exe` builds.
+compatibility gap in older Windows `tar.exe` builds. After Apply, the provisioner
+writes the resolved Bash path only to the local FastCtx MCP environment so a
+restarted Codex process receives it. Do not declare or capture this device-specific
+path in the shared Codex Sync repository.
 
 #### Migrate from Subagent Dispatch
 
