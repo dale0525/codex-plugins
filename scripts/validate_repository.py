@@ -302,13 +302,15 @@ def _validate_fastctx_windows_runtime(validation: Validation) -> None:
     name = asset.get("name")
     url = asset.get("url")
     tag = metadata.get("tag")
-    if not isinstance(name, str) or not re.fullmatch(r"PortableGit-.+-64-bit\.7z\.exe", name):
+    if not isinstance(name, str) or not re.fullmatch(r"Git-.+-64-bit\.tar\.bz2", name):
         validation.error("FastCtx Windows Bash runtime: invalid asset name")
     expected_prefix = f"https://github.com/git-for-windows/git/releases/download/{tag}/"
     if not isinstance(url, str) or not url.startswith(expected_prefix) or not url.endswith(f"/{name}"):
         validation.error("FastCtx Windows Bash runtime: invalid asset URL")
     if not isinstance(asset.get("size"), int) or asset["size"] <= 0:
         validation.error("FastCtx Windows Bash runtime: invalid asset size")
+    if asset.get("archive_format") != "tar.bz2":
+        validation.error("FastCtx Windows Bash runtime: archive_format must be tar.bz2")
     digest = asset.get("sha256")
     if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
         validation.error("FastCtx Windows Bash runtime: invalid asset digest")
