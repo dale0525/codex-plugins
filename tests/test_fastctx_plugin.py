@@ -14,6 +14,7 @@ class FastCtxPluginTests(unittest.TestCase):
     def test_windows_provisioner_uses_reviewed_portable_bash_without_pixi(self) -> None:
         script = (PLUGIN / "scripts/provision.ps1").read_text(encoding="utf-8")
         self.assertIn("windows-bash-runtime.json", script)
+        self.assertIn("fastctx-mcp-env.ps1", script)
         self.assertIn("FASTCTX_BASH", script)
         self.assertIn("tar.exe", script)
         self.assertIn("-tjf $archive", script)
@@ -21,6 +22,15 @@ class FastCtxPluginTests(unittest.TestCase):
         self.assertIn("Git for Windows runtime archive checksum verification failed", script)
         self.assertNotRegex(script, re.compile(r"\b(?:pixi|conda|m2-bash)\b", re.IGNORECASE))
         self.assertNotIn(".7z.exe", script)
+
+    def test_windows_provisioner_persists_device_local_bash_in_mcp_environment(self) -> None:
+        script = (PLUGIN / "scripts/provision.ps1").read_text(encoding="utf-8")
+        helper = (PLUGIN / "scripts/fastctx-mcp-env.ps1").read_text(encoding="utf-8")
+        self.assertIn("Set-FastCtxMcpBashEnvironment", script)
+        self.assertIn("Assert-FastCtxMcpBashEnvironment", script)
+        self.assertIn("[mcp_servers.fastctx.env]", helper)
+        self.assertIn("FASTCTX_BASH", helper)
+        self.assertNotIn("codex-config", helper)
 
     def test_windows_bash_runtime_is_pinned_to_github_digest(self) -> None:
         metadata = json.loads(

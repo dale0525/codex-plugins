@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'fastctx-mcp-env.ps1')
 
 $pluginRoot = Split-Path -Parent $PSScriptRoot
 $metadataPath = Join-Path $pluginRoot 'upstream-release.json'
@@ -8,6 +9,7 @@ $action = if ($args.Count -gt 0) { $args[0] } else { 'status' }
 $metadata = Get-Content -LiteralPath $metadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $bashMetadata = Get-Content -LiteralPath $bashMetadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }
+$codexConfig = Join-Path $codexHome 'config.toml'
 $fastctxDirectory = Join-Path $env:USERPROFILE '.fastctx'
 $fastctxConfig = Join-Path $fastctxDirectory 'config.toml'
 $stableBinary = Join-Path $fastctxDirectory 'bin\fastctx.exe'
@@ -287,13 +289,15 @@ function Get-DownloadedBinary {
 }
 
 function Invoke-Setup {
-    $null = Initialize-BashEnvironment -AllowInstall
+    $bash = Initialize-BashEnvironment -AllowInstall
     if ((Test-Path -LiteralPath $stableBinary) -and (Test-FastShellEnabled)) {
         $versionOutput = & $stableBinary --version 2>$null
         $installedVersion = (($versionOutput | Select-Object -First 1) -split '\s+')[1]
         if ($installedVersion -eq $metadata.version) {
             & $stableBinary status --codex-home $codexHome *> $null
-            if ($LASTEXITCODE -eq 0) {
+            if ($LASTEXITCODE -eq 0 -and (Test-FastCtxMcpEnvironmentTable -ConfigPath $codexConfig)) {
+                Set-FastCtxMcpBashEnvironment -ConfigPath $codexConfig -BashPath $bash
+                Assert-FastCtxMcpBashEnvironment -ConfigPath $codexConfig -BashPath $bash
                 Write-Output "FastCtx $($metadata.version) is already provisioned with shell tools enabled"
                 return
             }
@@ -310,6 +314,8 @@ function Invoke-Setup {
         $env:FASTCTX_DISABLE_UPDATE_CHECK = '1'
         & $downloaded apply --codex-home $codexHome --tier standard --yes
         if ($LASTEXITCODE -ne 0) { throw "FastCtx Apply failed with exit code $LASTEXITCODE" }
+        Set-FastCtxMcpBashEnvironment -ConfigPath $codexConfig -BashPath $bash
+        Assert-FastCtxMcpBashEnvironment -ConfigPath $codexConfig -BashPath $bash
         & $stableBinary status --codex-home $codexHome
         if ($LASTEXITCODE -ne 0) { throw "FastCtx status failed with exit code $LASTEXITCODE" }
     } catch {
@@ -329,7 +335,8 @@ switch ($action) {
     'setup' { Invoke-Setup }
     'status' {
         if (-not (Test-Path -LiteralPath $stableBinary)) { throw "FastCtx is not installed at $stableBinary" }
-        $null = Initialize-BashEnvironment
+        $bash = Initialize-BashEnvironment
+        Assert-FastCtxMcpBashEnvironment -ConfigPath $codexConfig -BashPath $bash
         $env:FASTCTX_DISABLE_UPDATE_CHECK = '1'
         & $stableBinary status --codex-home $codexHome
         exit $LASTEXITCODE

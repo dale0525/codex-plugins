@@ -28,7 +28,7 @@ Supported actions are `setup`, `status`, and `unapply`.
 
 ## Set up or repair
 
-1. Explain that setup downloads the exact reviewed GitHub Release recorded in `upstream-release.json`, verifies its SHA-256 digest, enables the FastCtx Bash tools, and changes global Codex configuration plus `~/.fastctx/`. On Windows, setup first uses an existing standalone GNU Bash when available; otherwise it downloads the locked Git for Windows `tar.bz2` asset in `windows-bash-runtime.json`, verifies its size and SHA-256 digest, safely extracts it under `~/.fastctx/portable-git/`, and owns only the matching user-level `FASTCTX_BASH` value. The bzip2 archive deliberately avoids the LZMA method used by the Portable Git self-extractor because older Windows `tar.exe` builds cannot decode it reliably.
+1. Explain that setup downloads the exact reviewed GitHub Release recorded in `upstream-release.json`, verifies its SHA-256 digest, enables the FastCtx Bash tools, and changes global Codex configuration plus `~/.fastctx/`. On Windows, setup first uses an existing standalone GNU Bash when available; otherwise it downloads the locked Git for Windows `tar.bz2` asset in `windows-bash-runtime.json`, verifies its size and SHA-256 digest, safely extracts it under `~/.fastctx/portable-git/`, and owns only the matching user-level `FASTCTX_BASH` value. The bzip2 archive deliberately avoids the LZMA method used by the Portable Git self-extractor because older Windows `tar.exe` builds cannot decode it reliably. Setup also writes the resolved path to this device's `mcp_servers.fastctx.env.FASTCTX_BASH` so the next Codex MCP process receives it; never add that device-specific path to the shared Codex Sync repository.
 2. Obtain explicit confirmation unless this invocation is the already-approved Codex Sync provisioning step.
 3. Run the platform provision command with `setup --yes`.
 4. Report the FastCtx version and status result.
@@ -47,7 +47,7 @@ status/handshake as drift.
 
 ## Inspect status
 
-Run the provision command with `status`. This is read-only. Report missing binaries, configuration drift, AGENTS drift, or MCP handshake failures exactly as FastCtx reports them.
+Run the provision command with `status`. This is read-only. On Windows it also rejects a missing or mismatched device-local `mcp_servers.fastctx.env.FASTCTX_BASH` value. Report missing binaries, configuration drift, AGENTS drift, or MCP handshake failures exactly as FastCtx reports them.
 
 ## Remove FastCtx
 
