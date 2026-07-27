@@ -281,6 +281,39 @@ def _validate_sync_metadata(validation: Validation) -> None:
                 validation.error(f"sync lock {source_id}: unsupported kind {kind}")
 
 
+def _validate_fastctx_windows_runtime(validation: Validation) -> None:
+    path = ROOT / "plugins/fastctx/windows-bash-runtime.json"
+    metadata = _read_json(path, validation)
+    if metadata is None:
+        return
+    if metadata.get("schema_version") != 1:
+        validation.error("FastCtx Windows Bash runtime: schema_version must be 1")
+    if metadata.get("repository") != "git-for-windows/git":
+        validation.error("FastCtx Windows Bash runtime: unexpected repository")
+    for field in ("version", "tag", "published_at"):
+        if not isinstance(metadata.get(field), str) or not metadata[field]:
+            validation.error(f"FastCtx Windows Bash runtime: invalid {field}")
+    if not isinstance(metadata.get("release_id"), int):
+        validation.error("FastCtx Windows Bash runtime: invalid release_id")
+    asset = metadata.get("asset")
+    if not isinstance(asset, dict):
+        validation.error("FastCtx Windows Bash runtime: asset must be an object")
+        return
+    name = asset.get("name")
+    url = asset.get("url")
+    tag = metadata.get("tag")
+    if not isinstance(name, str) or not re.fullmatch(r"PortableGit-.+-64-bit\.7z\.exe", name):
+        validation.error("FastCtx Windows Bash runtime: invalid asset name")
+    expected_prefix = f"https://github.com/git-for-windows/git/releases/download/{tag}/"
+    if not isinstance(url, str) or not url.startswith(expected_prefix) or not url.endswith(f"/{name}"):
+        validation.error("FastCtx Windows Bash runtime: invalid asset URL")
+    if not isinstance(asset.get("size"), int) or asset["size"] <= 0:
+        validation.error("FastCtx Windows Bash runtime: invalid asset size")
+    digest = asset.get("sha256")
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        validation.error("FastCtx Windows Bash runtime: invalid asset digest")
+
+
 def _validate_workflows(validation: Validation) -> None:
     for workflow in (ROOT / ".github/workflows").glob("*.yml"):
         try:
@@ -293,6 +326,7 @@ def main() -> int:
     validation = Validation()
     _validate_marketplace(validation)
     _validate_sync_metadata(validation)
+    _validate_fastctx_windows_runtime(validation)
     _validate_workflows(validation)
     for warning in validation.warnings:
         print(f"warning: {warning}")

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "repository": "git-for-windows/git",
+  "version": "2.55.0.3",
+  "tag": "v2.55.0.windows.3",
+  "release_id": 354001887,
+  "published_at": "2026-07-14T18:41:31Z",
+  "asset": {
+    "name": "PortableGit-2.55.0.3-64-bit.7z.exe",
+    "url": "https://github.com/git-for-windows/git/releases/download/v2.55.0.windows.3/PortableGit-2.55.0.3-64-bit.7z.exe",
+    "size": 58919776,
+    "sha256": "ab00566336b5472120f9a52d34f2e79c5406535792acb0548001ffd0bd090e5d"
+  }
+}

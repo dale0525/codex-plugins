@@ -3,12 +3,16 @@ Set-StrictMode -Version Latest
 
 $pluginRoot = Split-Path -Parent $PSScriptRoot
 $metadataPath = Join-Path $pluginRoot 'upstream-release.json'
+$bashMetadataPath = Join-Path $pluginRoot 'windows-bash-runtime.json'
 $action = if ($args.Count -gt 0) { $args[0] } else { 'status' }
 $metadata = Get-Content -LiteralPath $metadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
+$bashMetadata = Get-Content -LiteralPath $bashMetadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
 $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }
 $fastctxDirectory = Join-Path $env:USERPROFILE '.fastctx'
 $fastctxConfig = Join-Path $fastctxDirectory 'config.toml'
 $stableBinary = Join-Path $fastctxDirectory 'bin\fastctx.exe'
+$managedBashRoot = Join-Path $fastctxDirectory 'portable-git'
+$managedBash = Join-Path $managedBashRoot 'usr\bin\bash.exe'
 
 function Test-FastShellEnabled {
     if (-not (Test-Path -LiteralPath $fastctxConfig)) { return $false }
@@ -25,6 +29,190 @@ function Test-FastShellEnabled {
         }
     }
     return $false
+}
+
+function Test-GnuBash {
+    param([Parameter(Mandatory)][string]$Path)
+
+    if (-not [System.IO.Path]::IsPathRooted($Path) -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $false
+    }
+    $normalized = [System.IO.Path]::GetFullPath($Path).Replace('\', '/')
+    if ($normalized -match '(?i)/Windows/System32/bash\.exe$' -or $normalized -match '(?i)/WindowsApps/bash\.exe$') {
+        return $false
+    }
+    try {
+        $output = (& $Path --version 2>&1 | Out-String)
+        return $LASTEXITCODE -eq 0 -and $output.Contains('GNU bash')
+    } catch {
+        return $false
+    }
+}
+
+function Get-AutomaticBashCandidates {
+    $candidates = [System.Collections.Generic.List[string]]::new()
+    foreach ($git in @(Get-Command git.exe -All -ErrorAction SilentlyContinue)) {
+        $directory = Split-Path -Parent $git.Source
+        for ($index = 0; $index -lt 4 -and $directory; $index++) {
+            $candidates.Add((Join-Path $directory 'usr\bin\bash.exe'))
+            $directory = Split-Path -Parent $directory
+        }
+    }
+    foreach ($root in @(
+        [Environment]::GetEnvironmentVariable('ProgramFiles'),
+        [Environment]::GetEnvironmentVariable('ProgramFiles(x86)')
+    )) {
+        if ($root) { $candidates.Add((Join-Path $root 'Git\usr\bin\bash.exe')) }
+    }
+    $localAppData = [Environment]::GetEnvironmentVariable('LocalAppData')
+    if ($localAppData) {
+        $candidates.Add((Join-Path $localAppData 'Programs\Git\usr\bin\bash.exe'))
+    }
+    foreach ($bash in @(Get-Command bash.exe -All -ErrorAction SilentlyContinue)) {
+        $candidates.Add($bash.Source)
+    }
+    return $candidates
+}
+
+function Resolve-UsableBash {
+    $processOverride = $env:FASTCTX_BASH
+    if ($processOverride) {
+        if (Test-GnuBash -Path $processOverride) { return [System.IO.Path]::GetFullPath($processOverride) }
+        if (-not [System.StringComparer]::OrdinalIgnoreCase.Equals(
+            [System.IO.Path]::GetFullPath($processOverride),
+            [System.IO.Path]::GetFullPath($managedBash)
+        )) {
+            throw "FASTCTX_BASH is set but is not a usable standalone GNU bash: $processOverride"
+        }
+        Remove-Item Env:FASTCTX_BASH
+    }
+
+    $userOverride = [Environment]::GetEnvironmentVariable('FASTCTX_BASH', 'User')
+    if ($userOverride) {
+        if (-not (Test-GnuBash -Path $userOverride)) {
+            if (-not [System.StringComparer]::OrdinalIgnoreCase.Equals(
+                [System.IO.Path]::GetFullPath($userOverride),
+                [System.IO.Path]::GetFullPath($managedBash)
+            )) {
+                throw "The user FASTCTX_BASH value is not a usable standalone GNU bash: $userOverride"
+            }
+            [Environment]::SetEnvironmentVariable('FASTCTX_BASH', $null, 'User')
+        } else {
+            $env:FASTCTX_BASH = [System.IO.Path]::GetFullPath($userOverride)
+            return $env:FASTCTX_BASH
+        }
+    }
+
+    if (Test-GnuBash -Path $managedBash) {
+        $resolved = [System.IO.Path]::GetFullPath($managedBash)
+        [Environment]::SetEnvironmentVariable('FASTCTX_BASH', $resolved, 'User')
+        $env:FASTCTX_BASH = $resolved
+        return $resolved
+    }
+
+    $seen = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($candidate in Get-AutomaticBashCandidates) {
+        if (-not $candidate) { continue }
+        $resolved = [System.IO.Path]::GetFullPath($candidate)
+        if ($seen.Add($resolved) -and (Test-GnuBash -Path $resolved)) { return $resolved }
+    }
+    return $null
+}
+
+function Install-ManagedBash {
+    if ($bashMetadata.schema_version -ne 1 -or -not $bashMetadata.asset) {
+        throw 'Windows Bash runtime metadata is malformed'
+    }
+    $asset = $bashMetadata.asset
+    $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "fastctx-bash-$([System.Guid]::NewGuid().ToString('N'))"
+    New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null
+    try {
+        $archive = Join-Path $temporaryDirectory $asset.name
+        Invoke-WebRequest -Uri $asset.url -OutFile $archive
+        if ((Get-Item -LiteralPath $archive).Length -ne [long]$asset.size) {
+            throw "Portable Git archive size verification failed for $($asset.name)"
+        }
+        $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+        if ($actual -ne $asset.sha256) {
+            throw "Portable Git archive checksum verification failed for $($asset.name)"
+        }
+        $tar = Get-Command tar.exe -ErrorAction Stop
+        $entries = @(& $tar.Source -tf $archive)
+        if ($LASTEXITCODE -ne 0) { throw "Cannot list Portable Git archive: exit code $LASTEXITCODE" }
+        foreach ($entry in $entries) {
+            $normalized = $entry.Replace('\', '/')
+            if ($normalized -match '^/' -or $normalized -match '^[A-Za-z]:' -or $normalized -match '(^|/)\.\.(/|$)') {
+                throw "Portable Git archive contains an unsafe path: $entry"
+            }
+        }
+        $extractDirectory = Join-Path $temporaryDirectory 'extract'
+        New-Item -ItemType Directory -Path $extractDirectory | Out-Null
+        & $tar.Source -xf $archive -C $extractDirectory
+        if ($LASTEXITCODE -ne 0) { throw "Cannot extract Portable Git archive: exit code $LASTEXITCODE" }
+        $extractedBash = Join-Path $extractDirectory 'usr\bin\bash.exe'
+        if (-not (Test-GnuBash -Path $extractedBash)) {
+            throw 'Portable Git archive does not contain a usable usr\bin\bash.exe'
+        }
+
+        New-Item -ItemType Directory -Force -Path $fastctxDirectory | Out-Null
+        $backup = $null
+        try {
+            if (Test-Path -LiteralPath $managedBashRoot) {
+                $backup = "$managedBashRoot.backup-$([System.Guid]::NewGuid().ToString('N'))"
+                Move-Item -LiteralPath $managedBashRoot -Destination $backup
+            }
+            Move-Item -LiteralPath $extractDirectory -Destination $managedBashRoot
+            if ($backup) { Remove-Item -LiteralPath $backup -Recurse -Force }
+        } catch {
+            if (Test-Path -LiteralPath $managedBashRoot) {
+                Remove-Item -LiteralPath $managedBashRoot -Recurse -Force
+            }
+            if ($backup -and (Test-Path -LiteralPath $backup)) {
+                Move-Item -LiteralPath $backup -Destination $managedBashRoot
+            }
+            throw
+        }
+    } finally {
+        if (Test-Path -LiteralPath $temporaryDirectory) {
+            Remove-Item -LiteralPath $temporaryDirectory -Recurse -Force
+        }
+    }
+
+    if (-not (Test-GnuBash -Path $managedBash)) { throw 'Managed Portable Git installation failed validation' }
+    $resolved = [System.IO.Path]::GetFullPath($managedBash)
+    [Environment]::SetEnvironmentVariable('FASTCTX_BASH', $resolved, 'User')
+    $env:FASTCTX_BASH = $resolved
+    return $resolved
+}
+
+function Initialize-BashEnvironment {
+    param([switch]$AllowInstall)
+
+    $bash = Resolve-UsableBash
+    if (-not $bash) {
+        if (-not $AllowInstall) {
+            throw 'Cannot find a usable standalone GNU bash; run FastCtx setup to install the reviewed portable runtime'
+        }
+        $bash = Install-ManagedBash
+    }
+    $env:FASTCTX_BASH = $bash
+    return $bash
+}
+
+function Remove-ManagedBashEnvironment {
+    $userValue = [Environment]::GetEnvironmentVariable('FASTCTX_BASH', 'User')
+    if ($userValue -and [System.StringComparer]::OrdinalIgnoreCase.Equals(
+        [System.IO.Path]::GetFullPath($userValue),
+        [System.IO.Path]::GetFullPath($managedBash)
+    )) {
+        [Environment]::SetEnvironmentVariable('FASTCTX_BASH', $null, 'User')
+    }
+    if ($env:FASTCTX_BASH -and [System.StringComparer]::OrdinalIgnoreCase.Equals(
+        [System.IO.Path]::GetFullPath($env:FASTCTX_BASH),
+        [System.IO.Path]::GetFullPath($managedBash)
+    )) {
+        Remove-Item Env:FASTCTX_BASH
+    }
 }
 
 function Enable-FastShell {
@@ -96,6 +284,7 @@ function Get-DownloadedBinary {
 }
 
 function Invoke-Setup {
+    $null = Initialize-BashEnvironment -AllowInstall
     if ((Test-Path -LiteralPath $stableBinary) -and (Test-FastShellEnabled)) {
         $versionOutput = & $stableBinary --version 2>$null
         $installedVersion = (($versionOutput | Select-Object -First 1) -split '\s+')[1]
@@ -137,6 +326,7 @@ switch ($action) {
     'setup' { Invoke-Setup }
     'status' {
         if (-not (Test-Path -LiteralPath $stableBinary)) { throw "FastCtx is not installed at $stableBinary" }
+        $null = Initialize-BashEnvironment
         $env:FASTCTX_DISABLE_UPDATE_CHECK = '1'
         & $stableBinary status --codex-home $codexHome
         exit $LASTEXITCODE
@@ -145,7 +335,9 @@ switch ($action) {
         if (-not (Test-Path -LiteralPath $stableBinary)) { throw "FastCtx is not installed at $stableBinary" }
         $env:FASTCTX_DISABLE_UPDATE_CHECK = '1'
         & $stableBinary unapply --codex-home $codexHome --yes
-        exit $LASTEXITCODE
+        $exitCode = $LASTEXITCODE
+        if ($exitCode -eq 0) { Remove-ManagedBashEnvironment }
+        exit $exitCode
     }
     default { throw 'Usage: provision.ps1 {setup|status|unapply} [--yes]' }
 }

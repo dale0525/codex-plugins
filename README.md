@@ -46,8 +46,11 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
-Codex Sync 0.4.0 preserves declared external marker sections in global
-`AGENTS.md` while keeping the repository copy canonical. It can also run a
+Codex Sync 0.4.1 launches reviewed Windows plugin provisioners with a
+process-scoped PowerShell execution-policy bypass, avoiding AuthorizationManager
+failures without changing user or machine policy. Codex Sync 0.4.0 preserves
+declared external marker sections in global `AGENTS.md` while keeping the
+repository copy canonical. It can also run a
 plugin's reviewed high-risk provisioner after installation when
 `auto_provision = true`. The bundled FastCtx plugin uses this path to download
 a locked native release, verify its SHA-256 digest, enable repository and Bash
@@ -113,12 +116,18 @@ FastCtx and Codex Sync have explicit ownership boundaries:
 | `~/.fastctx/bin/fastctx` | FastCtx | The checksum-verified native executable |
 | `~/.fastctx/config.toml` | FastCtx | Shell enablement, tier and budgets, update preferences, and Apply rollback metadata |
 | `~/.fastctx/jobs/` | FastCtx | Created on demand for persistent Bash jobs |
+| `~/.fastctx/portable-git/` | FastCtx plugin | Windows-only, checksum-verified GNU Bash fallback when Git Bash is unavailable |
+| User `FASTCTX_BASH` | FastCtx plugin | Windows-only and set only for the managed fallback; Unapply removes it only if unchanged |
 
 Do not duplicate the FastCtx-owned Codex keys in Codex Sync's common or device
 configuration. On Windows, FastCtx shell tools run through Git Bash and the
 FastCtx-owned AGENTS block requires POSIX Bash syntax for those tools. A private
 canonical AGENTS file can therefore remove a blanket PowerShell-only rule when
 FastCtx is enabled; this public repository cannot rewrite that private file.
+When no standalone Git Bash exists, the plugin downloads the locked Portable
+Git runtime recorded in `windows-bash-runtime.json`, verifies its size and
+SHA-256 digest, and installs it under `~/.fastctx` instead of a project `.tool/`
+directory or a system-wide location.
 
 #### Migrate from Subagent Dispatch
 

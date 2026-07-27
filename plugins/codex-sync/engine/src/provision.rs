@@ -36,6 +36,23 @@ struct ProvisionSpec {
     arguments: Vec<String>,
 }
 
+fn provision_launcher(windows: bool) -> (&'static str, &'static [&'static str]) {
+    if windows {
+        (
+            "pwsh",
+            &[
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+            ],
+        )
+    } else {
+        ("/bin/sh", &[])
+    }
+}
+
 fn safe_child(root: &Path, relative: &str) -> Result<PathBuf> {
     let relative = Path::new(relative);
     if relative.is_absolute()
@@ -103,13 +120,9 @@ fn run_one(plugin: &PluginSpec) -> Result<String> {
             script.display()
         )
     }
-    let mut command = if cfg!(windows) {
-        let mut command = Command::new("pwsh");
-        command.args(["-NoProfile", "-File"]);
-        command
-    } else {
-        Command::new("/bin/sh")
-    };
+    let (launcher, launcher_arguments) = provision_launcher(cfg!(windows));
+    let mut command = Command::new(launcher);
+    command.args(launcher_arguments);
     let output = command
         .arg(&script)
         .args(&specification.arguments)
@@ -148,5 +161,21 @@ mod tests {
     fn safe_child_rejects_parent_traversal() {
         let temporary = tempfile::tempdir().unwrap();
         assert!(safe_child(temporary.path(), "../outside").is_err());
+    }
+
+    #[test]
+    fn windows_provisioners_bypass_only_process_execution_policy() {
+        let (launcher, arguments) = provision_launcher(true);
+        assert_eq!(launcher, "pwsh");
+        assert_eq!(
+            arguments,
+            [
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+            ]
+        );
     }
 }
