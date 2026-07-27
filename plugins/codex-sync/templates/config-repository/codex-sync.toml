@@ -6,3 +6,8 @@ devices = "devices"
 marketplaces = "marketplaces.toml"
 plugins = "plugins.toml"
 providers = "providers.toml"
+
+[[external_agents_sections]]
+id = "fastctx"
+begin_marker = "<!-- fastctx:begin -->"
+end_marker = "<!-- fastctx:end -->"

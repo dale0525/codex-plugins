@@ -20,6 +20,12 @@ codex plugin add apple-design@dale0525-codex-plugins
 codex plugin add codex-sync@dale0525-codex-plugins
 ```
 
+## Install FastCtx
+
+```bash
+codex plugin add fastctx@dale0525-codex-plugins
+```
+
 ## Install Film Craft Orchestrator
 
 ```bash
@@ -40,7 +46,13 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
-Codex Sync 0.3.5 captures `plugins.toml` as the complete desired installed set,
+Codex Sync 0.4.0 preserves declared external marker sections in global
+`AGENTS.md` while keeping the repository copy canonical. It can also run a
+plugin's reviewed high-risk provisioner after installation when
+`auto_provision = true`. The bundled FastCtx plugin uses this path to download
+a locked native release, verify its SHA-256 digest, enable repository and Bash
+MCP tools, and apply the integration without a global npm installation. Codex
+Sync 0.3.5 captures `plugins.toml` as the complete desired installed set,
 removing absent or disabled plugin entries instead of retaining `enabled = false`
 tombstones. Legacy disabled entries remain readable for backward compatibility.
 Codex Sync 0.3.4 runs Codex child processes from a stable configuration
@@ -83,6 +95,31 @@ drift detection, scoped secret policy, pre-apply backups, and rollback. Private
 marketplaces are downloaded at immutable commit SHAs and registered as local
 versioned snapshots instead of exposing GitHub credentials to Git subprocesses.
 
+### FastCtx
+
+Packages the native [yc-duan/fastctx](https://github.com/yc-duan/fastctx)
+runtime for reviewed, npm-free provisioning. FastCtx supplies structured local
+file reading, search, discovery, mechanical replacement, Bash execution, and
+persistent background jobs through MCP. Release metadata and supported-platform
+archive digests are synchronized daily behind the pull-request supply-chain
+review gate.
+
+FastCtx and Codex Sync have explicit ownership boundaries:
+
+| Location | Owner | Managed content |
+| --- | --- | --- |
+| `~/.codex/config.toml` | FastCtx | `mcp_servers.fastctx`, its token-budget environment, the `mcp__fastctx` member of `features.code_mode.direct_only_tool_namespaces`, and `tool_output_token_limit` |
+| `~/.codex/AGENTS.md` | Codex Sync + FastCtx | Codex Sync owns the canonical base; FastCtx owns only `<!-- fastctx:begin -->` through `<!-- fastctx:end -->` |
+| `~/.fastctx/bin/fastctx` | FastCtx | The checksum-verified native executable |
+| `~/.fastctx/config.toml` | FastCtx | Shell enablement, tier and budgets, update preferences, and Apply rollback metadata |
+| `~/.fastctx/jobs/` | FastCtx | Created on demand for persistent Bash jobs |
+
+Do not duplicate the FastCtx-owned Codex keys in Codex Sync's common or device
+configuration. On Windows, FastCtx shell tools run through Git Bash and the
+FastCtx-owned AGENTS block requires POSIX Bash syntax for those tools. A private
+canonical AGENTS file can therefore remove a blanket PowerShell-only rule when
+FastCtx is enabled; this public repository cannot rewrite that private file.
+
 #### Migrate from Subagent Dispatch
 
 Before applying Codex Sync 0.2.0 on an existing configuration repository:
@@ -122,22 +159,23 @@ than claiming unsupported transcript coverage.
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
 17:23 UTC (01:23 China Standard Time) and can also be started manually. It:
 
-1. Reads external Git sources from `sync-sources.toml`.
-2. Copies the configured skill or plugin directory and preserves its license.
-3. Applies declared compatibility normalization, records the upstream commit in
-   `sync-lock.json`, and increments the affected plugin's patch version when its
-   packaged content changes.
+1. Reads external Git-tree and GitHub Release sources from `sync-sources.toml`.
+2. Copies configured skill/plugin directories and verifies every required
+   GitHub Release asset against both `SHA256SUMS` and the GitHub asset digest.
+3. Applies declared compatibility normalization, records immutable commits,
+   release tags, asset digests, and destinations in `sync-lock.json`, and
+   increments an affected plugin's patch version when packaged content changes.
 4. Runs the repository tests and validators with pixi.
-5. Creates or refreshes `codex/sync-apple-design` as a reviewable pull request.
+5. Creates or refreshes `codex/sync-external-content` as a reviewable pull request.
 
 The workflow intentionally does not merge upstream changes automatically.
 Skills can change agent behavior, so each synchronization pull request is a
 supply-chain review gate. Repository settings must allow GitHub Actions to
 create pull requests with the `GITHUB_TOKEN`.
 
-To add another source, append a `[[sources]]` entry to `sync-sources.toml`.
-The source may point at a skills directory or a complete plugin directory; the
-destination must remain inside this repository.
+To add another Git-tree source, append a `[[sources]]` entry. To track a stable
+GitHub Release, append `[[github_releases]]` with an explicit required-asset
+set and checksum asset. Every destination must remain inside this repository.
 
 ## Repository layout
 
@@ -145,6 +183,7 @@ destination must remain inside this repository.
 .agents/plugins/marketplace.json
 plugins/apple-design/
 plugins/codex-sync/
+plugins/fastctx/
 plugins/film-craft-orchestrator/
 plugins/web-novel-craft/
 sync-sources.toml

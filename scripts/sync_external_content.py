@@ -6,12 +6,15 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
 import tempfile
 import tomllib
 import uuid
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -23,6 +26,8 @@ DEFAULT_CONFIG = REPOSITORY_ROOT / "sync-sources.toml"
 DEFAULT_LOCK = REPOSITORY_ROOT / "sync-lock.json"
 SEMVER_PATTERN = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 SOURCE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+REPOSITORY_SLUG_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
 class SyncError(RuntimeError):
@@ -49,6 +54,23 @@ class StagedSource:
     commit: str
     content: Path
     license_content: bytes | None
+
+
+@dataclass(frozen=True)
+class GithubReleaseSpec:
+    source_id: str
+    repository: str
+    metadata_destination: str
+    plugin_manifest: str
+    required_assets: tuple[str, ...]
+    checksum_asset: str
+
+
+@dataclass(frozen=True)
+class StagedGithubRelease:
+    spec: GithubReleaseSpec
+    metadata: bytes
+    lock_entry: dict[str, Any]
 
 
 def _required_string(data: dict[str, Any], key: str, context: str) -> str:
@@ -141,6 +163,68 @@ def load_config(config_path: Path, repository_root: Path = REPOSITORY_ROOT) -> l
                 raise SyncError(f"overlapping destinations: {existing} and {destination}")
         destinations.append(destination)
         specs.append(spec)
+    return specs
+
+
+def load_github_release_config(
+    config_path: Path,
+    repository_root: Path = REPOSITORY_ROOT,
+) -> list[GithubReleaseSpec]:
+    with config_path.open("rb") as handle:
+        config = tomllib.load(handle)
+    specs: list[GithubReleaseSpec] = []
+    seen_ids = {
+        item.get("id")
+        for item in config.get("sources", [])
+        if isinstance(item, dict)
+    }
+    for index, raw in enumerate(config.get("github_releases", [])):
+        context = f"github_releases[{index}]"
+        if not isinstance(raw, dict):
+            raise SyncError(f"{context} must be a table")
+        source_id = _required_string(raw, "id", context)
+        if not SOURCE_ID_PATTERN.fullmatch(source_id):
+            raise SyncError(f"{context}.id must use lower-case letters, digits, and hyphens")
+        if source_id in seen_ids:
+            raise SyncError(f"duplicate source id: {source_id}")
+        seen_ids.add(source_id)
+        repository = _required_string(raw, "repository", context)
+        if not REPOSITORY_SLUG_PATTERN.fullmatch(repository):
+            raise SyncError(f"{context}.repository must use owner/name syntax")
+        metadata_destination = _required_string(raw, "metadata_destination", context)
+        plugin_manifest = _required_string(raw, "plugin_manifest", context)
+        for field_name, value in (
+            ("metadata_destination", metadata_destination),
+            ("plugin_manifest", plugin_manifest),
+        ):
+            path = _safe_repository_path(repository_root, value)
+            if not Path(value).parts or Path(value).parts[0] != "plugins":
+                raise SyncError(f"{context}.{field_name} must stay under plugins/")
+            if field_name == "plugin_manifest" and not path.is_file():
+                raise SyncError(f"{context}.{field_name} does not exist: {value}")
+        required_assets = raw.get("required_assets")
+        if (
+            not isinstance(required_assets, list)
+            or not required_assets
+            or not all(isinstance(item, str) and item for item in required_assets)
+            or len(set(required_assets)) != len(required_assets)
+        ):
+            raise SyncError(f"{context}.required_assets must be unique non-empty strings")
+        checksum_asset = _required_string(raw, "checksum_asset", context)
+        if checksum_asset in required_assets:
+            raise SyncError(
+                f"{context}.checksum_asset must not also appear in required_assets"
+            )
+        specs.append(
+            GithubReleaseSpec(
+                source_id=source_id,
+                repository=repository,
+                metadata_destination=metadata_destination,
+                plugin_manifest=plugin_manifest,
+                required_assets=tuple(required_assets),
+                checksum_asset=checksum_asset,
+            )
+        )
     return specs
 
 
@@ -257,6 +341,210 @@ def _stage_source(spec: SourceSpec, temporary_root: Path) -> StagedSource:
     return StagedSource(spec, commit, staged_content, license_content)
 
 
+def _github_json(url: str) -> Any:
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "dale0525-codex-plugins-sync",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    token = os.environ.get("GITHUB_TOKEN", "").strip()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except (urllib.error.URLError, json.JSONDecodeError, UnicodeDecodeError) as error:
+        raise SyncError(f"GitHub request failed for {url}: {error}") from error
+
+
+def _download(url: str, destination: Path) -> bytes:
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "dale0525-codex-plugins-sync"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=120) as response:
+            content = response.read()
+    except urllib.error.URLError as error:
+        raise SyncError(f"download failed for {url}: {error}") from error
+    destination.write_bytes(content)
+    return content
+
+
+def _release_version(tag: str) -> tuple[int, int, int] | None:
+    match = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)", tag)
+    if match is None:
+        return None
+    return tuple(int(value) for value in match.groups())
+
+
+def _peel_tag(api_base: str, repository: str, tag: str) -> tuple[str, str]:
+    reference = _github_json(f"{api_base}/repos/{repository}/git/ref/tags/{tag}")
+    if not isinstance(reference, dict) or not isinstance(reference.get("object"), dict):
+        raise SyncError(f"GitHub tag reference is malformed: {repository}@{tag}")
+    tag_object = reference["object"]
+    object_type = tag_object.get("type")
+    object_sha = tag_object.get("sha")
+    if not isinstance(object_sha, str) or not re.fullmatch(r"[0-9a-f]{40}", object_sha):
+        raise SyncError(f"GitHub tag reference has an invalid SHA: {repository}@{tag}")
+    if object_type == "commit":
+        return object_sha, object_sha
+    if object_type != "tag":
+        raise SyncError(f"GitHub tag points to unsupported object type {object_type!r}")
+    tag_data = _github_json(f"{api_base}/repos/{repository}/git/tags/{object_sha}")
+    peeled = tag_data.get("object") if isinstance(tag_data, dict) else None
+    commit_sha = peeled.get("sha") if isinstance(peeled, dict) else None
+    if (
+        not isinstance(peeled, dict)
+        or peeled.get("type") != "commit"
+        or not isinstance(commit_sha, str)
+        or not re.fullmatch(r"[0-9a-f]{40}", commit_sha)
+    ):
+        raise SyncError(f"annotated GitHub tag does not peel to a commit: {repository}@{tag}")
+    return object_sha, commit_sha
+
+
+def _parse_checksums(content: bytes) -> dict[str, str]:
+    try:
+        text = content.decode("utf-8")
+    except UnicodeDecodeError as error:
+        raise SyncError("SHA256SUMS is not UTF-8") from error
+    checksums: dict[str, str] = {}
+    for line_number, line in enumerate(text.splitlines(), 1):
+        match = re.fullmatch(r"([0-9a-fA-F]{64})\s+\*?([^/\\\s]+)", line.strip())
+        if match is None:
+            raise SyncError(f"SHA256SUMS line {line_number} is malformed")
+        digest, name = match.groups()
+        if name in checksums:
+            raise SyncError(f"SHA256SUMS contains duplicate asset {name}")
+        checksums[name] = digest.lower()
+    return checksums
+
+
+def _stage_github_release(
+    spec: GithubReleaseSpec,
+    temporary_root: Path,
+    previous_lock: dict[str, Any] | None,
+) -> StagedGithubRelease:
+    api_base = os.environ.get("GITHUB_API_URL", "https://api.github.com").rstrip("/")
+    releases = _github_json(f"{api_base}/repos/{spec.repository}/releases?per_page=100")
+    if not isinstance(releases, list):
+        raise SyncError(f"GitHub releases response is malformed for {spec.repository}")
+    candidates: list[tuple[tuple[int, int, int], dict[str, Any]]] = []
+    for release in releases:
+        if not isinstance(release, dict) or release.get("draft") or release.get("prerelease"):
+            continue
+        tag = release.get("tag_name")
+        version = _release_version(tag) if isinstance(tag, str) else None
+        if version is not None:
+            candidates.append((version, release))
+    if not candidates:
+        raise SyncError(f"no stable semantic GitHub Release found for {spec.repository}")
+    version_tuple, release = max(candidates, key=lambda item: item[0])
+    tag = release["tag_name"]
+    version = ".".join(str(value) for value in version_tuple)
+    release_id = release.get("id")
+    published_at = release.get("published_at")
+    if not isinstance(release_id, int) or not isinstance(published_at, str):
+        raise SyncError(f"GitHub Release metadata is incomplete for {spec.repository}@{tag}")
+    tag_object_sha, commit_sha = _peel_tag(api_base, spec.repository, tag)
+
+    raw_assets = release.get("assets")
+    if not isinstance(raw_assets, list):
+        raise SyncError(f"GitHub Release assets are malformed for {spec.repository}@{tag}")
+    assets_by_name: dict[str, dict[str, Any]] = {}
+    for asset in raw_assets:
+        if not isinstance(asset, dict) or not isinstance(asset.get("name"), str):
+            raise SyncError(f"GitHub Release contains a malformed asset for {spec.repository}@{tag}")
+        if asset["name"] in assets_by_name:
+            raise SyncError(f"GitHub Release contains duplicate asset {asset['name']}")
+        assets_by_name[asset["name"]] = asset
+    required_names = [*spec.required_assets, spec.checksum_asset]
+    missing = [name for name in required_names if name not in assets_by_name]
+    if missing:
+        raise SyncError(f"GitHub Release is missing required assets: {', '.join(missing)}")
+
+    checksum_asset = assets_by_name[spec.checksum_asset]
+    checksum_url = checksum_asset.get("browser_download_url")
+    if not isinstance(checksum_url, str):
+        raise SyncError("checksum asset has no download URL")
+    checksum_content = _download(
+        checksum_url,
+        temporary_root / f"{spec.source_id}-{spec.checksum_asset}",
+    )
+    checksum_digest = hashlib.sha256(checksum_content).hexdigest()
+    api_checksum_digest = checksum_asset.get("digest")
+    if api_checksum_digest != f"sha256:{checksum_digest}":
+        raise SyncError("checksum asset digest does not match the GitHub API digest")
+    checksums = _parse_checksums(checksum_content)
+
+    staged_assets: dict[str, dict[str, Any]] = {}
+    for name in spec.required_assets:
+        asset = assets_by_name[name]
+        url = asset.get("browser_download_url")
+        size = asset.get("size")
+        api_digest = asset.get("digest")
+        if not isinstance(url, str) or not isinstance(size, int):
+            raise SyncError(f"GitHub Release asset metadata is incomplete: {name}")
+        content = _download(url, temporary_root / f"{spec.source_id}-{name}")
+        digest = hashlib.sha256(content).hexdigest()
+        if len(content) != size:
+            raise SyncError(f"GitHub Release asset size does not match: {name}")
+        if checksums.get(name) != digest or api_digest != f"sha256:{digest}":
+            raise SyncError(f"GitHub Release asset digest verification failed: {name}")
+        target = name.removeprefix("fastctx-").removesuffix(".tar.gz").removesuffix(".zip")
+        staged_assets[target] = {
+            "name": name,
+            "url": url,
+            "size": size,
+            "sha256": digest,
+        }
+
+    checksum_record = {
+        "name": spec.checksum_asset,
+        "url": checksum_url,
+        "size": len(checksum_content),
+        "sha256": checksum_digest,
+    }
+    ignored_assets = sorted(set(assets_by_name) - set(required_names))
+    lock_entry: dict[str, Any] = {
+        "kind": "github-release",
+        "repository": spec.repository,
+        "version": version,
+        "tag": tag,
+        "release_id": release_id,
+        "published_at": published_at,
+        "tag_object_sha": tag_object_sha,
+        "commit": commit_sha,
+        "metadata_destination": spec.metadata_destination,
+        "assets": staged_assets,
+        "checksum_asset": checksum_record,
+        "ignored_assets": ignored_assets,
+    }
+    if previous_lock and previous_lock.get("tag") == tag and previous_lock != lock_entry:
+        raise SyncError(
+            f"GitHub Release {spec.repository}@{tag} changed after it was locked; review the upstream release manually"
+        )
+    metadata = {
+        "schema_version": 1,
+        "repository": spec.repository,
+        "version": version,
+        "tag": tag,
+        "release_id": release_id,
+        "published_at": published_at,
+        "tag_object_sha": tag_object_sha,
+        "commit_sha": commit_sha,
+        "assets": staged_assets,
+        "checksum_asset": checksum_record,
+    }
+    return StagedGithubRelease(
+        spec=spec,
+        metadata=(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n").encode("utf-8"),
+        lock_entry=lock_entry,
+    )
+
+
 def _directory_digest(path: Path) -> str | None:
     if not path.is_dir():
         return None
@@ -307,7 +595,7 @@ def _write_json_atomic(destination: Path, data: dict[str, Any]) -> None:
     _write_bytes_atomic(destination, content)
 
 
-def _bump_patch_version(manifest_path: Path) -> tuple[str, str]:
+def _bumped_manifest(manifest_path: Path) -> tuple[bytes, str, str]:
     try:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
@@ -317,8 +605,37 @@ def _bump_patch_version(manifest_path: Path) -> tuple[str, str]:
         raise SyncError(f"plugin version must be numeric semver: {manifest_path}")
     old_version = version
     manifest["version"] = f"{match.group(1)}.{match.group(2)}.{int(match.group(3)) + 1}"
-    _write_json_atomic(manifest_path, manifest)
-    return old_version, manifest["version"]
+    content = (json.dumps(manifest, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+    return content, old_version, manifest["version"]
+
+
+def _snapshot_targets(targets: set[Path], backup_root: Path) -> dict[Path, tuple[str, Path | None]]:
+    snapshots: dict[Path, tuple[str, Path | None]] = {}
+    for index, target in enumerate(sorted(targets)):
+        if target.is_dir():
+            backup = backup_root / f"target-{index}"
+            shutil.copytree(target, backup)
+            snapshots[target] = ("directory", backup)
+        elif target.is_file():
+            backup = backup_root / f"target-{index}"
+            backup.write_bytes(target.read_bytes())
+            snapshots[target] = ("file", backup)
+        else:
+            snapshots[target] = ("absent", None)
+    return snapshots
+
+
+def _restore_targets(snapshots: dict[Path, tuple[str, Path | None]]) -> None:
+    for target, (kind, backup) in reversed(list(snapshots.items())):
+        if target.is_dir():
+            shutil.rmtree(target)
+        elif target.exists():
+            target.unlink()
+        if kind == "directory" and backup is not None:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(backup, target)
+        elif kind == "file" and backup is not None:
+            _write_bytes_atomic(target, backup.read_bytes())
 
 
 def synchronize(config_path: Path = DEFAULT_CONFIG, lock_path: Path = DEFAULT_LOCK) -> bool:
@@ -328,13 +645,33 @@ def synchronize(config_path: Path = DEFAULT_CONFIG, lock_path: Path = DEFAULT_LO
     if lock_path != repository_root and repository_root not in lock_path.parents:
         raise SyncError("lock path must stay inside the repository")
     specs = load_config(config_path, repository_root)
+    release_specs = load_github_release_config(config_path, repository_root)
     changed_manifests: set[Path] = set()
-    lock_sources: dict[str, dict[str, str]] = {}
-    any_change = False
+    lock_sources: dict[str, dict[str, Any]] = {}
+    previous_lock: dict[str, Any] = {}
+    if lock_path.is_file():
+        try:
+            parsed_lock = json.loads(lock_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            raise SyncError(f"cannot read synchronization lock: {error}") from error
+        if isinstance(parsed_lock, dict) and isinstance(parsed_lock.get("sources"), dict):
+            previous_lock = parsed_lock["sources"]
 
     with tempfile.TemporaryDirectory(prefix="codex-plugin-sync-") as temporary:
         temporary_root = Path(temporary)
         staged_sources = [_stage_source(spec, temporary_root) for spec in specs]
+        staged_releases = [
+            _stage_github_release(
+                spec,
+                temporary_root,
+                previous_lock.get(spec.source_id)
+                if isinstance(previous_lock.get(spec.source_id), dict)
+                else None,
+            )
+            for spec in release_specs
+        ]
+        directory_writes: list[tuple[Path, Path]] = []
+        file_writes: dict[Path, bytes] = {}
 
         for staged in staged_sources:
             spec = staged.spec
@@ -350,15 +687,15 @@ def synchronize(config_path: Path = DEFAULT_CONFIG, lock_path: Path = DEFAULT_LO
                 )
                 license_changed = current_license != staged.license_content
             if content_changed:
-                _replace_directory(staged.content, destination)
+                directory_writes.append((staged.content, destination))
             if license_changed:
-                _write_bytes_atomic(license_destination, staged.license_content)
+                file_writes[license_destination] = staged.license_content
             if content_changed or license_changed:
                 changed_manifests.add(
                     _safe_repository_path(repository_root, spec.plugin_manifest)
                 )
-                any_change = True
             lock_sources[spec.source_id] = {
+                "kind": "git-tree",
                 "repository": spec.repository,
                 "ref": spec.ref,
                 "commit": staged.commit,
@@ -367,18 +704,55 @@ def synchronize(config_path: Path = DEFAULT_CONFIG, lock_path: Path = DEFAULT_LO
             state = "updated" if content_changed or license_changed else "unchanged"
             print(f"{spec.source_id}: {state} at {staged.commit[:12]}")
 
-    for manifest_path in sorted(changed_manifests):
-        old_version, new_version = _bump_patch_version(manifest_path)
-        print(f"{manifest_path.relative_to(repository_root)}: {old_version} -> {new_version}")
+        for staged in staged_releases:
+            destination = _safe_repository_path(
+                repository_root, staged.spec.metadata_destination
+            )
+            current = destination.read_bytes() if destination.is_file() else None
+            changed = current != staged.metadata
+            if changed:
+                file_writes[destination] = staged.metadata
+                changed_manifests.add(
+                    _safe_repository_path(repository_root, staged.spec.plugin_manifest)
+                )
+            lock_sources[staged.spec.source_id] = staged.lock_entry
+            state = "updated" if changed else "unchanged"
+            print(
+                f"{staged.spec.source_id}: {state} at "
+                f"{staged.lock_entry['tag']} ({staged.lock_entry['commit'][:12]})"
+            )
 
-    lock_data: dict[str, Any] = {"version": 1, "sources": lock_sources}
-    serialized_lock = (json.dumps(lock_data, indent=2, ensure_ascii=False) + "\n").encode()
-    current_lock = lock_path.read_bytes() if lock_path.is_file() else None
-    if current_lock != serialized_lock:
-        _write_bytes_atomic(lock_path, serialized_lock)
-        any_change = True
-        print(f"updated {lock_path.relative_to(repository_root)}")
-    return any_change
+        version_changes: list[tuple[Path, str, str]] = []
+        for manifest_path in sorted(changed_manifests):
+            content, old_version, new_version = _bumped_manifest(manifest_path)
+            file_writes[manifest_path] = content
+            version_changes.append((manifest_path, old_version, new_version))
+
+        lock_data: dict[str, Any] = {"version": 2, "sources": lock_sources}
+        serialized_lock = (json.dumps(lock_data, indent=2, ensure_ascii=False) + "\n").encode()
+        current_lock = lock_path.read_bytes() if lock_path.is_file() else None
+        if current_lock != serialized_lock:
+            file_writes[lock_path] = serialized_lock
+
+        if not directory_writes and not file_writes:
+            return False
+        targets = {destination for _, destination in directory_writes} | set(file_writes)
+        backup_root = temporary_root / "rollback"
+        backup_root.mkdir()
+        snapshots = _snapshot_targets(targets, backup_root)
+        try:
+            for source, destination in directory_writes:
+                _replace_directory(source, destination)
+            for destination, content in file_writes.items():
+                _write_bytes_atomic(destination, content)
+        except Exception:
+            _restore_targets(snapshots)
+            raise
+        for manifest_path, old_version, new_version in version_changes:
+            print(f"{manifest_path.relative_to(repository_root)}: {old_version} -> {new_version}")
+        if lock_path in file_writes:
+            print(f"updated {lock_path.relative_to(repository_root)}")
+        return True
 
 
 def main() -> int:

@@ -1,3 +1,4 @@
+mod agents;
 mod app;
 mod auth;
 mod capture;
@@ -5,6 +6,7 @@ mod config;
 mod github;
 mod model;
 mod profiles;
+mod provision;
 mod reconcile;
 mod storage;
 

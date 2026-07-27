@@ -1,11 +1,56 @@
 {
-  "version": 1,
+  "version": 2,
   "sources": {
     "emilkowalski-skills": {
+      "kind": "git-tree",
       "repository": "https://github.com/emilkowalski/skills.git",
       "ref": "main",
       "commit": "e695d13cb298db0f46d5ef05be2ad13fa12908a6",
       "destination": "plugins/apple-design/skills"
+    },
+    "fastctx-release": {
+      "kind": "github-release",
+      "repository": "yc-duan/fastctx",
+      "version": "0.2.3",
+      "tag": "v0.2.3",
+      "release_id": 359855142,
+      "published_at": "2026-07-25T20:47:52Z",
+      "tag_object_sha": "45c5861287a59c1a9fb581df056b21452f19e797",
+      "commit": "8056641e3969bc10ffc4871b5fa01ca8a91544e4",
+      "metadata_destination": "plugins/fastctx/upstream-release.json",
+      "assets": {
+        "aarch64-apple-darwin": {
+          "name": "fastctx-aarch64-apple-darwin.tar.gz",
+          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.3/fastctx-aarch64-apple-darwin.tar.gz",
+          "size": 25135305,
+          "sha256": "9116db926fb632e133a3a485e8c9d88e7b2a579b033cebc80d09a7ccc2ad6269"
+        },
+        "x86_64-apple-darwin": {
+          "name": "fastctx-x86_64-apple-darwin.tar.gz",
+          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.3/fastctx-x86_64-apple-darwin.tar.gz",
+          "size": 25310217,
+          "sha256": "877fabed2b21da36839bd3e344101b8f7988481469cd493d635a7625929aa6be"
+        },
+        "x86_64-pc-windows-msvc": {
+          "name": "fastctx-x86_64-pc-windows-msvc.zip",
+          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.3/fastctx-x86_64-pc-windows-msvc.zip",
+          "size": 26159595,
+          "sha256": "eff20e77e013bdb8aa4fff1defee7a4813205bd448c0fe1f579bf23aee817e74"
+        },
+        "x86_64-unknown-linux-gnu": {
+          "name": "fastctx-x86_64-unknown-linux-gnu.tar.gz",
+          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.3/fastctx-x86_64-unknown-linux-gnu.tar.gz",
+          "size": 25494997,
+          "sha256": "ef919eef71432b9c4560ea18a8e70daacb4d2a271fd9187cd72a35f4999d2283"
+        }
+      },
+      "checksum_asset": {
+        "name": "SHA256SUMS",
+        "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.3/SHA256SUMS",
+        "size": 410,
+        "sha256": "55b805e90b0a980a2321be03198288d51fcf4c51a7f128718f4fbba3fa8bb3e3"
+      },
+      "ignored_assets": []
     }
   }
 }

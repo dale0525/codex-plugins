@@ -1,3 +1,8 @@
 [[plugins]]
 id = "codex-sync@dale0525-codex-plugins"
 enabled = true
+
+[[plugins]]
+id = "fastctx@dale0525-codex-plugins"
+enabled = true
+auto_provision = true

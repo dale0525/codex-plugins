@@ -4,9 +4,15 @@ import json
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
-from scripts.sync_external_content import SyncError, load_config, synchronize
+from scripts.sync_external_content import (
+    SyncError,
+    load_config,
+    load_github_release_config,
+    synchronize,
+)
 
 
 class ExternalContentSyncTests(unittest.TestCase):
@@ -85,6 +91,64 @@ class ExternalContentSyncTests(unittest.TestCase):
         manifest = self.root / "plugins/apple-design/.codex-plugin/plugin.json"
         return json.loads(manifest.read_text(encoding="utf-8"))["version"]
 
+    def _release_fixture(self):
+        manifest = self.root / "plugins/fastctx/.codex-plugin/plugin.json"
+        manifest.parent.mkdir(parents=True, exist_ok=True)
+        manifest.write_text(
+            json.dumps({"name": "fastctx", "version": "0.1.0"}) + "\n",
+            encoding="utf-8",
+        )
+        asset_name = "fastctx-test-target.tar.gz"
+        asset_content = b"reviewed release archive"
+        asset_digest = __import__("hashlib").sha256(asset_content).hexdigest()
+        checksums = f"{asset_digest}  {asset_name}\n".encode()
+        checksum_digest = __import__("hashlib").sha256(checksums).hexdigest()
+        with self.config.open("a", encoding="utf-8") as handle:
+            handle.write(
+                "\n[[github_releases]]\n"
+                'id = "fastctx-release"\n'
+                'repository = "yc-duan/fastctx"\n'
+                'metadata_destination = "plugins/fastctx/upstream-release.json"\n'
+                'plugin_manifest = "plugins/fastctx/.codex-plugin/plugin.json"\n'
+                'checksum_asset = "SHA256SUMS"\n'
+                f'required_assets = ["{asset_name}"]\n'
+            )
+        release = {
+            "id": 7,
+            "tag_name": "v0.2.3",
+            "draft": False,
+            "prerelease": False,
+            "published_at": "2026-07-25T20:47:52Z",
+            "assets": [
+                {
+                    "name": asset_name,
+                    "browser_download_url": "https://download.example/asset",
+                    "size": len(asset_content),
+                    "digest": f"sha256:{asset_digest}",
+                },
+                {
+                    "name": "SHA256SUMS",
+                    "browser_download_url": "https://download.example/checksums",
+                    "size": len(checksums),
+                    "digest": f"sha256:{checksum_digest}",
+                },
+            ],
+        }
+
+        def github_json(url: str):
+            if "/releases?" in url:
+                return [release]
+            if "/git/ref/tags/" in url:
+                return {"object": {"type": "commit", "sha": "a" * 40}}
+            raise AssertionError(url)
+
+        def download(url: str, destination: Path) -> bytes:
+            content = checksums if url.endswith("checksums") else asset_content
+            destination.write_bytes(content)
+            return content
+
+        return manifest, asset_digest, github_json, download
+
     def test_sync_normalizes_bumps_and_is_idempotent(self) -> None:
         self.assertTrue(synchronize(self.config, self.lock))
         skill = self.root / "plugins/apple-design/skills/example-skill/SKILL.md"
@@ -126,6 +190,64 @@ class ExternalContentSyncTests(unittest.TestCase):
         )
         with self.assertRaises(SyncError):
             load_config(self.config, self.root)
+
+    def test_github_release_sync_verifies_assets_and_is_idempotent(self) -> None:
+        manifest, asset_digest, github_json, download = self._release_fixture()
+
+        with (
+            patch("scripts.sync_external_content._github_json", side_effect=github_json),
+            patch("scripts.sync_external_content._download", side_effect=download),
+        ):
+            self.assertTrue(synchronize(self.config, self.lock))
+            self.assertEqual(
+                json.loads(manifest.read_text(encoding="utf-8"))["version"],
+                "0.1.1",
+            )
+            metadata = json.loads(
+                (self.root / "plugins/fastctx/upstream-release.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(metadata["version"], "0.2.3")
+            self.assertEqual(metadata["assets"]["test-target"]["sha256"], asset_digest)
+            self.assertFalse(synchronize(self.config, self.lock))
+
+    def test_github_release_rejects_mutated_locked_tag_without_writes(self) -> None:
+        manifest, _, github_json, download = self._release_fixture()
+        with (
+            patch("scripts.sync_external_content._github_json", side_effect=github_json),
+            patch("scripts.sync_external_content._download", side_effect=download),
+        ):
+            self.assertTrue(synchronize(self.config, self.lock))
+        metadata = self.root / "plugins/fastctx/upstream-release.json"
+        manifest_before = manifest.read_bytes()
+        metadata_before = metadata.read_bytes()
+        lock_data = json.loads(self.lock.read_text(encoding="utf-8"))
+        release_entry = lock_data["sources"]["fastctx-release"]
+        release_entry["release_id"] = 8
+        self.lock.write_text(json.dumps(lock_data, indent=2) + "\n", encoding="utf-8")
+
+        with (
+            patch("scripts.sync_external_content._github_json", side_effect=github_json),
+            patch("scripts.sync_external_content._download", side_effect=download),
+        ):
+            with self.assertRaisesRegex(SyncError, "changed after it was locked"):
+                synchronize(self.config, self.lock)
+        self.assertEqual(manifest.read_bytes(), manifest_before)
+        self.assertEqual(metadata.read_bytes(), metadata_before)
+
+    def test_release_config_rejects_checksum_as_required_asset(self) -> None:
+        self._release_fixture()
+        text = self.config.read_text(encoding="utf-8")
+        self.config.write_text(
+            text.replace(
+                'required_assets = ["fastctx-test-target.tar.gz"]',
+                'required_assets = ["fastctx-test-target.tar.gz", "SHA256SUMS"]',
+            ),
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(SyncError, "must not also appear"):
+            load_github_release_config(self.config, self.root)
 
 
 if __name__ == "__main__":

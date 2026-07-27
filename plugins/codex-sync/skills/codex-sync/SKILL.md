@@ -58,6 +58,11 @@ Read [repository-schema.md](references/repository-schema.md) when creating or ed
 
 6. Report the applied commit and instruct the user to start a new Codex task. Plugin skills, tools, and config changes are not guaranteed to hot-load into the current task.
 
+When the reviewed plan contains an `auto_provision` plugin, the engine installs
+the plugin and runs its bundled provisioner automatically after the core apply
+transaction. Do not invoke the plugin's setup skill separately unless the
+provisioner reports incomplete setup or the user requests repair.
+
 Do not silently replace an existing setup. Run `<bootstrap> status` first. Use `setup ... --replace-existing` only after the user explicitly approves replacing the repository/device binding; the engine backs up the previous local state.
 
 ## Synchronize
@@ -65,7 +70,7 @@ Do not silently replace an existing setup. Run `<bootstrap> status` first. Use `
 1. Run `<bootstrap> doctor` if the previous synchronization failed or the device has changed materially.
 2. Run `<bootstrap> sync`. This fetches an immutable commit snapshot and creates a pending plan; it does not apply changes.
    If the engine reports unpublished cache edits, publish them or obtain explicit permission before running `<bootstrap> sync --discard-local`; never discard them automatically. Discarding invalidates any older pending plan, so run sync again and use only the newly printed plan ID.
-3. Show the plan ID, commit, affected configuration paths, agent profile operations, marketplace operations, and plugin operations.
+3. Show the plan ID, commit, affected configuration paths, agent profile operations, marketplace operations, plugin operations, and automatic provisioning operations.
 4. For a low-risk plan, show all changes and ask “Apply this plan now?”; wait for an affirmative answer. For a high-risk plan, enumerate those changes and obtain explicit confirmation.
 5. If the engine reports that `config.toml`, `AGENTS.md`, or a managed agent profile changed after planning, do not use the old plan ID. Run `sync` again, which replaces the pending plan, and review the newly printed ID.
 
@@ -76,7 +81,7 @@ Never copy hook trust hashes, project trust, authentication sessions, SQLite sta
 Use this workflow when the user asks to “upload configuration,” “push this device's configuration,” or otherwise make the current device the reviewed source for synchronized state.
 
 1. Run `status` and `doctor`. The repository cache must match its last fetched digest. If it already has unpublished edits, show them and publish or synchronize them first; never let capture overwrite them.
-2. Run `<bootstrap> capture`. Capture updates only the local repository cache. It copies the current values for configuration keys already declared in common and device configuration, complete current provider tables, global `AGENTS.md`, synchronized native agent profiles, and installed enabled plugins outside OpenAI-managed marketplaces. The resulting `plugins.toml` is the complete desired installed set for declared marketplaces; capture removes entries for plugins that are absent or disabled locally instead of retaining `enabled = false` tombstones.
+2. Run `<bootstrap> capture`. Capture updates only the local repository cache. It copies the current values for configuration keys already declared in common and device configuration, complete current provider tables, canonical global `AGENTS.md` content with declared external marker sections removed, synchronized native agent profiles, and installed enabled plugins outside OpenAI-managed marketplaces. The resulting `plugins.toml` is the complete desired installed set for declared marketplaces; capture removes entries for plugins that are absent or disabled locally instead of retaining `enabled = false` tombstones and preserves existing `auto_provision = true` declarations.
 3. Treat marketplace names equal to `openai` or beginning with `openai-` as app-managed. Capture removes their plugin and marketplace declarations from the cache. It never uninstalls those local plugins.
 4. For a captured plugin from a marketplace not yet declared in the repository, capture may add the marketplace only when current Codex configuration exposes a portable HTTPS Git source. It skips local or otherwise non-portable marketplaces with a warning because a plugin declaration alone cannot restore their plugin code on another device.
 5. Run `doctor`, then show the repository diff or exact changed files. Mask `experimental_bearer_token` values while confirming that the field is present when applicable. Explain any skipped plugin before publication.
@@ -113,3 +118,4 @@ The engine publishes one commit only when the remote branch still matches the fe
 - Do not manually edit Codex marketplace snapshot metadata or plugin cache directories.
 - Do not claim that a local-only marketplace plugin is portable. Synchronize its source through a reviewed Git marketplace first, then capture it.
 - Do not add lifecycle hooks for synchronization or drift repair. All checks and applies are explicitly invoked.
+- Do not execute a plugin provisioner unless its synchronized plugin entry explicitly sets `auto_provision = true` and the reviewed plan is approved as high risk.

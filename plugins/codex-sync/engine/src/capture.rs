@@ -3,6 +3,7 @@ use std::fs;
 
 use anyhow::{Context, Result};
 
+use crate::agents::strip_external_sections;
 use crate::app::{load_repository_manifest, validate_desired_state, validate_state};
 use crate::config::{
     capture_current_providers, capture_existing_managed_values, load_managed_values,
@@ -68,7 +69,9 @@ pub fn capture() -> Result<()> {
 
     let current_agents =
         fs::read(paths.codex_home.join("AGENTS.md")).context("read current global AGENTS.md")?;
-    atomic_write(&staged.join(&manifest.agents), &current_agents)?;
+    let captured_agents =
+        strip_external_sections(&current_agents, &manifest.external_agents_sections)?;
+    atomic_write(&staged.join(&manifest.agents), &captured_agents)?;
 
     let repository_profiles = load_agent_profiles(&staged, &manifest.agent_profiles)?;
     for name in repository_profiles.keys() {
@@ -117,6 +120,13 @@ fn capture_plugins(
     let mut report = PluginCapture::default();
     let mut marketplaces: MarketplaceFile =
         read_optional_toml(&repository.join(&manifest.marketplaces))?;
+    let previous_plugins: PluginFile = read_optional_toml(&repository.join(&manifest.plugins))?;
+    let auto_provisioned: BTreeSet<_> = previous_plugins
+        .plugins
+        .into_iter()
+        .filter(|plugin| plugin.auto_provision)
+        .map(|plugin| plugin.id)
+        .collect();
     marketplaces
         .marketplaces
         .retain(|spec| !is_openai_managed_marketplace(spec.name()));
@@ -158,7 +168,11 @@ fn capture_plugins(
     let plugins = PluginFile {
         plugins: desired
             .into_iter()
-            .map(|id| PluginSpec { id, enabled: true })
+            .map(|id| PluginSpec {
+                auto_provision: auto_provisioned.contains(&id),
+                id,
+                enabled: true,
+            })
             .collect(),
     };
     atomic_write(

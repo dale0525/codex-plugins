@@ -11,3 +11,16 @@ license_source = "LICENSE"
 license_destination = "plugins/apple-design/third-party/emilkowalski-skills-LICENSE"
 remove_skill_frontmatter_fields = ["disable-model-invocation"]
 skill_description_suffixes = { review-animations = "Use only when the user explicitly asks for an animation review; do not trigger on general code review." }
+
+[[github_releases]]
+id = "fastctx-release"
+repository = "yc-duan/fastctx"
+metadata_destination = "plugins/fastctx/upstream-release.json"
+plugin_manifest = "plugins/fastctx/.codex-plugin/plugin.json"
+checksum_asset = "SHA256SUMS"
+required_assets = [
+  "fastctx-aarch64-apple-darwin.tar.gz",
+  "fastctx-x86_64-apple-darwin.tar.gz",
+  "fastctx-x86_64-pc-windows-msvc.zip",
+  "fastctx-x86_64-unknown-linux-gnu.tar.gz",
+]
