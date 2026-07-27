@@ -127,31 +127,34 @@ function Install-ManagedBash {
     $temporaryDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "fastctx-bash-$([System.Guid]::NewGuid().ToString('N'))"
     New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null
     try {
+        if ($asset.archive_format -ne 'tar.bz2') {
+            throw "Unsupported Git for Windows runtime archive format: $($asset.archive_format)"
+        }
         $archive = Join-Path $temporaryDirectory $asset.name
         Invoke-WebRequest -Uri $asset.url -OutFile $archive
         if ((Get-Item -LiteralPath $archive).Length -ne [long]$asset.size) {
-            throw "Portable Git archive size verification failed for $($asset.name)"
+            throw "Git for Windows runtime archive size verification failed for $($asset.name)"
         }
         $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
         if ($actual -ne $asset.sha256) {
-            throw "Portable Git archive checksum verification failed for $($asset.name)"
+            throw "Git for Windows runtime archive checksum verification failed for $($asset.name)"
         }
         $tar = Get-Command tar.exe -ErrorAction Stop
-        $entries = @(& $tar.Source -tf $archive)
-        if ($LASTEXITCODE -ne 0) { throw "Cannot list Portable Git archive: exit code $LASTEXITCODE" }
+        $entries = @(& $tar.Source -tjf $archive)
+        if ($LASTEXITCODE -ne 0) { throw "Cannot list Git for Windows runtime archive: exit code $LASTEXITCODE" }
         foreach ($entry in $entries) {
             $normalized = $entry.Replace('\', '/')
             if ($normalized -match '^/' -or $normalized -match '^[A-Za-z]:' -or $normalized -match '(^|/)\.\.(/|$)') {
-                throw "Portable Git archive contains an unsafe path: $entry"
+                throw "Git for Windows runtime archive contains an unsafe path: $entry"
             }
         }
         $extractDirectory = Join-Path $temporaryDirectory 'extract'
         New-Item -ItemType Directory -Path $extractDirectory | Out-Null
-        & $tar.Source -xf $archive -C $extractDirectory
-        if ($LASTEXITCODE -ne 0) { throw "Cannot extract Portable Git archive: exit code $LASTEXITCODE" }
+        & $tar.Source -xjf $archive -C $extractDirectory
+        if ($LASTEXITCODE -ne 0) { throw "Cannot extract Git for Windows runtime archive: exit code $LASTEXITCODE" }
         $extractedBash = Join-Path $extractDirectory 'usr\bin\bash.exe'
         if (-not (Test-GnuBash -Path $extractedBash)) {
-            throw 'Portable Git archive does not contain a usable usr\bin\bash.exe'
+            throw 'Git for Windows runtime archive does not contain a usable usr\bin\bash.exe'
         }
 
         New-Item -ItemType Directory -Force -Path $fastctxDirectory | Out-Null

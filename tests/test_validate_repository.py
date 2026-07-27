@@ -75,6 +75,7 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                             "url": "https://example.com/untrusted.exe",
                             "size": 1,
                             "sha256": "invalid",
+                            "archive_format": "7z",
                         },
                     }
                 )
@@ -90,6 +91,10 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
             )
             self.assertIn(
                 "FastCtx Windows Bash runtime: invalid asset digest",
+                validation.errors,
+            )
+            self.assertIn(
+                "FastCtx Windows Bash runtime: archive_format must be tar.bz2",
                 validation.errors,
             )
 

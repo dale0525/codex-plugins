@@ -124,10 +124,11 @@ configuration. On Windows, FastCtx shell tools run through Git Bash and the
 FastCtx-owned AGENTS block requires POSIX Bash syntax for those tools. A private
 canonical AGENTS file can therefore remove a blanket PowerShell-only rule when
 FastCtx is enabled; this public repository cannot rewrite that private file.
-When no standalone Git Bash exists, the plugin downloads the locked Portable
-Git runtime recorded in `windows-bash-runtime.json`, verifies its size and
-SHA-256 digest, and installs it under `~/.fastctx` instead of a project `.tool/`
-directory or a system-wide location.
+When no standalone Git Bash exists, the plugin downloads the locked Git for
+Windows `tar.bz2` runtime recorded in `windows-bash-runtime.json`, verifies its
+size and SHA-256 digest, and installs it under `~/.fastctx` instead of a project
+`.tool/` directory or a system-wide location. The bzip2 format avoids the LZMA
+compatibility gap in older Windows `tar.exe` builds.
 
 #### Migrate from Subagent Dispatch
 
