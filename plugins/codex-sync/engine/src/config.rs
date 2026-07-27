@@ -437,6 +437,7 @@ hash = "device-only"
             marketplaces: "marketplaces.toml".to_owned(),
             plugins: "plugins.toml".to_owned(),
             providers: "providers.toml".to_owned(),
+            external_agents_sections: Vec::new(),
         };
         let values = load_managed_values(directory.path(), &manifest, "test-device").unwrap();
         let token_path = vec![

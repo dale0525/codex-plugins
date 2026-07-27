@@ -212,7 +212,14 @@ def _validate_sync_metadata(validation: Validation) -> None:
     lock = _read_json(lock_path, validation)
     if lock is None:
         return
-    configured = {item.get("id") for item in config.get("sources", []) if isinstance(item, dict)}
+    if lock.get("version") != 2:
+        validation.error("sync-lock.json: version must be 2")
+    configured = {
+        item.get("id")
+        for section in ("sources", "github_releases")
+        for item in config.get(section, [])
+        if isinstance(item, dict)
+    }
     locked = set(lock.get("sources", {})) if isinstance(lock.get("sources"), dict) else set()
     if configured != locked:
         validation.error("sync source ids and sync-lock.json source ids do not match")
@@ -223,6 +230,55 @@ def _validate_sync_metadata(validation: Validation) -> None:
             value = source.get(field)
             if value is not None and not (ROOT / value).exists():
                 validation.error(f"sync source {source.get('id')}: missing {field} {value}")
+    for source in config.get("github_releases", []):
+        if not isinstance(source, dict):
+            continue
+        for field in ("metadata_destination", "plugin_manifest"):
+            value = source.get(field)
+            if not isinstance(value, str) or not (ROOT / value).is_file():
+                validation.error(
+                    f"sync GitHub Release {source.get('id')}: missing {field} {value}"
+                )
+    lock_sources = lock.get("sources", {})
+    if isinstance(lock_sources, dict):
+        for source_id, entry in lock_sources.items():
+            if not isinstance(entry, dict):
+                validation.error(f"sync lock {source_id}: entry must be an object")
+                continue
+            kind = entry.get("kind", "git-tree")
+            if kind == "git-tree":
+                commit = entry.get("commit")
+                if not isinstance(commit, str) or not re.fullmatch(r"[0-9a-f]{40}", commit):
+                    validation.error(f"sync lock {source_id}: invalid commit")
+            elif kind == "github-release":
+                for field in ("tag_object_sha", "commit"):
+                    value = entry.get(field)
+                    if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{40}", value):
+                        validation.error(f"sync lock {source_id}: invalid {field}")
+                assets = entry.get("assets")
+                if not isinstance(assets, dict) or not assets:
+                    validation.error(f"sync lock {source_id}: assets must be non-empty")
+                else:
+                    for name, asset in assets.items():
+                        digest = asset.get("sha256") if isinstance(asset, dict) else None
+                        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+                            validation.error(
+                                f"sync lock {source_id}: invalid asset digest for {name}"
+                            )
+                checksum_asset = entry.get("checksum_asset")
+                checksum_digest = (
+                    checksum_asset.get("sha256")
+                    if isinstance(checksum_asset, dict)
+                    else None
+                )
+                if not isinstance(checksum_digest, str) or not re.fullmatch(
+                    r"[0-9a-f]{64}", checksum_digest
+                ):
+                    validation.error(
+                        f"sync lock {source_id}: invalid checksum asset digest"
+                    )
+            else:
+                validation.error(f"sync lock {source_id}: unsupported kind {kind}")
 
 
 def _validate_workflows(validation: Validation) -> None:

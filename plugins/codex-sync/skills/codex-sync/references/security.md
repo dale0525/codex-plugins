@@ -13,6 +13,7 @@ Always require explicit user confirmation before applying or publishing changes 
 - shell environment policy
 - marketplace registration or replacement
 - plugin installation or removal
+- automatic plugin provisioning
 - publication to GitHub
 - rollback
 
@@ -37,6 +38,7 @@ Publication rejects obvious private-key filenames, `.env`, `auth.json`, GitHub t
 - Keep marketplace source changes visible in the synchronization plan.
 - Exclude app-managed `openai` and `openai-*` marketplaces and plugins from current-device capture. This exclusion affects synchronized declarations only and never uninstalls the desktop App's local runtime plugins.
 - Applying a plan may download and register plugins, but never invoke their new capabilities in the current task. Start a new task before use.
+- Auto-provisioning is opt-in per plugin, must declare high risk, resolves its contract and scripts inside the registered marketplace root, rejects path traversal, and removes `CODEX_SYNC_GITHUB_TOKEN`, `GITHUB_TOKEN`, and `GH_TOKEN` before execution. A provisioner runs only after the core synchronization transaction succeeds.
 
 ## Concurrency and rollback
 

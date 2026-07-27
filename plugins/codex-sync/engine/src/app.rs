@@ -6,6 +6,7 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use sha2::{Digest, Sha256};
 
+use crate::agents::render_with_external_sections;
 use crate::auth;
 use crate::config::{
     changed_paths, classify_path, display_path, load_managed_values, read_current_config,
@@ -20,6 +21,7 @@ use crate::profiles::{
     current_profile_bytes, load_agent_profiles, managed_profile_names, profile_state_sha256,
     synchronize_agent_profiles,
 };
+use crate::provision::run_auto_provisioners;
 use crate::reconcile::{
     add_local_marketplace, installed_plugins, marketplace_names, marketplace_roots,
     plugin_ids_to_remove, portable_name, reconcile_marketplaces, reconcile_plugins,
@@ -201,9 +203,14 @@ fn build_plan(
         });
     }
 
-    let desired_agents = fs::read(paths.repository_dir.join(&manifest.agents))
+    let canonical_agents = fs::read(paths.repository_dir.join(&manifest.agents))
         .with_context(|| format!("read synchronized {}", manifest.agents))?;
     let current_agents = fs::read(paths.codex_home.join("AGENTS.md")).unwrap_or_default();
+    let desired_agents = render_with_external_sections(
+        &canonical_agents,
+        &current_agents,
+        &manifest.external_agents_sections,
+    )?;
     if desired_agents != current_agents {
         changes.push(PlannedChange {
             risk: Risk::High,
@@ -287,6 +294,15 @@ fn build_plan(
                 },
             });
         }
+        if plugin.enabled && plugin.auto_provision {
+            changes.push(PlannedChange {
+                risk: Risk::High,
+                kind: "plugin-provision".to_owned(),
+                target: plugin.id.clone(),
+                summary: "run the plugin's reviewed high-risk provisioner after installation"
+                    .to_owned(),
+            });
+        }
     }
 
     let high_risk = changes.iter().any(|change| change.risk == Risk::High);
@@ -355,6 +371,12 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
     }
     let desired = load_managed_values(&paths.repository_dir, &manifest, &state.device_id)?;
     let rendered = render_config(&current_config, &state.managed_paths, &desired)?;
+    let canonical_agents = fs::read(paths.repository_dir.join(&manifest.agents))?;
+    let rendered_agents = render_with_external_sections(
+        &canonical_agents,
+        &current_agents,
+        &manifest.external_agents_sections,
+    )?;
     let backup = create_backup(&paths, &state, &plan)?;
     let result = (|| -> Result<()> {
         apply_transaction(
@@ -364,6 +386,7 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
             &mut state,
             &plan,
             &rendered,
+            &rendered_agents,
         )?;
         state.latest_backup = Some(backup.file_name().unwrap().to_string_lossy().into_owned());
         state.last_applied_commit = Some(plan.commit.clone());
@@ -379,8 +402,21 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
             }
         };
     }
+    let plugins: PluginFile = read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
+    let provisioning = run_auto_provisioners(&plugins.plugins);
     let _ = fs::remove_file(&paths.pending_plan);
+    let provisioning_messages = match provisioning {
+        Ok(messages) => messages,
+        Err(error) => {
+            anyhow::bail!(
+                "synchronized configuration was applied, but automatic plugin provisioning did not complete: {error:#}; run sync again after resolving the provisioning error"
+            )
+        }
+    };
     println!("Applied plan {} from commit {}", plan.id, plan.commit);
+    for message in provisioning_messages {
+        println!("{message}");
+    }
     println!("Start a new Codex task so synchronized plugins and settings are reloaded");
     Ok(())
 }
@@ -392,13 +428,13 @@ fn apply_transaction(
     state: &mut LocalState,
     plan: &PendingPlan,
     rendered_config: &str,
+    rendered_agents: &[u8],
 ) -> Result<()> {
     atomic_write(
         &paths.codex_home.join("config.toml"),
         rendered_config.as_bytes(),
     )?;
-    let agents = fs::read(paths.repository_dir.join(&manifest.agents))?;
-    atomic_write(&paths.codex_home.join("AGENTS.md"), &agents)?;
+    atomic_write(&paths.codex_home.join("AGENTS.md"), rendered_agents)?;
     synchronize_agent_profiles(
         &paths.codex_home.join("agents"),
         desired_profiles,
@@ -679,6 +715,13 @@ pub fn doctor() -> Result<()> {
     }
     if paths.repository_dir.exists() {
         let manifest = load_repository_manifest(&paths.repository_dir)?;
+        let canonical_agents = fs::read(paths.repository_dir.join(&manifest.agents))?;
+        let current_agents = fs::read(paths.codex_home.join("AGENTS.md")).unwrap_or_default();
+        render_with_external_sections(
+            &canonical_agents,
+            &current_agents,
+            &manifest.external_agents_sections,
+        )?;
         load_managed_values(&paths.repository_dir, &manifest, &state.device_id)?;
         let desired_profiles =
             load_agent_profiles(&paths.repository_dir, &manifest.agent_profiles)?;
@@ -853,6 +896,12 @@ pub(crate) fn validate_desired_state(
     let mut plugin_ids = BTreeSet::new();
     for plugin in &plugins.plugins {
         validate_plugin_id(&plugin.id)?;
+        if plugin.auto_provision && !plugin.enabled {
+            anyhow::bail!(
+                "plugin {} cannot enable auto_provision while disabled",
+                plugin.id
+            );
+        }
         if !plugin_ids.insert(&plugin.id) {
             anyhow::bail!("duplicate plugin ID: {}", plugin.id);
         }
@@ -907,47 +956,4 @@ fn print_plan(plan: &PendingPlan) {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn device_ids_are_portable() {
-        assert!(validate_device_id("mac-studio_1").is_ok());
-        assert!(validate_device_id("bad/device").is_err());
-        assert!(validate_device_id("").is_err());
-    }
-
-    #[test]
-    fn publish_secret_scan_rejects_private_keys() {
-        let directory = tempfile::tempdir().unwrap();
-        fs::write(directory.path().join("credential.pem"), "not even a key").unwrap();
-        assert!(scan_repository_for_obvious_secrets(directory.path()).is_err());
-    }
-
-    #[test]
-    fn restore_removes_files_that_were_absent_before_apply() {
-        let directory = tempfile::tempdir().unwrap();
-        let codex_home = directory.path().join("codex");
-        let data_home = directory.path().join("sync");
-        let backup = data_home.join("backups/example");
-        fs::create_dir_all(&codex_home).unwrap();
-        fs::create_dir_all(&backup).unwrap();
-        fs::write(codex_home.join("config.toml"), "model = \"new\"\n").unwrap();
-        fs::write(codex_home.join("AGENTS.md"), "new\n").unwrap();
-        fs::write(backup.join("config.toml.absent"), "").unwrap();
-        fs::write(backup.join("AGENTS.md.absent"), "").unwrap();
-        let paths = crate::model::Paths {
-            state_file: data_home.join("state.toml"),
-            lock_file: data_home.join("sync.lock"),
-            repository_dir: data_home.join("repository"),
-            marketplaces_dir: data_home.join("marketplaces"),
-            backups_dir: data_home.join("backups"),
-            pending_plan: data_home.join("pending-plan.json"),
-            data_home,
-            codex_home: codex_home.clone(),
-        };
-        restore_backup(&paths, &backup).unwrap();
-        assert!(!codex_home.join("config.toml").exists());
-        assert!(!codex_home.join("AGENTS.md").exists());
-    }
-}
+mod tests;

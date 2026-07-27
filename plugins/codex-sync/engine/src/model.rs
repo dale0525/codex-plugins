@@ -80,6 +80,15 @@ pub struct RepositoryManifest {
     pub plugins: String,
     #[serde(default = "default_providers_path")]
     pub providers: String,
+    #[serde(default)]
+    pub external_agents_sections: Vec<ExternalAgentsSection>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ExternalAgentsSection {
+    pub id: String,
+    pub begin_marker: String,
+    pub end_marker: String,
 }
 
 fn default_agents_path() -> String {
@@ -129,6 +138,35 @@ impl RepositoryManifest {
             &self.providers,
         ] {
             validate_relative_path(value)?;
+        }
+        let mut section_ids = std::collections::BTreeSet::new();
+        let mut markers = std::collections::BTreeSet::new();
+        for section in &self.external_agents_sections {
+            if section.id.is_empty()
+                || !section.id.chars().all(|character| {
+                    character.is_ascii_lowercase() || character.is_ascii_digit() || character == '-'
+                })
+            {
+                anyhow::bail!(
+                    "external AGENTS section id must use lower-case letters, digits, and hyphens"
+                )
+            }
+            if !section_ids.insert(&section.id) {
+                anyhow::bail!("duplicate external AGENTS section id: {}", section.id)
+            }
+            if section.begin_marker.is_empty()
+                || section.end_marker.is_empty()
+                || section.begin_marker == section.end_marker
+                || section.begin_marker.contains(['\r', '\n'])
+                || section.end_marker.contains(['\r', '\n'])
+            {
+                anyhow::bail!(
+                    "external AGENTS section markers must be distinct single-line strings"
+                )
+            }
+            if !markers.insert(&section.begin_marker) || !markers.insert(&section.end_marker) {
+                anyhow::bail!("external AGENTS section markers must be unique")
+            }
         }
         Ok(())
     }
@@ -191,6 +229,8 @@ pub struct PluginSpec {
     pub id: String,
     #[serde(default = "default_true")]
     pub enabled: bool,
+    #[serde(default)]
+    pub auto_provision: bool,
 }
 
 fn default_true() -> bool {

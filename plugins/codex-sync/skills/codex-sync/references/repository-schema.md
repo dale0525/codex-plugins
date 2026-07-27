@@ -37,9 +37,20 @@ devices = "devices"
 marketplaces = "marketplaces.toml"
 plugins = "plugins.toml"
 providers = "providers.toml"
+
+[[external_agents_sections]]
+id = "fastctx"
+begin_marker = "<!-- fastctx:begin -->"
+end_marker = "<!-- fastctx:end -->"
 ```
 
 Every path must be relative and remain inside the repository. Parent traversal and absolute paths are rejected.
+
+An external AGENTS section declares a marker-delimited block owned by another
+reviewed tool. The synchronized repository `AGENTS.md` must not contain that
+block. Apply preserves one valid live block while replacing the canonical base;
+capture strips it before updating the repository cache. Duplicate, unmatched,
+reversed, or overlapping marker declarations are rejected.
 
 ## Agent profiles
 
@@ -135,11 +146,24 @@ enabled = true
 [[plugins]]
 id = "private-tool@personal-private"
 enabled = true
+
+[[plugins]]
+id = "fastctx@dale0525-codex-plugins"
+enabled = true
+auto_provision = true
 ```
 
 Plugin IDs must use `plugin@marketplace` syntax. For each non-OpenAI marketplace declared in `marketplaces.toml`, `plugins.toml` is the complete synchronized plugin set. Removing an installed plugin's entry schedules a high-risk uninstall through `codex plugin remove`, which removes its local configuration and cache. Plugins from undeclared marketplaces are preserved.
 
 Use presence in this file to express the desired installed set; remove a plugin's entire entry when it should be absent. `enabled = false` remains accepted for backward compatibility and also requests removal, but capture does not generate or retain disabled entries.
+
+`auto_provision = true` opts an enabled plugin into its bundled
+`.codex-sync/provision.json` contract. The synchronization plan marks the action
+high risk. After marketplace refresh and plugin installation succeed, Codex
+Sync resolves the local plugin root and runs the platform provision script with
+GitHub credentials removed from its environment. Provisioning runs last; if it
+fails, the synchronized core state remains applied and the next sync creates a
+retryable plan.
 
 ## Ownership behavior
 
@@ -158,7 +182,7 @@ The repository declares desired portable state. It does not own or transport:
 
 - current values for leaf keys already declared by common and current-device configuration, while preserving common values shadowed by a device override
 - complete current `model_providers` tables into `providers.toml`, subject to the normal secret policy
-- global `AGENTS.md` and the profile files already synchronized by the repository
+- the canonical portion of global `AGENTS.md`, excluding declared external sections, and the profile files already synchronized by the repository
 - installed and enabled plugins outside marketplaces named `openai` or beginning with `openai-`
 
 Capture removes OpenAI-managed plugin and marketplace declarations from the cache. It also removes entries for portable plugins that are absent or disabled on the current device. After reviewed publication, other devices interpret the missing entry as a high-risk uninstall because `plugins.toml` is the complete desired set for declared marketplaces.
@@ -166,3 +190,7 @@ Capture removes OpenAI-managed plugin and marketplace declarations from the cach
 When an installed plugin uses an undeclared marketplace, capture can add that marketplace only when current Codex configuration records a portable HTTPS Git source and ref. Local marketplaces, including the implicit personal marketplace, are skipped with a warning because the configuration repository does not transport plugin source code.
 
 Capture does not discover arbitrary new common or device configuration keys. Add a new key to the appropriate repository file once to establish its ownership and portability; later captures update its current value automatically.
+
+Capture preserves `auto_provision = true` for a plugin already carrying that
+declaration. It never infers auto-provisioning merely because an installed
+plugin happens to contain executable files.

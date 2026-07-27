@@ -493,6 +493,7 @@ mod tests {
         let specs = [PluginSpec {
             id: "current@managed-market".to_owned(),
             enabled: true,
+            auto_provision: false,
         }];
         let managed_marketplaces =
             BTreeSet::from(["managed-market".to_owned(), "openai-bundled".to_owned()]);
