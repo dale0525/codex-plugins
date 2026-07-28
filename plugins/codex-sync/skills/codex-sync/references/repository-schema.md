@@ -74,7 +74,7 @@ Put portable Codex keys in `config/common.toml`:
 
 ```toml
 model = "gpt-5.6"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 web_search = "cached"
 
 [features]
@@ -189,7 +189,7 @@ Capture removes OpenAI-managed plugin and marketplace declarations from the cach
 
 When an installed plugin uses an undeclared marketplace, capture can add that marketplace only when current Codex configuration records a portable HTTPS Git source and ref. Local marketplaces, including the implicit personal marketplace, are skipped with a warning because the configuration repository does not transport plugin source code.
 
-Capture does not discover arbitrary new common or device configuration keys. Add a new key to the appropriate repository file once to establish its ownership and portability; later captures update its current value automatically.
+Capture does not discover arbitrary new common or device configuration keys. Add a new key to the appropriate repository file once to establish its ownership and portability; later captures update its current value automatically. `model_reasoning_effort` is the exception: normal capture canonicalizes it to `medium` in common configuration and removes device overrides. A different shared value requires an explicit user request followed by a reviewed repository-cache edit and publication; capture never infers that intent from the live session value.
 
 Capture preserves `auto_provision = true` for a plugin already carrying that
 declaration. It never infers auto-provisioning merely because an installed

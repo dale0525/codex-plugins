@@ -81,11 +81,16 @@ Never copy hook trust hashes, project trust, authentication sessions, SQLite sta
 Use this workflow when the user asks to “upload configuration,” “push this device's configuration,” or otherwise make the current device the reviewed source for synchronized state.
 
 1. Run `status` and `doctor`. The repository cache must match its last fetched digest. If it already has unpublished edits, show them and publish or synchronize them first; never let capture overwrite them.
-2. Run `<bootstrap> capture`. Capture updates only the local repository cache. It copies the current values for configuration keys already declared in common and device configuration, complete current provider tables, canonical global `AGENTS.md` content with declared external marker sections removed, synchronized native agent profiles, and installed enabled plugins outside OpenAI-managed marketplaces. The resulting `plugins.toml` is the complete desired installed set for declared marketplaces; capture removes entries for plugins that are absent or disabled locally instead of retaining `enabled = false` tombstones and preserves existing `auto_provision = true` declarations.
+2. Run `<bootstrap> capture`. Capture updates only the local repository cache. It copies the current values for configuration keys already declared in common and device configuration, complete current provider tables, canonical global `AGENTS.md` content with declared external marker sections removed, synchronized native agent profiles, and installed enabled plugins outside OpenAI-managed marketplaces. The resulting `plugins.toml` is the complete desired installed set for declared marketplaces; capture removes entries for plugins that are absent or disabled locally instead of retaining `enabled = false` tombstones and preserves existing `auto_provision = true` declarations. Capture always restores the portable `model_reasoning_effort` value to `medium` and removes device-level overrides so transient session settings cannot become shared defaults.
 3. Treat marketplace names equal to `openai` or beginning with `openai-` as app-managed. Capture removes their plugin and marketplace declarations from the cache. It never uninstalls those local plugins.
 4. For a captured plugin from a marketplace not yet declared in the repository, capture may add the marketplace only when current Codex configuration exposes a portable HTTPS Git source. It skips local or otherwise non-portable marketplaces with a warning because a plugin declaration alone cannot restore their plugin code on another device.
 5. Run `doctor`, then show the repository diff or exact changed files. Mask `experimental_bearer_token` values while confirming that the field is present when applicable. Explain any skipped plugin before publication.
 6. Obtain explicit confirmation, then run `<bootstrap> publish --message "MESSAGE" --approve`.
+
+Only when the user explicitly asks to synchronize a different global reasoning
+effort may you edit `model_reasoning_effort` in the captured repository cache
+after capture. Show that exact change, run `doctor`, and use the normal reviewed
+publication workflow. Never infer this exception from the live session value.
 
 Capture and publication remain explicit commands. Do not add hooks or silently capture local changes during `sync`, `apply`, `doctor`, or ordinary publication.
 

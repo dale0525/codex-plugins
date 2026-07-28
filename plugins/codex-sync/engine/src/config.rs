@@ -10,6 +10,8 @@ use crate::storage::{atomic_write, read_optional_toml, read_toml};
 
 pub type ManagedValues = BTreeMap<Vec<String>, toml::Value>;
 
+pub const DEFAULT_MODEL_REASONING_EFFORT: &str = "medium";
+
 pub fn load_managed_values(
     repository: &Path,
     manifest: &RepositoryManifest,
@@ -339,6 +341,77 @@ pub fn capture_existing_managed_values(
     Ok(())
 }
 
+pub fn enforce_default_model_reasoning_effort(
+    repository: &Path,
+    manifest: &RepositoryManifest,
+) -> Result<()> {
+    let path = vec!["model_reasoning_effort".to_owned()];
+    let value = toml::Value::String(DEFAULT_MODEL_REASONING_EFFORT.to_owned());
+    update_managed_document(
+        &repository.join(&manifest.common_config),
+        &path,
+        Some(&value),
+    )?;
+
+    let devices = repository.join(&manifest.devices);
+    if !devices.is_dir() {
+        return Ok(());
+    }
+    for entry in fs::read_dir(&devices)
+        .with_context(|| format!("read device configuration directory {}", devices.display()))?
+    {
+        let entry = entry.context("read device configuration entry")?;
+        if !entry
+            .file_type()
+            .context("inspect device configuration entry")?
+            .is_file()
+            || entry.path().extension().and_then(|value| value.to_str()) != Some("toml")
+        {
+            continue;
+        }
+        update_managed_document(&entry.path(), &path, None)?;
+    }
+    Ok(())
+}
+
+fn update_managed_document(
+    target: &Path,
+    path: &[String],
+    value: Option<&toml::Value>,
+) -> Result<()> {
+    let target_text = match fs::read_to_string(target) {
+        Ok(value) => value,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => String::new(),
+        Err(error) => {
+            return Err(error)
+                .with_context(|| format!("read managed configuration {}", target.display()))
+        }
+    };
+    let mut document = if target_text.trim().is_empty() {
+        DocumentMut::new()
+    } else {
+        target_text
+            .parse::<DocumentMut>()
+            .with_context(|| format!("parse managed configuration {}", target.display()))?
+    };
+    match value {
+        Some(value) => set_path(document.as_item_mut(), path, value)?,
+        None => {
+            remove_path(document.as_item_mut(), path);
+        }
+    }
+    let rendered = document.to_string();
+    if rendered != target_text {
+        if let Some(parent) = target.parent() {
+            fs::create_dir_all(parent).with_context(|| {
+                format!("create managed configuration parent {}", parent.display())
+            })?;
+        }
+        atomic_write(target, rendered.as_bytes())?;
+    }
+    Ok(())
+}
+
 pub fn capture_current_providers(current: &str, target: &Path) -> Result<()> {
     let current_value = current
         .parse::<toml::Value>()
@@ -456,5 +529,41 @@ hash = "device-only"
         )
         .unwrap();
         assert!(load_managed_values(directory.path(), &manifest, "test-device").is_err());
+    }
+
+    #[test]
+    fn reasoning_effort_is_canonical_in_common_and_removed_from_devices() {
+        let directory = tempfile::tempdir().unwrap();
+        fs::create_dir_all(directory.path().join("devices")).unwrap();
+        fs::write(
+            directory.path().join("common.toml"),
+            "model_reasoning_effort = \"xhigh\"\nmodel = \"test\"\n",
+        )
+        .unwrap();
+        fs::write(
+            directory.path().join("devices/test-device.toml"),
+            "model_reasoning_effort = \"high\"\nweb_search = \"live\"\n",
+        )
+        .unwrap();
+        let manifest = RepositoryManifest {
+            schema_version: 2,
+            agents: "AGENTS.md".to_owned(),
+            agent_profiles: "agents".to_owned(),
+            common_config: "common.toml".to_owned(),
+            devices: "devices".to_owned(),
+            marketplaces: "marketplaces.toml".to_owned(),
+            plugins: "plugins.toml".to_owned(),
+            providers: "providers.toml".to_owned(),
+            external_agents_sections: Vec::new(),
+        };
+
+        enforce_default_model_reasoning_effort(directory.path(), &manifest).unwrap();
+
+        let common = fs::read_to_string(directory.path().join("common.toml")).unwrap();
+        assert!(common.contains("model_reasoning_effort = \"medium\""));
+        assert!(common.contains("model = \"test\""));
+        let device = fs::read_to_string(directory.path().join("devices/test-device.toml")).unwrap();
+        assert!(!device.contains("model_reasoning_effort"));
+        assert!(device.contains("web_search = \"live\""));
     }
 }

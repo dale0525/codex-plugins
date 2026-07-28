@@ -46,7 +46,11 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
-Codex Sync 0.4.1 launches reviewed Windows plugin provisioners with a
+Codex Sync 0.4.2 prevents transient session reasoning settings from becoming
+cross-device defaults: normal capture restores portable
+`model_reasoning_effort = "medium"` and removes device-level overrides. A
+different shared value requires an explicit user request and reviewed
+publication. Codex Sync 0.4.1 launches reviewed Windows plugin provisioners with a
 process-scoped PowerShell execution-policy bypass, avoiding AuthorizationManager
 failures without changing user or machine policy. Codex Sync 0.4.0 preserves
 declared external marker sections in global `AGENTS.md` while keeping the
@@ -75,7 +79,8 @@ local repository cache. It excludes app-managed `openai` and `openai-*`
 marketplaces and plugins, shows the resulting diff, and publishes only after
 explicit approval. Portable HTTPS Git marketplaces can be captured automatically;
 local-only plugin sources are reported and skipped because their code cannot be
-restored on another device.
+restored on another device. Normal capture also canonicalizes
+`model_reasoning_effort` to `medium` instead of copying the live session value.
 
 Apple Design packages seven MIT-licensed design-engineering skills from
 [emilkowalski/skills](https://github.com/emilkowalski/skills). The upstream
