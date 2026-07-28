@@ -1,3 +1,4 @@
+#!/usr/bin/env -S pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'fastctx-mcp-env.ps1')

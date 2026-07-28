@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import stat
 import unittest
 from pathlib import Path
 
@@ -31,6 +32,20 @@ class FastCtxPluginTests(unittest.TestCase):
         self.assertIn("[mcp_servers.fastctx.env]", helper)
         self.assertIn("FASTCTX_BASH", helper)
         self.assertNotIn("codex-config", helper)
+
+    def test_windows_bash_bridge_invokes_pwsh_instead_of_parsing_ps1(self) -> None:
+        bridge = (PLUGIN / "scripts/provision-windows.sh").read_text(encoding="utf-8")
+        provisioner = PLUGIN / "scripts/provision.ps1"
+        powershell = provisioner.read_text(encoding="utf-8")
+        skill = (PLUGIN / "skills/fastctx/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("pwsh.exe", bridge)
+        self.assertIn("-ExecutionPolicy Bypass", bridge)
+        self.assertIn('-File "$provisioner"', bridge)
+        self.assertNotIn("source $provisioner", bridge)
+        self.assertTrue(powershell.startswith("#!/usr/bin/env -S pwsh "))
+        self.assertTrue(provisioner.stat().st_mode & stat.S_IXUSR)
+        self.assertIn("provision-windows.sh", skill)
+        self.assertIn("Never execute `provision.ps1` as a bare command", skill)
 
     def test_windows_bash_runtime_is_pinned_to_github_digest(self) -> None:
         metadata = json.loads(
