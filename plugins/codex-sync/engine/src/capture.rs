@@ -6,8 +6,9 @@ use anyhow::{Context, Result};
 use crate::agents::strip_external_sections;
 use crate::app::{load_repository_manifest, validate_desired_state, validate_state};
 use crate::config::{
-    capture_current_providers, capture_existing_managed_values, load_managed_values,
-    managed_value_paths, read_current_config,
+    capture_current_providers, capture_existing_managed_values,
+    enforce_default_model_reasoning_effort, load_managed_values, managed_value_paths,
+    read_current_config,
 };
 use crate::model::{MarketplaceFile, MarketplaceSpec, PluginFile, PluginSpec};
 use crate::profiles::{current_profile_bytes, load_agent_profiles};
@@ -59,13 +60,21 @@ pub fn capture() -> Result<()> {
         .join(&manifest.devices)
         .join(format!("{}.toml", state.device_id));
     let device_paths = managed_value_paths(&device_file)?;
+    let reasoning_effort_path = vec!["model_reasoning_effort".to_owned()];
+    let mut common_exclusions = device_paths;
+    common_exclusions.insert(reasoning_effort_path.clone());
     capture_existing_managed_values(
         &current_config,
         &staged.join(&manifest.common_config),
-        &device_paths,
+        &common_exclusions,
     )?;
-    capture_existing_managed_values(&current_config, &device_file, &BTreeSet::new())?;
+    capture_existing_managed_values(
+        &current_config,
+        &device_file,
+        &BTreeSet::from([reasoning_effort_path]),
+    )?;
     capture_current_providers(&current_config, &staged.join(&manifest.providers))?;
+    enforce_default_model_reasoning_effort(&staged, &manifest)?;
 
     let current_agents =
         fs::read(paths.codex_home.join("AGENTS.md")).context("read current global AGENTS.md")?;
@@ -107,6 +116,7 @@ pub fn capture() -> Result<()> {
     }
     println!("Captured current device state into the local repository cache");
     println!("- updated managed config values, providers, AGENTS.md, and managed profiles");
+    println!("- restored portable model_reasoning_effort to the reviewed default: medium");
     print_plugin_capture(&plugin_capture);
     println!("Review the repository diff, run `codex-sync doctor`, then publish after approval");
     Ok(())

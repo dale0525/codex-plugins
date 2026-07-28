@@ -1,6 +1,6 @@
 {
   "name": "codex-sync",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Capture and synchronize global Codex instructions, native agent profiles, portable settings, providers, marketplaces, and plugins through a private GitHub repository.",
   "author": {
     "name": "Logic Tan",

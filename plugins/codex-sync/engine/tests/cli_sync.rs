@@ -246,7 +246,7 @@ fn repository_zip_for_capture() -> Vec<u8> {
             ),
             (
                 "owner-config-commit/devices/test-device.toml",
-                "model = \"device-model\"\nweb_search = \"cached\"\n",
+                "model = \"device-model\"\nmodel_reasoning_effort = \"low\"\nweb_search = \"cached\"\n",
             ),
             (
                 "owner-config-commit/providers.toml",
@@ -802,15 +802,19 @@ ref = "stable"
         .stdout(predicates::str::contains(
             "excluded 2 OpenAI-managed plugin(s)",
         ))
+        .stdout(predicates::str::contains(
+            "restored portable model_reasoning_effort to the reviewed default: medium",
+        ))
         .stdout(predicates::str::contains("skipped local-tool@personal"));
 
     let repository = sync_home.join("repository");
     let common = fs::read_to_string(repository.join("config/common.toml")).unwrap();
     assert!(common.contains("model = \"remote-model\""));
-    assert!(common.contains("model_reasoning_effort = \"high\""));
+    assert!(common.contains("model_reasoning_effort = \"medium\""));
     let device = fs::read_to_string(repository.join("devices/test-device.toml")).unwrap();
     assert!(device.contains("model = \"local-model\""));
     assert!(device.contains("web_search = \"live\""));
+    assert!(!device.contains("model_reasoning_effort"));
     let providers = fs::read_to_string(repository.join("providers.toml")).unwrap();
     assert!(providers.contains("name = \"New CPA\""));
     assert!(providers.contains("experimental_bearer_token = \"test-captured-token\""));
