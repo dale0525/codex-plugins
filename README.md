@@ -131,7 +131,9 @@ size and SHA-256 digest, and installs it under `~/.fastctx` instead of a project
 compatibility gap in older Windows `tar.exe` builds. After Apply, the provisioner
 writes the resolved Bash path only to the local FastCtx MCP environment so a
 restarted Codex process receives it. Do not declare or capture this device-specific
-path in the shared Codex Sync repository.
+path in the shared Codex Sync repository. When repairing from FastCtx `run` or
+Git Bash, invoke `scripts/provision-windows.sh`; never execute the PowerShell
+provisioner directly as a Bash command.
 
 #### Migrate from Subagent Dispatch
 

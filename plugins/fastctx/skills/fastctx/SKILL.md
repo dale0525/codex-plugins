@@ -17,12 +17,26 @@ On macOS or Linux, use:
 <plugin-root>/scripts/provision.sh <action>
 ```
 
-On Windows, use PowerShell 7 with a process-scoped execution-policy bypass for
-the reviewed plugin script. This does not change the machine or user policy:
+On Windows, FastCtx `run` and Git Bash must invoke the Bash bridge. The bridge
+starts PowerShell 7 with a process-scoped execution-policy bypass for the
+reviewed plugin script:
+
+```sh
+bash "<plugin-root>/scripts/provision-windows.sh" <action>
+```
+
+Never execute `provision.ps1` as a bare command and never pass it to `bash`.
+FastCtx shell commands are always parsed by Bash, which would treat PowerShell
+syntax as shell syntax. When already operating in native PowerShell, the direct
+equivalent is:
 
 ```powershell
 pwsh -NoProfile -NonInteractive -ExecutionPolicy Bypass -File <plugin-root>\scripts\provision.ps1 <action>
 ```
+
+Both Windows forms change only the provisioner process policy; they do not
+change the machine or user execution policy. Codex Sync invokes the direct
+PowerShell form internally and does not use the Bash bridge.
 
 Supported actions are `setup`, `status`, and `unapply`.
 
