@@ -29,6 +29,26 @@ Distinguish:
 - wound/history: explanatory experience, not a destiny;
 - quirk: a memorable surface behavior that should connect to constraint, choice, relationship, or plot if emphasized.
 
+## Dilemma and cognitive pressure
+
+A dilemma is not merely two painful outcomes. Give the character two obligations, values, identities, or relationships that both have legitimate claims and cannot be fully honored under the current time, resource, information, or authority constraint. The character must own the consequential choice; refusal may remain an option, but it must have its own causal result rather than serving as escape.
+
+Record the character's working model of the situation: what they believe protects people, preserves order, proves worth, or prevents recurrence. Pressure may expose that model as false, incomplete, obsolete, locally useful, or morally insufficient. Do not force every dilemma to share a hidden wrong belief. Reality can contain genuine conflicts between valid duties, and an arc may revise, narrow, harden, or consciously retain a belief rather than destroy it.
+
+Choice may emerge through deliberation, habit, trained reflex, fear, shame, attachment, refusal, or interrupted judgment. Its mode changes the scene, but the action must still reveal a priority for which the character remains accountable. Do not turn every decisive act into involuntary psychology or explain it afterward with a complete diagnostic monologue.
+
+## Strength shadow
+
+Do not assume every virtue is secretly vice. A strength becomes damaging when it is extended beyond its useful domain, used at excessive intensity, or left without a countervalue. Track:
+
+```text
+core strength -> prior success -> overextension condition
+-> ignored countervalue or blind spot -> real gain + collateral harm
+-> recognition, denial, or revised use -> future test
+```
+
+Protection without respect for agency can become control; reason without uncertainty or empathy can instrumentalize people. The strength must earn a real result as well as a cost. Do not require it to cause the worst imaginable outcome merely to prove a flaw.
+
 ## Proactivity without false control
 
 A protagonist can be overwhelmed yet active if they choose priorities, interpret events, refuse, seek, bargain, hide, protect, investigate, or pay a cost. Action is not only physical aggression. When events keep happening to the protagonist, give their response a strategy that changes the next state.
@@ -67,4 +87,4 @@ Voice comes from what the character notices and omits, vocabulary, syntax, rhyth
 
 ## Character deliverable
 
-Deliver character cards, relationship tensions, knowledge boundaries, POV rules, turning-point arcs, voice samples tied to cognition, and a diagnosis of empathy/rooting/progress plus likeability/proactivity/competence.
+Deliver character cards, relationship tensions, knowledge boundaries, POV rules, turning-point arcs, voice samples tied to cognition, and a diagnosis of empathy/rooting/progress plus likeability/proactivity/competence. When the task centers on dilemma or consequential cost, also deliver incompatible obligations, working model, choice mode, strength-shadow conditions, price paid, and the later test.

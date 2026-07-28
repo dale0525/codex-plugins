@@ -49,6 +49,25 @@ entry state -> immediate goal -> obstacle -> strategy
 
 Coincidence may start trouble; it should not repeatedly solve it. A reveal must change interpretation or choice, not merely add trivia.
 
+## Cost propagation
+
+For a major delayed cost, identify the concrete carrier rather than saying that danger “ferments.” Use the full lifecycle only when the story benefits from latency:
+
+```text
+containment -> latency -> spillover -> amplification
+```
+
+- containment: a locally reasonable lie, expenditure, concession, emergency measure, or overcompensation creates temporary control without removing the cause;
+- latency: the cost accumulates in a legible carrier such as trust, injury, debt, evidence, information exposure, institutional precedent, or missed obligation;
+- spillover: that carrier crosses from its original domain into another relationship, resource, identity, or system through a named causal bridge;
+- amplification: a later crisis meets the accumulated deficit, removes an otherwise available solution, and changes the problem's nature rather than merely enlarging damage.
+
+Each later action should be locally intelligible. At least one observable but reasonably misread signal should appear before amplification. Do not introduce the decisive rule, actor, or evidence at the final stage, and do not force immediate or self-contained costs through all four stages. See `choice-cost-experience.md` for the constraint card and prompts.
+
+## Reader information and consequence
+
+For a consequential reveal, separate author, viewpoint-character, and reader knowledge. Reader advantage produces dread or dramatic irony; character advantage can produce mystery and later re-evaluation; shared partial knowledge supports discovery. Withholding must follow viewpoint and narrator rules. Do not hide a fact the current mode would naturally reveal merely to protect a twist. The payoff may surprise in form, but retrospective evidence must make the cause legible.
+
 ## Pacing
 
 Fast pacing is a high rate of meaningful state change with low confusion, not permanently short sentences, fights, summaries, or skipped consequences. Slow down when the reader must feel a cost, understand a decision, reorient in space, or revise a relationship model. Speed up by removing repeated setup, compressing low-choice travel/training, entering later, exiting after consequence, and combining beats that change the same state.
@@ -71,4 +90,4 @@ Early attempts can fail or succeed with a complication; later attempts should de
 
 ## Structure deliverable
 
-Deliver a one-line mainline, promise ledger, nested arc map, causal chapter chain, state-change table, information prerequisites, pacing rationale, and explicit closure conditions for each active thread.
+Deliver a one-line mainline, promise ledger, nested arc map, causal chapter chain, state-change table, information prerequisites, pacing rationale, and explicit closure conditions for each active thread. For major delayed costs, include carrier, containment, latency signal, spillover bridge, amplification trigger, lost option, and irreversible result.

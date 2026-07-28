@@ -7,6 +7,7 @@
 | 选择题材、读者、前提或故事发动机 | `$web-novel-development` | `development.md` | 决定写什么以及为何可持续 |
 | 设计主线、卷章、承诺回收、节奏或章末钩子 | `$web-novel-structure` | `structure.md` | 负责事件和期待结构 |
 | 设计人物、关系、弧光、POV 或声音 | `$web-novel-characters` | `characters.md` | 负责选择、知识和人物体验 |
+| 同时设计人物两难、优势阴影、延迟代价和日常余波 | `$web-novel-craft` | `choice-cost-experience.md`，并按需加载 `characters.md`、`structure.md`、`scene-prose-craft.md` | 跨人物、结构与场景；不把每个节点机械写成创伤或灾难 |
 | 处理类型专项机制 | `$web-novel-genre-craft` | `genre-craft.md` 及对应类型页 | 类型经验是条件化工具，不是平台公式 |
 | 设计升级、能力、资源、身份或谜题进展 | `$web-novel-progression` | `progression.md` | 负责规则、成本、反制和选项变化 |
 | 写或修场景、动作、感官、情绪、对白和句群 | `$web-novel-prose-craft` | `scene-prose-craft.md` 及对应文体页 | 场景目的不清时先回结构/人物 |
