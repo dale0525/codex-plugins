@@ -1,0 +1,36 @@
+{
+  "name": "prompt-master",
+  "version": "1.0.1",
+  "description": "Generate, improve, and adapt production-ready prompts for AI tools.",
+  "author": {
+    "name": "Nidhin Joseph Nelson",
+    "url": "https://github.com/nidhinjs"
+  },
+  "homepage": "https://github.com/nidhinjs/prompt-master",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "prompt-engineering",
+    "prompts",
+    "ai-tools",
+    "productivity"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Prompt Master",
+    "shortDescription": "Create sharper prompts for AI tools.",
+    "longDescription": "An upstream-synchronized prompt-engineering skill that generates, diagnoses, improves, and adapts prompts for language models, coding agents, image and video generators, and other AI tools.",
+    "developerName": "Nidhin Joseph Nelson",
+    "category": "Productivity",
+    "capabilities": [
+      "Prompt generation",
+      "Prompt diagnosis and improvement",
+      "Cross-tool prompt adaptation"
+    ],
+    "defaultPrompt": [
+      "Write a production-ready prompt for my AI tool.",
+      "Improve this prompt without changing its intent.",
+      "Adapt this prompt for a different AI tool."
+    ]
+  }
+}
