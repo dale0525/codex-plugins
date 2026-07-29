@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
   group: sync-external-content
@@ -49,36 +48,15 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Create or update synchronization pull request
+      - name: Commit synchronized changes to the default branch
         if: steps.changes.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
-          SYNC_BRANCH: codex/sync-external-content
-          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         shell: bash
         run: |
           git config user.name "Logic Tan"
           git config user.email "logictan89@gmail.com"
-          git switch -C "$SYNC_BRANCH"
           git add --all
           git commit -m "Sync external skills and plugins"
-
-          remote_sha=""
-          if git fetch origin "$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH"; then
-            remote_sha="$(git rev-parse "refs/remotes/origin/$SYNC_BRANCH")"
-          fi
-          if [[ -n "$remote_sha" ]]; then
-            git push \
-              --force-with-lease="refs/heads/$SYNC_BRANCH:$remote_sha" \
-              origin "HEAD:refs/heads/$SYNC_BRANCH"
-          else
-            git push --set-upstream origin "HEAD:refs/heads/$SYNC_BRANCH"
-          fi
-
-          if [[ -z "$(gh pr list --head "$SYNC_BRANCH" --state open --json url --jq '.[0].url')" ]]; then
-            gh pr create \
-              --base "$BASE_BRANCH" \
-              --head "$SYNC_BRANCH" \
-              --title "Sync external skills and plugins" \
-              --body "Automated daily synchronization from the sources in \`sync-sources.toml\`. The pull request remains open for supply-chain review and is refreshed when upstream changes again."
-          fi
+          git pull --rebase origin "$DEFAULT_BRANCH"
+          git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"
