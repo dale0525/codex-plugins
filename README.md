@@ -32,6 +32,12 @@ codex plugin add fastctx@dale0525-codex-plugins
 codex plugin add film-craft-orchestrator@dale0525-codex-plugins
 ```
 
+## Install Prompt Master
+
+```bash
+codex plugin add prompt-master@dale0525-codex-plugins
+```
+
 ## Install Web Novel Craft
 
 ```bash
@@ -85,6 +91,10 @@ restored on another device. Normal capture also canonicalizes
 Apple Design packages seven MIT-licensed design-engineering skills from
 [emilkowalski/skills](https://github.com/emilkowalski/skills). The upstream
 license is preserved in the plugin's `third-party/` directory.
+
+Prompt Master packages the MIT-licensed prompt-engineering skill from
+[nidhinjs/prompt-master](https://github.com/nidhinjs/prompt-master). Its
+upstream content and license are synchronized daily.
 
 ## Included plugins
 
@@ -161,6 +171,12 @@ continuity and quality control, editing and sound, and timestamped video-evidenc
 research. Shared templates, evidence corpora, compilers, and deterministic
 validators remain in one canonical skill root so the focused skills do not drift.
 
+### Prompt Master
+
+Provides an explicitly invoked prompt-engineering skill for generating,
+diagnosing, improving, and adapting prompts across language models, coding
+agents, image and video generators, and other AI tools.
+
 ### Web Novel Craft
 
 Provides one writer/editor orchestration skill and eight focused skills for web-novel
@@ -186,12 +202,11 @@ The `Sync external skills and plugins` GitHub Actions workflow runs daily at
    release tags, asset digests, and destinations in `sync-lock.json`, and
    increments an affected plugin's patch version when packaged content changes.
 4. Runs the repository tests and validators with pixi.
-5. Creates or refreshes `codex/sync-external-content` as a reviewable pull request.
+5. Commits validated changes and pushes them to the repository's default branch.
 
-The workflow intentionally does not merge upstream changes automatically.
-Skills can change agent behavior, so each synchronization pull request is a
-supply-chain review gate. Repository settings must allow GitHub Actions to
-create pull requests with the `GITHUB_TOKEN`.
+Skills can change agent behavior, so maintainers should review the automated
+commits and upstream repository history. Repository settings must allow GitHub
+Actions to write to the default branch with the `GITHUB_TOKEN`.
 
 To add another Git-tree source, append a `[[sources]]` entry. To track a stable
 GitHub Release, append `[[github_releases]]` with an explicit required-asset
@@ -205,6 +220,7 @@ plugins/apple-design/
 plugins/codex-sync/
 plugins/fastctx/
 plugins/film-craft-orchestrator/
+plugins/prompt-master/
 plugins/web-novel-craft/
 sync-sources.toml
 ```

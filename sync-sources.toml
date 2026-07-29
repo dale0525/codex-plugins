@@ -12,6 +12,17 @@ license_destination = "plugins/apple-design/third-party/emilkowalski-skills-LICE
 remove_skill_frontmatter_fields = ["disable-model-invocation"]
 skill_description_suffixes = { review-animations = "Use only when the user explicitly asks for an animation review; do not trigger on general code review." }
 
+[[sources]]
+id = "prompt-master"
+repository = "https://github.com/nidhinjs/prompt-master.git"
+ref = "main"
+source = "."
+destination = "plugins/prompt-master/skills/prompt-master"
+plugin_manifest = "plugins/prompt-master/.codex-plugin/plugin.json"
+license_source = "LICENSE"
+license_destination = "plugins/prompt-master/third-party/prompt-master-LICENSE"
+remove_skill_frontmatter_fields = ["version"]
+
 [[github_releases]]
 id = "fastctx-release"
 repository = "yc-duan/fastctx"
