@@ -1,0 +1,29 @@
+{
+  "name": "creative-model-bridge",
+  "version": "0.1.0",
+  "description": "Route creative writing requests to a configured Responses API provider with auditable prompts.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/creative-model-bridge",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": ["creative-writing", "responses-api", "mcp", "model-provider"],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Creative Model Bridge",
+    "shortDescription": "Use configured creative models through a transparent MCP bridge.",
+    "longDescription": "Builds deterministic prompts from the requested task and supplied materials, previews the exact outbound payload, lists models from the configured Responses provider, and returns generated text verbatim with request metadata.",
+    "developerName": "Logic Tan",
+    "category": "Writing",
+    "capabilities": ["Read", "Network"],
+    "defaultPrompt": [
+      "Preview this creative writing request.",
+      "List the creative models configured for this device.",
+      "Generate a draft using the exact model I name."
+    ]
+  }
+}
