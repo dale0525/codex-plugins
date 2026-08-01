@@ -13,9 +13,9 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 try:  # direct script launch from a copied plugin cache
-    from bridge import Bridge, BridgeError, REQUEST_SCHEMA  # type: ignore  # noqa: E402
+    from bridge import BRIDGE_VERSION, Bridge, BridgeError, REQUEST_SCHEMA  # type: ignore  # noqa: E402
 except ImportError:  # package import in tests or embedding applications
-    from .bridge import Bridge, BridgeError, REQUEST_SCHEMA  # noqa: E402
+    from .bridge import BRIDGE_VERSION, Bridge, BridgeError, REQUEST_SCHEMA  # noqa: E402
 
 
 def _prompt_report_schema() -> dict[str, Any]:
@@ -204,7 +204,7 @@ def handle(message: dict[str, Any], bridge: Bridge) -> dict[str, Any] | None:
             {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "creative-model-bridge", "version": "0.1.0"},
+                "serverInfo": {"name": "creative-model-bridge", "version": BRIDGE_VERSION},
             },
         )
     if method == "ping":

@@ -24,6 +24,8 @@ import urllib.request
 
 
 SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"
+BRIDGE_VERSION = "0.1.1"
+USER_AGENT = f"creative-model-bridge/{BRIDGE_VERSION}"
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_CHARS = 180_000
 DEFAULT_MAX_OUTPUT_TOKENS = 8192
@@ -522,7 +524,11 @@ class ResponsesClient:
     def _request(self, path: str, body: dict[str, Any] | None = None) -> tuple[dict[str, Any], str | None]:
         url = f"{self.provider.base_url}/{path.lstrip('/')}"
         data = json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8") if body is not None else None
-        headers = {"Authorization": f"Bearer {self.credential}", "Accept": "application/json"}
+        headers = {
+            "Authorization": f"Bearer {self.credential}",
+            "Accept": "application/json",
+            "User-Agent": USER_AGENT,
+        }
         if body is not None:
             headers["Content-Type"] = "application/json"
         request = urllib.request.Request(url, data=data, headers=headers, method="POST" if body is not None else "GET")
