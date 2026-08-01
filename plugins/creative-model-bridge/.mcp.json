@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "creative-model-bridge": {
+      "command": "./bin/creative-model-bridge",
+      "args": [],
+      "cwd": ".",
+      "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"]
+    }
+  }
+}

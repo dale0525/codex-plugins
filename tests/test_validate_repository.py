@@ -98,6 +98,131 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 validation.errors,
             )
 
+    def test_mcp_companion_validates_path_launcher_cwd_and_env_vars(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mcp-validator-test-") as temporary:
+            root = Path(temporary)
+            plugin = root / "plugins/example"
+            launcher = plugin / "bin/launch"
+            launcher.parent.mkdir(parents=True)
+            launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+            launcher.chmod(0o755)
+            companion = plugin / ".mcp.json"
+            companion.write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "example": {
+                                "command": "./bin/launch",
+                                "cwd": ".",
+                                "args": [],
+                                "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"],
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin,
+                    {"mcpServers": "./.mcp.json"},
+                    validation,
+                )
+            self.assertEqual(validation.errors, [])
+
+    def test_mcp_companion_rejects_escape_and_unallowlisted_environment(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mcp-validator-test-") as temporary:
+            root = Path(temporary)
+            plugin = root / "plugins/example"
+            plugin.mkdir(parents=True)
+            companion = plugin / ".mcp.json"
+            companion.write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "example": {
+                                "command": "../outside",
+                                "cwd": "..",
+                                "env_vars": ["HOME"],
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin,
+                    {"mcpServers": "./.mcp.json"},
+                    validation,
+                )
+            self.assertTrue(any("cwd must stay inside" in error for error in validation.errors))
+            self.assertTrue(any("non-allowlisted" in error for error in validation.errors))
+            self.assertTrue(any("command target escapes" in error for error in validation.errors))
+
+    def test_pixi_launcher_requires_and_validates_lockfile(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="pixi-launcher-validator-test-") as temporary:
+            root = Path(temporary)
+            plugin = root / "plugins/example"
+            launcher = plugin / "bin/launch"
+            launcher.parent.mkdir(parents=True)
+            launcher.write_text(
+                "#!/bin/sh\nexec pixi run --manifest-path \"$PLUGIN_ROOT/pixi.toml\" --locked python -u server.py\n",
+                encoding="utf-8",
+            )
+            launcher.chmod(0o755)
+            (plugin / "pixi.toml").write_text(
+                "[workspace]\nplatforms = [\"linux-64\"]\n",
+                encoding="utf-8",
+            )
+            companion = plugin / ".mcp.json"
+            companion.write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "example": {
+                                "command": "./bin/launch",
+                                "cwd": ".",
+                                "args": [],
+                                "env_vars": ["CODEX_HOME"],
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin,
+                    {"mcpServers": "./.mcp.json"},
+                    validation,
+                )
+            self.assertTrue(any("Pixi launcher requires pixi.lock" in error for error in validation.errors))
+
+            (plugin / "pixi.lock").write_text(
+                "version: 6\n"
+                "environments:\n"
+                "  default:\n"
+                "    packages:\n"
+                "      linux-64:\n"
+                "      - conda: https://conda.example/pkg.conda\n"
+                "packages:\n"
+                "- conda: https://conda.example/pkg.conda\n"
+                f"  sha256: {'a' * 64}\n",
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin,
+                    {"mcpServers": "./.mcp.json"},
+                    validation,
+                )
+            self.assertEqual(validation.errors, [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import tomllib
@@ -18,6 +19,7 @@ MARKETPLACE = ROOT / ".agents/plugins/marketplace.json"
 SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
+PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
 class Validation:
@@ -146,7 +148,177 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
                 validation.error(f"{manifest_path.relative_to(ROOT)}: no skills found")
             for skill_directory in skill_directories:
                 _validate_skill(skill_directory, validation)
+    _validate_mcp_servers(plugin_path, manifest, validation)
     validation.plugin_count += 1
+
+
+def _inside(root: Path, candidate: Path) -> bool:
+    try:
+        candidate.relative_to(root)
+        return True
+    except ValueError:
+        return False
+
+
+def _validate_mcp_servers(plugin_path: Path, manifest: dict[str, Any], validation: Validation) -> None:
+    """Validate companion MCP launchers without assuming a particular server."""
+
+    value = manifest.get("mcpServers")
+    if value is None:
+        return
+    if isinstance(value, str):
+        companion = (plugin_path / value).resolve()
+        if not _inside(plugin_path.resolve(), companion):
+            validation.error(f"{plugin_path.relative_to(ROOT)}: mcpServers path escapes plugin")
+            return
+        if not companion.is_file():
+            validation.error(f"{companion.relative_to(ROOT)}: mcpServers companion is missing")
+            return
+        payload = _read_json(companion, validation)
+        if payload is None:
+            return
+        if set(payload) != {"mcpServers"}:
+            validation.error(f"{companion.relative_to(ROOT)}: companion must contain only mcpServers")
+            return
+        value = payload.get("mcpServers")
+    if not isinstance(value, dict):
+        validation.error(f"{plugin_path.relative_to(ROOT)}: mcpServers must be an object or companion path")
+        return
+    for name, server in value.items():
+        context = f"{plugin_path.relative_to(ROOT)} mcp server {name!r}"
+        if not isinstance(name, str) or not name.strip():
+            validation.error(f"{context}: server name must be non-empty")
+            continue
+        if not isinstance(server, dict):
+            validation.error(f"{context}: entry must be an object")
+            continue
+        _validate_mcp_server_entry(plugin_path, context, server, validation)
+
+
+def _validate_pixi_launcher(plugin_path: Path, launcher: Path, context: str, validation: Validation) -> None:
+    """Require and sanity-check a lockfile for launchers that invoke Pixi."""
+
+    try:
+        launcher_bytes = launcher.read_bytes()
+    except OSError as error:
+        validation.error(f"{context}: Pixi launcher could not be read: {error}")
+        return
+    if b"pixi run" not in launcher_bytes or b"pixi.toml" not in launcher_bytes:
+        return
+    if b"--locked" not in launcher_bytes and b"--frozen" not in launcher_bytes:
+        validation.error(f"{context}: Pixi launcher must use --locked or --frozen")
+    try:
+        launcher_bytes.decode("utf-8")
+    except UnicodeDecodeError as error:
+        validation.error(f"{context}: Pixi launcher is not valid UTF-8: {error}")
+        return
+
+    manifest_path = plugin_path / "pixi.toml"
+    lock_path = plugin_path / "pixi.lock"
+    if not manifest_path.is_file():
+        validation.error(f"{context}: Pixi launcher requires pixi.toml")
+        return
+    if not lock_path.is_file():
+        validation.error(f"{context}: Pixi launcher requires pixi.lock")
+        return
+
+    try:
+        with manifest_path.open("rb") as handle:
+            manifest = tomllib.load(handle)
+    except (OSError, tomllib.TOMLDecodeError) as error:
+        validation.error(f"{context}: invalid pixi.toml: {error}")
+        return
+    try:
+        lock = yaml.safe_load(lock_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, yaml.YAMLError) as error:
+        validation.error(f"{context}: invalid pixi.lock: {error}")
+        return
+    if not isinstance(lock, dict):
+        validation.error(f"{context}: pixi.lock root must be an object")
+        return
+    if not isinstance(lock.get("version"), int) or lock["version"] < 6:
+        validation.error(f"{context}: pixi.lock version must be at least 6")
+
+    workspace = manifest.get("workspace")
+    platforms = workspace.get("platforms") if isinstance(workspace, dict) else None
+    if not isinstance(platforms, list) or any(not isinstance(item, str) or not item for item in platforms):
+        validation.error(f"{context}: pixi.toml workspace.platforms must be a non-empty array")
+        platforms = []
+    environments = lock.get("environments")
+    default_environment = environments.get("default") if isinstance(environments, dict) else None
+    package_map = default_environment.get("packages") if isinstance(default_environment, dict) else None
+    if not isinstance(package_map, dict):
+        validation.error(f"{context}: pixi.lock default environment packages are missing")
+    else:
+        for platform in platforms:
+            packages = package_map.get(platform)
+            if not isinstance(packages, list) or not packages:
+                validation.error(f"{context}: pixi.lock is missing packages for {platform}")
+
+    packages = lock.get("packages")
+    if not isinstance(packages, list) or not packages:
+        validation.error(f"{context}: pixi.lock packages must be a non-empty array")
+        return
+    for index, package in enumerate(packages):
+        package_context = f"{context}: pixi.lock packages[{index}]"
+        if not isinstance(package, dict):
+            validation.error(f"{package_context} must be an object")
+            continue
+        references = [package.get("conda"), package.get("pypi")]
+        references = [item for item in references if item is not None]
+        if len(references) != 1 or not isinstance(references[0], str) or not references[0].startswith("https://"):
+            validation.error(f"{package_context} must contain one https package URL")
+        digest = package.get("sha256")
+        if not isinstance(digest, str) or not PIXI_SHA256_PATTERN.fullmatch(digest):
+            validation.error(f"{package_context} has an invalid sha256 digest")
+
+
+def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str, Any], validation: Validation) -> None:
+    allowed_fields = {"command", "args", "cwd", "env_vars", "url"}
+    unknown = set(server) - allowed_fields
+    if unknown:
+        validation.error(f"{context}: unsupported fields {sorted(unknown)}")
+    env_vars = server.get("env_vars", [])
+    if not isinstance(env_vars, list) or any(not isinstance(item, str) or not item for item in env_vars):
+        validation.error(f"{context}: env_vars must be an array of non-empty strings")
+    elif len(env_vars) != len(set(env_vars)):
+        validation.error(f"{context}: env_vars must not contain duplicates")
+    elif any(item not in {"CODEX_HOME", "CREATIVE_MODEL_API_KEY"} for item in env_vars):
+        validation.error(f"{context}: env_vars contains a non-allowlisted variable")
+
+    cwd = server.get("cwd", ".")
+    if not isinstance(cwd, str) or Path(cwd).is_absolute():
+        validation.error(f"{context}: cwd must be a relative path")
+        cwd_path = plugin_path.resolve()
+    else:
+        cwd_path = (plugin_path / cwd).resolve()
+        if not _inside(plugin_path.resolve(), cwd_path) or not cwd_path.is_dir():
+            validation.error(f"{context}: cwd must stay inside the plugin and exist")
+    args = server.get("args", [])
+    if not isinstance(args, list) or any(not isinstance(item, str) for item in args):
+        validation.error(f"{context}: args must be an array of strings")
+
+    command = server.get("command")
+    url = server.get("url")
+    if command is None and url is None:
+        validation.error(f"{context}: command or url is required")
+        return
+    if command is not None:
+        if not isinstance(command, str) or not command:
+            validation.error(f"{context}: command must be a non-empty string")
+            return
+        if "/" in command or "\\" in command or command.startswith("."):
+            target = (cwd_path / command).resolve()
+            if not _inside(plugin_path.resolve(), target):
+                validation.error(f"{context}: command target escapes plugin")
+            elif not target.is_file():
+                validation.error(f"{context}: command target does not exist: {target.relative_to(ROOT)}")
+            elif not os.access(target, os.X_OK):
+                validation.error(f"{context}: command target is not executable: {target.relative_to(ROOT)}")
+            else:
+                _validate_pixi_launcher(plugin_path, target, context, validation)
+    if url is not None and (not isinstance(url, str) or not url.startswith("https://")):
+        validation.error(f"{context}: url must be an https URL")
 
 
 def _validate_marketplace(validation: Validation) -> None:

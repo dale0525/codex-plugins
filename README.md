@@ -44,6 +44,12 @@ codex plugin add prompt-master@dale0525-codex-plugins
 codex plugin add web-novel-craft@dale0525-codex-plugins
 ```
 
+## Install Creative Model Bridge
+
+```bash
+codex plugin add creative-model-bridge@dale0525-codex-plugins
+```
+
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
@@ -190,6 +196,14 @@ counterexamples, and executable procedures without distributing raw captions.
 One source retains an explicitly excluded, uncharacterized media-tail gap rather
 than claiming unsupported transcript coverage.
 
+### Creative Model Bridge
+
+Provides a provider-neutral Responses API MCP bridge for creative writing. It
+lists models from the configured provider, previews the exact outbound prompt
+without network access, and returns generated text verbatim with file hashes,
+usage, and request metadata. It does not auto-select models, inject hidden
+instructions, retry, or switch providers.
+
 ## External content synchronization
 
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
@@ -218,6 +232,7 @@ set and checksum asset. Every destination must remain inside this repository.
 .agents/plugins/marketplace.json
 plugins/apple-design/
 plugins/codex-sync/
+plugins/creative-model-bridge/
 plugins/fastctx/
 plugins/film-craft-orchestrator/
 plugins/prompt-master/
