@@ -17,6 +17,7 @@ from bridge import Bridge  # noqa: E402
 class MockResponsesHandler(BaseHTTPRequestHandler):
     calls: list[tuple[str, dict[str, object] | None]] = []
     request_headers: list[tuple[str, dict[str, str]]] = []
+    response_payload: dict[str, object] | None = None
 
     def log_message(self, format: str, *args: object) -> None:
         return None
@@ -38,7 +39,7 @@ class MockResponsesHandler(BaseHTTPRequestHandler):
         payload = json.loads(self.rfile.read(size).decode("utf-8"))
         self.__class__.calls.append((self.path, payload))
         self.__class__.request_headers.append((self.path, {key.lower(): value for key, value in self.headers.items()}))
-        body = {
+        body = self.__class__.response_payload or {
             "id": "response-request",
             "output": [{"type": "message", "content": [{"type": "output_text", "text": "原样返回"}]}],
             "usage": {"input_tokens": 7, "output_tokens": 3},
@@ -55,6 +56,7 @@ class MockResponsesIntegrationTests(unittest.TestCase):
     def test_models_and_responses_use_standard_paths_and_payload(self) -> None:
         MockResponsesHandler.calls = []
         MockResponsesHandler.request_headers = []
+        MockResponsesHandler.response_payload = None
         server = ThreadingHTTPServer(("127.0.0.1", 0), MockResponsesHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -83,7 +85,7 @@ class MockResponsesIntegrationTests(unittest.TestCase):
                     ["/v1/models", "/v1/responses"],
                 )
                 for _, headers in MockResponsesHandler.request_headers:
-                    self.assertEqual(headers["user-agent"], "creative-model-bridge/0.1.1")
+                    self.assertEqual(headers["user-agent"], "creative-model-bridge/0.1.2")
                     self.assertFalse(
                         any(
                             key.startswith(("codex", "x-codex", "originator")) or key in {"session", "x-session"}
@@ -95,6 +97,44 @@ class MockResponsesIntegrationTests(unittest.TestCase):
                 self.assertEqual(response_payload["temperature"], 0.2)
                 self.assertEqual(response_payload["instructions"], "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。")
         finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+
+    def test_compatible_cpa_text_shape_round_trips_verbatim(self) -> None:
+        MockResponsesHandler.calls = []
+        MockResponsesHandler.request_headers = []
+        MockResponsesHandler.response_payload = {
+            "id": "response-cpa-shape",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [{"type": "text", "text": {"value": "第一行\n第二行"}}],
+                }
+            ],
+        }
+        server = ThreadingHTTPServer(("127.0.0.1", 0), MockResponsesHandler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with tempfile.TemporaryDirectory(prefix="creative-bridge-http-cpa-") as temporary:
+                config = Path(temporary) / "config.toml"
+                config.write_text(
+                    "[shell_environment_policy.set]\n"
+                    'CREATIVE_MODEL_PROVIDER = "mock"\n'
+                    'CREATIVE_MODEL_DEFAULT = "mock/model-v1"\n\n'
+                    "[model_providers.mock]\n"
+                    f'base_url = "http://127.0.0.1:{server.server_port}/v1"\n'
+                    'wire_api = "responses"\n'
+                    'env_key = "BRIDGE_INTEGRATION_KEY"\n',
+                    encoding="utf-8",
+                )
+                with patch.dict("os.environ", {"BRIDGE_INTEGRATION_KEY": "placeholder-key"}):
+                    generated = Bridge(config).creative_generate({"task": "写作"})
+                self.assertEqual(generated["text"], "第一行\n第二行")
+                self.assertEqual(generated["request_id"], "response-cpa-shape")
+        finally:
+            MockResponsesHandler.response_payload = None
             server.shutdown()
             server.server_close()
             thread.join(timeout=2)

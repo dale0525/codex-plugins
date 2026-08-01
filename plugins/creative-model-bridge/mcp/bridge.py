@@ -24,7 +24,7 @@ import urllib.request
 
 
 SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"
-BRIDGE_VERSION = "0.1.1"
+BRIDGE_VERSION = "0.1.2"
 USER_AGENT = f"creative-model-bridge/{BRIDGE_VERSION}"
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_CHARS = 180_000
@@ -520,6 +520,7 @@ class ResponsesClient:
         self.credential = credential
         self.opener = opener or _open_without_redirects
         self.timeout = timeout
+        self.last_http_status: int | None = None
 
     def _request(self, path: str, body: dict[str, Any] | None = None) -> tuple[dict[str, Any], str | None]:
         url = f"{self.provider.base_url}/{path.lstrip('/')}"
@@ -535,9 +536,10 @@ class ResponsesClient:
         response: Any = None
         try:
             response = self.opener(request, timeout=self.timeout)
-            response_status = getattr(response, "status", getattr(response, "code", None))
-            if isinstance(response_status, int) and 300 <= response_status < 400:
-                raise BridgeError(f"Responses API redirect refused (HTTP {response_status})")
+            http_status = getattr(response, "status", getattr(response, "code", None))
+            self.last_http_status = http_status if isinstance(http_status, int) else None
+            if isinstance(http_status, int) and 300 <= http_status < 400:
+                raise BridgeError(f"Responses API redirect refused (HTTP {http_status})")
             raw = response.read()
             header_request_id = response.headers.get("x-request-id") if getattr(response, "headers", None) is not None else None
         except urllib.error.HTTPError as error:
@@ -560,7 +562,14 @@ class ResponsesClient:
         except (UnicodeDecodeError, json.JSONDecodeError) as error:
             raise BridgeError("Responses API returned malformed JSON") from error
         if not isinstance(parsed, dict):
-            raise BridgeError("Responses API returned a malformed object")
+            raise BridgeError(
+                _response_diagnostic(
+                    "Responses API returned a malformed object",
+                    parsed,
+                    request_id=header_request_id,
+                    http_status=http_status if isinstance(http_status, int) else None,
+                )
+            )
         request_id = parsed.get("id") if isinstance(parsed.get("id"), str) else header_request_id
         return parsed, request_id
 
@@ -580,27 +589,306 @@ class ResponsesClient:
         return self._request("responses", body)
 
 
-def _extract_output_text(payload: dict[str, Any]) -> str:
-    top_level = payload.get("output_text")
-    if isinstance(top_level, str):
-        return top_level
-    output = payload.get("output")
-    if not isinstance(output, list):
-        raise BridgeError("Responses API returned no output text")
-    chunks: list[str] = []
-    for item in output:
-        if not isinstance(item, dict):
+_TEXT_TYPES = frozenset({"output_text", "text", "text_delta", "output_text_delta", "message", "assistant", "completion", "output"})
+_NON_TEXT_TYPES = frozenset({
+    "input_text", "input_image", "reasoning", "refusal", "tool", "tool_call", "tool_result", "tool_output",
+    "function", "function_call", "function_call_output", "function_output", "function_result", "computer_call", "file_search_call", "web_search_call",
+})
+_REJECTED_TYPES = _NON_TEXT_TYPES | {
+    "system", "developer", "user", "function_result", "summary", "analysis", "reasoning_content"
+}
+_KNOWN_RESPONSE_STATUSES = frozenset({"completed", "incomplete", "failed", "in_progress", "queued", "cancelled"})
+_BLOCKED_RESPONSE_STATUSES = frozenset({"failed", "cancelled", "queued", "in_progress"})
+_SAFE_TYPE_VALUE = re.compile(r"^[A-Za-z0-9_.:-]{1,64}$")
+_SAFE_FIELD_VALUE = re.compile(r"^[A-Za-z0-9_.-]{1,48}$")
+_UUID_REQUEST_ID = re.compile(r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+_SAFE_FIELDS = frozenset({
+    "id", "object", "created_at", "status", "output", "output_text", "content", "choices", "response", "result", "data",
+    "type", "role", "text", "value", "message", "delta", "assistant", "model", "usage", "annotations", "summary", "parts",
+    "incomplete_details", "error", "code", "name", "reason", "details", "length", "items", "item", "input", "created",
+})
+_MAX_SHAPE_ITEMS = 8
+_MAX_SHAPE_FIELDS = 32
+_MAX_SHAPE_DEPTH = 5
+_MAX_DIAGNOSTIC_CHARS = 12000
+_SHAPE_FIELDS = ("output", "content", "choices", "response", "result", "data", "error", "incomplete_details")
+
+
+def _json_kind(value: Any) -> str:
+    return {
+        type(None): "null", bool: "boolean", str: "string", int: "integer",
+        float: "number", list: "array", dict: "object",
+    }.get(type(value), "other")
+
+
+def _field_names(value: dict[str, Any]) -> list[str]:
+    safe: set[str] = set()
+    unknown = 0
+    for key in value:
+        if isinstance(key, str) and key in _SAFE_FIELDS and _SAFE_FIELD_VALUE.fullmatch(key):
+            safe.add(key)
+        else:
+            unknown += 1
+    names = sorted(safe)[:_MAX_SHAPE_FIELDS]
+    if len(safe) > _MAX_SHAPE_FIELDS:
+        names.append("<fields_truncated>")
+    if unknown:
+        names.append(f"<unknown_fields:{min(unknown, 9999)}>")
+    return names
+
+
+def _shape(value: Any, *, include_items: bool = False, depth: int = 0) -> dict[str, Any]:
+    kind = _json_kind(value)
+    if kind in {"object", "array"} and depth >= _MAX_SHAPE_DEPTH:
+        return {"type": kind, "truncated": True}
+    if kind == "object":
+        result: dict[str, Any] = {"type": kind, "fields": _field_names(value)}
+        declared = value.get("type")
+        normalized = declared.lower() if isinstance(declared, str) else ""
+        if isinstance(declared, str) and _SAFE_TYPE_VALUE.fullmatch(declared) and normalized in _TEXT_TYPES | _NON_TEXT_TYPES:
+            result["declared_type"] = normalized
+        for field in _SHAPE_FIELDS:
+            if field in value:
+                result[field] = _shape(value[field], include_items=True, depth=depth + 1)
+        return result
+    if kind == "array":
+        result: dict[str, Any] = {"type": kind, "length": len(value)}
+        if include_items:
+            result["items"] = [_shape(item, include_items=True, depth=depth + 1) for item in value[:_MAX_SHAPE_ITEMS]]
+            if len(value) > _MAX_SHAPE_ITEMS:
+                result["items_truncated"] = True
+        return result
+    return {"type": kind}
+
+
+def _response_shape(payload: Any) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        return {"type": _json_kind(payload)}
+    report: dict[str, Any] = {"type": "object", "top_level_fields": _field_names(payload)}
+    for field in _SHAPE_FIELDS:
+        if field in payload:
+            report[field] = _shape(payload[field], include_items=field in {"output", "content", "choices"})
+    return report
+
+
+def _response_status(payload: Any, depth: int = 0) -> str | None:
+    if depth >= _MAX_SHAPE_DEPTH:
+        return None
+    if isinstance(payload, list):
+        for item in payload[:_MAX_SHAPE_ITEMS]:
+            status = _response_status(item, depth + 1)
+            if status is not None:
+                return status
+        return None
+    if not isinstance(payload, dict):
+        return None
+    status = payload.get("status")
+    if isinstance(status, str) and status in _KNOWN_RESPONSE_STATUSES:
+        return status
+    for field in _SHAPE_FIELDS:
+        nested = payload.get(field)
+        status = _response_status(nested, depth + 1)
+        if status is not None:
+            return status
+    return None
+
+
+def _response_diagnostic(prefix: str, payload: Any, *, request_id: str | None, http_status: int | None) -> str:
+    response_status = _response_status(payload)
+    metadata = {
+        "http_status": http_status if isinstance(http_status, int) else None,
+        "response_status": response_status,
+        "response_shape": _response_shape(payload),
+    }
+    metadata.update(_request_id_metadata(request_id))
+    rendered = f"{prefix}; " + json.dumps(metadata, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return rendered if len(rendered) <= _MAX_DIAGNOSTIC_CHARS else rendered[:_MAX_DIAGNOSTIC_CHARS - 27] + "...<diagnostic_truncated>"
+
+
+def _request_id_metadata(value: Any) -> dict[str, str | None]:
+    if isinstance(value, str) and _UUID_REQUEST_ID.fullmatch(value):
+        return {"request_id": value}
+    if isinstance(value, str):
+        return {"request_id_sha256": hashlib.sha256(value.encode("utf-8")).hexdigest()}
+    return {"request_id": None}
+
+
+def _marker_has_content(value: Any, exempt: frozenset[str] = frozenset()) -> bool:
+    for key, marker in value.items():
+        if not isinstance(key, str):
             continue
-        content = item.get("content")
-        if isinstance(content, list):
-            for part in content:
-                if isinstance(part, dict) and part.get("type") in {"output_text", "text"} and isinstance(part.get("text"), str):
-                    chunks.append(part["text"])
-        elif isinstance(item.get("text"), str) and item.get("type") in {"output_text", "text"}:
-            chunks.append(item["text"])
-    if not chunks:
-        raise BridgeError("Responses API returned no output text")
-    return "".join(chunks)
+        normalized = key.lower()
+        if normalized in exempt:
+            continue
+        if (
+            normalized in _REJECTED_TYPES
+            or normalized.startswith(("tool", "function", "refusal", "reasoning", "analysis"))
+        ) and _has_value(marker):
+            return True
+    return False
+
+
+def _has_value(value: Any) -> bool:
+    return value is not None and value is not False and (not isinstance(value, (str, list, dict)) or bool(value))
+
+
+def _response_blocks_text(payload: dict[str, Any]) -> bool:
+    status = payload.get("status")
+    return (isinstance(status, str) and status in _BLOCKED_RESPONSE_STATUSES) or (
+        "error" in payload and _has_value(payload["error"])
+    )
+
+
+def _identity_allowed(value: Any) -> bool:
+    if not isinstance(value, dict):
+        return True
+    if "role" in value and value.get("role") != "assistant":
+        return False
+    marker = value.get("type")
+    if "type" in value and not isinstance(marker, str):
+        return False
+    if isinstance(marker, str):
+        marker = marker.lower()
+        if marker in _REJECTED_TYPES or any(token in marker for token in ("tool", "function", "refusal", "reasoning")):
+            return False
+    return True
+
+
+def _node_allowed(value: Any) -> bool:
+    if not _identity_allowed(value):
+        return False
+    if not isinstance(value, dict):
+        return True
+    return not _response_blocks_text(value) and not _marker_has_content(value)
+
+
+def _allows_text_type(value: Any) -> bool:
+    return value is None or isinstance(value, str) and value.lower() in _TEXT_TYPES
+
+
+def _text_value(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict) and isinstance(value.get("value"), str):
+        return [value["value"]]
+    return []
+
+
+def _content_text(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        chunks: list[str] = []
+        for item in value:
+            chunks.extend(_content_text(item))
+        return chunks
+    if not isinstance(value, dict) or not _node_allowed(value) or not _allows_text_type(value.get("type")):
+        return []
+    if "output_text" in value:
+        chunks = _direct_text(value["output_text"])
+        if chunks:
+            return chunks
+    chunks = _text_value(value.get("text"))
+    if chunks:
+        return chunks
+    if isinstance(value.get("value"), str):
+        return [value["value"]]
+    return _content_text(value["content"]) if "content" in value else []
+
+
+def _output_text(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        chunks: list[str] = []
+        for item in value:
+            chunks.extend(_output_text(item))
+        return chunks
+    if not isinstance(value, dict) or not _node_allowed(value) or not _allows_text_type(value.get("type")):
+        return []
+    if "output_text" in value:
+        chunks = _direct_text(value["output_text"])
+        if chunks:
+            return chunks
+    chunks = _text_value(value.get("text"))
+    if chunks:
+        return chunks
+    if isinstance(value.get("value"), str):
+        return [value["value"]]
+    if "content" in value:
+        chunks = _content_text(value["content"])
+        if chunks:
+            return chunks
+    for field in ("message", "delta", "assistant"):
+        nested = value.get(field)
+        if isinstance(nested, dict):
+            chunks = _output_text(nested)
+            if chunks:
+                return chunks
+    return []
+
+
+def _direct_text(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        chunks: list[str] = []
+        for item in value:
+            chunks.extend(_direct_text(item))
+        return chunks
+    return _output_text(value) if isinstance(value, dict) else []
+
+
+def _first_nonempty_group(groups: Iterable[list[str]]) -> list[str]:
+    return next((group for group in groups if any(chunk != "" for chunk in group)), [])
+
+
+def _first_choice_text(choices: Any) -> list[str]:
+    if not isinstance(choices, list):
+        return []
+    for choice in choices:
+        chunks = _output_text(choice)
+        if any(chunk != "" for chunk in chunks):
+            return chunks
+    return []
+
+
+def _payload_text(payload: dict[str, Any], *, envelope: bool = False) -> list[str]:
+    envelope_markers = frozenset({"reasoning", "tools", "user"}) if envelope else frozenset()
+    if not _identity_allowed(payload) or _response_blocks_text(payload) or _marker_has_content(payload, envelope_markers):
+        return []
+    groups: list[list[str]] = []
+    if "output_text" in payload:
+        groups.append(_direct_text(payload["output_text"]))
+    if "output" in payload:
+        groups.append(_output_text(payload["output"]))
+    if "choices" in payload:
+        groups.append(_first_choice_text(payload["choices"]))
+    if "content" in payload:
+        groups.append(_content_text(payload["content"]))
+    for field in ("text", "message", "delta"):
+        if field in payload:
+            value = payload[field]
+            groups.append(_direct_text(value) if field == "text" else _output_text(value))
+    for field in ("response", "result", "data"):
+        nested = payload.get(field)
+        groups.append(
+            _payload_text(nested, envelope=True)
+            if isinstance(nested, dict)
+            else _output_text(nested)
+            if isinstance(nested, list)
+            else []
+        )
+    return _first_nonempty_group(groups)
+
+
+def _extract_output_text(payload: dict[str, Any], *, request_id: str | None = None, http_status: int | None = None) -> str:
+    if isinstance(payload, dict) and _response_blocks_text(payload):
+        raise BridgeError(_response_diagnostic("Responses API returned no output text", payload, request_id=request_id, http_status=http_status))
+    chunks = _payload_text(payload, envelope=True) if isinstance(payload, dict) else []
+    if chunks:
+        return "".join(chunks)
+    raise BridgeError(_response_diagnostic("Responses API returned no output text", payload, request_id=request_id, http_status=http_status))
 
 
 class Bridge:
@@ -662,7 +950,11 @@ class Bridge:
         client = ResponsesClient(provider, provider.credential(), self.opener, self.timeout)
         payload, request_id = client.responses(body)
         return {
-            "text": _extract_output_text(payload),
+            "text": _extract_output_text(
+                payload,
+                request_id=request_id,
+                http_status=client.last_http_status,
+            ),
             "provider": provider.name,
             "model": model,
             "usage": payload.get("usage") if isinstance(payload.get("usage"), dict) else None,

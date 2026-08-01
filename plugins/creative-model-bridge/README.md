@@ -61,7 +61,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.1` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.2` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -22,6 +23,7 @@ from bridge import (  # noqa: E402
     MAX_TOTAL_CHARS,
     REQUEST_SCHEMA,
     SYSTEM_PROMPT,
+    _extract_output_text,
 )
 from server import TOOL_DEFINITIONS, handle  # noqa: E402
 
@@ -348,6 +350,403 @@ class BridgeTests(unittest.TestCase):
         opener = FakeOpener([FakeResponse({"output": []})])
         with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError):
             self.bridge(opener).creative_generate(self.request())
+
+    def test_responses_compatible_text_shapes_preserve_order_and_verbatim_text(self) -> None:
+        cases = [
+            (
+                {
+                    "output": [
+                        {
+                            "type": "message",
+                            "content": [
+                                {"type": "output_text", "text": "A"},
+                                {"type": "output_text", "text": "\n B"},
+                            ],
+                        }
+                    ]
+                },
+                "A\n B",
+            ),
+            (
+                {"output": [{"type": "message", "content": "A"}, {"type": "text", "text": "B"}]},
+                "AB",
+            ),
+            (
+                {
+                    "output": [
+                        {
+                            "type": "message",
+                            "content": {
+                                "type": "text",
+                                "text": {"value": "A"},
+                            },
+                        }
+                    ]
+                },
+                "A",
+            ),
+            (
+                {
+                    "choices": [
+                        {"message": {"content": "A"}},
+                        {"delta": {"content": [{"type": "text", "text": "B"}]}},
+                    ]
+                },
+                "A",
+            ),
+            ({"output_text": ["A", "\nB"]}, "A\nB"),
+            ({"response": {"data": {"output_text": "wrapped"}}}, "wrapped"),
+            (
+                {
+                    "response": {
+                        "reasoning": {"summary": [{"type": "summary_text", "text": "hidden"}]},
+                        "output": [{"type": "message", "role": "assistant", "content": [{"type": "text", "text": "normal"}]}],
+                    }
+                },
+                "normal",
+            ),
+            (
+                {"result": {"tools": [{"type": "function", "name": "lookup"}], "user": {"id": "opaque"}, "output_text": "normal"}},
+                "normal",
+            ),
+            (
+                {
+                    "reasoning": {"summary": [{"type": "summary_text", "text": "hidden"}]},
+                    "tools": [{"type": "function", "name": "lookup"}],
+                    "user": {"id": "opaque-user"},
+                    "output_text": "normal",
+                },
+                "normal",
+            ),
+            ({"output_text": "normal", "reasoning": None}, "normal"),
+            (
+                {
+                    "output": [
+                        {
+                            "type": "message",
+                            "role": "assistant",
+                            "refusal": None,
+                            "content": [{"type": "output_text", "text": "normal"}],
+                        }
+                    ]
+                },
+                "normal",
+            ),
+        ]
+        for payload, expected in cases:
+            self.assertEqual(_extract_output_text(payload), expected)
+
+    def test_response_status_and_error_gate_prevents_provider_errors_becoming_text(self) -> None:
+        secret = "provider failure details must not appear"
+        payload = {
+            "id": "provider-failure-id",
+            "status": "failed",
+            "error": {"message": secret},
+            "output": [{"type": "message", "content": [{"type": "text", "text": "provider message"}]}],
+        }
+        opener = FakeOpener([FakeResponse(payload)])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            self.bridge(opener).creative_generate(self.request())
+        diagnostic = str(context.exception)
+        self.assertNotIn(secret, diagnostic)
+        self.assertIn("response_status", diagnostic)
+        self.assertIn("failed", diagnostic)
+
+        opener = FakeOpener([FakeResponse(payload)])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
+            response = handle(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 7,
+                    "method": "tools/call",
+                    "params": {"name": "creative_generate", "arguments": self.request()},
+                },
+                self.bridge(opener),
+            )
+        self.assertTrue(response["result"]["isError"])
+        self.assertNotIn(secret, response["result"]["content"][0]["text"])
+
+    def test_non_completed_response_statuses_block_text_but_incomplete_text_is_allowed(self) -> None:
+        for status in ("cancelled", "queued", "in_progress"):
+            with self.assertRaises(BridgeError):
+                _extract_output_text({"status": status, "text": "must not be returned"})
+        with self.assertRaises(BridgeError):
+            _extract_output_text({"status": "completed", "error": {"message": "provider error"}, "output_text": "not text"})
+        self.assertEqual(_extract_output_text({"status": "incomplete", "output_text": "partial text"}), "partial text")
+
+    def test_nested_response_envelopes_gate_status_error_and_propagate_mcp_safely(self) -> None:
+        secret = "nested provider error must not appear"
+        rejected = [
+            {"response": {"status": "failed", "error": {"message": secret}, "output_text": "bad"}},
+            {"result": {"status": "cancelled", "output_text": "bad"}},
+            {"data": {"status": "queued", "output_text": "bad"}},
+        ]
+        for payload in rejected:
+            with self.assertRaises(BridgeError) as context:
+                _extract_output_text(payload, request_id="nested-failure", http_status=200)
+            self.assertIn("response_status", str(context.exception))
+        with self.assertRaises(BridgeError) as context:
+            _extract_output_text(rejected[0], request_id="nested-failure", http_status=200)
+        self.assertIn('"response_status":"failed"', str(context.exception))
+        self.assertNotIn(secret, str(context.exception))
+
+        opener = FakeOpener([FakeResponse(rejected[0])])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
+            response = handle(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 8,
+                    "method": "tools/call",
+                    "params": {"name": "creative_generate", "arguments": self.request()},
+                },
+                self.bridge(opener),
+            )
+        self.assertTrue(response["result"]["isError"])
+        self.assertNotIn(secret, response["result"]["content"][0]["text"])
+
+        self.assertEqual(
+            _extract_output_text({"response": {"status": "incomplete", "output_text": "partial"}}),
+            "partial",
+        )
+
+    def test_array_items_gate_status_error_and_propagate_mcp_safely(self) -> None:
+        secret = "array provider failure must not appear"
+        payloads = [
+            ({"response": [{"status": "failed", "output_text": secret}]}, "failed"),
+            ({"result": [{"status": "cancelled", "output_text": secret}]}, "cancelled"),
+            ({"data": [{"status": "queued", "output_text": secret}]}, "queued"),
+            ({"choices": [{"status": "in_progress", "text": secret}]}, "in_progress"),
+            ({"output": [{"error": {"message": secret}, "output_text": secret}]}, None),
+        ]
+        for payload, status in payloads:
+            with self.assertRaises(BridgeError) as context:
+                _extract_output_text(payload, request_id="array-failure", http_status=200)
+            diagnostic = str(context.exception)
+            self.assertNotIn(secret, diagnostic)
+            if status is not None:
+                self.assertIn(f'"response_status":"{status}"', diagnostic)
+
+        opener = FakeOpener([FakeResponse(payloads[0][0])])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
+            response = handle(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 9,
+                    "method": "tools/call",
+                    "params": {"name": "creative_generate", "arguments": self.request()},
+                },
+                self.bridge(opener),
+            )
+        self.assertTrue(response["result"]["isError"])
+        self.assertNotIn(secret, response["result"]["content"][0]["text"])
+
+        self.assertEqual(
+            _extract_output_text({"response": [{"status": "incomplete", "output_text": "partial"}]}),
+            "partial",
+        )
+
+    def test_empty_response_error_contains_safe_shape_diagnostic_and_mcp_propagates_it(self) -> None:
+        secret_text = "COMPLETE_CREATIVE_TEXT_SHOULD_NOT_APPEAR"
+        secret_key = "provider-secret-value"
+        payload = {
+            "id": "response-diagnostic-1",
+            "status": "completed",
+            "output": [
+                {
+                    "type": "message",
+                    "content": [{"type": "refusal", "text": secret_text}],
+                },
+                {
+                    "type": "tool_call",
+                    "content": {"type": "function_call_output", "output": secret_key},
+                },
+            ],
+            "api_key": secret_key,
+        }
+        opener = FakeOpener([FakeResponse(payload, status=207)])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            self.bridge(opener).creative_generate(self.request())
+        diagnostic = str(context.exception)
+        self.assertIn("request_id", diagnostic)
+        request_digest = hashlib.sha256(b"response-diagnostic-1").hexdigest()
+        self.assertIn(f'"request_id_sha256":"{request_digest}"', diagnostic)
+        self.assertNotIn("response-diagnostic-1", diagnostic)
+        self.assertIn("\"http_status\":207", diagnostic)
+        self.assertIn("\"response_status\":\"completed\"", diagnostic)
+        self.assertIn("top_level_fields", diagnostic)
+        self.assertIn("output", diagnostic)
+        self.assertIn("content", diagnostic)
+        self.assertIn("fields", diagnostic)
+        self.assertIn("refusal", diagnostic)
+        self.assertNotIn(secret_text, diagnostic)
+        self.assertNotIn(secret_key, diagnostic)
+
+        opener = FakeOpener([FakeResponse(payload, status=207)])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
+            response = handle(
+                {
+                    "jsonrpc": "2.0",
+                    "id": 3,
+                    "method": "tools/call",
+                    "params": {"name": "creative_generate", "arguments": self.request()},
+                },
+                self.bridge(opener),
+            )
+        self.assertTrue(response["result"]["isError"])
+        mcp_text = response["result"]["content"][0]["text"]
+        self.assertIn(f'"request_id_sha256":"{request_digest}"', mcp_text)
+        self.assertNotIn("response-diagnostic-1", mcp_text)
+        self.assertIn("top_level_fields", mcp_text)
+        self.assertNotIn(secret_text, mcp_text)
+        self.assertNotIn(secret_key, mcp_text)
+
+    def test_unknown_response_status_and_error_values_are_not_leaked(self) -> None:
+        status_secret = "MALICIOUS_STATUS_VALUE_SHOULD_NOT_APPEAR"
+        error_secret = "PROVIDER_ERROR_TEXT_SHOULD_NOT_APPEAR"
+        payload = {
+            "id": "response-incomplete-1",
+            "status": status_secret,
+            "output": [
+                {
+                    "type": "reasoning",
+                    "summary": [{"type": "summary_text", "text": error_secret}],
+                }
+            ],
+            "incomplete_details": {"reason": error_secret},
+            "error": {"code": "provider_error", "message": error_secret},
+        }
+        for malicious_status in (status_secret, [status_secret], {"value": status_secret}):
+            payload["status"] = malicious_status
+            with self.assertRaises(BridgeError) as context:
+                _extract_output_text(payload, request_id="response-incomplete-1", http_status=200)
+            diagnostic = str(context.exception)
+            self.assertIn('"http_status":200', diagnostic)
+            self.assertIn('"response_status":null', diagnostic)
+            self.assertIn("incomplete_details", diagnostic)
+            self.assertIn("error", diagnostic)
+            self.assertIn("summary", diagnostic)
+            self.assertNotIn(status_secret, diagnostic)
+            self.assertNotIn(error_secret, diagnostic)
+
+    def test_non_assistant_roles_and_tool_markers_are_never_extracted(self) -> None:
+        rejected = [
+            {"type": "reasoning", "text": "reasoning"},
+            {"type": "tool_call", "output_text": "tool"},
+            {"response": {"type": "reasoning", "content": "reasoning"}},
+            {"response": {"role": "user", "content": "user"}},
+            {"response": {"role": None, "content": "unknown role"}},
+            {"response": {"tool_call_id": "opaque", "text": "tool"}},
+            {"result": {"function_output": "opaque", "text": "function"}},
+            {"data": {"refusal": "non-empty refusal", "content": "refusal"}},
+            {"response": {"reasoning_content": "opaque", "text": "reasoning"}},
+            {"tool_call_id": "opaque", "text": "tool"},
+            {"function_output": "opaque", "text": "function"},
+            {"refusal": "non-empty refusal", "content": "refusal"},
+            {"reasoning_content": "opaque", "text": "reasoning"},
+            {"output": [{"role": "tool", "text": "tool output"}]},
+            {"output": [{"role": "system", "content": [{"type": "text", "text": "system"}]}]},
+            {"output": [{"role": "developer", "text": "developer"}]},
+            {"output": [{"role": "user", "text": "user"}]},
+            {"output": [{"role": None, "text": "unknown role"}]},
+            {"output": [{"type": "tool", "text": "tool"}]},
+            {"output": [{"type": "refusal", "text": "refusal"}]},
+            {"output": [{"type": "reasoning", "summary": [{"type": "text", "text": "reasoning"}]}]},
+            {"output": [{"summary": [{"type": "text", "text": "reasoning"}], "text": "reasoning"}]},
+            {"output": [{"tool_call_id": "opaque", "text": "tool"}]},
+            {"output": [{"type": "function_output", "text": "function output"}]},
+            {"output_text": {"type": "refusal", "value": "refusal"}},
+            {
+                "output": [
+                    {
+                        "type": "message",
+                        "role": "assistant",
+                        "content": [{"role": "tool", "type": "text", "text": "nested tool"}],
+                    }
+                ]
+            },
+            {
+                "output": [
+                    {
+                        "type": "message",
+                        "role": "assistant",
+                        "refusal": "non-empty refusal",
+                        "content": [{"type": "text", "text": "should not extract"}],
+                    }
+                ]
+            },
+        ]
+        for payload in rejected:
+            with self.assertRaises(BridgeError):
+                _extract_output_text(payload)
+
+        nested_assistant = {
+            "output": [
+                {
+                    "role": "assistant",
+                    "message": {
+                        "role": "assistant",
+                        "content": [{"role": "assistant", "type": "text", "text": "assistant only"}],
+                    },
+                }
+            ]
+        }
+        self.assertEqual(_extract_output_text(nested_assistant), "assistant only")
+
+    def test_request_id_uuid_is_preserved_but_other_ids_are_fingerprinted(self) -> None:
+        uuid = "123e4567-e89b-12d3-a456-426614174000"
+        with self.assertRaises(BridgeError) as context:
+            _extract_output_text({"output": []}, request_id=uuid, http_status=200)
+        diagnostic = str(context.exception)
+        self.assertIn(f'"request_id":"{uuid}"', diagnostic)
+        self.assertNotIn("request_id_sha256", diagnostic)
+
+    def test_wrapper_reasoning_diagnostic_descends_known_fields_without_values(self) -> None:
+        secret = "wrapper-reasoning-secret"
+        payload = {
+            "result": {
+                "data": {
+                    "response": {
+                        "type": "reasoning",
+                        "content": [{"type": "text", "text": secret}],
+                        "private_wrapper_key": secret,
+                    }
+                }
+            }
+        }
+        with self.assertRaises(BridgeError) as context:
+            _extract_output_text(payload, request_id="wrapper-id", http_status=200)
+        diagnostic = str(context.exception)
+        self.assertIn("result", diagnostic)
+        self.assertIn("data", diagnostic)
+        self.assertIn("response", diagnostic)
+        self.assertIn("content", diagnostic)
+        self.assertIn("reasoning", diagnostic)
+        self.assertIn("<unknown_fields:", diagnostic)
+        self.assertNotIn(secret, diagnostic)
+        self.assertNotIn("private_wrapper_key", diagnostic)
+
+    def test_response_shape_diagnostic_is_bounded_and_redacts_unknown_keys(self) -> None:
+        deep: dict[str, object] = {"type": "reasoning"}
+        cursor = deep
+        for _ in range(20):
+            child: dict[str, object] = {"type": "reasoning"}
+            cursor["content"] = [child]
+            cursor = child
+        payload: dict[str, object] = {
+            "status": "incomplete",
+            "output": [deep] * 100,
+            "incomplete_details": {"reason": "max_output_tokens"},
+        }
+        for index in range(10_000):
+            payload[f"secret key {index}"] = "response value must not appear"
+        with self.assertRaises(BridgeError) as context:
+            _extract_output_text(payload, request_id="shape-test", http_status=200)
+        diagnostic = str(context.exception)
+        self.assertLessEqual(len(diagnostic), 12_000)
+        self.assertIn("<unknown_fields:", diagnostic)
+        self.assertIn("truncated", diagnostic)
+        self.assertNotIn("secret key 0", diagnostic)
+        self.assertNotIn("response value must not appear", diagnostic)
 
     def test_mcp_handle_returns_structured_tool_result(self) -> None:
         bridge = self.bridge()
