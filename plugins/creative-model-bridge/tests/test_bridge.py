@@ -13,6 +13,7 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PLUGIN_ROOT / "mcp"))
 
 from bridge import (  # noqa: E402
+    BRIDGE_VERSION,
     Bridge,
     BridgeError,
     ConfigError,
@@ -350,6 +351,8 @@ class BridgeTests(unittest.TestCase):
 
     def test_mcp_handle_returns_structured_tool_result(self) -> None:
         bridge = self.bridge()
+        response = handle({"jsonrpc": "2.0", "id": 0, "method": "initialize"}, bridge)
+        self.assertEqual(response["result"]["serverInfo"]["version"], BRIDGE_VERSION)
         response = handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, bridge)
         self.assertEqual(response["result"]["tools"][0]["name"], "creative_models")
         response = handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "creative_preview", "arguments": self.request()}}, bridge)

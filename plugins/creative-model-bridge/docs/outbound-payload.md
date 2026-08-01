@@ -20,3 +20,8 @@ assembled in the fixed order `task` → `constraints` → `output_spec` →
 `context_text` → `context_files`; there is no hidden Codex prompt or model
 adapter. `prompt_report` records the exact system prompt (or `null`), section
 order, user/total character counts, context details, and `truncated: false`.
+
+The HTTP transport sends `User-Agent: creative-model-bridge/0.1.1` on both
+`/models` and `/responses`. This is an honest bridge identifier used for edge
+compatibility; no Codex-specific identity, originator, or session headers are
+sent.

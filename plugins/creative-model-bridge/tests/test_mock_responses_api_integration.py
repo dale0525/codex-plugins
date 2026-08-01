@@ -16,12 +16,14 @@ from bridge import Bridge  # noqa: E402
 
 class MockResponsesHandler(BaseHTTPRequestHandler):
     calls: list[tuple[str, dict[str, object] | None]] = []
+    request_headers: list[tuple[str, dict[str, str]]] = []
 
     def log_message(self, format: str, *args: object) -> None:
         return None
 
     def do_GET(self) -> None:  # noqa: N802
         self.__class__.calls.append((self.path, None))
+        self.__class__.request_headers.append((self.path, {key.lower(): value for key, value in self.headers.items()}))
         body = {"object": "list", "data": [{"id": "mock/model-v1"}]}
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
@@ -35,6 +37,7 @@ class MockResponsesHandler(BaseHTTPRequestHandler):
         size = int(self.headers.get("Content-Length", "0"))
         payload = json.loads(self.rfile.read(size).decode("utf-8"))
         self.__class__.calls.append((self.path, payload))
+        self.__class__.request_headers.append((self.path, {key.lower(): value for key, value in self.headers.items()}))
         body = {
             "id": "response-request",
             "output": [{"type": "message", "content": [{"type": "output_text", "text": "原样返回"}]}],
@@ -51,6 +54,7 @@ class MockResponsesHandler(BaseHTTPRequestHandler):
 class MockResponsesIntegrationTests(unittest.TestCase):
     def test_models_and_responses_use_standard_paths_and_payload(self) -> None:
         MockResponsesHandler.calls = []
+        MockResponsesHandler.request_headers = []
         server = ThreadingHTTPServer(("127.0.0.1", 0), MockResponsesHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
@@ -74,6 +78,18 @@ class MockResponsesIntegrationTests(unittest.TestCase):
                 self.assertEqual(models["models"], ["mock/model-v1"])
                 self.assertEqual(generated["text"], "原样返回")
                 self.assertEqual([path for path, _ in MockResponsesHandler.calls], ["/v1/models", "/v1/responses"])
+                self.assertEqual(
+                    [path for path, _ in MockResponsesHandler.request_headers],
+                    ["/v1/models", "/v1/responses"],
+                )
+                for _, headers in MockResponsesHandler.request_headers:
+                    self.assertEqual(headers["user-agent"], "creative-model-bridge/0.1.1")
+                    self.assertFalse(
+                        any(
+                            key.startswith(("codex", "x-codex", "originator")) or key in {"session", "x-session"}
+                            for key in headers
+                        )
+                    )
                 response_payload = MockResponsesHandler.calls[1][1]
                 self.assertEqual(response_payload["model"], "mock/model-v1")
                 self.assertEqual(response_payload["temperature"], 0.2)
