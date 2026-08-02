@@ -50,6 +50,7 @@ jobs:
         with:
           cache: true
           frozen: true
+          manifest-path: plugins/creative-model-bridge/pixi.toml
       - name: Validate release version and build contract
         run: python scripts/validate_creative_model_bridge_release.py "${{ github.ref_name }}"
       - name: Build locked one-file executable

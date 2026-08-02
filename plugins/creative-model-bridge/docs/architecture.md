@@ -33,7 +33,7 @@ report, logs, or error messages. The bridge does not inject Codex instructions,
 model-specific adapters, retries, provider switching, or conversation history.
 
 Every provider request also carries the explicit honest `User-Agent`
-`creative-model-bridge/0.1.3`. This stable product identifier is a transport
+`creative-model-bridge/0.1.4`. This stable product identifier is a transport
 compatibility measure for provider edges that reject Python's default user
 agent; it does not claim to be Codex and is not accompanied by Codex-,
 originator-, or session-spoofing headers.

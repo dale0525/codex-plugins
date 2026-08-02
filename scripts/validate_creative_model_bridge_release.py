@@ -16,10 +16,12 @@ ASSETS = {
     "creative-model-bridge-aarch64-unknown-linux-gnu",
     "creative-model-bridge-x86_64-pc-windows-msvc.exe",
 }
+PLATFORMS = ("linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64")
 RELEASE_ASSETS = ASSETS | {"checksums.txt"}
 VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
 TAG_RE = re.compile(r"^creative-model-bridge-v(\d+\.\d+\.\d+)$")
 PUBLISH_STEP_NAME = "Publish verified draft, or confirm published exact no-op"
+BUILD_PIXI_MANIFEST = "plugins/creative-model-bridge/pixi.toml"
 
 
 def validate_publish_step_structure(workflow_text: str) -> list[str]:
@@ -69,6 +71,53 @@ def validate_publish_step_structure(workflow_text: str) -> list[str]:
     return errors
 
 
+def validate_build_pixi_manifest_path(workflow_text: str) -> list[str]:
+    """Require the build job to resolve its own locked plugin workspace."""
+
+    errors: list[str] = []
+    build_match = re.search(r"(?ms)^  build:\n(?P<body>.*?)(?=^  release:|\Z)", workflow_text)
+    if not build_match:
+        return ["release workflow must contain a build job"]
+    setup_match = re.search(
+        r"(?ms)^      - name: Set up Pixi\n(?P<body>.*?)(?=^      - name:|\Z)",
+        build_match.group("body"),
+    )
+    if not setup_match:
+        return ["build job must contain its Set up Pixi step"]
+    manifest_match = re.search(r"(?m)^\s*manifest-path:\s*(\S+)\s*$", setup_match.group("body"))
+    if not manifest_match:
+        errors.append(f"build Set up Pixi step must set manifest-path to {BUILD_PIXI_MANIFEST}")
+    elif manifest_match.group(1) != BUILD_PIXI_MANIFEST:
+        errors.append(
+            f"build Set up Pixi manifest-path must be {BUILD_PIXI_MANIFEST}, got {manifest_match.group(1)}"
+        )
+    return errors
+
+
+def validate_pixi_lock_platforms(lock_text: str) -> list[str]:
+    """Check non-empty per-platform environments and native package URLs."""
+
+    errors: list[str] = []
+    packages_match = re.search(r"(?ms)^    packages:\n(?P<body>.*?)(?=^packages:\n|\Z)", lock_text)
+    if not packages_match:
+        return ["pixi.lock default environment packages are missing"]
+    packages = packages_match.group("body")
+    for platform in PLATFORMS:
+        platform_match = re.search(
+            rf"(?ms)^      {re.escape(platform)}:\n(?P<body>.*?)(?=^      [^:\n]+:\n|\Z)",
+            packages,
+        )
+        if not platform_match or not platform_match.group("body").strip():
+            errors.append(f"pixi.lock platform environment is missing or empty: {platform}")
+            continue
+        body = platform_match.group("body")
+        if not re.search(rf"https?://\S+/{re.escape(platform)}/python-\S+", body):
+            errors.append(f"pixi.lock platform {platform} lacks a platform-specific python URL")
+        if not re.search(rf"https?://\S+/{re.escape(platform)}/pyinstaller-\S+", body):
+            errors.append(f"pixi.lock platform {platform} lacks a platform-specific pyinstaller URL")
+    return errors
+
+
 def validate(root: Path, tag: str | None = None) -> list[str]:
     errors: list[str] = []
     plugin = root / "plugins/creative-model-bridge"
@@ -111,6 +160,7 @@ def validate(root: Path, tag: str | None = None) -> list[str]:
     workflow_text = workflow.read_text(encoding="utf-8") if workflow.is_file() else ""
     if workflow.is_file():
         errors.extend(validate_publish_step_structure(workflow_text))
+        errors.extend(validate_build_pixi_manifest_path(workflow_text))
     for asset in RELEASE_ASSETS:
         if asset not in workflow_text:
             errors.append(f"release workflow is missing asset contract: {asset}")
@@ -132,12 +182,15 @@ def validate(root: Path, tag: str | None = None) -> list[str]:
     pixi_text = pixi.read_text(encoding="utf-8") if pixi.is_file() else ""
     if "pyinstaller" not in pixi_text.lower() or "build" not in pixi_text:
         errors.append("pixi.toml must lock the PyInstaller build task")
-    for platform in ("linux-64", "linux-aarch64", "osx-64", "osx-arm64", "win-64"):
+    for platform in PLATFORMS:
         if f'"{platform}"' not in pixi_text:
             errors.append(f"pixi.toml is missing locked build platform {platform}")
     lock = plugin / "pixi.lock"
-    if not lock.is_file() or "pyinstaller" not in lock.read_text(encoding="utf-8").lower():
+    lock_text = lock.read_text(encoding="utf-8") if lock.is_file() else ""
+    if not lock.is_file() or "pyinstaller" not in lock_text.lower():
         errors.append("pixi.lock must contain PyInstaller")
+    else:
+        errors.extend(validate_pixi_lock_platforms(lock_text))
     if (plugin / ".pixi/config.toml").exists():
         errors.append("plugin .pixi/config.toml direct-runtime target must be removed")
     bootstrap_contract = bootstrap.read_text(encoding="utf-8") if bootstrap.is_file() else ""
