@@ -22,7 +22,7 @@ response.
 The launcher forwards `CODEX_HOME` and `CREATIVE_MODEL_API_KEY`; the
 development-only `CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a cached version/target asset only.
-The default release version is 0.1.4; the repository deliberately does not
+The default release version is 0.1.5; the repository deliberately does not
 claim that tag has been published. The binary's `provision setup`, `status`,
 `repair`, and `uninstall` commands own the global MCP entry transactionally.
 

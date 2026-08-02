@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $null = [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.1.4' }
+$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.1.5' }
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'creative-model-bridge: invalid version' }
 
 $override = $env:CREATIVE_MODEL_BRIDGE_BIN

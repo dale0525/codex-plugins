@@ -5,8 +5,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
+import subprocess
 from pathlib import Path
+from typing import Any, Callable
 
 
 ASSETS = {
@@ -22,6 +25,7 @@ VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
 TAG_RE = re.compile(r"^creative-model-bridge-v(\d+\.\d+\.\d+)$")
 PUBLISH_STEP_NAME = "Publish verified draft, or confirm published exact no-op"
 BUILD_PIXI_MANIFEST = "plugins/creative-model-bridge/pixi.toml"
+BOOTSTRAP_RELATIVE_PATH = "plugins/creative-model-bridge/scripts/bootstrap.sh"
 
 
 def validate_publish_step_structure(workflow_text: str) -> list[str]:
@@ -118,7 +122,77 @@ def validate_pixi_lock_platforms(lock_text: str) -> list[str]:
     return errors
 
 
-def validate(root: Path, tag: str | None = None) -> list[str]:
+def validate_bootstrap_tracking(
+    root: Path,
+    bootstrap: Path,
+    *,
+    platform_name: str | None = None,
+    git_runner: Callable[..., Any] = subprocess.run,
+    stat_fn: Callable[[Path], Any] = os.stat,
+) -> list[str]:
+    """Require a uniquely tracked executable launcher without shell evaluation."""
+
+    errors: list[str] = []
+    try:
+        relative = bootstrap.relative_to(root).as_posix()
+    except ValueError:
+        relative = BOOTSTRAP_RELATIVE_PATH
+    try:
+        result = git_runner(
+            ["git", "ls-files", "--stage", "--", relative],
+            cwd=root,
+            shell=False,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+    except (OSError, TypeError) as error:
+        return [f"git ls-files bootstrap check failed: {error}"]
+    if result.returncode != 0:
+        errors.append("git ls-files bootstrap check failed")
+    lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if not lines:
+        errors.append("bootstrap.sh must be tracked exactly once with git ls-files")
+    elif len(lines) != 1:
+        errors.append("bootstrap.sh has duplicate tracked index entries")
+    else:
+        fields = lines[0].split(None, 3)
+        if len(fields) != 4 or fields[3] != relative:
+            errors.append("git ls-files bootstrap entry has an unexpected path")
+        elif fields[0] != "100755":
+            errors.append(f"git-index bootstrap mode must be 100755, got {fields[0]}")
+    if (platform_name or os.name) != "nt":
+        try:
+            if not stat_fn(bootstrap).st_mode & 0o111:
+                errors.append("POSIX bootstrap.sh working-tree mode must be executable")
+        except OSError as error:
+            errors.append(f"bootstrap.sh working-tree stat failed: {error}")
+    return errors
+
+
+def validate_provisioner_contract(ps_text: str, version: object) -> list[str]:
+    """Validate PowerShell safety markers and its default release version."""
+
+    errors: list[str] = []
+    if "Tls12" not in ps_text or "Get-FileHash" not in ps_text or "-in @('.', '..')" not in ps_text:
+        errors.append("PowerShell provisioner must pin TLS 1.2, verify SHA-256, and reject dot generations")
+    default_match = re.search(
+        r"\$version\s*=\s*if\s*\([^\n]+\)\s*\{[^\n]+\}\s*else\s*\{\s*'([^']+)'\s*\}",
+        ps_text,
+    )
+    if not default_match or default_match.group(1) != version:
+        errors.append("PowerShell provisioner default version must equal plugin manifest version")
+    return errors
+
+
+def validate(
+    root: Path,
+    tag: str | None = None,
+    *,
+    platform_name: str | None = None,
+    git_runner: Callable[..., Any] = subprocess.run,
+    stat_fn: Callable[[Path], Any] = os.stat,
+) -> list[str]:
     errors: list[str] = []
     plugin = root / "plugins/creative-model-bridge"
     try:
@@ -140,13 +214,36 @@ def validate(root: Path, tag: str | None = None) -> list[str]:
     if not bridge_match or bridge_match.group(1) != version:
         errors.append("mcp/bridge.py BRIDGE_VERSION must equal plugin manifest version")
     bootstrap = plugin / "scripts/bootstrap.sh"
-    if not bootstrap.is_file() or not bootstrap.stat().st_mode & 0o111:
-        errors.append("scripts/bootstrap.sh must exist and be executable")
+    bootstrap_text = ""
+    if not bootstrap.is_file():
+        errors.append("scripts/bootstrap.sh must exist and be readable")
     else:
-        bootstrap_text = bootstrap.read_text(encoding="utf-8")
+        try:
+            bootstrap_text = bootstrap.read_text(encoding="utf-8")
+        except OSError as error:
+            errors.append(f"scripts/bootstrap.sh must be readable: {error}")
+        errors.extend(
+            validate_bootstrap_tracking(
+                root,
+                bootstrap,
+                platform_name=platform_name,
+                git_runner=git_runner,
+                stat_fn=stat_fn,
+            )
+        )
         default_match = re.search(r'CREATIVE_MODEL_BRIDGE_VERSION:-([^}]+)', bootstrap_text)
         if not default_match or default_match.group(1) != version:
             errors.append("bootstrap default version must equal plugin manifest version")
+    if not bootstrap.is_file():
+        errors.extend(
+            validate_bootstrap_tracking(
+                root,
+                bootstrap,
+                platform_name=platform_name,
+                git_runner=git_runner,
+                stat_fn=stat_fn,
+            )
+        )
     if (plugin / ".mcp.json").exists():
         errors.append("bundled .mcp.json must not be distributed; provisioning owns global MCP config")
     provision = plugin / "scripts/provision.ps1"
@@ -154,8 +251,7 @@ def validate(root: Path, tag: str | None = None) -> list[str]:
         errors.append("scripts/provision.ps1 is required for Windows PowerShell 5.1")
     else:
         ps_text = provision.read_text(encoding="utf-8")
-        if "Tls12" not in ps_text or "Get-FileHash" not in ps_text or "-in @('.', '..')" not in ps_text:
-            errors.append("PowerShell provisioner must pin TLS 1.2, verify SHA-256, and reject dot generations")
+        errors.extend(validate_provisioner_contract(ps_text, version))
     workflow = root / ".github/workflows/release-creative-model-bridge.yml"
     workflow_text = workflow.read_text(encoding="utf-8") if workflow.is_file() else ""
     if workflow.is_file():
