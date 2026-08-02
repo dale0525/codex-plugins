@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import os
+import ssl
 from typing import Any, Callable
 import urllib.error
 import urllib.request
@@ -18,11 +20,22 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
         return None
 
 
-_NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirectHandler())
+def _ssl_context() -> ssl.SSLContext | None:
+    """Build a per-request HTTPS context, honoring an explicit CA override."""
+    cafile = os.environ.get("SSL_CERT_FILE")
+    if cafile is None:
+        return None
+    return ssl.create_default_context(cafile=cafile)
+
+
+def _opener_without_redirects() -> urllib.request.OpenerDirector:
+    context = _ssl_context()
+    https_handler = urllib.request.HTTPSHandler(context=context) if context is not None else urllib.request.HTTPSHandler()
+    return urllib.request.build_opener(https_handler, _NoRedirectHandler())
 
 
 def _open_without_redirects(request: urllib.request.Request, timeout: float) -> Any:
-    return _NO_REDIRECT_OPENER.open(request, timeout=timeout)
+    return _opener_without_redirects().open(request, timeout=timeout)
 
 
 class ResponsesClient:
