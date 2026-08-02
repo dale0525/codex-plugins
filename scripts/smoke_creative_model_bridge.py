@@ -16,24 +16,211 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import threading
 
 
-def _run_rpc(binary: Path, payload: str, environment: dict[str, str]) -> list[dict[str, object]]:
-    result = subprocess.run(
-        [str(binary)],
-        cwd=binary.parent,
-        input=payload.encode("utf-8"),
-        capture_output=True,
-        env=environment,
-        check=False,
-        timeout=90,
+_DIAGNOSTIC_KEYS = frozenset(
+    {"phase", "outer_type", "reason_type", "errno", "ssl_verify_code", "ssl_reason"}
+)
+_DIAGNOSTIC_PHASES = frozenset({"models", "responses"})
+_DIAGNOSTIC_REASONS = frozenset(
+    {
+        "CERTIFICATE_VERIFY_FAILED",
+        "HOSTNAME_MISMATCH",
+        "SELF_SIGNED_CERTIFICATE",
+        "UNABLE_TO_GET_ISSUER",
+        "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+    }
+)
+_DIAGNOSTIC_TYPES = frozenset(
+    {
+        "HTTPError",
+        "JSONDecodeError",
+        "OSError",
+        "SSLError",
+        "SSLCertVerificationError",
+        "TimeoutError",
+        "URLError",
+        "unknown",
+    }
+)
+
+
+class _SmokeFailure(RuntimeError):
+    """A fixed-shape, host-safe smoke failure; never stores exception text."""
+
+    def __init__(
+        self,
+        phase: str,
+        category: str,
+        *,
+        returncode: int | None = None,
+        diagnostic: dict[str, object] | None = None,
+    ) -> None:
+        self.phase = phase
+        self.category = category
+        self.returncode = returncode if type(returncode) is int else None
+        self.diagnostic = _validate_transport_diagnostic(diagnostic)
+        self.emitted = False
+        super().__init__(phase, category)
+
+    def payload(self) -> dict[str, object]:
+        return {
+            "phase": self.phase,
+            "category": self.category,
+            "returncode": self.returncode,
+            "transport_diagnostic": self.diagnostic,
+            "handler_seen": _handler_seen_fingerprint(),
+        }
+
+
+def _validate_transport_diagnostic(value: object) -> dict[str, object] | None:
+    if not isinstance(value, dict) or set(value) != _DIAGNOSTIC_KEYS:
+        return None
+    phase = value.get("phase")
+    outer_type = value.get("outer_type")
+    reason_type = value.get("reason_type")
+    errno = value.get("errno")
+    ssl_verify_code = value.get("ssl_verify_code")
+    ssl_reason = value.get("ssl_reason")
+    if type(phase) is not str or phase not in _DIAGNOSTIC_PHASES:
+        return None
+    if type(outer_type) is not str or outer_type not in _DIAGNOSTIC_TYPES:
+        return None
+    if reason_type is not None and (type(reason_type) is not str or reason_type not in _DIAGNOSTIC_TYPES):
+        return None
+    if errno is not None and type(errno) is not int:
+        return None
+    if ssl_verify_code is not None and (type(ssl_verify_code) is not int or ssl_verify_code < 0):
+        return None
+    if ssl_reason is not None and (type(ssl_reason) is not str or ssl_reason not in _DIAGNOSTIC_REASONS):
+        return None
+    return {
+        "phase": phase,
+        "outer_type": outer_type,
+        "reason_type": reason_type,
+        "errno": errno,
+        "ssl_verify_code": ssl_verify_code,
+        "ssl_reason": ssl_reason,
+    }
+
+
+def _handler_seen_fingerprint() -> list[str]:
+    allowed = {
+        ("GET", "/v1/models"): "GET /v1/models",
+        ("POST", "/v1/responses"): "POST /v1/responses",
+    }
+    return [label for event, label in allowed.items() if event in _TLSHandler.seen]
+
+
+def _emit_failure(failure: _SmokeFailure) -> None:
+    if failure.emitted:
+        return
+    print(
+        "creative-model-bridge smoke failure: "
+        + json.dumps(failure.payload(), ensure_ascii=True, sort_keys=True),
+        file=sys.stderr,
+        flush=True,
     )
-    stdout = result.stdout.decode("utf-8", errors="strict")
-    stderr = result.stderr.decode("utf-8", errors="replace")
-    if result.returncode != 0:
-        raise RuntimeError(stderr or f"bridge exited with {result.returncode}")
+    failure.emitted = True
+
+
+def _run_rpc(
+    binary: Path,
+    payload: str,
+    environment: dict[str, str],
+    *,
+    phase: str = "rpc",
+) -> list[dict[str, object]]:
     try:
-        return [json.loads(line) for line in stdout.splitlines() if line.strip()]
-    except json.JSONDecodeError as error:
-        raise RuntimeError(f"invalid MCP output: {stdout}") from error
+        result = subprocess.run(
+            [str(binary)],
+            cwd=binary.parent,
+            input=payload.encode("utf-8"),
+            capture_output=True,
+            env=environment,
+            check=False,
+            timeout=90,
+        )
+    except OSError:
+        raise _SmokeFailure(phase, "launch")
+    except subprocess.TimeoutExpired:
+        raise _SmokeFailure(phase, "timeout")
+    except UnicodeDecodeError:
+        raise _SmokeFailure(phase, "decode")
+    if type(result.returncode) is not int or result.returncode != 0:
+        raise _SmokeFailure(phase, "nonzero", returncode=result.returncode)
+    try:
+        stdout = result.stdout.decode("utf-8", errors="strict")
+    except UnicodeDecodeError:
+        raise _SmokeFailure(phase, "decode")
+    responses: list[dict[str, object]] = []
+    for line in stdout.splitlines():
+        if not line.strip():
+            continue
+        try:
+            parsed = json.loads(line)
+        except json.JSONDecodeError:
+            raise _SmokeFailure(phase, "parse")
+        if not isinstance(parsed, dict):
+            raise _SmokeFailure(phase, "parse")
+        responses.append(parsed)
+    return responses
+
+
+def _run_command(
+    command: list[str],
+    environment: dict[str, str],
+    *,
+    phase: str,
+) -> subprocess.CompletedProcess[str]:
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            encoding="utf-8",
+            env=environment,
+            timeout=90,
+            check=False,
+        )
+    except OSError:
+        raise _SmokeFailure(phase, "launch")
+    except subprocess.TimeoutExpired:
+        raise _SmokeFailure(phase, "timeout")
+    except UnicodeDecodeError:
+        raise _SmokeFailure(phase, "decode")
+    if type(result.returncode) is not int or result.returncode != 0:
+        raise _SmokeFailure(phase, "nonzero", returncode=result.returncode)
+    return result
+
+
+def _tls_environment(
+    base: dict[str, str],
+    home: Path,
+    ca_cert: Path,
+) -> dict[str, str]:
+    environment = base.copy()
+    environment["NO_PROXY"] = "*"
+    environment["no_proxy"] = "*"
+    environment["PYTHONIOENCODING"] = "utf-8"
+    environment.update(
+        {
+            "CODEX_HOME": str(home),
+            "SSL_CERT_FILE": str(ca_cert),
+            "SMOKE_BEARER": "placeholder-smoke-token",
+            "CREATIVE_MODEL_BRIDGE_TEST_TRANSPORT_DIAGNOSTICS": "1",
+        }
+    )
+    return environment
+
+
+def _trusted_error_diagnostic(responses: list[dict[str, object]]) -> dict[str, object] | None:
+    for item in responses:
+        result = item.get("result")
+        if not isinstance(result, dict) or result.get("isError") is not True:
+            continue
+        diagnostic = _validate_transport_diagnostic(result.get("transport_diagnostic"))
+        if diagnostic is None:
+            raise _SmokeFailure("trusted-response", "assertion")
+        return diagnostic
+    return None
 
 
 def _openssl_executable() -> str | None:
@@ -46,18 +233,21 @@ def _openssl_executable() -> str | None:
 def _make_tls_material(root: Path) -> tuple[Path, Path, Path, Path]:
     openssl = _openssl_executable()
     if not openssl:
-        raise RuntimeError("TLS smoke requires openssl; no executable was found")
+        raise _SmokeFailure("tls-setup", "openssl")
     ca_key, ca_cert = root / "ca.key", root / "ca.pem"
     untrusted_key, untrusted_cert = root / "untrusted-ca.key", root / "untrusted-ca.pem"
     server_key, server_csr, server_cert = root / "server.key", root / "server.csr", root / "server.pem"
     extensions = root / "server.ext"
-    extensions.write_text(
-        "basicConstraints=critical,CA:FALSE\n"
-        "keyUsage=critical,digitalSignature,keyEncipherment\n"
-        "extendedKeyUsage=serverAuth\n"
-        "subjectAltName=DNS:localhost,IP:127.0.0.1\n",
-        encoding="utf-8",
-    )
+    try:
+        extensions.write_text(
+            "basicConstraints=critical,CA:FALSE\n"
+            "keyUsage=critical,digitalSignature,keyEncipherment\n"
+            "extendedKeyUsage=serverAuth\n"
+            "subjectAltName=DNS:localhost,IP:127.0.0.1\n",
+            encoding="utf-8",
+        )
+    except OSError:
+        raise _SmokeFailure("tls-setup", "filesystem")
     commands = [
         [openssl, "genrsa", "-out", str(ca_key), "2048"],
         [openssl, "req", "-x509", "-new", "-nodes", "-key", str(ca_key), "-sha256", "-days", "1", "-subj", "/CN=Creative Smoke CA", "-addext", "basicConstraints=critical,CA:TRUE", "-addext", "keyUsage=critical,keyCertSign,cRLSign", "-out", str(ca_cert)],
@@ -70,8 +260,8 @@ def _make_tls_material(root: Path) -> tuple[Path, Path, Path, Path]:
     try:
         for command in commands:
             subprocess.run(command, check=True, capture_output=True, encoding="utf-8", timeout=30)
-    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
-        raise RuntimeError(f"TLS smoke could not create ephemeral certificates with {openssl}: {error}") from error
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        raise _SmokeFailure("tls-setup", "certificate")
     return ca_cert, server_cert, server_key, untrusted_cert
 
 
@@ -128,14 +318,20 @@ def _phase(name: str) -> None:
 
 
 def _tls_smoke(binary: Path, root: Path) -> None:
-    ca_cert, server_cert, server_key, untrusted_cert = _make_tls_material(root)
-    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain(certfile=server_cert, keyfile=server_key)
-    server = _LocalTLSHTTPServer(("127.0.0.1", 0), _TLSHandler)
-    server.socket = context.wrap_socket(server.socket, server_side=True)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
+    _TLSHandler.seen = []
+    server: _LocalTLSHTTPServer | None = None
+    thread: threading.Thread | None = None
     try:
+        ca_cert, server_cert, server_key, untrusted_cert = _make_tls_material(root)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(certfile=server_cert, keyfile=server_key)
+        try:
+            server = _LocalTLSHTTPServer(("127.0.0.1", 0), _TLSHandler)
+        except OSError:
+            raise _SmokeFailure("tls-setup", "launch")
+        server.socket = context.wrap_socket(server.socket, server_side=True)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
         home = root / "tls-home"
         home.mkdir()
         (home / "config.toml").write_text(
@@ -160,26 +356,37 @@ def _tls_smoke(binary: Path, root: Path) -> None:
             for key, value in environment.items()
             if not key.lower().endswith("_proxy")
         }
-        environment["NO_PROXY"] = "*"
-        environment["no_proxy"] = "*"
-        environment["PYTHONIOENCODING"] = "utf-8"
-        environment.update({"CODEX_HOME": str(home), "SSL_CERT_FILE": str(ca_cert), "SMOKE_BEARER": "placeholder-smoke-token"})
+        environment = _tls_environment(environment, home, ca_cert)
         requests = "\n".join([
             '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"creative_models","arguments":{}}}',
             '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"creative_generate","arguments":{"task":"TLS smoke"}}}',
             "",
         ])
-        responses = _run_rpc(binary, requests, environment)
+        responses = _run_rpc(binary, requests, environment, phase="trusted-rpc")
         if [item.get("id") for item in responses] != [1, 2]:
-            raise RuntimeError(f"TLS smoke returned unexpected IDs: {responses}")
-        models = responses[0].get("result", {}).get("structuredContent", {})
-        generated = responses[1].get("result", {}).get("structuredContent", {})
-        if models.get("models") != ["smoke/model"] or generated.get("text") != "TLS 烟雾成功" or not generated.get("usage"):
-            raise RuntimeError(f"TLS smoke response assertion failed: {responses}")
-        if any("transport_diagnostic" in item.get("result", {}) for item in responses):
-            raise RuntimeError(f"trusted CA unexpectedly returned transport diagnostics: {responses}")
+            raise _SmokeFailure("trusted-assertion", "assertion")
+        diagnostic = _trusted_error_diagnostic(responses)
+        if diagnostic is not None:
+            raise _SmokeFailure("trusted-response", "is-error", diagnostic=diagnostic)
+        models_result = responses[0].get("result")
+        generated_result = responses[1].get("result")
+        models = models_result.get("structuredContent", {}) if isinstance(models_result, dict) else {}
+        generated = generated_result.get("structuredContent", {}) if isinstance(generated_result, dict) else {}
+        if (
+            not isinstance(models, dict)
+            or not isinstance(generated, dict)
+            or models.get("models") != ["smoke/model"]
+            or generated.get("text") != "TLS 烟雾成功"
+            or not generated.get("usage")
+        ):
+            raise _SmokeFailure("trusted-assertion", "assertion")
+        if any(
+            isinstance(item.get("result"), dict) and "transport_diagnostic" in item["result"]
+            for item in responses
+        ):
+            raise _SmokeFailure("trusted-response", "assertion")
         if _TLSHandler.seen != [("GET", "/v1/models"), ("POST", "/v1/responses")]:
-            raise RuntimeError(f"TLS smoke did not exercise both endpoints: {_TLSHandler.seen}")
+            raise _SmokeFailure("trusted-assertion", "assertion")
         _TLSHandler.seen = []
         untrusted_environment = environment.copy()
         # The leaf certificate is intentionally not a CA trust anchor.  The
@@ -188,38 +395,51 @@ def _tls_smoke(binary: Path, root: Path) -> None:
         # WP2's server integration may surface the typed diagnostic on this
         # test-only switch.  Older candidates simply keep the sanitized text.
         untrusted_environment["CREATIVE_MODEL_BRIDGE_TEST_TRANSPORT_DIAGNOSTICS"] = "1"
-        negative = _run_rpc(binary, requests.replace('"id":1', '"id":3').replace('"id":2', '"id":4'), untrusted_environment)
+        negative = _run_rpc(
+            binary,
+            requests.replace('"id":1', '"id":3').replace('"id":2', '"id":4'),
+            untrusted_environment,
+            phase="negative-rpc",
+        )
         if [item.get("id") for item in negative] != [3, 4]:
-            raise RuntimeError(f"untrusted CA returned unexpected IDs: {negative}")
-        if not all(item.get("result", {}).get("isError") is True for item in negative):
-            raise RuntimeError(f"untrusted CA unexpectedly succeeded: {negative}")
-        allowed_reasons = {
-            "CERTIFICATE_VERIFY_FAILED",
-            "HOSTNAME_MISMATCH",
-            "SELF_SIGNED_CERTIFICATE",
-            "UNABLE_TO_GET_ISSUER",
-            "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
-        }
+            raise _SmokeFailure("negative-response", "assertion")
         for item in negative:
-            diagnostic = item.get("result", {}).get("transport_diagnostic")
-            if not isinstance(diagnostic, dict) or set(diagnostic) != {"phase", "outer_type", "reason_type", "errno", "ssl_verify_code", "ssl_reason"}:
-                raise RuntimeError(f"untrusted CA diagnostic shape is missing or unsafe: {negative}")
-            if item.get("id") not in {3, 4}:
-                raise RuntimeError(f"untrusted CA diagnostic request ID is invalid: {item}")
+            result = item.get("result")
+            if not isinstance(result, dict) or result.get("isError") is not True:
+                raise _SmokeFailure("negative-response", "assertion")
+            diagnostic = _validate_transport_diagnostic(result.get("transport_diagnostic"))
+            if diagnostic is None:
+                raise _SmokeFailure("negative-response", "assertion")
             expected_phase = "models" if item.get("id") == 3 else "responses"
-            if diagnostic["phase"] != expected_phase or diagnostic["reason_type"] != "SSLCertVerificationError" or diagnostic["outer_type"] not in {"URLError", "SSLError"}:
-                raise RuntimeError(f"untrusted CA diagnostic classification failed: {diagnostic}")
-            if ((diagnostic["errno"] is not None and type(diagnostic["errno"]) is not int) or type(diagnostic["ssl_verify_code"]) is not int or diagnostic["ssl_verify_code"] < 0 or diagnostic["ssl_reason"] not in allowed_reasons):
-                raise RuntimeError(f"untrusted CA TLS diagnostic values are invalid: {diagnostic}")
+            if (
+                diagnostic["phase"] != expected_phase
+                or diagnostic["reason_type"] != "SSLCertVerificationError"
+                or diagnostic["outer_type"] not in {"URLError", "SSLError"}
+                or type(diagnostic["ssl_verify_code"]) is not int
+                or diagnostic["ssl_verify_code"] < 0
+                or diagnostic["ssl_reason"] not in _DIAGNOSTIC_REASONS
+            ):
+                raise _SmokeFailure("negative-response", "assertion")
             print(f"creative-model-bridge transport diagnostic: {json.dumps(diagnostic, ensure_ascii=True, sort_keys=True)}", file=sys.stderr, flush=True)
         if _TLSHandler.seen != []:
-            raise RuntimeError(f"untrusted CA reached the HTTP handler: {_TLSHandler.seen}")
-    except Exception:
-        raise RuntimeError(f"TLS smoke failed; handler_seen={tuple(_TLSHandler.seen)}") from None
+            raise _SmokeFailure("negative-assertion", "assertion")
+    except _SmokeFailure as failure:
+        _emit_failure(failure)
+        raise
+    except ssl.SSLError:
+        failure = _SmokeFailure("trusted-setup", "certificate")
+        _emit_failure(failure)
+        raise failure
+    except OSError:
+        failure = _SmokeFailure("trusted-setup", "filesystem")
+        _emit_failure(failure)
+        raise failure
     finally:
-        server.shutdown()
-        server.server_close()
-        thread.join(timeout=2)
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if thread is not None:
+            thread.join(timeout=2)
 
 
 def main() -> int:
@@ -252,27 +472,29 @@ def main() -> int:
                 '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"creative_preview","arguments":{"task":"offline smoke","model":"smoke-model"}}}',
                 "",
             ])
-            responses = _run_rpc(binary, payload, environment)
+            responses = _run_rpc(binary, payload, environment, phase="offline-rpc")
             if [item.get("id") for item in responses] != [1, 2, 3] or "creative_preview" not in json.dumps(responses, ensure_ascii=False):
-                raise RuntimeError(f"unexpected MCP offline smoke output: {responses}")
-            preview = responses[2].get("result", {}).get("structuredContent", {})
-            if preview.get("network") is not False:
-                raise RuntimeError(f"preview smoke was not offline: {preview}")
+                raise _SmokeFailure("offline-assertion", "assertion")
+            preview_result = responses[2].get("result")
+            preview = preview_result.get("structuredContent", {}) if isinstance(preview_result, dict) else {}
+            if not isinstance(preview, dict) or preview.get("network") is not False:
+                raise _SmokeFailure("offline-assertion", "assertion")
             _phase("provision")
-            setup = subprocess.run([str(binary), "provision", "setup", "--yes"], capture_output=True, encoding="utf-8", env=environment, timeout=90)
-            if setup.returncode != 0:
-                raise RuntimeError(setup.stderr or "provision setup failed")
-            status = subprocess.run([str(binary), "provision", "status"], capture_output=True, encoding="utf-8", env=environment, timeout=90)
+            _run_command([str(binary), "provision", "setup", "--yes"], environment, phase="provision-setup")
+            status = _run_command([str(binary), "provision", "status"], environment, phase="provision-status")
             if status.returncode != 0 or '"status": "installed"' not in status.stdout:
-                raise RuntimeError(status.stderr or status.stdout or "provision status failed")
-            uninstall = subprocess.run([str(binary), "provision", "uninstall"], capture_output=True, encoding="utf-8", env=environment, timeout=90)
+                raise _SmokeFailure("provision-status", "assertion", returncode=status.returncode)
+            uninstall = _run_command([str(binary), "provision", "uninstall"], environment, phase="provision-uninstall")
             if uninstall.returncode != 0 or "mcp_servers.creative-model-bridge" in (home / "config.toml").read_text(encoding="utf-8"):
-                raise RuntimeError(uninstall.stderr or "provision uninstall failed")
+                raise _SmokeFailure("provision-uninstall", "assertion", returncode=uninstall.returncode)
             _TLSHandler.seen = []
             _phase("trusted-tls")
             _tls_smoke(binary, root)
-    except RuntimeError as error:
-        print(f"creative-model-bridge TLS smoke: {error}", file=sys.stderr)
+    except _SmokeFailure as failure:
+        _emit_failure(failure)
+        return 1
+    except OSError:
+        _emit_failure(_SmokeFailure("offline-setup", "filesystem"))
         return 1
     return 0
 
