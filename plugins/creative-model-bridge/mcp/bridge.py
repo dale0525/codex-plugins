@@ -22,6 +22,13 @@ import unicodedata
 import urllib.error
 import urllib.request
 
+try:
+    from .transport_diagnostics import TransportDiagnostic, TransportPhase, diagnostic_for
+    from .transport_client import ResponsesClient
+except ImportError:  # direct mcp/ path execution
+    from transport_diagnostics import TransportDiagnostic, TransportPhase, diagnostic_for
+    from transport_client import ResponsesClient
+
 
 SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"
 BRIDGE_VERSION = "0.1.7"
@@ -112,6 +119,9 @@ class BridgeError(Exception):
     in development-only configuration fields.
     """
 
+    def __init__(self, message: str, *, transport_diagnostic: TransportDiagnostic | None = None) -> None:
+        super().__init__(message); self.transport_diagnostic = transport_diagnostic
+
 
 class ConfigError(BridgeError):
     """The local Codex provider configuration is missing or invalid."""
@@ -119,6 +129,10 @@ class ConfigError(BridgeError):
 
 class FileContextError(BridgeError):
     """A context file is not an acceptable regular text file."""
+
+
+def _transport_error(message: str, error: BaseException, phase: TransportPhase, enabled: bool) -> BridgeError:
+    return BridgeError(message, transport_diagnostic=diagnostic_for(error, phase) if enabled else None)
 
 
 @dataclass(frozen=True)
@@ -505,95 +519,6 @@ def build_prompt(task: str, blocks: list[TextBlock], files: list[ContextFile], c
     return "\n\n".join(sections)
 
 
-class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, request: Any, fp: Any, code: int, msg: str, headers: Any, newurl: str) -> None:
-        return None
-
-
-_NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirectHandler())
-
-
-def _open_without_redirects(request: urllib.request.Request, timeout: float) -> Any:
-    return _NO_REDIRECT_OPENER.open(request, timeout=timeout)
-
-
-class ResponsesClient:
-    """Tiny standard-library HTTP client for `/models` and `/responses`."""
-
-    def __init__(self, provider: ProviderConfig, credential: str, opener: Callable[..., Any] | None = None, timeout: float = 60.0) -> None:
-        self.provider = provider
-        self.credential = credential
-        self.opener = opener or _open_without_redirects
-        self.timeout = timeout
-        self.last_http_status: int | None = None
-
-    def _request(self, path: str, body: dict[str, Any] | None = None) -> tuple[dict[str, Any], str | None]:
-        url = f"{self.provider.base_url}/{path.lstrip('/')}"
-        data = json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8") if body is not None else None
-        headers = {
-            "Authorization": f"Bearer {self.credential}",
-            "Accept": "application/json",
-            "User-Agent": USER_AGENT,
-        }
-        if body is not None:
-            headers["Content-Type"] = "application/json"
-        request = urllib.request.Request(url, data=data, headers=headers, method="POST" if body is not None else "GET")
-        response: Any = None
-        try:
-            response = self.opener(request, timeout=self.timeout)
-            http_status = getattr(response, "status", getattr(response, "code", None))
-            self.last_http_status = http_status if isinstance(http_status, int) else None
-            if isinstance(http_status, int) and 300 <= http_status < 400:
-                raise BridgeError(f"Responses API redirect refused (HTTP {http_status})")
-            raw = response.read()
-            header_request_id = response.headers.get("x-request-id") if getattr(response, "headers", None) is not None else None
-        except urllib.error.HTTPError as error:
-            if 300 <= error.code < 400:
-                raise BridgeError(f"Responses API redirect refused (HTTP {error.code})") from error
-            if error.code == 401:
-                raise BridgeError("Responses API rejected the provider credential (401)") from error
-            if error.code == 429:
-                raise BridgeError("Responses API rate limit reached (429); no retry was attempted") from error
-            raise BridgeError(f"Responses API request failed (HTTP {error.code})") from error
-        except (TimeoutError, urllib.error.URLError, OSError) as error:
-            if isinstance(error, TimeoutError) or "timed out" in str(error).lower():
-                raise BridgeError("Responses API request timed out") from error
-            raise BridgeError("Responses API request could not be completed") from error
-        finally:
-            if response is not None and hasattr(response, "close"):
-                response.close()
-        try:
-            parsed = json.loads(raw.decode("utf-8"))
-        except (UnicodeDecodeError, json.JSONDecodeError) as error:
-            raise BridgeError("Responses API returned malformed JSON") from error
-        if not isinstance(parsed, dict):
-            raise BridgeError(
-                _response_diagnostic(
-                    "Responses API returned a malformed object",
-                    parsed,
-                    request_id=header_request_id,
-                    http_status=http_status if isinstance(http_status, int) else None,
-                )
-            )
-        request_id = parsed.get("id") if isinstance(parsed.get("id"), str) else header_request_id
-        return parsed, request_id
-
-    def models(self) -> tuple[list[str], str | None, dict[str, Any] | None]:
-        payload, request_id = self._request("models")
-        data = payload.get("data")
-        if not isinstance(data, list):
-            raise BridgeError("/models returned a malformed model list")
-        models: list[str] = []
-        for item in data:
-            if not isinstance(item, dict) or not isinstance(item.get("id"), str):
-                raise BridgeError("/models returned a malformed model entry")
-            models.append(item["id"])
-        return models, request_id, payload.get("usage") if isinstance(payload.get("usage"), dict) else None
-
-    def responses(self, body: dict[str, Any]) -> tuple[dict[str, Any], str | None]:
-        return self._request("responses", body)
-
-
 _TEXT_TYPES = frozenset({"output_text", "text", "text_delta", "output_text_delta", "message", "assistant", "completion", "output"})
 _NON_TEXT_TYPES = frozenset({
     "input_text", "input_image", "reasoning", "refusal", "tool", "tool_call", "tool_result", "tool_output",
@@ -899,10 +824,11 @@ def _extract_output_text(payload: dict[str, Any], *, request_id: str | None = No
 class Bridge:
     """Stateless implementation of the three Creative Model Bridge tools."""
 
-    def __init__(self, config_path: str | Path | None = None, opener: Callable[..., Any] | None = None, timeout: float = 60.0) -> None:
+    def __init__(self, config_path: str | Path | None = None, opener: Callable[..., Any] | None = None, timeout: float = 60.0, *, transport_diagnostics: bool = False) -> None:
         self.loader = ConfigLoader(config_path)
         self.opener = opener
         self.timeout = timeout
+        self.transport_diagnostics = transport_diagnostics
 
     def _prepare(self, request: dict[str, Any]) -> tuple[ProviderConfig, str, dict[str, Any], dict[str, Any]]:
         if not isinstance(request, dict):
@@ -952,7 +878,7 @@ class Bridge:
 
     def creative_generate(self, request: dict[str, Any]) -> dict[str, Any]:
         provider, model, body, report = self._prepare(request)
-        client = ResponsesClient(provider, provider.credential(), self.opener, self.timeout)
+        client = self._client(provider, "responses")
         payload, request_id = client.responses(body)
         return {
             "text": _extract_output_text(
@@ -971,7 +897,7 @@ class Bridge:
         if request not in (None, {}):
             raise BridgeError("creative_models takes no arguments")
         provider = self.loader.load()
-        client = ResponsesClient(provider, provider.credential(), self.opener, self.timeout)
+        client = self._client(provider, "models")
         models, request_id, usage = client.models()
         return {
             "text": "",
@@ -982,6 +908,9 @@ class Bridge:
             "prompt_report": None,
             "models": models,
         }
+
+    def _client(self, provider: ProviderConfig, phase: TransportPhase) -> ResponsesClient:
+        return ResponsesClient(provider, provider.credential(), self.opener, self.timeout, phase=phase, transport_diagnostics=self.transport_diagnostics, error_factory=BridgeError, failure_factory=_transport_error, response_diagnostic=_response_diagnostic, user_agent=USER_AGENT)
 
     def call(self, name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
         if name == "creative_models":

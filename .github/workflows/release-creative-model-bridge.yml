@@ -4,9 +4,15 @@ on:
   push:
     tags:
       - "creative-model-bridge-v*"
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: "Full 40-character commit SHA to build and smoke-test"
+        required: true
+        type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: creative-model-bridge-release-${{ github.ref }}
@@ -14,6 +20,8 @@ concurrency:
 
 jobs:
   build:
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -41,10 +49,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
+      - name: Validate candidate SHA
+        if: github.event_name == 'workflow_dispatch'
+        shell: bash
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.ref }}
+          persist-credentials: false
       - name: Set up Pixi
         uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.10.0
         with:
@@ -52,6 +70,7 @@ jobs:
           frozen: true
           manifest-path: plugins/creative-model-bridge/pixi.toml
       - name: Validate release version and build contract
+        if: github.event_name == 'push'
         run: python scripts/validate_creative_model_bridge_release.py "${{ github.ref_name }}"
       - name: Build locked one-file executable
         shell: bash
@@ -84,12 +103,17 @@ jobs:
           if-no-files-found: error
 
   release:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/creative-model-bridge-v')
+    permissions:
+      contents: write
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Check out repository for release state planner
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: Set up Pixi for release validation
         uses: prefix-dev/setup-pixi@a09b6247153796b190642a2b53fac4241043cf6f # v0.10.0
         with:

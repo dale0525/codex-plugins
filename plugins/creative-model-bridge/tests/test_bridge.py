@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import ssl
 import sys
 import tempfile
 import unittest
@@ -24,6 +25,7 @@ from bridge import (  # noqa: E402
     MAX_TOTAL_CHARS,
     REQUEST_SCHEMA,
     SYSTEM_PROMPT,
+    TransportDiagnostic,
     _extract_output_text,
 )
 from server import TOOL_DEFINITIONS, handle  # noqa: E402
@@ -369,6 +371,51 @@ class BridgeTests(unittest.TestCase):
         opener = FakeOpener([FakeResponse({"output": []})])
         with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError):
             self.bridge(opener).creative_generate(self.request())
+
+    def test_transport_diagnostics_are_opt_in_typed_and_value_free(self) -> None:
+        verify_error = ssl.SSLCertVerificationError("secret verify_message")
+        verify_error.verify_code = 20
+        verify_error.verify_message = "secret verify_message"
+        opener = FakeOpener([urllib.error.URLError(verify_error)])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            Bridge(self.config, opener=opener, transport_diagnostics=True).creative_generate(self.request())
+        diagnostic = context.exception.transport_diagnostic
+        self.assertIsInstance(diagnostic, TransportDiagnostic)
+        assert diagnostic is not None
+        self.assertEqual(
+            set(diagnostic.as_dict()),
+            {"phase", "outer_type", "reason_type", "errno", "ssl_verify_code", "ssl_reason"},
+        )
+        self.assertEqual(diagnostic.phase, "responses")
+        self.assertEqual(diagnostic.outer_type, "URLError")
+        self.assertEqual(diagnostic.reason_type, "SSLCertVerificationError")
+        self.assertEqual(diagnostic.ssl_verify_code, 20)
+        self.assertEqual(diagnostic.ssl_reason, "UNABLE_TO_GET_ISSUER")
+        rendered = json.dumps(diagnostic.as_dict(), ensure_ascii=False)
+        self.assertNotIn("secret verify_message", rendered)
+        self.assertNotIn("provider.test", rendered)
+
+        opener = FakeOpener([urllib.error.URLError(verify_error)])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            self.bridge(opener).creative_generate(self.request())
+        self.assertIsNone(context.exception.transport_diagnostic)
+        self.assertNotIn("secret verify_message", str(context.exception))
+
+    def test_transport_diagnostics_redact_secret_exception_chain_and_preserve_errno(self) -> None:
+        secret_error = OSError(111, "provider secret body")
+        opener = FakeOpener([urllib.error.URLError(secret_error)])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            Bridge(self.config, opener=opener, transport_diagnostics=True).creative_models()
+        diagnostic = context.exception.transport_diagnostic
+        self.assertIsNotNone(diagnostic)
+        assert diagnostic is not None
+        self.assertEqual(diagnostic.phase, "models")
+        self.assertEqual(diagnostic.reason_type, "OSError")
+        self.assertEqual(diagnostic.errno, 111)
+        rendered = json.dumps(diagnostic.as_dict(), ensure_ascii=False)
+        self.assertNotIn("provider secret body", rendered)
+        self.assertNotIn("provider.test", rendered)
+        self.assertNotIn("provider secret body", str(context.exception))
 
     def test_responses_compatible_text_shapes_preserve_order_and_verbatim_text(self) -> None:
         cases = [

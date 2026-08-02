@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 import sys
 import unittest
 from types import SimpleNamespace
@@ -13,6 +14,9 @@ import validate_creative_model_bridge_release as release_validator  # noqa: E402
 
 
 class CreativeReleaseValidatorTests(unittest.TestCase):
+    def _workflow(self) -> str:
+        return (ROOT / ".github/workflows/release-creative-model-bridge.yml").read_text(encoding="utf-8")
+
     def test_checked_in_contract_matches_v017(self) -> None:
         self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.7"), [])
 
@@ -37,6 +41,57 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
         )
         errors = release_validator.validate_publish_step_structure(workflow)
         self.assertTrue(any("next command" in error for error in errors))
+
+    def test_candidate_dispatch_builds_all_matrix_entries_without_release_job(self) -> None:
+        workflow = self._workflow()
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("candidate_sha:", workflow)
+        self.assertIn("ref: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate_sha || github.ref }}", workflow)
+        self.assertIn("if: github.event_name == 'workflow_dispatch'", workflow)
+        release_body = workflow[workflow.index("\n  release:\n") :]
+        self.assertIn("if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/creative-model-bridge-v')", release_body)
+
+    def test_candidate_build_has_read_only_permissions_and_ephemeral_checkout(self) -> None:
+        workflow = self._workflow()
+        top_level = re.search(r"(?m)^permissions:\n  contents: ([^\n]+)\n", workflow)
+        self.assertIsNotNone(top_level)
+        self.assertEqual(top_level.group(1), "read")
+
+        build_body = workflow.split("\n  build:\n", 1)[1].split("\n  release:\n", 1)[0]
+        self.assertIn("    permissions:\n      contents: read\n", build_body)
+        self.assertNotIn("contents: write", build_body)
+        self.assertNotIn("GH_TOKEN", build_body)
+        checkout = re.search(
+            r"(?ms)^      - name: Check out repository\n.*?(?=^      - name: Set up Pixi)",
+            build_body,
+        )
+        self.assertIsNotNone(checkout)
+        self.assertIn("persist-credentials: false", checkout.group(0))
+
+    def test_release_is_the_only_writable_contents_job(self) -> None:
+        workflow = self._workflow()
+        release_body = workflow.split("\n  release:\n", 1)[1]
+        self.assertIn("    permissions:\n      contents: write\n", release_body)
+        release_checkout = re.search(
+            r"(?ms)^      - name: Check out repository for release state planner\n.*?(?=^      - name: Set up Pixi)",
+            release_body,
+        )
+        self.assertIsNotNone(release_checkout)
+        self.assertIn("persist-credentials: false", release_checkout.group(0))
+        self.assertNotIn("permissions:\n      contents: write", workflow.split("\n  release:\n", 1)[0])
+
+    def test_build_matrix_retains_all_five_release_assets(self) -> None:
+        workflow = self._workflow()
+        expected_assets = (
+            "creative-model-bridge-x86_64-unknown-linux-gnu",
+            "creative-model-bridge-aarch64-unknown-linux-gnu",
+            "creative-model-bridge-x86_64-apple-darwin",
+            "creative-model-bridge-aarch64-apple-darwin",
+            "creative-model-bridge-x86_64-pc-windows-msvc.exe",
+        )
+        matrix = workflow.split("\n  build:\n", 1)[1].split("\n    runs-on:", 1)[0]
+        for asset in expected_assets:
+            self.assertIn(f"            asset: {asset}", matrix)
 
     def test_build_setup_pixi_requires_plugin_manifest_path(self) -> None:
         workflow = (ROOT / ".github/workflows/release-creative-model-bridge.yml").read_text(

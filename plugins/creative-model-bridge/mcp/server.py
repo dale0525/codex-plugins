@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -163,6 +164,54 @@ def _generate_output_schema() -> dict[str, Any]:
 STANDARD_OUTPUT_SCHEMA = _generate_output_schema()
 
 
+_TRANSPORT_DIAGNOSTICS_ENV = "CREATIVE_MODEL_BRIDGE_TEST_TRANSPORT_DIAGNOSTICS"
+
+
+def _is_utf8_encoding(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    normalized = value.lower().replace("-", "").replace("_", "")
+    return normalized in {"utf8", "utf8sig"}
+
+
+def _configure_stdio_utf8() -> None:
+    """Configure the process stdio wrappers for UTF-8 before MCP input/output.
+
+    Frozen Windows executables inherit the console code page (often cp1252),
+    so relying on ``PYTHONIOENCODING`` is insufficient.  ``reconfigure`` is
+    It deliberately leaves newline translation unchanged and passes through the
+    wrapper's existing error policy.  A wrapper that cannot be reconfigured is
+    accepted only when it already advertises UTF-8; otherwise fail closed
+    before consuming any JSON-RPC input.
+    """
+
+    failures: list[str] = []
+    for name in ("stdin", "stdout", "stderr"):
+        stream = getattr(sys, name, None)
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            try:
+                # Changing encoding otherwise resets TextIOWrapper.errors to
+                # ``strict``; pass the existing value explicitly.  Omitting
+                # newline keeps the wrapper's newline translation unchanged.
+                errors = getattr(stream, "errors", None)
+                kwargs: dict[str, str] = {"encoding": "utf-8"}
+                if isinstance(errors, str):
+                    kwargs["errors"] = errors
+                reconfigure(**kwargs)
+                if not _is_utf8_encoding(getattr(stream, "encoding", None)):
+                    failures.append(f"{name}: reconfigure did not produce UTF-8")
+            except (AttributeError, OSError, TypeError, ValueError):
+                failures.append(f"{name}: reconfigure failed")
+            continue
+        encoding = getattr(stream, "encoding", None)
+        if _is_utf8_encoding(encoding):
+            continue
+        failures.append(f"{name}: UTF-8 reconfigure unsupported")
+    if failures:
+        raise RuntimeError("UTF-8 stdio configuration unavailable (" + "; ".join(failures) + ")")
+
+
 TOOL_DEFINITIONS = [
     {
         "name": "creative_models",
@@ -226,9 +275,16 @@ def handle(message: dict[str, Any], bridge: Bridge) -> dict[str, Any] | None:
         value = bridge.call(params["name"], arguments or {})
     except BridgeError as error:
         message_text = str(error)
+        result: dict[str, Any] = {
+            "isError": True,
+            "content": [{"type": "text", "text": message_text}],
+        }
+        diagnostic = getattr(error, "transport_diagnostic", None)
+        if getattr(bridge, "transport_diagnostics", False) and diagnostic is not None:
+            result["transport_diagnostic"] = diagnostic.as_dict()
         return _result(
             request_id,
-            {"isError": True, "content": [{"type": "text", "text": message_text}]},
+            result,
         )
     except Exception:
         # Never send implementation details or configuration values over MCP.
@@ -244,9 +300,23 @@ def handle(message: dict[str, Any], bridge: Bridge) -> dict[str, Any] | None:
 
 
 def main() -> int:
+    try:
+        _configure_stdio_utf8()
+    except RuntimeError as error:
+        # Keep the diagnostic ASCII-only so it remains printable even when a
+        # hostile wrapper rejected UTF-8 configuration.
+        try:
+            sys.stderr.write(f"creative-model-bridge: {error}\n")
+            sys.stderr.flush()
+        except Exception:
+            pass
+        return 1
     if len(sys.argv) > 1 and sys.argv[1] == "provision":
         return provision_main(sys.argv[2:])
-    bridge = Bridge()
+    if os.environ.get(_TRANSPORT_DIAGNOSTICS_ENV) == "1":
+        bridge = Bridge(transport_diagnostics=True)
+    else:
+        bridge = Bridge()
     for raw_line in sys.stdin:
         line = raw_line.strip()
         if not line:

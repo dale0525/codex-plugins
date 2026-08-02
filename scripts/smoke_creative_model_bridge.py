@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import socket
 import ssl
 import subprocess
 import sys
@@ -42,11 +43,12 @@ def _openssl_executable() -> str | None:
     return next((item for item in candidates if item), None)
 
 
-def _make_tls_material(root: Path) -> tuple[Path, Path, Path]:
+def _make_tls_material(root: Path) -> tuple[Path, Path, Path, Path]:
     openssl = _openssl_executable()
     if not openssl:
         raise RuntimeError("TLS smoke requires openssl; no executable was found")
     ca_key, ca_cert = root / "ca.key", root / "ca.pem"
+    untrusted_key, untrusted_cert = root / "untrusted-ca.key", root / "untrusted-ca.pem"
     server_key, server_csr, server_cert = root / "server.key", root / "server.csr", root / "server.pem"
     extensions = root / "server.ext"
     extensions.write_text(
@@ -59,6 +61,8 @@ def _make_tls_material(root: Path) -> tuple[Path, Path, Path]:
     commands = [
         [openssl, "genrsa", "-out", str(ca_key), "2048"],
         [openssl, "req", "-x509", "-new", "-nodes", "-key", str(ca_key), "-sha256", "-days", "1", "-subj", "/CN=Creative Smoke CA", "-addext", "basicConstraints=critical,CA:TRUE", "-addext", "keyUsage=critical,keyCertSign,cRLSign", "-out", str(ca_cert)],
+        [openssl, "genrsa", "-out", str(untrusted_key), "2048"],
+        [openssl, "req", "-x509", "-new", "-nodes", "-key", str(untrusted_key), "-sha256", "-days", "1", "-subj", "/CN=Untrusted Smoke CA", "-addext", "basicConstraints=critical,CA:TRUE", "-addext", "keyUsage=critical,keyCertSign,cRLSign", "-out", str(untrusted_cert)],
         [openssl, "genrsa", "-out", str(server_key), "2048"],
         [openssl, "req", "-new", "-key", str(server_key), "-subj", "/CN=localhost", "-out", str(server_csr)],
         [openssl, "x509", "-req", "-in", str(server_csr), "-CA", str(ca_cert), "-CAkey", str(ca_key), "-CAcreateserial", "-out", str(server_cert), "-days", "1", "-sha256", "-extfile", str(extensions)],
@@ -68,7 +72,7 @@ def _make_tls_material(root: Path) -> tuple[Path, Path, Path]:
             subprocess.run(command, check=True, capture_output=True, encoding="utf-8", timeout=30)
     except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
         raise RuntimeError(f"TLS smoke could not create ephemeral certificates with {openssl}: {error}") from error
-    return ca_cert, server_cert, server_key
+    return ca_cert, server_cert, server_key, untrusted_cert
 
 
 class _TLSHandler(BaseHTTPRequestHandler):
@@ -105,11 +109,29 @@ class _TLSHandler(BaseHTTPRequestHandler):
         self._write({"id": "tls-response", "output_text": "TLS 烟雾成功", "usage": {"input_tokens": 4, "output_tokens": 3}})
 
 
+class _LocalTLSHTTPServer(ThreadingHTTPServer):
+    """Bind loopback without macOS ``getfqdn`` reverse-lookup surprises."""
+
+    def server_bind(self) -> None:
+        original_getfqdn = socket.getfqdn
+        try:
+            # Preserve socket.bind/listen and TLS wrapping; bypass only the
+            # hostname lookup performed by HTTPServer.server_bind on macOS.
+            socket.getfqdn = lambda host: host
+            super().server_bind()
+        finally:
+            socket.getfqdn = original_getfqdn
+
+
+def _phase(name: str) -> None:
+    print(f"creative-model-bridge smoke phase: {name}", file=sys.stderr, flush=True)
+
+
 def _tls_smoke(binary: Path, root: Path) -> None:
-    ca_cert, server_cert, server_key = _make_tls_material(root)
+    ca_cert, server_cert, server_key, untrusted_cert = _make_tls_material(root)
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     context.load_cert_chain(certfile=server_cert, keyfile=server_key)
-    server = ThreadingHTTPServer(("127.0.0.1", 0), _TLSHandler)
+    server = _LocalTLSHTTPServer(("127.0.0.1", 0), _TLSHandler)
     server.socket = context.wrap_socket(server.socket, server_side=True)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -154,8 +176,46 @@ def _tls_smoke(binary: Path, root: Path) -> None:
         generated = responses[1].get("result", {}).get("structuredContent", {})
         if models.get("models") != ["smoke/model"] or generated.get("text") != "TLS 烟雾成功" or not generated.get("usage"):
             raise RuntimeError(f"TLS smoke response assertion failed: {responses}")
+        if any("transport_diagnostic" in item.get("result", {}) for item in responses):
+            raise RuntimeError(f"trusted CA unexpectedly returned transport diagnostics: {responses}")
         if _TLSHandler.seen != [("GET", "/v1/models"), ("POST", "/v1/responses")]:
             raise RuntimeError(f"TLS smoke did not exercise both endpoints: {_TLSHandler.seen}")
+        _TLSHandler.seen = []
+        untrusted_environment = environment.copy()
+        # The leaf certificate is intentionally not a CA trust anchor.  The
+        # request must fail without reaching the HTTP handler.
+        untrusted_environment["SSL_CERT_FILE"] = str(untrusted_cert)
+        # WP2's server integration may surface the typed diagnostic on this
+        # test-only switch.  Older candidates simply keep the sanitized text.
+        untrusted_environment["CREATIVE_MODEL_BRIDGE_TEST_TRANSPORT_DIAGNOSTICS"] = "1"
+        negative = _run_rpc(binary, requests.replace('"id":1', '"id":3').replace('"id":2', '"id":4'), untrusted_environment)
+        if [item.get("id") for item in negative] != [3, 4]:
+            raise RuntimeError(f"untrusted CA returned unexpected IDs: {negative}")
+        if not all(item.get("result", {}).get("isError") is True for item in negative):
+            raise RuntimeError(f"untrusted CA unexpectedly succeeded: {negative}")
+        allowed_reasons = {
+            "CERTIFICATE_VERIFY_FAILED",
+            "HOSTNAME_MISMATCH",
+            "SELF_SIGNED_CERTIFICATE",
+            "UNABLE_TO_GET_ISSUER",
+            "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+        }
+        for item in negative:
+            diagnostic = item.get("result", {}).get("transport_diagnostic")
+            if not isinstance(diagnostic, dict) or set(diagnostic) != {"phase", "outer_type", "reason_type", "errno", "ssl_verify_code", "ssl_reason"}:
+                raise RuntimeError(f"untrusted CA diagnostic shape is missing or unsafe: {negative}")
+            if item.get("id") not in {3, 4}:
+                raise RuntimeError(f"untrusted CA diagnostic request ID is invalid: {item}")
+            expected_phase = "models" if item.get("id") == 3 else "responses"
+            if diagnostic["phase"] != expected_phase or diagnostic["reason_type"] != "SSLCertVerificationError" or diagnostic["outer_type"] not in {"URLError", "SSLError"}:
+                raise RuntimeError(f"untrusted CA diagnostic classification failed: {diagnostic}")
+            if ((diagnostic["errno"] is not None and type(diagnostic["errno"]) is not int) or type(diagnostic["ssl_verify_code"]) is not int or diagnostic["ssl_verify_code"] < 0 or diagnostic["ssl_reason"] not in allowed_reasons):
+                raise RuntimeError(f"untrusted CA TLS diagnostic values are invalid: {diagnostic}")
+            print(f"creative-model-bridge transport diagnostic: {json.dumps(diagnostic, ensure_ascii=True, sort_keys=True)}", file=sys.stderr, flush=True)
+        if _TLSHandler.seen != []:
+            raise RuntimeError(f"untrusted CA reached the HTTP handler: {_TLSHandler.seen}")
+    except Exception:
+        raise RuntimeError(f"TLS smoke failed; handler_seen={tuple(_TLSHandler.seen)}") from None
     finally:
         server.shutdown()
         server.server_close()
@@ -169,6 +229,7 @@ def main() -> int:
     try:
         with tempfile.TemporaryDirectory(prefix="creative-smoke-") as temporary:
             root = Path(temporary)
+            _phase("offline")
             environment = os.environ.copy()
             # Keep the offline/provision phase deterministic; the TLS phase
             # below installs its own ephemeral CA explicitly.
@@ -197,6 +258,7 @@ def main() -> int:
             preview = responses[2].get("result", {}).get("structuredContent", {})
             if preview.get("network") is not False:
                 raise RuntimeError(f"preview smoke was not offline: {preview}")
+            _phase("provision")
             setup = subprocess.run([str(binary), "provision", "setup", "--yes"], capture_output=True, encoding="utf-8", env=environment, timeout=90)
             if setup.returncode != 0:
                 raise RuntimeError(setup.stderr or "provision setup failed")
@@ -207,6 +269,7 @@ def main() -> int:
             if uninstall.returncode != 0 or "mcp_servers.creative-model-bridge" in (home / "config.toml").read_text(encoding="utf-8"):
                 raise RuntimeError(uninstall.stderr or "provision uninstall failed")
             _TLSHandler.seen = []
+            _phase("trusted-tls")
             _tls_smoke(binary, root)
     except RuntimeError as error:
         print(f"creative-model-bridge TLS smoke: {error}", file=sys.stderr)
