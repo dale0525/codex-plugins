@@ -17,11 +17,11 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
     def _workflow(self) -> str:
         return (ROOT / ".github/workflows/release-creative-model-bridge.yml").read_text(encoding="utf-8")
 
-    def test_checked_in_contract_matches_v017(self) -> None:
-        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.7"), [])
+    def test_checked_in_contract_matches_v018(self) -> None:
+        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.8"), [])
 
     def test_wrong_tag_version_is_rejected(self) -> None:
-        errors = release_validator.validate(ROOT, "creative-model-bridge-v0.1.8")
+        errors = release_validator.validate(ROOT, "creative-model-bridge-v0.1.7")
         self.assertTrue(any("tag version" in error for error in errors))
 
     def test_publish_step_final_verification_precedes_edit(self) -> None:
@@ -209,14 +209,14 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
 
     def test_provisioner_default_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/scripts/provision.ps1").read_text(encoding="utf-8")
-        mismatched = text.replace("else { '0.1.7' }", "else { '0.1.8' }")
-        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.7")
+        mismatched = text.replace("else { '0.1.8' }", "else { '0.1.7' }")
+        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.8")
         self.assertTrue(any("default version" in error for error in errors))
 
     def test_provision_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/mcp/provision.py").read_text(encoding="utf-8")
-        mismatched = text.replace('PROVISION_VERSION = "0.1.7"', 'PROVISION_VERSION = "0.1.8"', 1)
-        errors = release_validator.validate_provision_version(mismatched, "0.1.7")
+        mismatched = text.replace('PROVISION_VERSION = "0.1.8"', 'PROVISION_VERSION = "0.1.7"', 1)
+        errors = release_validator.validate_provision_version(mismatched, "0.1.8")
         self.assertTrue(any("PROVISION_VERSION" in error for error in errors))
 
 

@@ -22,7 +22,7 @@ from typing import Any, Callable, Iterator
 
 INSTALL_NAME = "creative-model-bridge"
 SCHEMA_VERSION = 2
-PROVISION_VERSION = "0.1.7"
+PROVISION_VERSION = "0.1.8"
 SSL_CERT_ENV = "SSL_CERT_FILE"
 # Ordered, deterministic Linux candidates.  The first readable, non-empty
 # regular file wins; callers/tests may provide an explicit candidate sequence.
@@ -296,17 +296,17 @@ def _provider_env_key(text: str) -> str | None:
 
 
 def _legacy_state_shape(state: dict[str, Any]) -> bool:
-    """Accept only reviewed pre-0.1.7 state contracts for migration/removal."""
+    """Accept only reviewed pre-0.1.8 state contracts for migration/removal."""
 
     has_version = "bridge_version" in state
     version = state.get("bridge_version")
-    if has_version and version not in {"0.1.5", "0.1.6"}:
+    if has_version and version not in {"0.1.5", "0.1.6", "0.1.7"}:
         return False
     base = LEGACY_STATE_KEYS | ({"bridge_version"} if has_version else set())
-    if version == "0.1.6":
-        # CA016 emitted ssl_cert_file on POSIX and omitted it when Windows kept
-        # the native trust store.  Both exact shapes are migratable; arbitrary
-        # extra fields remain fail-closed.
+    if version in {"0.1.6", "0.1.7"}:
+        # CA016/CA017 emitted ssl_cert_file on POSIX and omitted it when
+        # Windows kept the native trust store. Both exact shapes are
+        # migratable; arbitrary extra fields remain fail-closed.
         if set(state) == base:
             return True
         if set(state) != base | {"ssl_cert_file"}:
@@ -645,7 +645,7 @@ def _healthy(
         env_key = _provider_env_key(text)
         # The 0.1.6 state contract already recorded CA ownership when one was
         # configured; only the older pre-CA shape omits it.
-        ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") == "0.1.6") else None
+        ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") in {"0.1.6", "0.1.7"}) else None
         details = _validate_final(text, str(state["install_id"]), command, home, env_key, ssl_cert_file)
     except ProvisionError:
         return False
@@ -653,7 +653,7 @@ def _healthy(
         return False
     if not legacy and state.get("bridge_version") != PROVISION_VERSION:
         return False
-    ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") == "0.1.6") else None
+    ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") in {"0.1.6", "0.1.7"}) else None
     if ssl_cert_file is not None and (not isinstance(ssl_cert_file, str) or not Path(ssl_cert_file).is_absolute()):
         return False
     if ssl_cert_file and not allow_missing_ssl and not _valid_ca_file(Path(ssl_cert_file)):

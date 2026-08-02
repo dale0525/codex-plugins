@@ -85,7 +85,7 @@ class MockResponsesIntegrationTests(unittest.TestCase):
                     ["/v1/models", "/v1/responses"],
                 )
                 for _, headers in MockResponsesHandler.request_headers:
-                    self.assertEqual(headers["user-agent"], "creative-model-bridge/0.1.7")
+                    self.assertEqual(headers["user-agent"], "creative-model-bridge/0.1.8")
                     self.assertFalse(
                         any(
                             key.startswith(("codex", "x-codex", "originator")) or key in {"session", "x-session"}

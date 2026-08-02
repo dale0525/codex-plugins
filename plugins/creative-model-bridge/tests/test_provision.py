@@ -532,11 +532,109 @@ class ProvisionTests(unittest.TestCase):
             self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
             with patch.object(provision.sys, "platform", "win32"), patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
                 migrated = provision.setup(home=self.home)
-            self.assertEqual(migrated["bridge_version"], "0.1.7")
+            self.assertEqual(migrated["bridge_version"], "0.1.8")
             self.assertEqual(migrated["ssl_cert_file"], str(ca))
             self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
             self.assertEqual(legacy["status"], "installed")
         finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_consistent_v017_posix_and_windows_shapes_migrate_to_v018(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        try:
+            ca = self.home / "ca.pem"
+            ca.write_text("CA", encoding="utf-8")
+            with patch.object(provision.sys, "platform", "darwin"):
+                provision.setup(home=self.home, ssl_cert_file=ca)
+            state_path = provision.state_path(self.home)
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["bridge_version"] = "0.1.7"
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            with patch.object(provision.sys, "platform", "darwin"):
+                migrated = provision.setup(home=self.home, ssl_cert_file=ca)
+            self.assertEqual(migrated["bridge_version"], "0.1.8")
+            self.assertEqual(migrated["ssl_cert_file"], str(ca))
+
+            windows_home = self.home.parent / "windows-home"
+            windows_home.mkdir()
+            with patch.object(provision.sys, "platform", "win32"):
+                provision.setup(home=windows_home)
+            windows_state_path = provision.state_path(windows_home)
+            windows_state = json.loads(windows_state_path.read_text(encoding="utf-8"))
+            windows_state["bridge_version"] = "0.1.7"
+            windows_state_path.write_text(json.dumps(windows_state, sort_keys=True) + "\n", encoding="utf-8")
+            with patch.object(provision.sys, "platform", "win32"):
+                migrated_windows = provision.setup(home=windows_home)
+            self.assertEqual(migrated_windows["bridge_version"], "0.1.8")
+            self.assertNotIn("ssl_cert_file", migrated_windows)
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_v017_extra_or_modified_state_fails_closed_without_writes(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                provision.setup(home=self.home)
+            state_path = provision.state_path(self.home)
+            config_path = self.home / "config.toml"
+            original_config = config_path.read_bytes()
+            original_state = state_path.read_bytes()
+            state = json.loads(original_state)
+            state["bridge_version"] = "0.1.7"
+            state["unexpected"] = True
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            before_config, before_state = config_path.read_bytes(), state_path.read_bytes()
+            with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+            self.assertEqual(config_path.read_bytes(), before_config)
+            self.assertEqual(state_path.read_bytes(), before_state)
+            self.assertFalse(provision.wal_path(self.home).exists())
+
+            state.pop("unexpected")
+            state["ssl_cert_file"] = "relative-ca.pem"
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            before_config, before_state = config_path.read_bytes(), state_path.read_bytes()
+            with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+            self.assertEqual(config_path.read_bytes(), before_config)
+            self.assertEqual(state_path.read_bytes(), before_state)
+            self.assertFalse(provision.wal_path(self.home).exists())
+            self.assertNotEqual(original_state, state_path.read_bytes())
+            self.assertEqual(original_config, config_path.read_bytes())
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_v017_migration_rolls_back_config_and_state_transactionally(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                provision.setup(home=self.home)
+            state_path = provision.state_path(self.home)
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["bridge_version"] = "0.1.7"
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            config_path = self.home / "config.toml"
+            before_config, before_state = config_path.read_bytes(), state_path.read_bytes()
+            provision.os.environ["CREATIVE_MODEL_BRIDGE_TEST_FAIL_AFTER_CONFIG"] = "1"
+            with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+            self.assertEqual(config_path.read_bytes(), before_config)
+            self.assertEqual(state_path.read_bytes(), before_state)
+            self.assertFalse(provision.wal_path(self.home).exists())
+        finally:
+            provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_TEST_FAIL_AFTER_CONFIG", None)
             if old is None:
                 provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
             else:

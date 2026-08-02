@@ -3,7 +3,7 @@
 # intentionally dependency-light and does not require Git, Pixi, or Python.
 set -eu
 
-version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.7}"
+version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.8}"
 case "$version" in
   *[!0-9.]*|"") echo "creative-model-bridge: invalid version" >&2; exit 1 ;;
 esac
