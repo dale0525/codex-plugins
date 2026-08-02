@@ -9,6 +9,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 import unittest
 import sys
+from unittest.mock import patch
 
 PLUGIN = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PLUGIN / "mcp"))
@@ -252,6 +253,8 @@ class ProvisionTests(unittest.TestCase):
             provision.setup(home=self.home)
             config = (self.home / "config.toml").read_text(encoding="utf-8")
             self.assertIn('"MY_PROVIDER_KEY"', config)
+            entry = provision._parse_toml(config)["mcp_servers"]["creative-model-bridge"]
+            self.assertEqual(entry["env_vars"], ["CODEX_HOME", "CREATIVE_MODEL_API_KEY", "MY_PROVIDER_KEY", "SSL_CERT_FILE"])
             self.assertEqual(provision.status(home=self.home)["status"], "installed")
             (self.home / "config.toml").write_text(config + "# outside edit\n", encoding="utf-8")
             self.assertEqual(provision.status(home=self.home)["status"], "installed")
@@ -262,6 +265,56 @@ class ProvisionTests(unittest.TestCase):
                 provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
             else:
                 provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_reserved_provider_env_keys_fail_before_config_state_or_wal_writes(self) -> None:
+        for key in ("SSL_CERT_FILE", "CODEX_HOME", "CREATIVE_MODEL_API_KEY"):
+            with self.subTest(key=key):
+                config = self.home / "config.toml"
+                config.write_text(
+                    '[shell_environment_policy.set]\nCREATIVE_MODEL_PROVIDER = "p"\n'
+                    f'[model_providers.p]\nenv_key = "{key}"\n',
+                    encoding="utf-8",
+                )
+                before_config = config.read_bytes()
+                with self.assertRaisesRegex(provision.ProvisionError, rf"reserved environment key: {key}"):
+                    provision.setup(home=self.home)
+                self.assertEqual(config.read_bytes(), before_config)
+                self.assertFalse(provision.state_path(self.home).exists())
+                self.assertFalse(provision.wal_path(self.home).exists())
+
+    def test_arbitrary_bridge_version_fails_closed_for_setup_and_uninstall(self) -> None:
+        with patch.object(provision.sys, "platform", "win32"):
+            provision.setup(home=self.home)
+        config = self.home / "config.toml"
+        state_path = provision.state_path(self.home)
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state["bridge_version"] = "9.9.9"
+        state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+        before_config, before_state = config.read_bytes(), state_path.read_bytes()
+        with patch.object(provision.sys, "platform", "win32"):
+            with self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+            with self.assertRaises(provision.ProvisionError):
+                provision.uninstall(home=self.home)
+        self.assertEqual(config.read_bytes(), before_config)
+        self.assertEqual(state_path.read_bytes(), before_state)
+        self.assertFalse(provision.wal_path(self.home).exists())
+        state["status"] = "uninstalled"
+        state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+        with patch.object(provision.sys, "platform", "win32"):
+            with self.assertRaises(provision.ProvisionError):
+                provision.uninstall(home=self.home)
+
+    def test_valid_legacy_state_can_uninstall(self) -> None:
+        with patch.object(provision.sys, "platform", "win32"):
+            provision.setup(home=self.home)
+        state_path = provision.state_path(self.home)
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state.pop("bridge_version")
+        state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+        with patch.object(provision.sys, "platform", "win32"):
+            removed = provision.uninstall(home=self.home)
+        self.assertEqual(removed["status"], "uninstalled")
 
     def test_setup_and_repair_healthy_are_exact_noops_and_repair_preserves_outside_edits(self) -> None:
         old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
@@ -417,6 +470,74 @@ class ProvisionTests(unittest.TestCase):
             self.assertEqual(results, ["installed", "installed"])
         finally:
             provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_LOCK_MAX_ATTEMPTS", None)
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_ssl_resolution_platform_defaults_order_and_override(self) -> None:
+        first = self.home / "first-ca.pem"
+        second = self.home / "second-ca.pem"
+        second.write_text("CA", encoding="utf-8")
+        self.assertEqual(
+            provision.resolve_ssl_cert_file(platform_name="darwin", file_checker=lambda _: True),
+            "/etc/ssl/cert.pem",
+        )
+        self.assertEqual(provision.resolve_ssl_cert_file(platform_name="linux", candidates=[first, second]), str(second))
+        self.assertIsNone(provision.resolve_ssl_cert_file(platform_name="win32"))
+        self.assertEqual(provision.resolve_ssl_cert_file(platform_name="win32", explicit=second), str(second))
+
+    def test_invalid_explicit_ca_and_no_candidate_fail_before_writes(self) -> None:
+        before = sorted(path.name for path in self.home.iterdir())
+        with patch.dict(provision.os.environ, {"SSL_CERT_FILE": "relative-ca.pem"}, clear=False):
+            with self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+        self.assertEqual(sorted(path.name for path in self.home.iterdir()), before)
+        with self.assertRaises(provision.ProvisionError):
+            provision.resolve_ssl_cert_file(platform_name="linux", candidates=[self.home / "missing.pem"])
+
+    def test_missing_configured_ca_reports_drift_but_uninstall_is_available(self) -> None:
+        ca = self.home / "ca.pem"
+        ca.write_text("CA", encoding="utf-8")
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        try:
+            provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+            with patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
+                provision.setup(home=self.home)
+                ca.unlink()
+                result = provision.status(home=self.home)
+                self.assertEqual(result["status"], "drift")
+                self.assertTrue(any("CA bundle" in issue for issue in result["issues"]))
+                removed = provision.uninstall(home=self.home)
+            self.assertEqual(removed["status"], "uninstalled")
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_consistent_v015_state_migrates_transactionally(self) -> None:
+        ca = self.home / "ca.pem"
+        ca.write_text("CA", encoding="utf-8")
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        try:
+            provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+            with patch.object(provision.sys, "platform", "win32"):
+                legacy = provision.setup(home=self.home)
+            config = self.home / "config.toml"
+            state_path = provision.state_path(self.home)
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state.pop("bridge_version", None)
+            state.pop("ssl_cert_file", None)
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            self.assertNotIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
+            with patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
+                migrated = provision.setup(home=self.home)
+            self.assertEqual(migrated["bridge_version"], "0.1.6")
+            self.assertEqual(migrated["ssl_cert_file"], str(ca))
+            self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
+            self.assertEqual(legacy["status"], "installed")
+        finally:
             if old is None:
                 provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
             else:

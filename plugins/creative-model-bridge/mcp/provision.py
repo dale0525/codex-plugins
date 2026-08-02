@@ -17,17 +17,35 @@ import tempfile
 import time
 import uuid
 from contextlib import contextmanager
-from typing import Any, Iterator
+from typing import Any, Callable, Iterator
 
 
 INSTALL_NAME = "creative-model-bridge"
 SCHEMA_VERSION = 2
+PROVISION_VERSION = "0.1.6"
+SSL_CERT_ENV = "SSL_CERT_FILE"
+# Ordered, deterministic Linux candidates.  The first readable, non-empty
+# regular file wins; callers/tests may provide an explicit candidate sequence.
+LINUX_CA_CANDIDATES = (
+    "/etc/ssl/certs/ca-certificates.crt",
+    "/etc/pki/tls/certs/ca-bundle.crt",
+    "/etc/ssl/ca-bundle.pem",
+    "/etc/pki/tls/cacert.pem",
+    "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem",
+    "/etc/ssl/cert.pem",
+)
+MACOS_CA_CANDIDATES = ("/etc/ssl/cert.pem",)
 BEGIN_PREFIX = "creative-model-bridge:begin"
 END_PREFIX = "creative-model-bridge:end"
 UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$")
 ENV_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 GENERATION_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
+RESERVED_ENV_KEYS = frozenset({"CODEX_HOME", "CREATIVE_MODEL_API_KEY", SSL_CERT_ENV})
+LEGACY_STATE_KEYS = frozenset({
+    "schema_version", "status", "install_id", "config_path", "config_digest",
+    "managed_digest", "command", "command_sha256", "env_key", "updated_at",
+})
 
 
 class ProvisionError(RuntimeError):
@@ -77,6 +95,66 @@ def _file_digest(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             hasher.update(chunk)
     return hasher.hexdigest()
+
+
+def _valid_ca_file(path: Path) -> bool:
+    """Return true only for an absolute readable non-empty regular file."""
+
+    try:
+        stat_result = path.stat()
+        return bool(path.is_absolute() and stat_result.st_size > 0 and stat_result.st_mode & 0o170000 == 0o100000 and stat_result.st_mode & 0o444 and os.access(path, os.R_OK))
+    except OSError:
+        return False
+
+
+def resolve_ssl_cert_file(
+    *,
+    platform_name: str | None = None,
+    platform: str | None = None,
+    explicit: str | Path | None = None,
+    candidates: tuple[str | Path, ...] | list[str | Path] | None = None,
+    file_checker: Callable[[Path], bool] | None = None,
+) -> str | None:
+    """Resolve the deterministic CA bundle used by the provisioned server.
+
+    ``SSL_CERT_FILE`` (or the plugin-specific alias) is an explicit override;
+    when present it is validated before any provisioning writes.  Windows keeps
+    the platform trust store by default and therefore returns ``None``.
+    ``platform_name``, ``candidates`` and ``file_checker`` are injectable for
+    deterministic unit tests.
+    """
+
+    if explicit is None:
+        if "CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE" in os.environ:
+            explicit = os.environ["CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE"]
+        elif SSL_CERT_ENV in os.environ:
+            explicit = os.environ[SSL_CERT_ENV]
+    checker = file_checker or _valid_ca_file
+    if explicit is not None:
+        value = Path(str(explicit))
+        if not value.is_absolute() or not checker(value):
+            raise ProvisionError("SSL_CERT_FILE must be an absolute readable non-empty regular file")
+        return str(value)
+
+    normalized = (platform_name or platform or sys.platform).lower()
+    if normalized.startswith("win") or normalized in {"windows", "nt"}:
+        return None
+    if normalized.startswith("darwin") or normalized in {"macos", "mac"}:
+        ordered = candidates if candidates is not None else MACOS_CA_CANDIDATES
+    elif normalized.startswith("linux"):
+        ordered = candidates if candidates is not None else LINUX_CA_CANDIDATES
+    else:
+        ordered = candidates if candidates is not None else LINUX_CA_CANDIDATES
+    for candidate in ordered:
+        path = Path(candidate).expanduser()
+        if path.is_absolute() and checker(path):
+            return str(path)
+    raise ProvisionError("no usable system CA bundle was found; set SSL_CERT_FILE to an absolute readable file")
+
+
+# Kept as a private alias for embedders that used the provision module's
+# internal helper naming during the 0.1.5 preview.
+_resolve_ssl_cert_file = resolve_ssl_cert_file
 
 
 def _atomic_write(path: Path, data: bytes) -> None:
@@ -212,7 +290,39 @@ def _provider_env_key(text: str) -> str | None:
         return None
     if not isinstance(key, str) or not ENV_RE.fullmatch(key):
         raise ProvisionError("configured provider env_key is invalid")
+    if key in RESERVED_ENV_KEYS:
+        raise ProvisionError(f"configured provider env_key conflicts with reserved environment key: {key}")
     return key
+
+
+def _legacy_state_shape(state: dict[str, Any]) -> bool:
+    """Accept only the reviewed pre-0.1.6 state contract for migration/removal."""
+
+    has_version = "bridge_version" in state
+    version = state.get("bridge_version")
+    if has_version and version != "0.1.5":
+        return False
+    allowed = LEGACY_STATE_KEYS | ({"bridge_version"} if has_version else set())
+    if set(state) != allowed:
+        return False
+    return "ssl_cert_file" not in state
+
+
+def _supported_state_version(state: dict[str, Any]) -> bool:
+    version = state.get("bridge_version")
+    return version == PROVISION_VERSION or _legacy_state_shape(state)
+
+
+def _preflight_provider_env(home: Path) -> None:
+    """Reject reserved provider channels before lock/state/WAL creation."""
+
+    config_path = home / "config.toml"
+    if not config_path.exists():
+        return
+    try:
+        _provider_env_key(config_path.read_text(encoding="utf-8"))
+    except UnicodeDecodeError as error:
+        raise ProvisionError("Codex config.toml is not valid UTF-8") from error
 
 
 def _foreign(text: str) -> bool:
@@ -240,22 +350,28 @@ def _install_id(state: dict[str, Any] | None) -> str:
     return str(uuid.uuid4())
 
 
-def _render_block(install_id: str, command: Path, home: Path, env_key: str | None) -> str:
+def _render_block(install_id: str, command: Path, home: Path, env_key: str | None, ssl_cert_file: str | None) -> str:
+    if env_key in RESERVED_ENV_KEYS:
+        raise ProvisionError(f"configured provider env_key conflicts with reserved environment key: {env_key}")
     envs = ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"]
     if env_key and env_key not in envs:
         envs.append(env_key)
+    if ssl_cert_file:
+        envs.append(SSL_CERT_ENV)
     quote = lambda value: json.dumps(value, ensure_ascii=False)
-    return (
+    block = (
         f'# creative-model-bridge:begin schema=1 install_id="{install_id}"\n'
         "[mcp_servers.creative-model-bridge]\n"
         f"command = {quote(str(command))}\nargs = []\nenv_vars = {json.dumps(envs)}\n\n"
         "[mcp_servers.creative-model-bridge.env]\n"
         f"CODEX_HOME = {quote(str(home))}\n"
-        f'# creative-model-bridge:end install_id="{install_id}"\n'
     )
+    if ssl_cert_file:
+        block += f"{SSL_CERT_ENV} = {quote(ssl_cert_file)}\n"
+    return block + f'# creative-model-bridge:end install_id="{install_id}"\n'
 
 
-def _validate_final(text: str, install_id: str, command: Path, home: Path, env_key: str | None) -> dict[str, Any]:
+def _validate_final(text: str, install_id: str, command: Path, home: Path, env_key: str | None, ssl_cert_file: str | None) -> dict[str, Any]:
     marker = _marker(text)
     if marker is None or marker["install_id"] != install_id:
         raise ProvisionError("final config does not contain the owned marker pair")
@@ -263,11 +379,18 @@ def _validate_final(text: str, install_id: str, command: Path, home: Path, env_k
     servers = value.get("mcp_servers", {})
     entry = servers.get(INSTALL_NAME) if isinstance(servers, dict) else None
     envs = ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"] + ([env_key] if env_key and env_key not in {"CODEX_HOME", "CREATIVE_MODEL_API_KEY"} else [])
+    if ssl_cert_file:
+        envs.append(SSL_CERT_ENV)
     if not isinstance(entry, dict) or entry.get("command") != str(command) or entry.get("args") != [] or entry.get("env_vars") != envs:
         raise ProvisionError("final MCP config failed validation")
     env_table = entry.get("env")
     if not isinstance(env_table, dict) or env_table.get("CODEX_HOME") != str(home):
         raise ProvisionError("final MCP environment config failed validation")
+    if ssl_cert_file:
+        if env_table.get(SSL_CERT_ENV) != ssl_cert_file:
+            raise ProvisionError("final MCP CA environment config failed validation")
+    elif SSL_CERT_ENV in env_table:
+        raise ProvisionError("final MCP CA environment config is unexpected")
     return {"managed_digest": _digest(marker["block"].encode("utf-8")), "env_key": env_key}
 
 
@@ -498,28 +621,63 @@ def _transaction(home: Path, operation: str, before_config: tuple[bool, bytes, s
         raise
 
 
-def _healthy(state: dict[str, Any], marker: dict[str, Any], text: str, home: Path) -> bool:
+def _healthy(
+    state: dict[str, Any],
+    marker: dict[str, Any],
+    text: str,
+    home: Path,
+    *,
+    allow_missing_ssl: bool = False,
+    legacy: bool = False,
+) -> bool:
     command = Path(str(state.get("command", "")))
+    if legacy and not _legacy_state_shape(state):
+        return False
     try:
         env_key = _provider_env_key(text)
-        details = _validate_final(text, str(state["install_id"]), command, home, env_key)
+        ssl_cert_file = state.get("ssl_cert_file") if not legacy else None
+        details = _validate_final(text, str(state["install_id"]), command, home, env_key, ssl_cert_file)
     except ProvisionError:
         return False
-    return state.get("status") == "installed" and state.get("managed_digest") == details["managed_digest"] and state.get("env_key") == env_key and command.is_file() and state.get("command_sha256") == _file_digest(command) and state.get("config_path") == str(home / "config.toml")
+    if state.get("status") != "installed" or state.get("managed_digest") != details["managed_digest"] or state.get("env_key") != env_key or not command.is_file() or state.get("command_sha256") != _file_digest(command) or state.get("config_path") != str(home / "config.toml"):
+        return False
+    if not legacy and state.get("bridge_version") != PROVISION_VERSION:
+        return False
+    ssl_cert_file = state.get("ssl_cert_file") if not legacy else None
+    if ssl_cert_file is not None and (not isinstance(ssl_cert_file, str) or not Path(ssl_cert_file).is_absolute()):
+        return False
+    if ssl_cert_file and not allow_missing_ssl and not _valid_ca_file(Path(ssl_cert_file)):
+        return False
+    return True
 
 
-def setup(*, home: Path | None = None, repair: bool = False) -> dict[str, Any]:
+def setup(
+    *,
+    home: Path | None = None,
+    repair: bool = False,
+    platform_name: str | None = None,
+    candidates: tuple[str | Path, ...] | list[str | Path] | None = None,
+    ssl_cert_file: str | Path | None = None,
+) -> dict[str, Any]:
     home = (home or codex_home()).resolve()
+    # Resolve and validate the CA before creating the lock/state directory so
+    # an invalid explicit override has zero managed writes.
+    ssl_cert_file_value = resolve_ssl_cert_file(platform_name=platform_name, candidates=candidates, explicit=ssl_cert_file)
+    _preflight_provider_env(home)
     home.mkdir(parents=True, exist_ok=True)
     with _lock(home):
         config_path = home / "config.toml"
         before_config = _image(config_path)
         state_exists, state_bytes, state = _state(home)
+        if state is not None and not _supported_state_version(state):
+            raise ProvisionError("provision state bridge_version is unsupported")
         text = before_config[1].decode("utf-8")
         marker = _marker(text)
-        if state and state.get("status") == "installed" and marker and _healthy(state, marker, text, home):
-            return state
-        if state and state.get("status") == "installed" and not repair:
+        current_healthy = bool(state and state.get("status") == "installed" and marker and _healthy(state, marker, text, home))
+        legacy_healthy = bool(state and state.get("status") == "installed" and marker and _healthy(state, marker, text, home, legacy=True))
+        if current_healthy:
+            return state  # type: ignore[return-value]
+        if state and state.get("status") == "installed" and not repair and not legacy_healthy:
             raise ProvisionError("owned configuration drift detected; run provision repair")
         if repair and (not state or state.get("status") != "installed" or marker is None or marker["install_id"] != state.get("install_id")):
             raise ProvisionError("repair requires an owned installed configuration")
@@ -531,10 +689,12 @@ def setup(*, home: Path | None = None, repair: bool = False) -> dict[str, Any]:
             raise ProvisionError("foreign same-name MCP config")
         command = _executable()
         env_key = _provider_env_key(base)
-        block = _render_block(install_id, command, home, env_key)
+        block = _render_block(install_id, command, home, env_key, ssl_cert_file_value)
         updated = base + ("\n" if base and not base.endswith("\n") else "") + ("\n" if base else "") + block
-        details = _validate_final(updated, install_id, command, home, env_key)
-        new_state = {"schema_version": 2, "status": "installed", "install_id": install_id, "config_path": str(config_path), "config_digest": _digest(updated.encode("utf-8")), "managed_digest": details["managed_digest"], "command": str(command), "command_sha256": _file_digest(command), "env_key": env_key, "updated_at": int(time.time())}
+        details = _validate_final(updated, install_id, command, home, env_key, ssl_cert_file_value)
+        new_state = {"schema_version": 2, "status": "installed", "install_id": install_id, "config_path": str(config_path), "config_digest": _digest(updated.encode("utf-8")), "managed_digest": details["managed_digest"], "command": str(command), "command_sha256": _file_digest(command), "env_key": env_key, "bridge_version": PROVISION_VERSION, "updated_at": int(time.time())}
+        if ssl_cert_file_value:
+            new_state["ssl_cert_file"] = ssl_cert_file_value
         after_state = (json.dumps(new_state, indent=2, sort_keys=True) + "\n").encode("utf-8")
         _transaction(home, "repair" if repair else "setup", before_config, updated.encode("utf-8"), (state_exists, state_bytes, _digest(state_bytes)), after_state)
         _journal(home, "repair" if repair else "setup", install_id=install_id)
@@ -579,6 +739,12 @@ def status(*, home: Path | None = None) -> dict[str, Any]:
     else:
         status_value = "drift"
         issues.append("owned configuration drift")
+    if state and state.get("ssl_cert_file"):
+        ca_path = Path(str(state["ssl_cert_file"]))
+        if not _valid_ca_file(ca_path):
+            issues.append(f"configured CA bundle is missing or unreadable: {ca_path}")
+            if status_value == "installed":
+                status_value = "drift"
     return {"schema_version": 2, "status": status_value, "state": state, "config_path": str(config_path), "config_digest": config_digest, "managed": marker is not None, "command": state.get("command") if state else None, "command_exists": bool(state and Path(str(state.get("command", ""))).is_file()), "managed_digest": state.get("managed_digest") if state else None, "issues": issues}
 
 
@@ -590,13 +756,16 @@ def uninstall(*, home: Path | None = None) -> dict[str, Any]:
         state_exists, state_bytes, state = _state(home)
         if state is None:
             return status(home=home)
+        if not _supported_state_version(state):
+            raise ProvisionError("provision state bridge_version is unsupported")
         if state.get("status") == "uninstalled":
             return state
         text = before_config[1].decode("utf-8")
         marker = _marker(text)
         if marker is None or marker["install_id"] != state.get("install_id"):
             raise ProvisionError("owned marker is absent or foreign")
-        if not _healthy(state, marker, text, home):
+        legacy = state.get("bridge_version") != PROVISION_VERSION
+        if not _healthy(state, marker, text, home, allow_missing_ssl=True, legacy=legacy):
             raise ProvisionError("owned configuration drift detected; run provision repair")
         updated, managed_digest = _remove_owned(text, str(state["install_id"]))
         _parse_toml(updated)
@@ -607,11 +776,19 @@ def uninstall(*, home: Path | None = None) -> dict[str, Any]:
         return new_state
 
 
-def run(action: str, *, home: Path | None = None, yes: bool = False) -> dict[str, Any]:
+def run(
+    action: str,
+    *,
+    home: Path | None = None,
+    yes: bool = False,
+    platform_name: str | None = None,
+    candidates: tuple[str | Path, ...] | list[str | Path] | None = None,
+    ssl_cert_file: str | Path | None = None,
+) -> dict[str, Any]:
     if action == "setup":
-        return setup(home=home)
+        return setup(home=home, platform_name=platform_name, candidates=candidates, ssl_cert_file=ssl_cert_file)
     if action == "repair":
-        return setup(home=home, repair=True)
+        return setup(home=home, repair=True, platform_name=platform_name, candidates=candidates, ssl_cert_file=ssl_cert_file)
     if action == "status":
         return status(home=home)
     if action == "uninstall":
@@ -624,9 +801,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("action", choices=("setup", "status", "repair", "uninstall"))
     parser.add_argument("--yes", action="store_true")
     parser.add_argument("--codex-home", type=Path)
+    parser.add_argument("--ssl-cert-file", type=Path)
     args = parser.parse_args(argv)
     try:
-        result = run(args.action, home=args.codex_home, yes=args.yes)
+        result = run(args.action, home=args.codex_home, yes=args.yes, ssl_cert_file=args.ssl_cert_file)
     except ProvisionError as error:
         print(f"creative-model-bridge: {error}", file=sys.stderr)
         return 1

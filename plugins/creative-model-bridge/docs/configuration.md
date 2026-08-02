@@ -22,7 +22,7 @@ response.
 The launcher forwards `CODEX_HOME` and `CREATIVE_MODEL_API_KEY`; the
 development-only `CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a cached version/target asset only.
-The default release version is 0.1.5; the repository deliberately does not
+The default release version is 0.1.6; the repository deliberately does not
 claim that tag has been published. The binary's `provision setup`, `status`,
 `repair`, and `uninstall` commands own the global MCP entry transactionally.
 
@@ -36,6 +36,18 @@ provenance.
 Provision lifecycle state is schema 2. `status` reports `absent`, `installed`,
 `uninstalled`, `drift`, `foreign`, or `pending_manual_recovery`; the latter
 means a retained WAL could not safely reconcile an external edit.
+
+At setup time `SSL_CERT_FILE` (or `CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE`) may
+select an absolute, readable, non-empty regular CA bundle. macOS deterministically
+uses `/etc/ssl/cert.pem`; Linux checks the ordered candidates
+`/etc/ssl/certs/ca-certificates.crt`, `/etc/pki/tls/certs/ca-bundle.crt`,
+`/etc/ssl/ca-bundle.pem`, `/etc/pki/tls/cacert.pem`,
+`/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem`, then `/etc/ssl/cert.pem`.
+Windows leaves `SSL_CERT_FILE` out unless an explicit override is supplied.
+The selected value is appended to `env_vars` after the credential entries and
+stored as optional `ssl_cert_file` state. A missing configured file is reported
+as drift, but does not prevent owned-block uninstall. A consistent 0.1.5 state
+is upgraded to 0.1.6 under the same byte-exact WAL transaction.
 
 Release retries reconcile state before mutating: absent creates a draft,
 existing drafts may be completed or clobbered only while still draft, unknown

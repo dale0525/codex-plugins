@@ -21,7 +21,12 @@ assembled in the fixed order `task` → `constraints` → `output_spec` →
 adapter. `prompt_report` records the exact system prompt (or `null`), section
 order, user/total character counts, context details, and `truncated: false`.
 
-The HTTP transport sends `User-Agent: creative-model-bridge/0.1.5` on both
+The HTTP transport sends `User-Agent: creative-model-bridge/0.1.6` on both
 `/models` and `/responses`. This is an honest bridge identifier used for edge
 compatibility; no Codex-specific identity, originator, or session headers are
 sent.
+
+The provisioned MCP process receives `CODEX_HOME`, the fixed credential channel,
+the selected provider `env_key`, and (when resolved) `SSL_CERT_FILE`. The CA
+variable is ordered after credential entries and is never included in the JSON
+payload or prompt report.

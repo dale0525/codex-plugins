@@ -185,6 +185,15 @@ def validate_provisioner_contract(ps_text: str, version: object) -> list[str]:
     return errors
 
 
+def validate_provision_version(provision_text: str, version: object) -> list[str]:
+    """Require the provision implementation's release marker to match."""
+
+    match = re.search(r'^PROVISION_VERSION\s*=\s*["\']([^"\']+)', provision_text, re.MULTILINE)
+    if not match or match.group(1) != version:
+        return ["mcp/provision.py PROVISION_VERSION must equal plugin manifest version"]
+    return []
+
+
 def validate(
     root: Path,
     tag: str | None = None,
@@ -297,6 +306,7 @@ def validate(
         errors.append("release state planner is missing")
     provision_py = plugin / "mcp/provision.py"
     provision_text = provision_py.read_text(encoding="utf-8") if provision_py.is_file() else ""
+    errors.extend(validate_provision_version(provision_text, version))
     for marker in ("SCHEMA_VERSION = 2", '"phase": "prepared"', '"config_after"', "manual_required", "rollback_requested", "managed_digest"):
         if marker not in provision_text:
             errors.append(f"provision implementation is missing schema/WAL contract marker: {marker}")

@@ -33,7 +33,7 @@ report, logs, or error messages. The bridge does not inject Codex instructions,
 model-specific adapters, retries, provider switching, or conversation history.
 
 Every provider request also carries the explicit honest `User-Agent`
-`creative-model-bridge/0.1.5`. This stable product identifier is a transport
+`creative-model-bridge/0.1.6`. This stable product identifier is a transport
 compatibility measure for provider edges that reject Python's default user
 agent; it does not claim to be Codex and is not accompanied by Codex-,
 originator-, or session-spoofing headers.
@@ -68,3 +68,13 @@ native workflow matrix and has not been run on this local host.
 The canonical install and download locks contain exactly one `owner.<token>`
 marker. A stale owner is moved by atomic rename to an isolated retired path;
 live owners are never reclaimed, and release removes only its own lock.
+
+Provision-time trust resolution is deterministic and happens before lock/state
+writes: explicit absolute CA files are validated for readability, non-empty
+regular-file type; macOS uses `/etc/ssl/cert.pem`, Linux uses a fixed ordered
+candidate list, and Windows preserves the platform trust store by omitting
+`SSL_CERT_FILE` unless explicitly selected. The optional state `ssl_cert_file`
+and managed block digest make trust drift observable. Missing trust material
+does not block uninstall. A consistent prior 0.1.5 owned image is recognized as
+a migration input and rewritten as one setup transaction; foreign/tampered
+images remain fail-closed.

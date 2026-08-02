@@ -14,10 +14,10 @@ import validate_creative_model_bridge_release as release_validator  # noqa: E402
 
 class CreativeReleaseValidatorTests(unittest.TestCase):
     def test_checked_in_contract_matches_v015(self) -> None:
-        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.5"), [])
+        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.6"), [])
 
     def test_wrong_tag_version_is_rejected(self) -> None:
-        errors = release_validator.validate(ROOT, "creative-model-bridge-v0.1.6")
+        errors = release_validator.validate(ROOT, "creative-model-bridge-v0.1.7")
         self.assertTrue(any("tag version" in error for error in errors))
 
     def test_publish_step_final_verification_precedes_edit(self) -> None:
@@ -154,9 +154,15 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
 
     def test_provisioner_default_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/scripts/provision.ps1").read_text(encoding="utf-8")
-        mismatched = text.replace("else { '0.1.5' }", "else { '0.1.6' }")
-        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.5")
+        mismatched = text.replace("else { '0.1.6' }", "else { '0.1.7' }")
+        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.6")
         self.assertTrue(any("default version" in error for error in errors))
+
+    def test_provision_version_mismatch_fails(self) -> None:
+        text = (ROOT / "plugins/creative-model-bridge/mcp/provision.py").read_text(encoding="utf-8")
+        mismatched = text.replace('PROVISION_VERSION = "0.1.6"', 'PROVISION_VERSION = "0.1.7"', 1)
+        errors = release_validator.validate_provision_version(mismatched, "0.1.6")
+        self.assertTrue(any("PROVISION_VERSION" in error for error in errors))
 
 
 if __name__ == "__main__":
