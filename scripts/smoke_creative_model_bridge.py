@@ -223,46 +223,122 @@ def _trusted_error_diagnostic(responses: list[dict[str, object]]) -> dict[str, o
     return None
 
 
-def _openssl_executable() -> str | None:
-    candidates = [shutil.which("openssl")]
-    plugin_root = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge/.pixi/envs/default/bin/openssl"
-    candidates.append(str(plugin_root) if plugin_root.is_file() else None)
-    return next((item for item in candidates if item), None)
+def _openssl_executable(*, os_name: str | None = None) -> str | None:
+    plugin_root = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge/.pixi/envs/default"
+    locked = plugin_root / ("Library/bin/openssl.exe" if (os_name or os.name) == "nt" else "bin/openssl")
+    if locked.is_file():
+        return str(locked)
+    return shutil.which("openssl")
 
 
-def _make_tls_material(root: Path) -> tuple[Path, Path, Path, Path]:
-    openssl = _openssl_executable()
+def _run_fixture_openssl(
+    openssl: str,
+    arguments: list[str],
+    *,
+    phase: str,
+    timeout: float = 30,
+    input_text: str | None = None,
+) -> subprocess.CompletedProcess[str]:
+    try:
+        result = subprocess.run(
+            [openssl, *arguments],
+            input=input_text,
+            capture_output=True,
+            encoding="utf-8",
+            timeout=timeout,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired, UnicodeError):
+        raise _SmokeFailure(phase, "openssl")
+    if type(result.returncode) is not int or result.returncode != 0:
+        raise _SmokeFailure(phase, "verify", returncode=result.returncode)
+    return result
+
+
+def _make_tls_material(root: Path, openssl: str | None = None) -> tuple[Path, Path, Path, Path]:
+    openssl = openssl or _openssl_executable()
     if not openssl:
         raise _SmokeFailure("tls-setup", "openssl")
     ca_key, ca_cert = root / "ca.key", root / "ca.pem"
     untrusted_key, untrusted_cert = root / "untrusted-ca.key", root / "untrusted-ca.pem"
     server_key, server_csr, server_cert = root / "server.key", root / "server.csr", root / "server.pem"
-    extensions = root / "server.ext"
+    ca_config, leaf_config = root / "ca.cnf", root / "leaf.cnf"
     try:
-        extensions.write_text(
-            "basicConstraints=critical,CA:FALSE\n"
-            "keyUsage=critical,digitalSignature,keyEncipherment\n"
-            "extendedKeyUsage=serverAuth\n"
-            "subjectAltName=DNS:localhost,IP:127.0.0.1\n",
+        ca_config.write_text(
+            "[ req ]\n"
+            "distinguished_name = ca_dn\n"
+            "x509_extensions = ca_ext\n"
+            "prompt = no\n\n"
+            "[ ca_dn ]\n"
+            "CN = Creative Smoke CA\n\n"
+            "[ ca_ext ]\n"
+            "basicConstraints = critical,CA:true,pathlen:0\n"
+            "keyUsage = critical,keyCertSign,cRLSign\n"
+            "subjectKeyIdentifier = hash\n"
+            "authorityKeyIdentifier = keyid:always,issuer\n",
+            encoding="utf-8",
+        )
+        leaf_config.write_text(
+            "[ req ]\n"
+            "distinguished_name = leaf_dn\n"
+            "prompt = no\n\n"
+            "[ leaf_dn ]\n"
+            "CN = localhost\n\n"
+            "[ leaf_ext ]\n"
+            "basicConstraints = critical,CA:false\n"
+            "keyUsage = critical,digitalSignature,keyEncipherment\n"
+            "extendedKeyUsage = serverAuth\n"
+            "subjectAltName = DNS:localhost,IP:127.0.0.1\n"
+            "subjectKeyIdentifier = hash\n"
+            "authorityKeyIdentifier = keyid,issuer\n",
             encoding="utf-8",
         )
     except OSError:
         raise _SmokeFailure("tls-setup", "filesystem")
-    commands = [
-        [openssl, "genrsa", "-out", str(ca_key), "2048"],
-        [openssl, "req", "-x509", "-new", "-nodes", "-key", str(ca_key), "-sha256", "-days", "1", "-subj", "/CN=Creative Smoke CA", "-addext", "basicConstraints=critical,CA:TRUE", "-addext", "keyUsage=critical,keyCertSign,cRLSign", "-out", str(ca_cert)],
-        [openssl, "genrsa", "-out", str(untrusted_key), "2048"],
-        [openssl, "req", "-x509", "-new", "-nodes", "-key", str(untrusted_key), "-sha256", "-days", "1", "-subj", "/CN=Untrusted Smoke CA", "-addext", "basicConstraints=critical,CA:TRUE", "-addext", "keyUsage=critical,keyCertSign,cRLSign", "-out", str(untrusted_cert)],
-        [openssl, "genrsa", "-out", str(server_key), "2048"],
-        [openssl, "req", "-new", "-key", str(server_key), "-subj", "/CN=localhost", "-out", str(server_csr)],
-        [openssl, "x509", "-req", "-in", str(server_csr), "-CA", str(ca_cert), "-CAkey", str(ca_key), "-CAcreateserial", "-out", str(server_cert), "-days", "1", "-sha256", "-extfile", str(extensions)],
-    ]
     try:
-        for command in commands:
-            subprocess.run(command, check=True, capture_output=True, encoding="utf-8", timeout=30)
-    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        commands = [
+            ["genrsa", "-out", str(ca_key), "2048"],
+            ["req", "-x509", "-new", "-nodes", "-key", str(ca_key), "-sha256", "-days", "1", "-config", str(ca_config), "-extensions", "ca_ext", "-set_serial", "1001", "-out", str(ca_cert)],
+            ["genrsa", "-out", str(untrusted_key), "2048"],
+            ["req", "-x509", "-new", "-nodes", "-key", str(untrusted_key), "-sha256", "-days", "1", "-subj", "/CN=Untrusted Smoke CA", "-config", str(ca_config), "-extensions", "ca_ext", "-set_serial", "2001", "-out", str(untrusted_cert)],
+            ["genrsa", "-out", str(server_key), "2048"],
+            ["req", "-new", "-key", str(server_key), "-config", str(leaf_config), "-out", str(server_csr)],
+            ["x509", "-req", "-in", str(server_csr), "-CA", str(ca_cert), "-CAkey", str(ca_key), "-set_serial", "1002", "-out", str(server_cert), "-days", "1", "-sha256", "-extfile", str(leaf_config), "-extensions", "leaf_ext"],
+        ]
+        for arguments in commands:
+            _run_fixture_openssl(openssl, arguments, phase="tls-setup")
+    except _SmokeFailure:
         raise _SmokeFailure("tls-setup", "certificate")
     return ca_cert, server_cert, server_key, untrusted_cert
+
+
+def _verify_tls_fixture(openssl: str, ca_cert: Path, server_cert: Path) -> None:
+    _run_fixture_openssl(
+        openssl,
+        ["verify", "-purpose", "sslserver", "-verify_ip", "127.0.0.1", "-CAfile", str(ca_cert), str(server_cert)],
+        phase="tls-fixture-file-verify",
+    )
+
+
+def _verify_tls_live(openssl: str, ca_cert: Path, port: int) -> None:
+    _run_fixture_openssl(
+        openssl,
+        [
+            "s_client",
+            "-connect",
+            f"127.0.0.1:{port}",
+            "-CAfile",
+            str(ca_cert),
+            "-verify_return_error",
+            "-verify_ip",
+            "127.0.0.1",
+            "-servername",
+            "localhost",
+        ],
+        phase="tls-fixture-live-verify",
+        timeout=10,
+        input_text="",
+    )
 
 
 class _TLSHandler(BaseHTTPRequestHandler):
@@ -322,7 +398,11 @@ def _tls_smoke(binary: Path, root: Path) -> None:
     server: _LocalTLSHTTPServer | None = None
     thread: threading.Thread | None = None
     try:
-        ca_cert, server_cert, server_key, untrusted_cert = _make_tls_material(root)
+        openssl = _openssl_executable()
+        if not openssl:
+            raise _SmokeFailure("tls-setup", "openssl")
+        ca_cert, server_cert, server_key, untrusted_cert = _make_tls_material(root, openssl)
+        _verify_tls_fixture(openssl, ca_cert, server_cert)
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain(certfile=server_cert, keyfile=server_key)
         try:
@@ -332,6 +412,7 @@ def _tls_smoke(binary: Path, root: Path) -> None:
         server.socket = context.wrap_socket(server.socket, server_side=True)
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
+        _verify_tls_live(openssl, ca_cert, server.server_port)
         home = root / "tls-home"
         home.mkdir()
         (home / "config.toml").write_text(

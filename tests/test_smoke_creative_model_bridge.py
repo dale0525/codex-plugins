@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import redirect_stderr
 import io
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import subprocess
 import sys
 import tempfile
@@ -28,6 +28,95 @@ _DIAGNOSTIC = {
 
 
 class CreativeModelBridgeSmokeTests(unittest.TestCase):
+    def test_locked_openssl_priority_and_path_fallback_for_posix_and_windows(self) -> None:
+        def components(value: str) -> tuple[str, ...]:
+            return PurePosixPath(value.replace("\\", "/")).parts
+
+        with (
+            patch.object(smoke.Path, "is_file", return_value=True),
+            patch.object(smoke.shutil, "which", return_value="/path/openssl"),
+        ):
+            posix_locked = components(smoke._openssl_executable(os_name="posix"))
+            self.assertEqual(posix_locked[-5:], PurePosixPath(".pixi/envs/default/bin/openssl").parts)
+        with (
+            patch.object(smoke.Path, "is_file", return_value=True),
+            patch.object(smoke.shutil, "which", return_value="C:/path/openssl.exe"),
+        ):
+            windows_locked = components(smoke._openssl_executable(os_name="nt"))
+            self.assertEqual(windows_locked[-6:], PureWindowsPath(r".pixi\envs\default\Library\bin\openssl.exe").parts)
+        with (
+            patch.object(smoke.Path, "is_file", return_value=False),
+            patch.object(smoke.shutil, "which", return_value="/fallback/openssl"),
+        ):
+            self.assertEqual(smoke._openssl_executable(os_name="posix"), "/fallback/openssl")
+        with (
+            patch.object(smoke.Path, "is_file", return_value=False),
+            patch.object(smoke.shutil, "which", return_value=r"C:\fallback\openssl.exe"),
+        ):
+            self.assertEqual(smoke._openssl_executable(os_name="nt"), r"C:\fallback\openssl.exe")
+
+    def test_tls_fixture_commands_have_named_extensions_and_explicit_serials(self) -> None:
+        commands: list[list[str]] = []
+
+        def capture(openssl: str, arguments: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+            self.assertEqual(openssl, "/locked/openssl")
+            commands.append(arguments)
+            return subprocess.CompletedProcess([openssl, *arguments], 0, stdout="", stderr="")
+
+        with tempfile.TemporaryDirectory() as temporary, patch.object(smoke, "_run_fixture_openssl", side_effect=capture):
+            root = Path(temporary)
+            ca_cert, server_cert, _server_key, _untrusted_cert = smoke._make_tls_material(root, "/locked/openssl")
+            self.assertTrue(server_cert.parent == root)
+            ca_config = (root / "ca.cnf").read_text(encoding="utf-8")
+            leaf_config = (root / "leaf.cnf").read_text(encoding="utf-8")
+        self.assertIn("CA:true,pathlen:0", ca_config)
+        self.assertIn("keyCertSign,cRLSign", ca_config)
+        self.assertIn("subjectKeyIdentifier = hash", ca_config)
+        self.assertIn("authorityKeyIdentifier = keyid:always,issuer", ca_config)
+        self.assertIn("CA:false", leaf_config)
+        self.assertIn("extendedKeyUsage = serverAuth", leaf_config)
+        self.assertIn("subjectAltName = DNS:localhost,IP:127.0.0.1", leaf_config)
+        self.assertIn("authorityKeyIdentifier = keyid,issuer", leaf_config)
+        self.assertEqual(len(commands), 7)
+        self.assertIn("-set_serial", commands[1])
+        self.assertIn("1001", commands[1])
+        self.assertIn("2001", commands[3])
+        self.assertIn("1002", commands[6])
+        self.assertNotIn("-CAcreateserial", " ".join(" ".join(command) for command in commands))
+
+    def test_tls_verify_command_identity_and_safe_failures(self) -> None:
+        calls: list[tuple[str, list[str], dict[str, object]]] = []
+
+        def capture(openssl: str, arguments: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
+            calls.append((openssl, arguments, kwargs))
+            return subprocess.CompletedProcess([openssl, *arguments], 0, stdout="", stderr="")
+
+        with patch.object(smoke, "_run_fixture_openssl", side_effect=capture):
+            smoke._verify_tls_fixture("/locked/openssl", Path("ca.pem"), Path("server.pem"))
+            smoke._verify_tls_live("/locked/openssl", Path("ca.pem"), 443)
+        self.assertEqual(calls[0][0], calls[1][0])
+        self.assertEqual(calls[0][1][:2], ["verify", "-purpose"])
+        self.assertIn("sslserver", calls[0][1])
+        self.assertIn("-verify_ip", calls[0][1])
+        self.assertIn("127.0.0.1", calls[0][1])
+        self.assertEqual(calls[1][1][0], "s_client")
+        self.assertIn("-verify_return_error", calls[1][1])
+        self.assertEqual(calls[1][2]["input_text"], "")
+        with patch.object(smoke.subprocess, "run", side_effect=OSError("/secret/openssl")):
+            with self.assertRaises(smoke._SmokeFailure) as context:
+                smoke._run_fixture_openssl("/locked/openssl", ["verify"], phase="tls-fixture-file-verify")
+        self.assertEqual((context.exception.phase, context.exception.category), ("tls-fixture-file-verify", "openssl"))
+        self.assertNotIn("secret", json.dumps(context.exception.payload()))
+        with patch.object(
+            smoke.subprocess,
+            "run",
+            return_value=subprocess.CompletedProcess(["openssl"], 1, stdout="PEM SECRET", stderr="PEM SECRET"),
+        ):
+            with self.assertRaises(smoke._SmokeFailure) as context:
+                smoke._run_fixture_openssl("/locked/openssl", ["s_client"], phase="tls-fixture-live-verify")
+        self.assertEqual((context.exception.phase, context.exception.category, context.exception.returncode), ("tls-fixture-live-verify", "verify", 1))
+        self.assertNotIn("PEM", json.dumps(context.exception.payload()))
+
     def test_trusted_tls_child_environment_enables_typed_diagnostics(self) -> None:
         environment = smoke._tls_environment({"BASE": "value"}, ROOT / "home", ROOT / "ca.pem")
         self.assertEqual(environment["CREATIVE_MODEL_BRIDGE_TEST_TRANSPORT_DIAGNOSTICS"], "1")
@@ -94,6 +183,8 @@ class CreativeModelBridgeSmokeTests(unittest.TestCase):
             stream = io.StringIO()
             with (
                 patch.object(smoke, "_make_tls_material", return_value=materials),
+                patch.object(smoke, "_verify_tls_fixture"),
+                patch.object(smoke, "_verify_tls_live"),
                 patch.object(smoke.ssl, "SSLContext", return_value=FakeContext()),
                 patch.object(smoke, "_LocalTLSHTTPServer", return_value=FakeServer()),
                 patch.object(smoke.threading, "Thread", return_value=FakeThread()),
