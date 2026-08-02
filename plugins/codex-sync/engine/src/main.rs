@@ -1,5 +1,6 @@
 mod agents;
 mod app;
+mod artifact;
 mod auth;
 mod capture;
 mod config;
@@ -9,6 +10,7 @@ mod profiles;
 mod provision;
 mod reconcile;
 mod storage;
+mod transaction;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};

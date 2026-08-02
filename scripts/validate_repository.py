@@ -20,6 +20,7 @@ SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+WORKFLOW_ACTION_REF_PATTERN = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 
 
 class Validation:
@@ -149,7 +150,37 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
             for skill_directory in skill_directories:
                 _validate_skill(skill_directory, validation)
     _validate_mcp_servers(plugin_path, manifest, validation)
+    if plugin_path.name == "creative-model-bridge":
+        _validate_creative_provision(plugin_path, validation)
     validation.plugin_count += 1
+
+
+def _validate_creative_provision(plugin_path: Path, validation: Validation) -> None:
+    """Validate the no-dependency install handoff used by creative bridge."""
+    companion = plugin_path / ".mcp.json"
+    if companion.exists():
+        validation.error(f"{companion.relative_to(ROOT)} must not be distributed")
+    path = plugin_path / ".codex-sync/provision.json"
+    payload = _read_json(path, validation)
+    if payload is None:
+        return
+    if payload.get("schema_version") != 1 or payload.get("risk") != "high":
+        validation.error(f"{path.relative_to(ROOT)}: schema_version=1 and risk=high are required")
+    if payload.get("posix_script") != "./scripts/bootstrap.sh":
+        validation.error(f"{path.relative_to(ROOT)}: posix_script must reference bootstrap.sh")
+    if payload.get("windows_script") != "./scripts/provision.ps1":
+        validation.error(f"{path.relative_to(ROOT)}: windows_script must reference provision.ps1")
+    if payload.get("windows_shell") != "windows-powershell":
+        validation.error(f"{path.relative_to(ROOT)}: windows_shell must be windows-powershell")
+    if payload.get("arguments") != ["setup", "--yes"]:
+        validation.error(f"{path.relative_to(ROOT)}: arguments must be [setup, --yes]")
+    for relative in ("scripts/bootstrap.sh", "scripts/provision.ps1", "mcp/provision.py"):
+        target = plugin_path / relative
+        if not target.is_file():
+            validation.error(f"{path.relative_to(ROOT)}: missing {relative}")
+    bootstrap = plugin_path / "scripts/bootstrap.sh"
+    if bootstrap.is_file() and not os.access(bootstrap, os.X_OK):
+        validation.error(f"{bootstrap.relative_to(ROOT)} must be executable")
 
 
 def _inside(root: Path, candidate: Path) -> bool:
@@ -195,14 +226,23 @@ def _validate_mcp_servers(plugin_path: Path, manifest: dict[str, Any], validatio
         _validate_mcp_server_entry(plugin_path, context, server, validation)
 
 
-def _validate_pixi_launcher(plugin_path: Path, launcher: Path, context: str, validation: Validation) -> None:
+def _validate_pixi_launcher(
+    plugin_path: Path,
+    launcher: Path | None,
+    context: str,
+    validation: Validation,
+    *,
+    launcher_bytes: bytes | None = None,
+) -> None:
     """Require and sanity-check a lockfile for launchers that invoke Pixi."""
 
-    try:
-        launcher_bytes = launcher.read_bytes()
-    except OSError as error:
-        validation.error(f"{context}: Pixi launcher could not be read: {error}")
-        return
+    if launcher_bytes is None:
+        assert launcher is not None
+        try:
+            launcher_bytes = launcher.read_bytes()
+        except OSError as error:
+            validation.error(f"{context}: Pixi launcher could not be read: {error}")
+            return
     if b"pixi run" not in launcher_bytes or b"pixi.toml" not in launcher_bytes:
         return
     if b"--locked" not in launcher_bytes and b"--frozen" not in launcher_bytes:
@@ -283,8 +323,12 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
         validation.error(f"{context}: env_vars must be an array of non-empty strings")
     elif len(env_vars) != len(set(env_vars)):
         validation.error(f"{context}: env_vars must not contain duplicates")
-    elif any(item not in {"CODEX_HOME", "CREATIVE_MODEL_API_KEY"} for item in env_vars):
-        validation.error(f"{context}: env_vars contains a non-allowlisted variable")
+    else:
+        allowed_env = {"CODEX_HOME", "CREATIVE_MODEL_API_KEY"}
+        if plugin_path.name == "creative-model-bridge":
+            allowed_env.update({"CREATIVE_MODEL_BRIDGE_BIN", "CREATIVE_MODEL_BRIDGE_OFFLINE"})
+        if any(item not in allowed_env for item in env_vars):
+            validation.error(f"{context}: env_vars contains a non-allowlisted variable")
 
     cwd = server.get("cwd", ".")
     if not isinstance(cwd, str) or Path(cwd).is_absolute():
@@ -307,7 +351,22 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
         if not isinstance(command, str) or not command:
             validation.error(f"{context}: command must be a non-empty string")
             return
-        if "/" in command or "\\" in command or command.startswith("."):
+        if command == "pixi":
+            validation.error(f"{context}: direct Pixi command is not permitted for target runtime")
+        elif command == "git":
+            expected_args = [
+                "-c",
+                'alias.creative-model-bridge=!sh "${GIT_PREFIX}scripts/bootstrap.sh"',
+                "creative-model-bridge",
+            ]
+            if cwd != ".":
+                validation.error(f"{context}: Git alias command must run from plugin root (cwd '.')")
+            if args != expected_args:
+                validation.error(f"{context}: Git alias command must use the exact bootstrap arguments")
+            bootstrap = plugin_path / "scripts/bootstrap.sh"
+            if not bootstrap.is_file() or not os.access(bootstrap, os.X_OK):
+                validation.error(f"{context}: scripts/bootstrap.sh must exist and be executable")
+        elif "/" in command or "\\" in command or command.startswith("."):
             target = (cwd_path / command).resolve()
             if not _inside(plugin_path.resolve(), target):
                 validation.error(f"{context}: command target escapes plugin")
@@ -489,11 +548,33 @@ def _validate_fastctx_windows_runtime(validation: Validation) -> None:
 
 
 def _validate_workflows(validation: Validation) -> None:
-    for workflow in (ROOT / ".github/workflows").glob("*.yml"):
+    workflow_directory = ROOT / ".github/workflows"
+    workflows = sorted((*workflow_directory.glob("*.yml"), *workflow_directory.glob("*.yaml")))
+    for workflow in workflows:
         try:
-            yaml.load(workflow.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
+            payload = yaml.load(workflow.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
         except yaml.YAMLError as error:
             validation.error(f"{workflow.relative_to(ROOT)}: invalid YAML: {error}")
+            continue
+
+        def visit(value: Any, path: str = "") -> None:
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    child_path = f"{path}.{key}" if path else str(key)
+                    if key == "uses":
+                        context = f"{workflow.relative_to(ROOT)} ({child_path})"
+                        if not isinstance(child, str):
+                            validation.error(f"{context}: uses must be a string")
+                        elif not child.startswith("./") and not WORKFLOW_ACTION_REF_PATTERN.fullmatch(child):
+                            validation.error(
+                                f"{context}: external action uses must pin a full lowercase commit SHA"
+                            )
+                    visit(child, child_path)
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    visit(child, f"{path}[{index}]")
+
+        visit(payload)
 
 
 def main() -> int:

@@ -17,6 +17,7 @@ from bridge import (  # noqa: E402
     BRIDGE_VERSION,
     Bridge,
     BridgeError,
+    ConfigLoader,
     ConfigError,
     FileContextError,
     MAX_FILE_BYTES,
@@ -87,6 +88,20 @@ class BridgeTests(unittest.TestCase):
     def bridge(self, opener: FakeOpener | None = None) -> Bridge:
         return Bridge(self.config, opener=opener)
 
+    def test_config_path_precedence_and_home_fallback(self) -> None:
+        explicit = self.root / "explicit.toml"
+        codex_home = self.root / "codex-home"
+        default_home = self.root / "default-home"
+        explicit.write_text("", encoding="utf-8")
+        with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+            self.assertEqual(ConfigLoader(explicit)._path(), explicit)
+        with patch.dict(os.environ, {"CODEX_HOME": str(codex_home)}, clear=False):
+            self.assertEqual(ConfigLoader()._path(), codex_home / "config.toml")
+        with patch.dict(os.environ, {}, clear=True), patch("bridge.Path.home", return_value=default_home):
+            self.assertEqual(ConfigLoader()._path(), default_home / ".codex/config.toml")
+        with patch.dict(os.environ, {"CODEX_HOME": ""}, clear=True), patch("bridge.Path.home", return_value=default_home):
+            self.assertEqual(ConfigLoader()._path(), default_home / ".codex/config.toml")
+
     def request(self, **extra: object) -> dict[str, object]:
         value: dict[str, object] = {"task": "写一个短场景", "context_text": [{"label": "source", "text": "原始材料"}]}
         value.update(extra)
@@ -151,6 +166,10 @@ class BridgeTests(unittest.TestCase):
             path.write_bytes(text.encode(encoding))
             preview = self.bridge().creative_preview(self.request(context_files=[str(path)]))
             self.assertIn(text, preview["prompt"])
+
+    def test_relative_context_file_is_rejected_at_runtime(self) -> None:
+        with self.assertRaises(FileContextError):
+            self.bridge().creative_preview(self.request(context_files=["relative.txt"]))
 
     def test_binary_signatures_and_high_byte_noise_are_rejected(self) -> None:
         samples = {

@@ -355,7 +355,7 @@ elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "re
     : > "$FAKE_MARKETPLACE_STATE"
   fi
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "add" ]; then
-  printf '%s' "${4:-}" > "${FAKE_MARKETPLACE_STATE:?}"
+  printf '%s' "${FAKE_MARKETPLACE_ADD_ROOT:-${4:-}}" > "${FAKE_MARKETPLACE_STATE:?}"
 elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "upgrade" ]; then
   if [ -n "${FAKE_REMOVE_CWD_ON_UPGRADE:-}" ]; then
     rm -rf -- "$FAKE_REMOVE_CWD_ON_UPGRADE"
@@ -633,7 +633,7 @@ fn sync_apply_and_capture_preserve_external_agents_ownership() {
 }
 
 #[test]
-fn apply_installs_then_runs_reviewed_plugin_provisioner() {
+fn clean_marketplace_auto_provision_reconciles_before_execution() {
     let temporary = tempfile::tempdir().unwrap();
     let sync_home = temporary.path().join("sync");
     let codex_home = temporary.path().join("codex");
@@ -661,18 +661,14 @@ fn apply_installs_then_runs_reviewed_plugin_provisioner() {
     let provision_script = plugin_root.join("scripts/provision.sh");
     fs::write(
         &provision_script,
-        "#!/usr/bin/env sh\nset -eu\n[ -z \"${CODEX_SYNC_GITHUB_TOKEN:-}\" ]\n[ -z \"${GITHUB_TOKEN:-}\" ]\n[ -z \"${GH_TOKEN:-}\" ]\nprintf provisioned > \"${PROVISION_SENTINEL:?}\"\n",
+        "#!/usr/bin/env sh\nset -eu\n[ -z \"${CODEX_SYNC_GITHUB_TOKEN:-}\" ]\n[ -z \"${GITHUB_TOKEN:-}\" ]\n[ -z \"${GH_TOKEN:-}\" ]\nif [ \"${1:-}\" = uninstall ]; then printf uninstalled > \"${PROVISION_SENTINEL:?}\"; else printf provisioned > \"${PROVISION_SENTINEL:?}\"; fi\n",
     )
     .unwrap();
     let mut permissions = fs::metadata(&provision_script).unwrap().permissions();
     permissions.set_mode(0o755);
     fs::set_permissions(&provision_script, permissions).unwrap();
     let marketplace_state = temporary.path().join("marketplace-state");
-    fs::write(
-        &marketplace_state,
-        marketplace_root.to_string_lossy().as_bytes(),
-    )
-    .unwrap();
+    fs::write(&marketplace_state, b"").unwrap();
     let sentinel = temporary.path().join("provisioned");
 
     let configured = |command: &mut Command| {
@@ -681,6 +677,7 @@ fn apply_installs_then_runs_reviewed_plugin_provisioner() {
             .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
             .env("FAKE_MARKETPLACE_NAME", "market")
             .env("FAKE_MARKETPLACE_SOURCE", "https://example.com/market.git")
+            .env("FAKE_MARKETPLACE_ADD_ROOT", &marketplace_root)
             .env("GITHUB_TOKEN", "test-github-token")
             .env("GH_TOKEN", "test-gh-token")
             .env("PROVISION_SENTINEL", &sentinel);
@@ -725,6 +722,13 @@ fn apply_installs_then_runs_reviewed_plugin_provisioner() {
     assert!(fs::read_to_string(&codex_state)
         .unwrap()
         .starts_with("fastctx@market|true"));
+    let local_state = fs::read_to_string(sync_home.join("state.toml")).unwrap();
+    assert!(local_state.contains("provision_receipts"));
+    assert!(local_state.contains("fastctx@market"));
+    let mut rollback = command(&sync_home, &codex_home, &codex_bin);
+    configured(&mut rollback);
+    rollback.args(["rollback", "--approve"]).assert().success();
+    assert_eq!(fs::read_to_string(&sentinel).unwrap(), "uninstalled");
 }
 
 #[test]

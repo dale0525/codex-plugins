@@ -162,8 +162,20 @@ Use presence in this file to express the desired installed set; remove a plugin'
 high risk. After marketplace refresh and plugin installation succeed, Codex
 Sync resolves the local plugin root and runs the platform provision script with
 GitHub credentials removed from its environment. Provisioning runs last; if it
-fails, the synchronized core state remains applied and the next sync creates a
-retryable plan.
+fails, the complete apply (including core configuration and plugin registry)
+is rolled back and the runtime setup is restored from the pre-apply receipt.
+Successful runs record content hashes of `provision.json`, the selected script,
+and its script-directory dependencies together with the immutable script path
+and plugin root in local state. Every execution rechecks these hashes immediately
+before spawning the interpreter; a later apply hard-stops on any receipt drift.
+Removing a provisioned plugin first invokes that script with the single
+`uninstall` argument; a missing or changed receipt blocks removal until the
+operator repairs it explicitly.
+
+Provision specs may set `windows_shell = "windows-powershell"` to select the
+Windows PowerShell 5.1 executable (`%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe`,
+then `powershell.exe` from `PATH`). The omitted value remains `"pwsh"` for
+backward compatibility.
 
 ## Ownership behavior
 

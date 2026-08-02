@@ -1,11 +1,3 @@
-use std::collections::BTreeSet;
-use std::fs;
-use std::path::{Path, PathBuf};
-
-use anyhow::{Context, Result};
-use chrono::Utc;
-use sha2::{Digest, Sha256};
-
 use crate::agents::render_with_external_sections;
 use crate::auth;
 use crate::config::{
@@ -21,20 +13,32 @@ use crate::profiles::{
     current_profile_bytes, load_agent_profiles, managed_profile_names, profile_state_sha256,
     synchronize_agent_profiles,
 };
-use crate::provision::run_auto_provisioners;
+use crate::provision::{
+    compensate_operations_recorded, create_operation_log, materialize_new_provisioners,
+    migrate_receipts, new_operation_id, operation_log_path, operation_needs_recovery,
+    prepare_rollback_runtime_recorded, read_operation_log, restore_provisioners_recorded,
+    retain_receipts, run_auto_provisioners_recorded, run_removal_provisioners_recorded,
+    scan_operation_logs, validate_auto_provisioners, write_operation_log, ActionStatus,
+    OperationLog, RuntimeOperation,
+};
 use crate::reconcile::{
-    add_local_marketplace, installed_plugins, marketplace_names, marketplace_roots,
-    plugin_ids_to_remove, portable_name, reconcile_marketplaces, reconcile_plugins,
-    remove_marketplace, restore_installed_plugins, validate_plugin_id, verify_codex_available,
-    InstalledPlugin,
+    installed_plugins, marketplace_names, plugin_ids_to_remove, portable_name,
+    reconcile_marketplaces, reconcile_plugins, validate_plugin_id, verify_codex_available,
 };
 use crate::storage::{
-    acquire_lock, atomic_write, copy_tree, ensure_data_dirs, load_state, read_json,
-    read_optional_toml, read_toml, resolve_paths, save_state, tree_sha256, write_json,
+    acquire_lock, atomic_write, ensure_data_dirs, load_state, read_json, read_optional_toml,
+    read_toml, resolve_paths, save_state, tree_sha256, write_json,
 };
-
+use crate::transaction::{
+    create_backup, create_rollback_before_backup, restore_backup, OperationRecorder,
+};
+use anyhow::{Context, Result};
+use chrono::Utc;
+use sha2::{Digest, Sha256};
+use std::collections::BTreeSet;
+use std::fs;
+use std::path::{Path, PathBuf};
 const DEFAULT_GITHUB_CLIENT_ID: &str = "Iv23liN2J2Ryzkd99etp";
-
 pub fn setup(
     repository: &str,
     device_id: &str,
@@ -53,6 +57,11 @@ pub fn setup(
             );
         }
         let previous = load_state(&paths)?;
+        if previous.recovery_required {
+            anyhow::bail!(
+                "Codex Sync has a recovery-required operation; rollback or repair before setup"
+            );
+        }
         let backup_directory = paths.data_home.join("setup-backups");
         fs::create_dir_all(&backup_directory)?;
         let backup_name = format!("{}-state.toml", Utc::now().format("%Y%m%dT%H%M%S%.3fZ"));
@@ -91,7 +100,15 @@ pub fn setup(
             .as_ref()
             .map(|state| state.managed_agent_profiles.clone())
             .unwrap_or_default(),
-        latest_backup: previous.and_then(|state| state.latest_backup),
+        latest_backup: previous
+            .as_ref()
+            .and_then(|state| state.latest_backup.clone()),
+        provision_receipts: previous
+            .as_ref()
+            .map(|state| state.provision_receipts.clone())
+            .unwrap_or_default(),
+        operation_log: None,
+        recovery_required: false,
     };
     save_state(&paths, &state)?;
     println!(
@@ -102,7 +119,6 @@ pub fn setup(
     println!("Next: run `codex-sync login`, then `codex-sync sync`");
     Ok(())
 }
-
 pub fn login(client_id_override: Option<&str>, open_browser: bool) -> Result<()> {
     let paths = resolve_paths()?;
     let _lock = acquire_lock(&paths)?;
@@ -121,19 +137,16 @@ pub fn login(client_id_override: Option<&str>, open_browser: bool) -> Result<()>
     println!("GitHub authentication succeeded and was stored in the OS credential store");
     Ok(())
 }
-
 fn environment_client_id() -> Option<String> {
     std::env::var("CODEX_SYNC_GITHUB_CLIENT_ID")
         .ok()
         .filter(|value| !value.trim().is_empty())
 }
-
 pub fn logout() -> Result<()> {
     auth::logout()?;
     println!("Removed the Codex Sync GitHub credential");
     Ok(())
 }
-
 pub fn sync(discard_local: bool) -> Result<PendingPlan> {
     let paths = resolve_paths()?;
     let _lock = acquire_lock(&paths)?;
@@ -178,7 +191,6 @@ pub fn sync(discard_local: bool) -> Result<PendingPlan> {
     print_plan(&plan);
     Ok(plan)
 }
-
 fn build_plan(
     paths: &crate::model::Paths,
     state: &LocalState,
@@ -202,7 +214,6 @@ fn build_plan(
             },
         });
     }
-
     let canonical_agents = fs::read(paths.repository_dir.join(&manifest.agents))
         .with_context(|| format!("read synchronized {}", manifest.agents))?;
     let current_agents = fs::read(paths.codex_home.join("AGENTS.md")).unwrap_or_default();
@@ -219,7 +230,6 @@ fn build_plan(
             summary: "replace global agent instructions".to_owned(),
         });
     }
-
     let desired_profiles = load_agent_profiles(&paths.repository_dir, &manifest.agent_profiles)?;
     let profile_names = managed_profile_names(&desired_profiles, &state.managed_agent_profiles)?;
     for name in &profile_names {
@@ -240,7 +250,6 @@ fn build_plan(
             });
         }
     }
-
     let marketplace_file: MarketplaceFile =
         read_optional_toml(&paths.repository_dir.join(&manifest.marketplaces))?;
     let configured_marketplaces = marketplace_names()?;
@@ -256,7 +265,6 @@ fn build_plan(
             },
         });
     }
-
     let plugin_file: PluginFile =
         read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
     validate_desired_state(&marketplace_file, &plugin_file)?;
@@ -304,7 +312,6 @@ fn build_plan(
             });
         }
     }
-
     let high_risk = changes.iter().any(|change| change.risk == Risk::High);
     let base_config_sha256 = sha256(current_config.as_bytes());
     let base_agents_sha256 = sha256(&current_agents);
@@ -336,11 +343,14 @@ fn build_plan(
         managed_agent_profiles: desired_profiles.keys().cloned().collect(),
     })
 }
-
 pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
     let paths = resolve_paths()?;
     let _lock = acquire_lock(&paths)?;
     let mut state = load_state(&paths)?;
+    ensure_recovery_clear(&paths, &state)?;
+    if migrate_receipts(&mut state.provision_receipts, &paths.data_home)? {
+        save_state(&paths, &state)?;
+    }
     let plan: PendingPlan =
         read_json(&paths.pending_plan).context("no pending plan; run `codex-sync sync` first")?;
     if plan.id != plan_id {
@@ -377,8 +387,53 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
         &current_agents,
         &manifest.external_agents_sections,
     )?;
+    let desired_plugins: PluginFile =
+        read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
+    validate_auto_provisioners(&desired_plugins.plugins, &state.provision_receipts)?;
     let backup = create_backup(&paths, &state, &plan)?;
+    let operation_id = new_operation_id("apply", &plan.id);
+    let operation_path = operation_log_path(&paths.data_home, &operation_id);
+    let operation_log = OperationLog {
+        schema_version: 5,
+        operation_id: operation_id.clone(),
+        kind: "apply".to_owned(),
+        phase: "checkpointed".to_owned(),
+        actions: Vec::new(),
+        action_records: Vec::new(),
+        backup: Some(backup.file_name().unwrap().to_string_lossy().into_owned()),
+        recovery_required: false,
+        before_backup: Some(
+            backup
+                .file_name()
+                .context("apply backup has no basename")?
+                .to_string_lossy()
+                .into_owned(),
+        ),
+        target_state: Some(paths.state_file.to_string_lossy().into_owned()),
+        before_state_digest: Some(sha256(toml::to_string(&state)?.as_bytes())),
+        target_state_digest: None,
+        supersedes: None,
+        compensation_steps: Vec::new(),
+    };
+    create_operation_log(&operation_path, &operation_log)?;
+    state.operation_log = Some(operation_path.to_string_lossy().into_owned());
+    state.recovery_required = true;
+    save_state(&paths, &state)?;
+    let mut recorder = OperationRecorder::new(operation_path.clone(), operation_log)?;
+    let mut provisioning_messages = Vec::new();
+    let mut runtime_operations: Vec<RuntimeOperation> = Vec::new();
     let result = (|| -> Result<()> {
+        recorder.set_phase("runtime_started")?;
+        for message in run_removal_provisioners_recorded(
+            &plan.changes,
+            &desired_plugins.plugins,
+            &state.provision_receipts,
+            &mut runtime_operations,
+            &mut recorder,
+        )? {
+            provisioning_messages.push(message);
+        }
+        recorder.set_phase("core_started")?;
         apply_transaction(
             &paths,
             &manifest,
@@ -392,27 +447,96 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
         state.last_applied_commit = Some(plan.commit.clone());
         state.managed_paths = plan.managed_paths.clone();
         state.managed_agent_profiles = plan.managed_agent_profiles.clone();
-        save_state(&paths, &state)
+        let plugins: PluginFile =
+            read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
+        let (messages, receipts) = run_auto_provisioners_recorded(
+            &plugins.plugins,
+            &state.provision_receipts,
+            &mut runtime_operations,
+            &paths.data_home,
+            Some(&mut recorder),
+        )?;
+        provisioning_messages.extend(messages);
+        state.provision_receipts = retain_receipts(receipts, &plugins.plugins);
+        recorder.log.target_state_digest = Some(normalized_state_digest(&state)?);
+        recorder.set_phase("commit-prepared")?;
+        // Keep the recovery gate and log until the committed checkpoint is durable.
+        save_state(&paths, &state)?;
+        recorder.set_phase("committed")?;
+        state = normalize_committed_state(&paths, &state, &recorder.log)?;
+        Ok(())
     })();
     if let Err(error) = result {
-        return match restore_backup(&paths, &backup) {
-            Ok(()) => Err(error).context("apply failed; restored the pre-apply backup"),
-            Err(rollback_error) => {
-                anyhow::bail!("apply failed: {error:#}; rollback also failed: {rollback_error:#}")
-            }
-        };
-    }
-    let plugins: PluginFile = read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
-    let provisioning = run_auto_provisioners(&plugins.plugins);
-    let _ = fs::remove_file(&paths.pending_plan);
-    let provisioning_messages = match provisioning {
-        Ok(messages) => messages,
-        Err(error) => {
-            anyhow::bail!(
-                "synchronized configuration was applied, but automatic plugin provisioning did not complete: {error:#}; run sync again after resolving the provisioning error"
-            )
+        if recorder.log.phase == "committed" {
+            // A failed convergence write is fail-closed and must not trigger rollback.
+            recorder.log.recovery_required = true;
+            recorder.persist()?;
+            return Err(error).context(
+                "apply committed checkpoint is durable but final state convergence failed; manual recovery required",
+            );
         }
-    };
+        if error.to_string().contains("durability is unknown") {
+            recorder.log.phase = "recovery_required".to_owned();
+            recorder.log.recovery_required = true;
+            recorder.persist()?;
+            return Err(error).context(
+                "apply durability barrier failed after publication; target may be visible and manual recovery is required",
+            );
+        }
+        // A child that was durably marked Running and then exited non-zero has
+        // an observable but non-reversible outcome. Keep the WAL and recovery
+        // gate intact; restoring core or compensating another action would
+        // hide the manual intervention required for this child.
+        if recorder.has_blocked_actions() || recorder.has_blocked_compensation() {
+            recorder.log.phase = "manual-required".to_owned();
+            recorder.log.recovery_required = true;
+            recorder.persist()?;
+            return Err(error).context(
+                "apply provisioner outcome is manual-required; verify runtime before retrying",
+            );
+        }
+        recorder.set_phase("compensating")?;
+        // Freeze the complete reverse-runtime plan before restoring core.  No
+        // compensation process may be spawned until this checkpoint is durable.
+        recorder.materialize_compensation_plan(&runtime_operations)?;
+        let backup_result = restore_backup(&paths, &backup);
+        // Never spawn a reverse-runtime step when core restoration failed: the
+        // runtime plan is only valid after the backup is known to be restored.
+        let runtime_result = if backup_result.is_ok() {
+            Some(compensate_operations_recorded(
+                &runtime_operations,
+                Some(&mut recorder),
+            ))
+        } else {
+            None
+        };
+        if let Err(rollback_error) = backup_result {
+            recorder.log.phase = "recovery_required".to_owned();
+            recorder.log.recovery_required = true;
+            if let Err(log_error) = recorder.persist() {
+                anyhow::bail!("apply failed: {error:#}; recovery log failed: {log_error:#}; rollback also failed: {rollback_error:#}");
+            }
+            if let Some(Err(runtime_error)) = runtime_result {
+                anyhow::bail!("apply failed: {error:#}; runtime compensation failed: {runtime_error:#}; rollback also failed: {rollback_error:#}");
+            }
+            anyhow::bail!("apply failed: {error:#}; rollback also failed: {rollback_error:#}");
+        }
+        if let Some(Err(runtime_error)) = runtime_result {
+            recorder.log.phase = "recovery_required".to_owned();
+            recorder.log.recovery_required = true;
+            if let Err(log_error) = recorder.persist() {
+                return Err(error).context(format!("runtime compensation failed: {runtime_error:#}; recovery log failed: {log_error:#}"));
+            }
+            let mut recovery_state = load_state(&paths)?;
+            recovery_state.recovery_required = true;
+            recovery_state.operation_log = Some(operation_path.to_string_lossy().into_owned());
+            save_state(&paths, &recovery_state)?;
+            return Err(error).context(format!("apply failed; core backup restored but runtime compensation failed: {runtime_error:#}"));
+        }
+        recorder.set_phase("reverted")?;
+        return Err(error).context("apply failed; restored the pre-apply backup");
+    }
+    let _ = fs::remove_file(&paths.pending_plan);
     println!("Applied plan {} from commit {}", plan.id, plan.commit);
     for message in provisioning_messages {
         println!("{message}");
@@ -420,7 +544,6 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
     println!("Start a new Codex task so synchronized plugins and settings are reloaded");
     Ok(())
 }
-
 fn apply_transaction(
     paths: &crate::model::Paths,
     manifest: &RepositoryManifest,
@@ -440,7 +563,6 @@ fn apply_transaction(
         desired_profiles,
         &state.managed_agent_profiles,
     )?;
-
     let client = http_client()?;
     let token = auth::resolve_token(&client, state.github_client_id.as_deref())?;
     let github = GithubClient::new(client, token)?;
@@ -452,6 +574,11 @@ fn apply_transaction(
         println!("{message}");
     }
     let plugins: PluginFile = read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
+    materialize_new_provisioners(
+        &plugins.plugins,
+        &state.provision_receipts,
+        &paths.data_home,
+    )?;
     let managed_marketplaces: BTreeSet<_> = marketplaces
         .marketplaces
         .iter()
@@ -463,201 +590,31 @@ fn apply_transaction(
     state.last_applied_commit = Some(plan.commit.clone());
     Ok(())
 }
-
-fn create_backup(
-    paths: &crate::model::Paths,
-    state: &LocalState,
-    plan: &PendingPlan,
-) -> Result<PathBuf> {
-    let name = format!(
-        "{}-{}-{}",
-        Utc::now().format("%Y%m%dT%H%M%SZ"),
-        &plan.commit[..plan.commit.len().min(12)],
-        plan.id
-    );
-    let backup = paths.backups_dir.join(name);
-    fs::create_dir_all(&backup)?;
-    for file in ["config.toml", "AGENTS.md"] {
-        let source = paths.codex_home.join(file);
-        if source.exists() {
-            fs::copy(&source, backup.join(file))?;
-        } else {
-            atomic_write(&backup.join(format!("{file}.absent")), b"")?;
-        }
-    }
-    let profile_backup = backup.join("agent-profiles");
-    fs::create_dir_all(&profile_backup)?;
-    let profile_names: BTreeSet<_> = state
-        .managed_agent_profiles
-        .iter()
-        .chain(plan.managed_agent_profiles.iter())
-        .cloned()
-        .collect();
-    for name in profile_names {
-        match current_profile_bytes(&paths.codex_home.join("agents"), &name)? {
-            Some(bytes) => atomic_write(&profile_backup.join(format!("{name}.toml")), &bytes)?,
-            None => atomic_write(&profile_backup.join(format!("{name}.absent")), b"")?,
-        }
-    }
-    let state_text = toml::to_string_pretty(state)?;
-    atomic_write(&backup.join("state.toml"), state_text.as_bytes())?;
-    let plugin_state = installed_plugins().unwrap_or_default();
-    write_json(&backup.join("plugins.json"), &plugin_state)?;
-    let marketplace_state = marketplace_roots()?;
-    write_json(&backup.join("marketplaces.json"), &marketplace_state)?;
-    let affected_marketplaces: BTreeSet<_> = plan
-        .changes
-        .iter()
-        .filter(|change| change.kind == "marketplace")
-        .map(|change| change.target.as_str())
-        .collect();
-    for (name, root) in &marketplace_state {
-        if affected_marketplaces.contains(name.as_str())
-            && root.is_dir()
-            && (root.starts_with(&paths.codex_home) || root.starts_with(&paths.data_home))
-        {
-            copy_tree(root, &backup.join("marketplace-snapshots").join(name))?;
-        }
-    }
-    write_json(&backup.join("plan.json"), plan)?;
-    Ok(backup)
-}
-
-fn restore_backup(paths: &crate::model::Paths, backup: &Path) -> Result<()> {
-    restore_core_files(paths, backup)?;
-    let marketplaces_backup = backup.join("marketplaces.json");
-    let plan_backup = backup.join("plan.json");
-    let affected_marketplaces: BTreeSet<String> = if plan_backup.exists() {
-        let plan: PendingPlan = read_json(&plan_backup)?;
-        plan.changes
-            .into_iter()
-            .filter(|change| change.kind == "marketplace")
-            .map(|change| change.target)
-            .collect()
-    } else {
-        BTreeSet::new()
-    };
-    if marketplaces_backup.exists() {
-        let marketplaces: std::collections::BTreeMap<String, PathBuf> =
-            read_json(&marketplaces_backup)?;
-        for (name, root) in &marketplaces {
-            let snapshot = backup.join("marketplace-snapshots").join(name);
-            if snapshot.is_dir()
-                && (root.starts_with(&paths.codex_home) || root.starts_with(&paths.data_home))
-            {
-                copy_tree(&snapshot, root)?;
-            }
-        }
-        let actual = marketplace_roots()?;
-        for name in &affected_marketplaces {
-            match marketplaces.get(name) {
-                Some(expected_root) => {
-                    let matches = actual.get(name).is_some_and(|actual_root| {
-                        actual_root == expected_root
-                            || (actual_root.exists()
-                                && expected_root.exists()
-                                && fs::canonicalize(actual_root).ok()
-                                    == fs::canonicalize(expected_root).ok())
-                    });
-                    if !matches {
-                        if actual.contains_key(name) {
-                            remove_marketplace(name)?;
-                        }
-                        add_local_marketplace(expected_root)?;
-                    }
-                }
-                None => {
-                    if actual.contains_key(name) {
-                        remove_marketplace(name)?;
-                    }
-                }
-            }
-        }
-    }
-    restore_core_files(paths, backup)?;
-    let plugins_backup = backup.join("plugins.json");
-    if plugins_backup.exists() {
-        let plugins: Vec<InstalledPlugin> = read_json(&plugins_backup)?;
-        restore_installed_plugins(&plugins)?;
-    }
-    restore_core_files(paths, backup)?;
-    if marketplaces_backup.exists() {
-        let expected: std::collections::BTreeMap<String, PathBuf> =
-            read_json(&marketplaces_backup)?;
-        let actual = marketplace_roots()?;
-        for name in &affected_marketplaces {
-            if expected.contains_key(name) != actual.contains_key(name) {
-                anyhow::bail!(
-                    "marketplace registration for {name} does not match the backup after restore"
-                );
-            }
-        }
-    }
-    Ok(())
-}
-
-fn restore_core_files(paths: &crate::model::Paths, backup: &Path) -> Result<()> {
-    for file in ["config.toml", "AGENTS.md"] {
-        let source = backup.join(file);
-        let destination = paths.codex_home.join(file);
-        if backup.join(format!("{file}.absent")).exists() {
-            if destination.exists() {
-                fs::remove_file(&destination)?;
-            }
-        } else if source.exists() {
-            atomic_write(&destination, &fs::read(&source)?)?;
-        }
-    }
-    restore_agent_profiles(paths, backup)?;
-    let state_backup = backup.join("state.toml");
-    if state_backup.exists() {
-        atomic_write(&paths.state_file, &fs::read(state_backup)?)?;
-    }
-    Ok(())
-}
-
-fn restore_agent_profiles(paths: &crate::model::Paths, backup: &Path) -> Result<()> {
-    let profile_backup = backup.join("agent-profiles");
-    if !profile_backup.is_dir() {
-        return Ok(());
-    }
-    let previous: LocalState = read_toml(&backup.join("state.toml"))?;
-    let plan: PendingPlan = read_json(&backup.join("plan.json"))?;
-    let names: BTreeSet<_> = previous
-        .managed_agent_profiles
-        .iter()
-        .chain(plan.managed_agent_profiles.iter())
-        .cloned()
-        .collect();
-    let destination = paths.codex_home.join("agents");
-    for name in names {
-        let target = destination.join(format!("{name}.toml"));
-        let source = profile_backup.join(format!("{name}.toml"));
-        if profile_backup.join(format!("{name}.absent")).exists() {
-            match fs::remove_file(&target) {
-                Ok(()) => {}
-                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-                Err(error) => {
-                    return Err(error).with_context(|| format!("remove {}", target.display()))
-                }
-            }
-        } else if source.is_file() {
-            atomic_write(&target, &fs::read(source)?)?;
-        }
-    }
-    Ok(())
-}
-
 pub fn rollback(backup_name: Option<&str>, approve: bool) -> Result<()> {
     if !approve {
         anyhow::bail!("rollback changes Codex configuration; rerun with --approve after review");
     }
     let paths = resolve_paths()?;
     let _lock = acquire_lock(&paths)?;
-    let state = load_state(&paths)?;
+    let mut state = load_state(&paths)?;
+    ensure_recovery_clear(&paths, &state)?;
+    state = load_state(&paths)?;
+    let logged_backup = match state.operation_log.as_deref() {
+        Some(path) => {
+            let log = read_operation_log(Path::new(path))?;
+            if log.kind == "rollback" && log.schema_version < 5 && operation_needs_recovery(&log) {
+                anyhow::bail!(
+                    "unfinished schema<5 rollback lacks a true before snapshot; manual recovery required"
+                );
+            }
+            log.backup
+        }
+        None => None,
+    };
     let name = backup_name
         .map(str::to_owned)
-        .or(state.latest_backup)
+        .or(logged_backup)
+        .or(state.latest_backup.clone())
         .context("no backup is available")?;
     if !name
         .chars()
@@ -669,11 +626,98 @@ pub fn rollback(backup_name: Option<&str>, approve: bool) -> Result<()> {
     if !backup.is_dir() {
         anyhow::bail!("backup does not exist: {name}");
     }
-    restore_backup(&paths, &backup)?;
+    let mut target_state: LocalState = read_toml(&backup.join("state.toml"))?;
+    migrate_receipts(&mut state.provision_receipts, &paths.data_home)?;
+    migrate_receipts(&mut target_state.provision_receipts, &paths.data_home)?;
+    let current_receipts = state.provision_receipts.clone();
+    let interrupted_operation = state.operation_log.clone();
+    let operation_id = new_operation_id("rollback", &name);
+    let before_backup = create_rollback_before_backup(&paths, &state, &backup, &operation_id)?;
+    let before_name = before_backup
+        .file_name()
+        .context("rollback before snapshot has no basename")?
+        .to_string_lossy()
+        .into_owned();
+    if before_name == name {
+        anyhow::bail!("rollback before snapshot must differ from target backup");
+    }
+    let operation_path = operation_log_path(&paths.data_home, &operation_id);
+    let operation_log = OperationLog {
+        schema_version: 5,
+        operation_id: operation_id.clone(),
+        kind: "rollback".to_owned(),
+        phase: "checkpointed".to_owned(),
+        actions: Vec::new(),
+        action_records: Vec::new(),
+        backup: Some(name.clone()),
+        recovery_required: false,
+        before_backup: Some(before_name),
+        target_state: Some(backup.join("state.toml").to_string_lossy().into_owned()),
+        before_state_digest: Some(sha256(toml::to_string(&state)?.as_bytes())),
+        target_state_digest: Some(normalized_state_digest(&target_state)?),
+        supersedes: state.operation_log.clone(),
+        compensation_steps: Vec::new(),
+    };
+    create_operation_log(&operation_path, &operation_log)?;
+    let mut recorder = OperationRecorder::new(operation_path.clone(), operation_log)?;
+    let mut operations = Vec::new();
+    if let Err(error) = restore_backup(&paths, &backup) {
+        recorder.log.phase = "recovery_required".to_owned();
+        recorder.log.recovery_required = true;
+        recorder.persist()?;
+        return Err(error);
+    }
+    // restore_backup restores the target snapshot, including its historical
+    // state file. Re-assert the rollback recovery gate before any runtime
+    // convergence so a crash cannot expose an ungated target state.
+    state = target_state.clone();
+    state.operation_log = Some(operation_path.to_string_lossy().into_owned());
+    state.recovery_required = true;
+    save_state(&paths, &state)?;
+    recorder.set_phase("runtime_started")?;
+    prepare_rollback_runtime_recorded(
+        &current_receipts,
+        &target_state.provision_receipts,
+        &mut operations,
+        Some(&mut recorder),
+    )?;
+    let target_runtime_receipts =
+        target_runtime_receipts_for_restore(&current_receipts, &target_state.provision_receipts);
+    if let Err(error) = restore_provisioners_recorded(
+        &target_runtime_receipts,
+        &mut operations,
+        Some(&mut recorder),
+    ) {
+        recorder.log.phase = "recovery_required".to_owned();
+        recorder.log.recovery_required = true;
+        recorder.persist()?;
+        if !recorder.has_blocked_actions() && !recorder.has_blocked_compensation() {
+            let _ = compensate_operations_recorded(&operations, Some(&mut recorder));
+        }
+        let mut recovery_state = load_state(&paths)?;
+        recovery_state.recovery_required = true;
+        recovery_state.operation_log = Some(operation_path.to_string_lossy().into_owned());
+        save_state(&paths, &recovery_state)?;
+        anyhow::bail!("rollback restored configuration but runtime restoration failed: {error:#}");
+    }
+    recorder.set_phase("committed")?;
+    if let Some(interrupted) = interrupted_operation.as_deref() {
+        if interrupted != operation_path.to_string_lossy() {
+            let mut old_log = read_operation_log(Path::new(interrupted))
+                .context("read interrupted operation before superseding")?;
+            old_log.phase = "superseded".to_owned();
+            old_log.recovery_required = false;
+            write_operation_log(Path::new(interrupted), &old_log)
+                .context("durably supersede interrupted operation")?;
+        }
+    }
+    state = target_state;
+    state.operation_log = Some(operation_path.to_string_lossy().into_owned());
+    state.recovery_required = true;
+    normalize_committed_state(&paths, &state, &recorder.log)?;
     println!("Restored backup {name}; start a new Codex task");
     Ok(())
 }
-
 pub fn status(json: bool) -> Result<()> {
     let paths = resolve_paths()?;
     let state = load_state(&paths)?;
@@ -704,7 +748,6 @@ pub fn status(json: bool) -> Result<()> {
     }
     Ok(())
 }
-
 pub fn doctor() -> Result<()> {
     let paths = resolve_paths()?;
     ensure_data_dirs(&paths)?;
@@ -750,7 +793,6 @@ pub fn doctor() -> Result<()> {
     println!("Codex Sync doctor found no blocking problems");
     Ok(())
 }
-
 pub fn publish(message: &str, approve: bool) -> Result<()> {
     if !approve {
         anyhow::bail!(
@@ -784,7 +826,6 @@ pub fn publish(message: &str, approve: bool) -> Result<()> {
     println!("Run `codex-sync sync` to create a new local application plan");
     Ok(())
 }
-
 fn scan_repository_for_obvious_secrets(root: &Path) -> Result<()> {
     fn visit(root: &Path, directory: &Path) -> Result<()> {
         for entry in fs::read_dir(directory)? {
@@ -834,13 +875,11 @@ fn scan_repository_for_obvious_secrets(root: &Path) -> Result<()> {
     }
     visit(root, root)
 }
-
 pub(crate) fn load_repository_manifest(repository: &Path) -> Result<RepositoryManifest> {
     let manifest: RepositoryManifest = read_toml(&repository.join("codex-sync.toml"))?;
     manifest.validate()?;
     Ok(manifest)
 }
-
 pub(crate) fn validate_desired_state(
     marketplaces: &MarketplaceFile,
     plugins: &PluginFile,
@@ -908,13 +947,14 @@ pub(crate) fn validate_desired_state(
     }
     Ok(())
 }
-
 pub(crate) fn validate_state(state: &LocalState) -> Result<()> {
     if state.schema_version != LOCAL_STATE_SCHEMA_VERSION {
         anyhow::bail!("unsupported local state schema version");
     }
     validate_device_id(&state.device_id)
 }
+
+include!("app_recovery.rs");
 
 fn validate_device_id(value: &str) -> Result<()> {
     if value.is_empty()
@@ -927,11 +967,9 @@ fn validate_device_id(value: &str) -> Result<()> {
     }
     Ok(())
 }
-
 fn sha256(value: &[u8]) -> String {
     hex::encode(Sha256::digest(value))
 }
-
 fn print_plan(plan: &PendingPlan) {
     println!("Plan {} for commit {}", plan.id, plan.commit);
     if plan.changes.is_empty() {
@@ -954,6 +992,5 @@ fn print_plan(plan: &PendingPlan) {
         }
     );
 }
-
 #[cfg(test)]
 mod tests;

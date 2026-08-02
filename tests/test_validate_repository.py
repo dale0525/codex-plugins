@@ -223,6 +223,89 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 )
             self.assertEqual(validation.errors, [])
 
+    def test_git_alias_command_is_exact_and_direct_pixi_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="git-alias-validator-test-") as temporary:
+            root = Path(temporary)
+            plugin = root / "plugins/example"
+            plugin.mkdir(parents=True)
+            scripts = plugin / "scripts"
+            scripts.mkdir()
+            bootstrap = scripts / "bootstrap.sh"
+            bootstrap.write_text("#!/bin/sh\n", encoding="utf-8")
+            bootstrap.chmod(0o755)
+            companion = plugin / ".mcp.json"
+            companion.write_text(json.dumps({"mcpServers": {"example": {
+                "command": "git",
+                "args": ["-c", 'alias.creative-model-bridge=!sh "${GIT_PREFIX}scripts/bootstrap.sh"', "creative-model-bridge"],
+                "cwd": ".", "env_vars": ["CODEX_HOME"],
+            }}}), encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(plugin, {"mcpServers": "./.mcp.json"}, validation)
+            self.assertEqual(validation.errors, [])
+
+            payload = json.loads(companion.read_text(encoding="utf-8"))
+            payload["mcpServers"]["example"]["command"] = "pixi"
+            companion.write_text(json.dumps(payload), encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(plugin, {"mcpServers": "./.mcp.json"}, validation)
+            self.assertTrue(any("direct Pixi command" in error for error in validation.errors))
+
+
+class WorkflowActionPinValidationTests(unittest.TestCase):
+    def _validate_workflow(self, uses: str) -> list[str]:
+        with tempfile.TemporaryDirectory(prefix="workflow-validator-test-") as temporary:
+            root = Path(temporary)
+            workflows = root / ".github/workflows"
+            workflows.mkdir(parents=True)
+            (workflows / "release.yml").write_text(
+                "name: test\n"
+                "jobs:\n"
+                "  test:\n"
+                "    runs-on: ubuntu-latest\n"
+                "    steps:\n"
+                f"      - uses: {uses}\n",
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_workflows(validation)
+            return validation.errors
+
+    def test_external_workflow_action_refs_require_full_lowercase_shas(self) -> None:
+        invalid_refs = (
+            "actions/checkout@v4",
+            "actions/checkout@main",
+            "actions/checkout@1234",
+            "actions/checkout@3D3C42E5AAC5BA805825DA76410C181273BA90B1",
+        )
+        for ref in invalid_refs:
+            with self.subTest(ref=ref):
+                errors = self._validate_workflow(ref)
+                self.assertTrue(any("full lowercase commit SHA" in error for error in errors))
+
+    def test_full_sha_and_local_workflow_action_refs_are_accepted(self) -> None:
+        full_sha = "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1"
+        with tempfile.TemporaryDirectory(prefix="workflow-validator-test-") as temporary:
+            root = Path(temporary)
+            workflows = root / ".github/workflows"
+            workflows.mkdir(parents=True)
+            (workflows / "release.yml").write_text(
+                "name: test\n"
+                "jobs:\n"
+                "  test:\n"
+                "    runs-on: ubuntu-latest\n"
+                "    steps:\n"
+                f"      - uses: {full_sha}\n"
+                "      - uses: ./local-action\n",
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_workflows(validation)
+            self.assertEqual(validation.errors, [])
+
 
 if __name__ == "__main__":
     unittest.main()

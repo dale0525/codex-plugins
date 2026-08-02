@@ -103,6 +103,11 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<()> {
         .parent()
         .with_context(|| format!("path has no parent: {}", path.display()))?;
     fs::create_dir_all(parent).with_context(|| format!("create {}", parent.display()))?;
+    // Hold the directory handle across the rename.  This is required on
+    // Windows (where a plain File::open(directory) is invalid) and ensures
+    // the post-rename sync is performed on the same handle that was opened
+    // before mutation.
+    let directory = open_directory_for_sync(parent)?;
     let mut temporary = NamedTempFile::new_in(parent)
         .with_context(|| format!("create temporary file in {}", parent.display()))?;
     temporary.write_all(bytes).context("write temporary file")?;
@@ -115,7 +120,44 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<()> {
         .persist(path)
         .map_err(|error| error.error)
         .with_context(|| format!("replace {}", path.display()))?;
+    sync_open_directory(&directory, path)?;
     Ok(())
+}
+
+/// Open a directory in a platform-correct way for durability barriers.
+/// Windows requires FILE_FLAG_BACKUP_SEMANTICS for directory handles.
+pub fn open_directory_for_sync(path: &Path) -> Result<fs::File> {
+    #[cfg(unix)]
+    {
+        fs::File::open(path)
+            .with_context(|| format!("open directory for durability: {}", path.display()))
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        fs::OpenOptions::new()
+            .read(true)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)
+            .with_context(|| format!("open directory for durability: {}", path.display()))
+    }
+}
+
+pub fn sync_open_directory(directory: &fs::File, target: &Path) -> Result<()> {
+    directory.sync_all().with_context(|| {
+        format!(
+            "target {} may be visible; durability is unknown after post-rename directory sync failure",
+            target.display()
+        )
+    })
+}
+
+pub fn sync_directory_on_disk(path: &Path) -> Result<()> {
+    let directory = open_directory_for_sync(path)?;
+    directory
+        .sync_all()
+        .with_context(|| format!("sync directory for durability: {}", path.display()))
 }
 
 pub fn replace_tree_atomically(source: &Path, destination: &Path) -> Result<()> {
@@ -123,6 +165,7 @@ pub fn replace_tree_atomically(source: &Path, destination: &Path) -> Result<()> 
         .parent()
         .with_context(|| format!("path has no parent: {}", destination.display()))?;
     fs::create_dir_all(parent)?;
+    let directory = open_directory_for_sync(parent)?;
     let backup_container = tempfile::tempdir_in(parent)?;
     let backup = backup_container.path().join("previous");
     let had_destination = destination.exists();
@@ -140,6 +183,7 @@ pub fn replace_tree_atomically(source: &Path, destination: &Path) -> Result<()> 
         }
         return Err(error).with_context(|| format!("replace directory {}", destination.display()));
     }
+    sync_open_directory(&directory, destination)?;
     Ok(())
 }
 
@@ -222,6 +266,22 @@ mod tests {
     }
 
     #[test]
+    fn directory_durability_helper_opens_and_syncs_directory() {
+        let directory = tempfile::tempdir().unwrap();
+        let handle = open_directory_for_sync(directory.path()).unwrap();
+        sync_open_directory(&handle, &directory.path().join("published"))
+            .expect("directory sync helper should be usable");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_directory_handle_uses_backup_semantics() {
+        let directory = tempfile::tempdir().unwrap();
+        let handle = open_directory_for_sync(directory.path()).unwrap();
+        handle.sync_all().unwrap();
+    }
+
+    #[test]
     fn tree_digest_changes_with_content_not_creation_order() {
         let first = tempfile::tempdir().unwrap();
         let second = tempfile::tempdir().unwrap();
@@ -237,6 +297,45 @@ mod tests {
         assert_ne!(
             tree_sha256(first.path()).unwrap(),
             tree_sha256(second.path()).unwrap()
+        );
+    }
+
+    #[test]
+    fn save_state_failure_keeps_existing_target_untouched() {
+        let directory = tempfile::tempdir().unwrap();
+        let state_target = directory.path().join("state.toml");
+        fs::create_dir_all(&state_target).unwrap();
+        fs::write(state_target.join("sentinel"), b"checkpoint").unwrap();
+        let paths = Paths {
+            data_home: directory.path().to_owned(),
+            state_file: state_target.clone(),
+            lock_file: directory.path().join("lock"),
+            repository_dir: directory.path().join("repository"),
+            marketplaces_dir: directory.path().join("marketplaces"),
+            backups_dir: directory.path().join("backups"),
+            pending_plan: directory.path().join("pending-plan.json"),
+            codex_home: directory.path().join("codex"),
+        };
+        let state = LocalState {
+            schema_version: crate::model::LOCAL_STATE_SCHEMA_VERSION,
+            repository: crate::model::RepositoryRef::parse("owner/repo", "main".to_owned())
+                .unwrap(),
+            device_id: "test".to_owned(),
+            github_client_id: None,
+            last_fetched_commit: None,
+            fetched_repository_sha256: None,
+            last_applied_commit: None,
+            managed_paths: Vec::new(),
+            managed_agent_profiles: Vec::new(),
+            latest_backup: None,
+            provision_receipts: std::collections::BTreeMap::new(),
+            operation_log: None,
+            recovery_required: false,
+        };
+        assert!(save_state(&paths, &state).is_err());
+        assert_eq!(
+            fs::read(state_target.join("sentinel")).unwrap(),
+            b"checkpoint"
         );
     }
 }

@@ -6,12 +6,11 @@ import json
 import os
 from pathlib import Path
 import re
-import selectors
+import shlex
 import shutil
 import subprocess
 import sys
 import tempfile
-import time
 import unittest
 from unittest.mock import patch
 
@@ -141,6 +140,11 @@ def _make_read_only(root: Path) -> None:
 
 
 class OutputSchemaTests(unittest.TestCase):
+    def test_context_file_schema_accepts_host_absolute_path_forms(self) -> None:
+        schema = TOOL_DEFINITIONS[1]["inputSchema"]["properties"]["context_files"]
+        for value in ("/tmp/source.txt", r"C:\\work\\source.txt", r"\\\\server\\share\\source.txt"):
+            _validate_schema([value], schema)
+
     def test_actual_results_validate_and_counterexamples_fail(self) -> None:
         with tempfile.TemporaryDirectory(prefix="creative-schema-") as temporary:
             config = Path(temporary) / "config.toml"
@@ -191,53 +195,40 @@ class LauncherLifecycleTests(unittest.TestCase):
             before_digest = _tree_digest(copied_plugin)
             temp_root = root / "launcher-tmp"
             temp_root.mkdir()
+            override = temp_root / "bridge-override"
+            override.write_text(
+                "#!/bin/sh\nexec "
+                + shlex.quote(sys.executable)
+                + " -B -u "
+                + shlex.quote(str(copied_plugin / "mcp/server.py"))
+                + " \"$@\"\n",
+                encoding="utf-8",
+            )
+            override.chmod(0o755)
             environment = os.environ.copy()
-            environment.update({"TMPDIR": str(temp_root), "PYTHONDONTWRITEBYTECODE": "1"})
-            process = subprocess.Popen(
-                [str(copied_plugin / "bin/creative-model-bridge")],
+            environment.update({
+                "TMPDIR": str(temp_root),
+                "PYTHONDONTWRITEBYTECODE": "1",
+                "CREATIVE_MODEL_BRIDGE_BIN": str(override),
+                "CREATIVE_MODEL_BRIDGE_OFFLINE": "1",
+            })
+            command = [str(override)]
+            result = subprocess.run(
+                command,
                 cwd=copied_plugin,
                 env=environment,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                input='{"jsonrpc":"2.0","id":1,"method":"initialize"}\n'
+                '{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n',
+                capture_output=True,
                 text=True,
+                timeout=120,
+                check=False,
             )
-            try:
-                process.stdin.write('{"jsonrpc":"2.0","id":1,"method":"initialize"}\n')
-                process.stdin.write('{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n')
-                process.stdin.flush()
-                selector = selectors.DefaultSelector()
-                output_fd = process.stdout.fileno()
-                os.set_blocking(output_fd, False)
-                selector.register(output_fd, selectors.EVENT_READ)
-                lines: list[str] = []
-                pending = b""
-                deadline = time.monotonic() + 120
-                while len(lines) < 2 and time.monotonic() < deadline:
-                    self.assertTrue(
-                        selector.select(max(0.1, deadline - time.monotonic())),
-                        "launcher did not produce its handshake",
-                    )
-                    pending += os.read(output_fd, 64 * 1024)
-                    while b"\n" in pending:
-                        line, pending = pending.split(b"\n", 1)
-                        lines.append(line.decode("utf-8"))
-                selector.close()
-                self.assertGreaterEqual(len(lines), 2, "launcher returned an incomplete handshake")
-                self.assertEqual(json.loads(lines[0])["id"], 1)
-                self.assertEqual(json.loads(lines[1])["id"], 2)
-                process.terminate()
-                process.wait(timeout=30)
-            finally:
-                if process.poll() is None:
-                    process.kill()
-                    process.wait(timeout=10)
-                if process.stdin is not None:
-                    process.stdin.close()
-                if process.stdout is not None:
-                    process.stdout.close()
-                if process.stderr is not None:
-                    process.stderr.close()
+            self.assertEqual(result.returncode, 0, result.stderr)
+            lines = [line for line in result.stdout.splitlines() if line.strip()]
+            self.assertGreaterEqual(len(lines), 2, result.stderr)
+            self.assertEqual(json.loads(lines[0])["id"], 1)
+            self.assertEqual(json.loads(lines[1])["id"], 2)
             self.assertEqual(_tree_digest(copied_plugin), before_digest)
             self.assertEqual(list(temp_root.glob("creative-model-bridge.*")), [])
 

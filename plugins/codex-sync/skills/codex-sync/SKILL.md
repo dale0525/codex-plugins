@@ -59,8 +59,11 @@ Read [repository-schema.md](references/repository-schema.md) when creating or ed
 6. Report the applied commit and instruct the user to start a new Codex task. Plugin skills, tools, and config changes are not guaranteed to hot-load into the current task.
 
 When the reviewed plan contains an `auto_provision` plugin, the engine installs
-the plugin and runs its bundled provisioner automatically after the core apply
-transaction. Do not invoke the plugin's setup skill separately unless the
+the plugin and runs its bundled provisioner inside the transactional apply. A
+successful run records a content-addressed receipt; drift, missing runtime
+files, or a failed provisioner rolls the entire apply back. Removing a
+provisioned plugin invokes its script with `uninstall` before Codex removes the
+plugin. Do not invoke the plugin's setup skill separately unless the
 provisioner reports incomplete setup or the user requests repair.
 
 Do not silently replace an existing setup. Run `<bootstrap> status` first. Use `setup ... --replace-existing` only after the user explicitly approves replacing the repository/device binding; the engine backs up the previous local state.

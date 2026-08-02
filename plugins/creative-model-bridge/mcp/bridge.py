@@ -24,7 +24,7 @@ import urllib.request
 
 
 SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"
-BRIDGE_VERSION = "0.1.2"
+BRIDGE_VERSION = "0.1.3"
 USER_AGENT = f"creative-model-bridge/{BRIDGE_VERSION}"
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_CHARS = 180_000
@@ -74,7 +74,12 @@ REQUEST_SCHEMA: dict[str, Any] = {
         },
         "context_files": {
             "type": "array",
-            "items": {"type": "string", "minLength": 1, "pattern": "^/"},
+            "description": "Ordered host-OS absolute paths to regular text files; runtime validation uses os.path.isabs.",
+            "items": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Absolute path according to the host OS (POSIX, Windows drive, or UNC syntax).",
+            },
         },
         "constraints": {
             "oneOf": [
@@ -177,9 +182,9 @@ class ConfigLoader:
         if self.config_path is not None:
             return self.config_path
         codex_home = os.environ.get("CODEX_HOME")
-        if not codex_home:
-            raise ConfigError("CODEX_HOME is not set")
-        return Path(codex_home) / "config.toml"
+        if codex_home:
+            return Path(codex_home) / "config.toml"
+        return Path.home() / ".codex" / "config.toml"
 
     def load(self) -> ProviderConfig:
         path = self._path()

@@ -14,8 +14,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 try:  # direct script launch from a copied plugin cache
     from bridge import BRIDGE_VERSION, Bridge, BridgeError, REQUEST_SCHEMA  # type: ignore  # noqa: E402
+    from provision import main as provision_main  # type: ignore  # noqa: E402
 except ImportError:  # package import in tests or embedding applications
     from .bridge import BRIDGE_VERSION, Bridge, BridgeError, REQUEST_SCHEMA  # noqa: E402
+    from .provision import main as provision_main  # noqa: E402
 
 
 def _prompt_report_schema() -> dict[str, Any]:
@@ -242,6 +244,8 @@ def handle(message: dict[str, Any], bridge: Bridge) -> dict[str, Any] | None:
 
 
 def main() -> int:
+    if len(sys.argv) > 1 and sys.argv[1] == "provision":
+        return provision_main(sys.argv[2:])
     bridge = Bridge()
     for raw_line in sys.stdin:
         line = raw_line.strip()

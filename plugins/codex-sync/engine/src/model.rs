@@ -61,6 +61,45 @@ pub struct LocalState {
     pub managed_agent_profiles: Vec<String>,
     #[serde(default)]
     pub latest_backup: Option<String>,
+    /// Successful plugin provisioners keyed by their stable plugin ID.
+    /// Receipts are intentionally part of synchronized local state so a later
+    /// apply can detect contract drift before touching Codex configuration.
+    #[serde(default)]
+    pub provision_receipts: BTreeMap<String, ProvisionReceipt>,
+    #[serde(default)]
+    pub operation_log: Option<String>,
+    #[serde(default)]
+    pub recovery_required: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ProvisionReceipt {
+    #[serde(default = "default_receipt_version")]
+    pub schema_version: u32,
+    pub plugin_id: String,
+    #[serde(default)]
+    pub artifact_digest: String,
+    #[serde(default)]
+    pub artifact_root: String,
+    pub spec_sha256: String,
+    #[serde(default)]
+    pub script_sha256: String,
+    #[serde(default)]
+    pub dependencies_sha256: String,
+    #[serde(default)]
+    pub setup_args: Vec<String>,
+    #[serde(default)]
+    pub uninstall_args: Vec<String>,
+    #[serde(default)]
+    pub windows_shell: String,
+    pub plugin_root: String,
+    pub script: String,
+    #[serde(default)]
+    pub provisioned_at: String,
+}
+
+fn default_receipt_version() -> u32 {
+    1
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -58,6 +58,9 @@ GitHub App uses Device Flow. A complete provider definition, including an
 explicitly configured plaintext `experimental_bearer_token`, can be synchronized
 through the private repository for zero-setup use on every device.
 
+Codex Sync 0.4.3 records apply and rollback operations with durable write-ahead
+logs, runtime receipts, compensation plans, and recovery-required gates so
+configuration and plugin provisioning converge transactionally across failures.
 Codex Sync 0.4.2 prevents transient session reasoning settings from becoming
 cross-device defaults: normal capture restores portable
 `model_reasoning_effort = "medium"` and removes device-level overrides. A

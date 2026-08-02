@@ -9,15 +9,34 @@ Responses API shape:
 - `creative_generate` makes one `/responses` request and returns generated text
   verbatim with usage, request ID, and a prompt report.
 
-The server is launched from the installed plugin root by `.mcp.json` using the
-relative `bin/creative-model-bridge` launcher. That launcher runs the bundled
-plugin `pixi.toml` environment (Python 3.11–3.13) and forwards only
-`CODEX_HOME` plus the fixed `CREATIVE_MODEL_API_KEY` credential channel, so the
-same launcher works from a copied plugin cache.
+The plugin manifest intentionally has no bundled MCP declaration. Run the
+platform launcher once after installation (or let codex-sync run it):
+`scripts/bootstrap.sh setup --yes` on POSIX, or
+`powershell.exe -ExecutionPolicy Bypass -File scripts/provision.ps1 setup --yes`
+on Windows PowerShell 5.1. The launcher downloads a versioned, self-contained
+PyInstaller executable, verifies its SHA-256 entry, and atomically caches it at
+`$CODEX_HOME/creative-model-bridge/runtime/v<version>/objects/<target>/<sha256>/<generation>/`.
+The executable then transactionally writes the global `$CODEX_HOME/config.toml`
+MCP entry. `provision status`, `repair`, and `uninstall` are available from the
+same binary. Objects are immutable and never garbage-collected, so a Windows
+binary in use is never overwritten or deleted. Target machines need neither
+Git, Pixi, Python, nor PowerShell 7; only native Windows PowerShell 5.1 is
+required.
+
+Provision state schema 2 reports `absent`, `installed`, `uninstalled`,
+`drift`, `foreign`, or `pending_manual_recovery`. A healthy setup or repair is
+an exact no-op. Repair replaces only an owned MCP block and preserves outside
+configuration edits; uninstall removes only that block and retains the
+`uninstalled` state even when the rest of `config.toml` changes. A WAL with
+before/after images is retained when an unknown external edit prevents safe
+rollback.
 
 ## Configuration
 
-The bridge reads `$CODEX_HOME/config.toml` with `tomllib`. The provider name and
+The bridge reads `config.toml` with `tomllib`. It first honors an explicit
+configuration path, then a non-empty `$CODEX_HOME`, and otherwise uses the
+platform default `Path.home()/.codex` (on Windows, `%USERPROFILE%\.codex`).
+The provider name and
 default model are selected from:
 
 ```toml
@@ -35,9 +54,8 @@ env_key = "MY_PROVIDER_API_KEY"
 `wire_api` must be exactly `"responses"`. An explicitly supplied request model
 overrides `CREATIVE_MODEL_DEFAULT` exactly; no model auto-selection or adapter
 is performed. A bundled stdio MCP cannot dynamically forward arbitrary
-provider-specific environment names from its host, so `.mcp.json` forwards one
-fixed plugin channel: `CREATIVE_MODEL_API_KEY`. The Codex host must expose that
-variable when the configured provider's `env_key` is not otherwise present.
+provider-specific environment names from its host, so the provisioned entry
+forwards `CREATIVE_MODEL_API_KEY` and the selected provider's `env_key` when configured.
 Credential precedence is: the configured `env_key`, then
 `CREATIVE_MODEL_API_KEY`, and finally `experimental_bearer_token` only when no
 `env_key` is configured. Credentials never appear in tool results or errors.
@@ -61,7 +79,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.2` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.3` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test
@@ -73,5 +91,20 @@ pixi run test
 pixi run validate
 ```
 
+`CREATIVE_MODEL_BRIDGE_BIN` is an explicit executable override for tests and
+development; a valid override performs zero network access. Set
+`CREATIVE_MODEL_BRIDGE_OFFLINE=1` to require a cached executable (an uncached
+offline start fails clearly). Downloaded assets and `checksums.txt` come from
+the same GitHub release and therefore provide integrity checking, not an
+independent supply-chain attestation. No `creative-model-bridge-v0.1.3`
+release is claimed to exist until the workflow is run; before that tag, use the
+override for local smoke tests.
+
+The tag workflow is retry-safe: an absent tag creates a draft, a draft can be
+completed or clobbered only after rechecking that it is still draft, unknown
+extra assets fail, and an exact published release is a read-only no-op.
+
 Focused tests use an in-process mock HTTP opener; they never make a live CPA
-request and contain no credentials.
+request and contain no credentials. The repository workflow builds and smoke
+tests the direct binary on Linux, macOS, and Windows. This checkout has not run
+a real Windows host locally; the Windows matrix job is the validation boundary.
