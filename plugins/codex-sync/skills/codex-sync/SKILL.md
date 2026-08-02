@@ -117,7 +117,7 @@ The engine publishes one commit only when the remote branch still matches the fe
 
 ## Guardrails
 
-- When a global `AGENTS.md` explicitly grants standing authorization for proactive native subagent delegation, preserve that authorization as an explicit statement during capture, editing, or simplification. A generic instruction to use subagents is not equivalent; remove the authorization only on explicit user direction.
+- When a global `AGENTS.md` explicitly gives a standing instruction to proactively use native subagents, preserve it as an instruction—not merely permission—during capture, editing, or simplification. A generic statement that subagents are available or allowed is not equivalent; weaken or remove the instruction only on explicit user direction.
 - Prefer provider credentials in environment variables, command-backed authentication, or the OS credential store. If the user explicitly chooses plaintext cross-device storage, allow only `providers.<name>.experimental_bearer_token`, warn that it persists in Git history and global `config.toml`, and treat it as a high-risk provider change. Never ask the user to paste the token into chat.
 - Do not bypass a secret-scan failure.
 - Do not apply a plan whose ID, base hashes, or commit no longer match.

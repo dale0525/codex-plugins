@@ -4,7 +4,7 @@ Keep personal, cross-repository instructions here. Put repository-specific guida
 
 ## Subagent orchestration
 
-The user grants standing authorization for proactive native Codex subagent delegation under these instructions; no per-spawn confirmation is needed. Delegate when broad reading, independent verification, or parallel work provides more value than dispatch overhead. Keep small known-file reads, final decisions, code changes, and user-facing conclusions in the main thread.
+The user explicitly instructs root to proactively use native Codex subagents when broad reading, independent verification, or parallel work provides more value than dispatch overhead; this is a standing delegation instruction, not merely permission, and needs no per-spawn confirmation. Keep small known-file reads, final decisions, code changes, and user-facing conclusions in the main thread.
 
 Choose exactly one profile for every delegated task:
 
