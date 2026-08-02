@@ -1,6 +1,6 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Route creative writing requests to a configured Responses API provider with auditable prompts.",
   "author": {
     "name": "Logic Tan",

@@ -516,24 +516,23 @@ class ProvisionTests(unittest.TestCase):
             else:
                 provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
 
-    def test_consistent_v015_state_migrates_transactionally(self) -> None:
+    def test_consistent_v016_state_migrates_transactionally(self) -> None:
         ca = self.home / "ca.pem"
         ca.write_text("CA", encoding="utf-8")
         old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
         try:
             provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
-            with patch.object(provision.sys, "platform", "win32"):
+            with patch.object(provision.sys, "platform", "win32"), patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
                 legacy = provision.setup(home=self.home)
             config = self.home / "config.toml"
             state_path = provision.state_path(self.home)
             state = json.loads(state_path.read_text(encoding="utf-8"))
-            state.pop("bridge_version", None)
-            state.pop("ssl_cert_file", None)
+            state["bridge_version"] = "0.1.6"
             state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
-            self.assertNotIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
-            with patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
+            self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
+            with patch.object(provision.sys, "platform", "win32"), patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
                 migrated = provision.setup(home=self.home)
-            self.assertEqual(migrated["bridge_version"], "0.1.6")
+            self.assertEqual(migrated["bridge_version"], "0.1.7")
             self.assertEqual(migrated["ssl_cert_file"], str(ca))
             self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
             self.assertEqual(legacy["status"], "installed")

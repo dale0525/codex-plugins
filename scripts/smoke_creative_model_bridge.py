@@ -19,19 +19,20 @@ def _run_rpc(binary: Path, payload: str, environment: dict[str, str]) -> list[di
     result = subprocess.run(
         [str(binary)],
         cwd=binary.parent,
-        input=payload,
+        input=payload.encode("utf-8"),
         capture_output=True,
-        text=True,
         env=environment,
         check=False,
         timeout=90,
     )
+    stdout = result.stdout.decode("utf-8", errors="strict")
+    stderr = result.stderr.decode("utf-8", errors="replace")
     if result.returncode != 0:
-        raise RuntimeError(result.stderr or f"bridge exited with {result.returncode}")
+        raise RuntimeError(stderr or f"bridge exited with {result.returncode}")
     try:
-        return [json.loads(line) for line in result.stdout.splitlines() if line.strip()]
+        return [json.loads(line) for line in stdout.splitlines() if line.strip()]
     except json.JSONDecodeError as error:
-        raise RuntimeError(f"invalid MCP output: {result.stdout}") from error
+        raise RuntimeError(f"invalid MCP output: {stdout}") from error
 
 
 def _openssl_executable() -> str | None:
@@ -64,7 +65,7 @@ def _make_tls_material(root: Path) -> tuple[Path, Path, Path]:
     ]
     try:
         for command in commands:
-            subprocess.run(command, check=True, capture_output=True, text=True, timeout=30)
+            subprocess.run(command, check=True, capture_output=True, encoding="utf-8", timeout=30)
     except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
         raise RuntimeError(f"TLS smoke could not create ephemeral certificates with {openssl}: {error}") from error
     return ca_cert, server_cert, server_key
@@ -101,7 +102,7 @@ class _TLSHandler(BaseHTTPRequestHandler):
         if self.path != "/v1/responses" or not self._auth():
             self.send_error(401)
             return
-        self._write({"id": "tls-response", "output_text": "tls smoke success", "usage": {"input_tokens": 4, "output_tokens": 3}})
+        self._write({"id": "tls-response", "output_text": "TLS 烟雾成功", "usage": {"input_tokens": 4, "output_tokens": 3}})
 
 
 def _tls_smoke(binary: Path, root: Path) -> None:
@@ -122,6 +123,24 @@ def _tls_smoke(binary: Path, root: Path) -> None:
             encoding="utf-8",
         )
         environment = os.environ.copy()
+        # Exercise and then remove hostile proxy settings: loopback TLS must
+        # connect directly even when a caller's environment supplies proxies.
+        environment.update({
+            "HTTP_PROXY": "http://127.0.0.1:9",
+            "http_proxy": "http://127.0.0.1:9",
+            "HTTPS_PROXY": "http://127.0.0.1:9",
+            "https_proxy": "http://127.0.0.1:9",
+            "ALL_PROXY": "http://127.0.0.1:9",
+            "all_proxy": "http://127.0.0.1:9",
+        })
+        environment = {
+            key: value
+            for key, value in environment.items()
+            if not key.lower().endswith("_proxy")
+        }
+        environment["NO_PROXY"] = "*"
+        environment["no_proxy"] = "*"
+        environment["PYTHONIOENCODING"] = "utf-8"
         environment.update({"CODEX_HOME": str(home), "SSL_CERT_FILE": str(ca_cert), "SMOKE_BEARER": "placeholder-smoke-token"})
         requests = "\n".join([
             '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"creative_models","arguments":{}}}',
@@ -133,7 +152,7 @@ def _tls_smoke(binary: Path, root: Path) -> None:
             raise RuntimeError(f"TLS smoke returned unexpected IDs: {responses}")
         models = responses[0].get("result", {}).get("structuredContent", {})
         generated = responses[1].get("result", {}).get("structuredContent", {})
-        if models.get("models") != ["smoke/model"] or generated.get("text") != "tls smoke success" or not generated.get("usage"):
+        if models.get("models") != ["smoke/model"] or generated.get("text") != "TLS 烟雾成功" or not generated.get("usage"):
             raise RuntimeError(f"TLS smoke response assertion failed: {responses}")
         if _TLSHandler.seen != [("GET", "/v1/models"), ("POST", "/v1/responses")]:
             raise RuntimeError(f"TLS smoke did not exercise both endpoints: {_TLSHandler.seen}")
@@ -165,6 +184,7 @@ def main() -> int:
                 encoding="utf-8",
             )
             environment["CODEX_HOME"] = str(home)
+            environment["PYTHONIOENCODING"] = "utf-8"
             payload = "\n".join([
                 '{"jsonrpc":"2.0","id":1,"method":"initialize"}',
                 '{"jsonrpc":"2.0","id":2,"method":"tools/list"}',
@@ -177,13 +197,13 @@ def main() -> int:
             preview = responses[2].get("result", {}).get("structuredContent", {})
             if preview.get("network") is not False:
                 raise RuntimeError(f"preview smoke was not offline: {preview}")
-            setup = subprocess.run([str(binary), "provision", "setup", "--yes"], capture_output=True, text=True, env=environment, timeout=90)
+            setup = subprocess.run([str(binary), "provision", "setup", "--yes"], capture_output=True, encoding="utf-8", env=environment, timeout=90)
             if setup.returncode != 0:
                 raise RuntimeError(setup.stderr or "provision setup failed")
-            status = subprocess.run([str(binary), "provision", "status"], capture_output=True, text=True, env=environment, timeout=90)
+            status = subprocess.run([str(binary), "provision", "status"], capture_output=True, encoding="utf-8", env=environment, timeout=90)
             if status.returncode != 0 or '"status": "installed"' not in status.stdout:
                 raise RuntimeError(status.stderr or status.stdout or "provision status failed")
-            uninstall = subprocess.run([str(binary), "provision", "uninstall"], capture_output=True, text=True, env=environment, timeout=90)
+            uninstall = subprocess.run([str(binary), "provision", "uninstall"], capture_output=True, encoding="utf-8", env=environment, timeout=90)
             if uninstall.returncode != 0 or "mcp_servers.creative-model-bridge" in (home / "config.toml").read_text(encoding="utf-8"):
                 raise RuntimeError(uninstall.stderr or "provision uninstall failed")
             _TLSHandler.seen = []
