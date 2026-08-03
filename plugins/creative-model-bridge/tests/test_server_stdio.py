@@ -50,6 +50,55 @@ class _ErrorBridge:
 
 
 class ServerStdioTests(unittest.TestCase):
+    def test_ssl_initializer_reuses_resolver_and_sets_missing_environment(self) -> None:
+        with patch.dict(os.environ, {}, clear=True), patch.object(server, "resolve_ssl_cert_file", return_value="/etc/ssl/cert.pem") as resolver:
+            server._configure_ssl_cert_file()
+            selected = os.environ.get("SSL_CERT_FILE")
+        resolver.assert_called_once_with()
+        self.assertEqual(selected, "/etc/ssl/cert.pem")
+
+    def test_ssl_initializer_preserves_explicit_environment_after_validation(self) -> None:
+        with patch.dict(os.environ, {"SSL_CERT_FILE": "/custom/ca.pem"}, clear=True), patch.object(server, "resolve_ssl_cert_file", return_value="/custom/ca.pem") as resolver:
+            server._configure_ssl_cert_file()
+            selected = os.environ.get("SSL_CERT_FILE")
+        resolver.assert_called_once_with()
+        self.assertEqual(selected, "/custom/ca.pem")
+
+    def test_ssl_initializer_applies_plugin_alias_precedence_to_urllib_environment(self) -> None:
+        environment = {
+            "CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE": "/preferred/ca.pem",
+            "SSL_CERT_FILE": "/stale/ca.pem",
+        }
+        with patch.dict(os.environ, environment, clear=True), patch.object(
+            server, "resolve_ssl_cert_file", return_value="/preferred/ca.pem"
+        ) as resolver:
+            server._configure_ssl_cert_file()
+            selected = os.environ.get("SSL_CERT_FILE")
+        resolver.assert_called_once_with()
+        self.assertEqual(selected, "/preferred/ca.pem")
+
+    def test_main_initializes_ssl_before_constructing_bridge(self) -> None:
+        events: list[str] = []
+
+        def resolve() -> None:
+            events.append("ssl")
+            return None
+
+        class CapturingBridge:
+            def __init__(self, **kwargs: object) -> None:
+                events.append("bridge")
+
+        with (
+            patch.dict(os.environ, {}, clear=True),
+            patch.object(server, "_configure_stdio_utf8"),
+            patch.object(server, "resolve_ssl_cert_file", side_effect=resolve),
+            patch.object(server, "Bridge", CapturingBridge),
+            patch.object(server.sys, "stdin", io.StringIO("")),
+            patch.object(server.sys, "argv", ["server.py"]),
+        ):
+            self.assertEqual(server.main(), 0)
+        self.assertEqual(events, ["ssl", "bridge"])
+
     def test_cp1252_wrapper_is_red_before_boundary_reconfiguration(self) -> None:
         raw, stream = _cp1252_stream(errors="strict")
         with self.assertRaises(UnicodeEncodeError):

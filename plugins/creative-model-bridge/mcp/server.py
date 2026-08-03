@@ -15,10 +15,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 try:  # direct script launch from a copied plugin cache
     from bridge import BRIDGE_VERSION, Bridge, BridgeError, REQUEST_SCHEMA  # type: ignore  # noqa: E402
-    from provision import main as provision_main  # type: ignore  # noqa: E402
+    from provision import ProvisionError, main as provision_main, resolve_ssl_cert_file  # type: ignore  # noqa: E402
 except ImportError:  # package import in tests or embedding applications
     from .bridge import BRIDGE_VERSION, Bridge, BridgeError, REQUEST_SCHEMA  # noqa: E402
-    from .provision import main as provision_main  # noqa: E402
+    from .provision import ProvisionError, main as provision_main, resolve_ssl_cert_file  # noqa: E402
 
 
 def _prompt_report_schema() -> dict[str, Any]:
@@ -212,6 +212,22 @@ def _configure_stdio_utf8() -> None:
         raise RuntimeError("UTF-8 stdio configuration unavailable (" + "; ".join(failures) + ")")
 
 
+def _configure_ssl_cert_file() -> None:
+    """Initialize urllib's CA bundle before a standard stdio server request.
+
+    ``provision.resolve_ssl_cert_file`` is the single source of truth for
+    explicit overrides and platform defaults.  On POSIX it selects the
+    deterministic system bundle (including macOS's ``/etc/ssl/cert.pem``),
+    while Windows returns ``None`` so Python keeps its native trust store.
+    The resolver's result is always written back because the plugin-specific
+    alias intentionally takes precedence when both CA variables are present.
+    """
+
+    resolved = resolve_ssl_cert_file()
+    if resolved is not None:
+        os.environ["SSL_CERT_FILE"] = resolved
+
+
 TOOL_DEFINITIONS = [
     {
         "name": "creative_models",
@@ -313,6 +329,15 @@ def main() -> int:
         return 1
     if len(sys.argv) > 1 and sys.argv[1] == "provision":
         return provision_main(sys.argv[2:])
+    try:
+        _configure_ssl_cert_file()
+    except ProvisionError as error:
+        try:
+            sys.stderr.write(f"creative-model-bridge: {error}\n")
+            sys.stderr.flush()
+        except Exception:
+            pass
+        return 1
     if os.environ.get(_TRANSPORT_DIAGNOSTICS_ENV) == "1":
         bridge = Bridge(transport_diagnostics=True)
     else:

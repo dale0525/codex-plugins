@@ -9,19 +9,25 @@ Responses API shape:
 - `creative_generate` makes one `/responses` request and returns generated text
   verbatim with usage, request ID, and a prompt report.
 
-The plugin manifest intentionally has no bundled MCP declaration. Run the
-platform launcher once after installation (or let codex-sync run it):
-`scripts/bootstrap.sh setup --yes` on POSIX, or
+The plugin manifest includes a standard bundled MCP declaration in
+`.mcp.json`. After the plugin is enabled, Codex can discover all three tools by
+starting `scripts/bootstrap.sh serve` (the current bundled fixture is verified
+on macOS). Its server ID is `creative-model-bridge-bundled`, deliberately
+distinct from the legacy global `creative-model-bridge` provision ID so an
+existing 0.1.5–0.1.10 entry cannot shadow the bundled 0.1.11 runtime. No global
+MCP provisioning is required for that discovery path. The
+platform provisioners remain available for users who want a global owner-marked
+entry: run `scripts/bootstrap.sh setup --yes` on POSIX, or
 `powershell.exe -ExecutionPolicy Bypass -File scripts/provision.ps1 setup --yes`
 on Windows PowerShell 5.1. The launcher downloads a versioned, self-contained
 PyInstaller executable, verifies its SHA-256 entry, and atomically caches it at
 `$CODEX_HOME/creative-model-bridge/runtime/v<version>/objects/<target>/<sha256>/<generation>/`.
-The executable then transactionally writes the global `$CODEX_HOME/config.toml`
-MCP entry. `provision status`, `repair`, and `uninstall` are available from the
-same binary. Objects are immutable and never garbage-collected, so a Windows
-binary in use is never overwritten or deleted. Target machines need neither
-Git, Pixi, Python, nor PowerShell 7; only native Windows PowerShell 5.1 is
-required.
+The executable transactionally writes the global `$CODEX_HOME/config.toml` MCP
+entry only for that optional provisioning path. `provision status`, `repair`,
+and `uninstall` are available from the same binary. Objects are immutable and
+never garbage-collected, so a Windows binary in use is never overwritten or
+deleted. Target machines need neither Git, Pixi, Python, nor PowerShell 7; only
+native Windows PowerShell 5.1 is required.
 
 Provision state schema 2 reports `absent`, `installed`, `uninstalled`,
 `drift`, `foreign`, or `pending_manual_recovery`. A healthy setup or repair is
@@ -39,8 +45,8 @@ variable by default and keeps the native trust store. The selected path is
 recorded in schema-2 state and in the owned MCP environment. If that bundle is
 later removed, status reports drift while uninstall remains available.
 
-An internally consistent 0.1.5, 0.1.6, 0.1.7, or 0.1.8 owned block/state is
-upgraded transactionally to 0.1.10. The migration recognizes the one known
+An internally consistent 0.1.5 through 0.1.10 owned block/state is upgraded
+transactionally to 0.1.11. The migration recognizes the one known
 begin-only marker repair shape only when the legacy state, install ID, and both
 canonical CMB table values match exactly. Complete markers may surround
 unrelated tables; migration and uninstall remove only the two CMB table spans
@@ -96,7 +102,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.10` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.11` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test
@@ -113,7 +119,7 @@ development; a valid override performs zero network access. Set
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` to require a cached executable (an uncached
 offline start fails clearly). Downloaded assets and `checksums.txt` come from
 the same GitHub release and therefore provide integrity checking, not an
-independent supply-chain attestation. No `creative-model-bridge-v0.1.10`
+independent supply-chain attestation. No `creative-model-bridge-v0.1.11`
 release is claimed to exist until the workflow is run; before that tag, use the
 override for local smoke tests.
 

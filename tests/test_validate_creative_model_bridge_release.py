@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import re
 import sys
+import tempfile
 import unittest
 from types import SimpleNamespace
 
@@ -17,8 +19,38 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
     def _workflow(self) -> str:
         return (ROOT / ".github/workflows/release-creative-model-bridge.yml").read_text(encoding="utf-8")
 
-    def test_checked_in_contract_matches_v0110(self) -> None:
-        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.10"), [])
+    def test_checked_in_contract_matches_v0111(self) -> None:
+        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.11"), [])
+
+    def test_bundled_mcp_contract_rejects_absolute_command_and_unapproved_env(self) -> None:
+        plugin_manifest = {"mcpServers": "./.mcp.json"}
+        with tempfile.TemporaryDirectory(prefix="creative-mcp-contract-") as raw_root:
+            plugin = Path(raw_root)
+            (plugin / ".mcp.json").write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "creative-model-bridge-bundled": {
+                                "command": "/tmp/bootstrap.sh",
+                                "args": ["serve"],
+                                "cwd": ".",
+                                "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY", "HOME"],
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            errors = release_validator.validate_bundled_mcp_contract(plugin, plugin_manifest)
+        self.assertTrue(any("relative ./scripts/bootstrap.sh" in error for error in errors))
+        self.assertTrue(any("approved runtime environment" in error for error in errors))
+
+    def test_bundled_mcp_server_id_does_not_collide_with_legacy_global_provision(self) -> None:
+        self.assertEqual(release_validator.BUNDLED_MCP_SERVER, "creative-model-bridge-bundled")
+        self.assertNotEqual(
+            release_validator.BUNDLED_MCP_SERVER,
+            release_validator.LEGACY_GLOBAL_MCP_SERVER,
+        )
 
     def test_wrong_tag_version_is_rejected(self) -> None:
         errors = release_validator.validate(ROOT, "creative-model-bridge-v0.1.7")
@@ -209,14 +241,14 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
 
     def test_provisioner_default_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/scripts/provision.ps1").read_text(encoding="utf-8")
-        mismatched = text.replace("else { '0.1.10' }", "else { '0.1.7' }")
-        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.10")
+        mismatched = text.replace("else { '0.1.11' }", "else { '0.1.7' }")
+        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.11")
         self.assertTrue(any("default version" in error for error in errors))
 
     def test_provision_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/mcp/provision.py").read_text(encoding="utf-8")
-        mismatched = text.replace('PROVISION_VERSION = "0.1.10"', 'PROVISION_VERSION = "0.1.7"', 1)
-        errors = release_validator.validate_provision_version(mismatched, "0.1.10")
+        mismatched = text.replace('PROVISION_VERSION = "0.1.11"', 'PROVISION_VERSION = "0.1.7"', 1)
+        errors = release_validator.validate_provision_version(mismatched, "0.1.11")
         self.assertTrue(any("PROVISION_VERSION" in error for error in errors))
 
 

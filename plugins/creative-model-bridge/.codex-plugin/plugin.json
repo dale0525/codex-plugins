@@ -1,6 +1,6 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Route creative writing requests to a configured Responses API provider with auditable prompts.",
   "author": {
     "name": "Logic Tan",
@@ -11,6 +11,7 @@
   "repository": "https://github.com/dale0525/codex-plugins",
   "license": "MIT",
   "keywords": ["creative-writing", "responses-api", "mcp", "model-provider"],
+  "mcpServers": "./.mcp.json",
   "skills": "./skills/",
   "interface": {
     "displayName": "Creative Model Bridge",

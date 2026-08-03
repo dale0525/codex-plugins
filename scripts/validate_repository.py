@@ -151,15 +151,56 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
                 _validate_skill(skill_directory, validation)
     _validate_mcp_servers(plugin_path, manifest, validation)
     if plugin_path.name == "creative-model-bridge":
-        _validate_creative_provision(plugin_path, validation)
+        _validate_creative_provision(plugin_path, manifest, validation)
     validation.plugin_count += 1
 
 
-def _validate_creative_provision(plugin_path: Path, validation: Validation) -> None:
-    """Validate the no-dependency install handoff used by creative bridge."""
+def _validate_creative_provision(
+    plugin_path: Path, manifest: dict[str, Any], validation: Validation
+) -> None:
+    """Validate the bundled stdio handoff and optional provision metadata."""
     companion = plugin_path / ".mcp.json"
-    if companion.exists():
-        validation.error(f"{companion.relative_to(ROOT)} must not be distributed")
+    if manifest.get("mcpServers") != "./.mcp.json":
+        validation.error(
+            f"{plugin_path.relative_to(ROOT)}/.codex-plugin/plugin.json: mcpServers must equal './.mcp.json'"
+        )
+    if not companion.is_file():
+        validation.error(f"{companion.relative_to(ROOT)}: bundled MCP declaration is missing")
+    else:
+        try:
+            bundled = json.loads(companion.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as error:
+            validation.error(f"{companion.relative_to(ROOT)}: invalid bundled MCP declaration: {error}")
+            bundled = None
+        if isinstance(bundled, dict):
+            servers = bundled.get("mcpServers")
+            if set(bundled) != {"mcpServers"} or not isinstance(servers, dict):
+                validation.error(f"{companion.relative_to(ROOT)}: bundled declaration must contain only mcpServers")
+            elif set(servers) != {"creative-model-bridge-bundled"} or not isinstance(servers.get("creative-model-bridge-bundled"), dict):
+                validation.error(f"{companion.relative_to(ROOT)}: bundled declaration must contain exactly one creative-model-bridge-bundled server")
+            else:
+                entry = servers["creative-model-bridge-bundled"]
+                if set(entry) != {"command", "args", "cwd", "env_vars"}:
+                    validation.error(f"{companion.relative_to(ROOT)}: bundled server fields are not the stdio contract")
+                if entry.get("command") != "./scripts/bootstrap.sh":
+                    validation.error(f"{companion.relative_to(ROOT)}: bundled command must be relative ./scripts/bootstrap.sh")
+                if entry.get("args") != ["serve"]:
+                    validation.error(f"{companion.relative_to(ROOT)}: bundled args must be ['serve']")
+                if entry.get("cwd") != ".":
+                    validation.error(f"{companion.relative_to(ROOT)}: bundled cwd must be '.'")
+                env_vars = entry.get("env_vars")
+                allowed = {
+                    "CODEX_HOME",
+                    "CREATIVE_MODEL_API_KEY",
+                    "SSL_CERT_FILE",
+                    "CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE",
+                    "CREATIVE_MODEL_BRIDGE_BIN",
+                    "CREATIVE_MODEL_BRIDGE_VERSION",
+                    "CREATIVE_MODEL_BRIDGE_OFFLINE",
+                }
+                valid_env_vars = isinstance(env_vars, list) and all(isinstance(item, str) for item in env_vars)
+                if not valid_env_vars or len(env_vars) != len(set(env_vars)) or set(env_vars) != allowed:
+                    validation.error(f"{companion.relative_to(ROOT)}: bundled env_vars are not the approved runtime set")
     path = plugin_path / ".codex-sync/provision.json"
     payload = _read_json(path, validation)
     if payload is None:
@@ -326,7 +367,15 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
     else:
         allowed_env = {"CODEX_HOME", "CREATIVE_MODEL_API_KEY"}
         if plugin_path.name == "creative-model-bridge":
-            allowed_env.update({"CREATIVE_MODEL_BRIDGE_BIN", "CREATIVE_MODEL_BRIDGE_OFFLINE"})
+            allowed_env.update(
+                {
+                    "SSL_CERT_FILE",
+                    "CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE",
+                    "CREATIVE_MODEL_BRIDGE_BIN",
+                    "CREATIVE_MODEL_BRIDGE_VERSION",
+                    "CREATIVE_MODEL_BRIDGE_OFFLINE",
+                }
+            )
         if any(item not in allowed_env for item in env_vars):
             validation.error(f"{context}: env_vars contains a non-allowlisted variable")
 

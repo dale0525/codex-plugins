@@ -26,6 +26,20 @@ TAG_RE = re.compile(r"^creative-model-bridge-v(\d+\.\d+\.\d+)$")
 PUBLISH_STEP_NAME = "Publish verified draft, or confirm published exact no-op"
 BUILD_PIXI_MANIFEST = "plugins/creative-model-bridge/pixi.toml"
 BOOTSTRAP_RELATIVE_PATH = "plugins/creative-model-bridge/scripts/bootstrap.sh"
+BUNDLED_MCP_PATH = ".mcp.json"
+BUNDLED_MCP_SERVER = "creative-model-bridge-bundled"
+LEGACY_GLOBAL_MCP_SERVER = "creative-model-bridge"
+BUNDLED_MCP_REQUIRED_ENV_VARS = ("CODEX_HOME", "CREATIVE_MODEL_API_KEY")
+BUNDLED_MCP_ALLOWED_ENV_VARS = frozenset(
+    {
+        *BUNDLED_MCP_REQUIRED_ENV_VARS,
+        "SSL_CERT_FILE",
+        "CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE",
+        "CREATIVE_MODEL_BRIDGE_BIN",
+        "CREATIVE_MODEL_BRIDGE_VERSION",
+        "CREATIVE_MODEL_BRIDGE_OFFLINE",
+    }
+)
 
 
 def validate_publish_step_structure(workflow_text: str) -> list[str]:
@@ -194,6 +208,46 @@ def validate_provision_version(provision_text: str, version: object) -> list[str
     return []
 
 
+def validate_bundled_mcp_contract(plugin: Path, manifest: dict[str, Any]) -> list[str]:
+    """Validate the standard bundled MCP declaration and its safe launcher."""
+
+    errors: list[str] = []
+    if BUNDLED_MCP_SERVER == LEGACY_GLOBAL_MCP_SERVER:
+        errors.append("bundled MCP server ID must not collide with the legacy global provision ID")
+    if manifest.get("mcpServers") != f"./{BUNDLED_MCP_PATH}":
+        errors.append("plugin.json mcpServers must equal './.mcp.json'")
+    path = plugin / BUNDLED_MCP_PATH
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return errors + ["bundled .mcp.json is required when plugin.json mcpServers is declared"]
+    except (OSError, json.JSONDecodeError):
+        return errors + ["bundled .mcp.json must contain valid JSON"]
+    if not isinstance(payload, dict):
+        return errors + ["bundled .mcp.json must contain an object"]
+    if set(payload) != {"mcpServers"} or not isinstance(payload.get("mcpServers"), dict):
+        return errors + ["bundled .mcp.json must contain an mcpServers object"]
+    servers = payload["mcpServers"]
+    if set(servers) != {BUNDLED_MCP_SERVER}:
+        return errors + ["bundled .mcp.json must contain exactly one creative-model-bridge-bundled server"]
+    entry = servers[BUNDLED_MCP_SERVER]
+    if not isinstance(entry, dict):
+        return errors + ["bundled creative-model-bridge server must be an object"]
+    if set(entry) != {"command", "args", "cwd", "env_vars"}:
+        errors.append("bundled creative-model-bridge server fields are not the stdio contract")
+    if entry.get("command") != "./scripts/bootstrap.sh":
+        errors.append("bundled creative-model-bridge command must be relative ./scripts/bootstrap.sh")
+    if entry.get("args") != ["serve"]:
+        errors.append("bundled creative-model-bridge args must be ['serve']")
+    if entry.get("cwd") != ".":
+        errors.append("bundled creative-model-bridge cwd must be '.'")
+    env_vars = entry.get("env_vars")
+    valid_env_vars = isinstance(env_vars, list) and all(isinstance(value, str) for value in env_vars)
+    if not valid_env_vars or len(env_vars) != len(set(env_vars)) or set(env_vars) != BUNDLED_MCP_ALLOWED_ENV_VARS:
+        errors.append("bundled creative-model-bridge env_vars must use the approved runtime environment set")
+    return errors
+
+
 def validate(
     root: Path,
     tag: str | None = None,
@@ -253,8 +307,7 @@ def validate(
                 stat_fn=stat_fn,
             )
         )
-    if (plugin / ".mcp.json").exists():
-        errors.append("bundled .mcp.json must not be distributed; provisioning owns global MCP config")
+    errors.extend(validate_bundled_mcp_contract(plugin, manifest))
     provision = plugin / "scripts/provision.ps1"
     if not provision.is_file():
         errors.append("scripts/provision.ps1 is required for Windows PowerShell 5.1")

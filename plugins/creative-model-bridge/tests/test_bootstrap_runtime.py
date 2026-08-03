@@ -53,7 +53,7 @@ class BootstrapRuntimeTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temp.cleanup()
 
-    def run_bootstrap(self, *, home: Path | None = None, offline: str = "0", mode: str = "", extra: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
+    def run_bootstrap(self, *, home: Path | None = None, offline: str = "0", mode: str = "", argument: str = "hello", extra: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
         requested = extra or {}
         system = requested.get("FAKE_UNAME_S", "Darwin")
@@ -76,7 +76,7 @@ class BootstrapRuntimeTests(unittest.TestCase):
         })
         if extra:
             env.update(extra)
-        return subprocess.run([str(BOOTSTRAP), "hello"], capture_output=True, text=True, env=env, timeout=30)
+        return subprocess.run([str(BOOTSTRAP), argument], capture_output=True, text=True, env=env, timeout=30)
 
     def test_override_does_not_download(self) -> None:
         override = self.root / "override"
@@ -87,11 +87,20 @@ class BootstrapRuntimeTests(unittest.TestCase):
         self.assertEqual(result.stdout, "override\n")
         self.assertFalse(self.calls.exists())
 
+    def test_serve_override_execs_runtime_in_serve_mode(self) -> None:
+        override = self.root / "override-serve"
+        override.write_text("#!/bin/sh\nprintf 'override %s\\n' \"$1\"\n", encoding="utf-8")
+        override.chmod(0o755)
+        result = self.run_bootstrap(argument="serve", extra={"CREATIVE_MODEL_BRIDGE_BIN": str(override)})
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "override serve\n")
+        self.assertFalse(self.calls.exists())
+
     def test_download_checksum_cache_and_offline_hot_start(self) -> None:
         first = self.run_bootstrap()
         self.assertEqual(first.returncode, 0, first.stderr)
         self.assertEqual(first.stdout, "bridge-ok provision\n")
-        cache = self.home / "creative-model-bridge/runtime/v0.1.10/objects/aarch64-apple-darwin"
+        cache = self.home / "creative-model-bridge/runtime/v0.1.11/objects/aarch64-apple-darwin"
         active = (cache / "active").read_text(encoding="utf-8").splitlines()
         self.assertEqual(active[0], "cmb-active-v4")
         digest, generation = active[1:]
@@ -119,7 +128,7 @@ class BootstrapRuntimeTests(unittest.TestCase):
             home = self.root / ("platform-" + str(index))
             result = self.run_bootstrap(home=home, extra={"FAKE_UNAME_S": system, "FAKE_UNAME_M": machine})
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertTrue((home / "creative-model-bridge/runtime/v0.1.10/objects" / target / "active").is_file())
+            self.assertTrue((home / "creative-model-bridge/runtime/v0.1.11/objects" / target / "active").is_file())
 
     def test_version_bound_cache_does_not_cross_start_offline(self) -> None:
         first = self.run_bootstrap()
@@ -129,7 +138,7 @@ class BootstrapRuntimeTests(unittest.TestCase):
         self.assertIn("cached runtime", wrong_version.stderr)
 
     def test_active_pointer_digest_and_generation_traversal_are_rejected(self) -> None:
-        cache = self.home / "creative-model-bridge/runtime/v0.1.10/objects/aarch64-apple-darwin"
+        cache = self.home / "creative-model-bridge/runtime/v0.1.11/objects/aarch64-apple-darwin"
         cache.mkdir(parents=True)
         (cache / "active").write_text("cmb-active-v4\n../escape\n../../outside\n", encoding="utf-8")
         result = self.run_bootstrap(offline="1")

@@ -10,6 +10,14 @@ from scripts import validate_repository
 
 
 class RepositorySyncMetadataValidationTests(unittest.TestCase):
+    def test_creative_model_bridge_bundled_mcp_contract_is_checked(self) -> None:
+        plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
+        manifest = json.loads((plugin / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
+        validation = validate_repository.Validation()
+        with patch.object(validate_repository, "ROOT", plugin.parents[1]):
+            validate_repository._validate_creative_provision(plugin, manifest, validation)
+        self.assertEqual(validation.errors, [])
+
     def test_release_lock_requires_v2_and_checksum_digest(self) -> None:
         with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
             root = Path(temporary)

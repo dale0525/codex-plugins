@@ -3,16 +3,28 @@
 # intentionally dependency-light and does not require Git, Pixi, or Python.
 set -eu
 
-version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.10}"
+version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.11}"
 case "$version" in
   *[!0-9.]*|"") echo "creative-model-bridge: invalid version" >&2; exit 1 ;;
 esac
 printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "creative-model-bridge: invalid version" >&2; exit 1; }
 
+# The bundled MCP declaration uses `serve`.  Provisioning remains the
+# default for existing callers that invoke this launcher with setup/status/
+# repair/uninstall arguments.
+mode="provision"
+if [ "${1:-}" = "serve" ]; then
+  mode="serve"
+  shift
+fi
+
 if [ -n "${CREATIVE_MODEL_BRIDGE_BIN:-}" ]; then
   binary="$CREATIVE_MODEL_BRIDGE_BIN"
   [ -f "$binary" ] && [ -x "$binary" ] || { echo "creative-model-bridge: override is not executable" >&2; exit 1; }
   export CREATIVE_MODEL_BRIDGE_EXECUTABLE="$binary"
+  if [ "$mode" = "serve" ]; then
+    exec "$binary" serve "$@"
+  fi
   [ "$#" -gt 0 ] || set -- setup --yes
   exec "$binary" provision "$@"
 fi
@@ -117,5 +129,8 @@ if [ -z "$binary" ]; then
 fi
 
 export CREATIVE_MODEL_BRIDGE_EXECUTABLE="$binary"
+if [ "$mode" = "serve" ]; then
+  exec "$binary" serve "$@"
+fi
 [ "$#" -gt 0 ] || set -- setup --yes
 exec "$binary" provision "$@"

@@ -133,6 +133,12 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(body["input"], preview["payload"]["input"])
         self.assertEqual(body["instructions"], SYSTEM_PROMPT)
 
+    def test_default_max_output_tokens_is_60000_and_explicit_value_wins(self) -> None:
+        default_preview = self.bridge().creative_preview(self.request())
+        self.assertEqual(default_preview["payload"]["max_output_tokens"], 60000)
+        explicit_preview = self.bridge().creative_preview(self.request(max_output_tokens=123))
+        self.assertEqual(explicit_preview["payload"]["max_output_tokens"], 123)
+
     def test_system_none_omits_instruction_and_absent_temperature_is_omitted(self) -> None:
         opener = FakeOpener([FakeResponse({"output": [{"type": "message", "content": [{"type": "output_text", "text": "完成"}]}]})])
         with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):

@@ -19,10 +19,11 @@ configured default byte-for-byte. The bridge never guesses a model from
 `creative_models`; that tool reports only the provider's current `/models`
 response.
 
-The launcher forwards `CODEX_HOME` and `CREATIVE_MODEL_API_KEY`; the
+The bundled declaration forwards `CODEX_HOME`, `CREATIVE_MODEL_API_KEY`, the
+explicit CA channels, and the offline/runtime override channels. The
 development-only `CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a cached version/target asset only.
-The default release version is 0.1.10; the repository deliberately does not
+The default release version is 0.1.11; the repository deliberately does not
 claim that tag has been published. The binary's `provision setup`, `status`,
 `repair`, and `uninstall` commands own the global MCP entry transactionally.
 
@@ -46,11 +47,18 @@ uses `/etc/ssl/cert.pem`; Linux checks the ordered candidates
 Windows leaves `SSL_CERT_FILE` out unless an explicit override is supplied.
 The selected value is appended to `env_vars` after the credential entries and
 stored as optional `ssl_cert_file` state. A missing configured file is reported
-as drift, but does not prevent owned-block uninstall. A consistent 0.1.5,
-0.1.6, 0.1.7, 0.1.8, or 0.1.9 state is upgraded to 0.1.10 under the same byte-exact
+as drift, but does not prevent owned-block uninstall. A consistent 0.1.5
+through 0.1.10 state is upgraded to 0.1.11 under the same byte-exact
 WAL transaction. The ownership parser removes only canonical CMB table and
 marker line spans, and accepts begin-only markers only when matching legacy
 state proves the command, home, provider environment, and CA values.
+
+The bundled stdio server runs this same CA resolver before constructing the
+bridge or making any provider request. If `SSL_CERT_FILE` is absent on POSIX,
+the selected system bundle is assigned to it; Windows keeps native trust by
+default. An explicit `SSL_CERT_FILE` is validated and preserved unless the
+plugin-specific alias is also set, in which case the alias has documented
+precedence and becomes the effective `SSL_CERT_FILE` used by urllib.
 
 Release retries reconcile state before mutating: absent creates a draft,
 existing drafts may be completed or clobbered only while still draft, unknown

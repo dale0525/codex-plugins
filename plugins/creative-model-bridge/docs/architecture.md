@@ -1,7 +1,12 @@
 # Architecture and outbound boundary
 
-The plugin has no bundled `.mcp.json`: its provision launcher downloads an
-immutable binary and asks that binary to write one owner-marked global
+The plugin ships a standard bundled `.mcp.json` whose
+`creative-model-bridge-bundled` `serve` entry starts the POSIX bootstrap and
+exposes the three MCP tools without mutating global configuration. That server
+ID intentionally differs from the legacy global `creative-model-bridge` ID, so
+an older provisioned entry cannot shadow the bundled runtime. Its optional
+provision launcher downloads an immutable binary
+and asks that binary to write one owner-marked global
 `[mcp_servers.creative-model-bridge]` entry to `$CODEX_HOME/config.toml`.
 `mcp/server.py` is a small newline-delimited
 JSON-RPC adapter. It exposes
@@ -26,14 +31,15 @@ configured-provider /responses
 ```
 
 Only the provider's bearer credential is added as an HTTP `Authorization`
-header. A bundled stdio server cannot dynamically add arbitrary `env_key` names
-to its host declaration, so the host forwards the fixed
-`CREATIVE_MODEL_API_KEY` channel and the selected provider `env_key`. These are never placed in the JSON payload, prompt
-report, logs, or error messages. The bridge does not inject Codex instructions,
-model-specific adapters, retries, provider switching, or conversation history.
+header. The bundled stdio declaration forwards the fixed
+`CREATIVE_MODEL_API_KEY` channel and explicit runtime/CA override channels;
+the optional provisioned entry additionally appends the selected provider
+`env_key`. These are never placed in the JSON payload, prompt report, logs, or
+error messages. The bridge does not inject Codex instructions, model-specific
+adapters, retries, provider switching, or conversation history.
 
 Every provider request also carries the explicit honest `User-Agent`
-`creative-model-bridge/0.1.10`. This stable product identifier is a transport
+`creative-model-bridge/0.1.11`. This stable product identifier is a transport
 compatibility measure for provider edges that reject Python's default user
 agent; it does not claim to be Codex and is not accompanied by Codex-,
 originator-, or session-spoofing headers.
@@ -69,15 +75,19 @@ The canonical install and download locks contain exactly one `owner.<token>`
 marker. A stale owner is moved by atomic rename to an isolated retired path;
 live owners are never reclaimed, and release removes only its own lock.
 
-Provision-time trust resolution is deterministic and happens before lock/state
-writes: explicit absolute CA files are validated for readability, non-empty
+Standard stdio startup also resolves trust before constructing the bridge or
+reading a request: it reuses `provision.resolve_ssl_cert_file`, sets
+the resolver's selected path into `SSL_CERT_FILE` when a CA is selected (so the
+plugin-specific alias also wins in urllib), and leaves Windows on native trust
+by default. Provision-time trust resolution is deterministic and
+happens before lock/state writes: explicit absolute CA files are validated for readability, non-empty
 regular-file type; macOS uses `/etc/ssl/cert.pem`, Linux uses a fixed ordered
 candidate list, and Windows preserves the platform trust store by omitting
 `SSL_CERT_FILE` unless explicitly selected. The optional state `ssl_cert_file`
 and managed block digest make trust drift observable. Missing trust material
-does not block uninstall. A consistent prior 0.1.5, 0.1.6, 0.1.7, or 0.1.8
-owned image is recognized as a migration input and rewritten as one setup
-transaction. Ownership removal is a strict line-span operation over the two
+does not block uninstall. A consistent prior 0.1.5 through 0.1.10 owned image
+is recognized as a migration input and rewritten as one setup transaction.
+Ownership removal is a strict line-span operation over the two
 canonical CMB tables and marker lines, so expanded marker regions retain
 unrelated tables/comments verbatim; foreign, quoted, repeated, nested, or
 tampered images remain fail-closed.

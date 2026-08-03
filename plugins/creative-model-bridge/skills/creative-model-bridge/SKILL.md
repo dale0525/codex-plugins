@@ -12,8 +12,10 @@ small or too ordinary to use the bridge.
 
 ## Operating rules
 
-1. Use the `creative-model-bridge` MCP tools. Do not route the request through
-   the built-in `creative_text` profile or invent a second provider adapter.
+1. Use the tools from the bundled MCP server `creative-model-bridge-bundled`.
+   Do not select the legacy global `creative-model-bridge` server when both are
+   visible, route through the built-in `creative_text` profile, or invent a
+   second provider adapter.
 2. Preserve the user's material, language, point of view, tense, format, and
    named constraints. Put source text in labeled `context_text` blocks and
    source files in ordered absolute `context_files` paths.
