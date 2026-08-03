@@ -1,6 +1,6 @@
 {
   "name": "fastctx",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Provision FastCtx's native MCP runtime without a global npm installation.",
   "author": {
     "name": "yc-duan",
