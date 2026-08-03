@@ -347,6 +347,14 @@ class _TLSHandler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: object) -> None:
         return None
 
+    def _write_json(self, payload: dict[str, object]) -> None:
+        encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(encoded)))
+        self.end_headers()
+        self.wfile.write(encoded)
+
     def _write_sse(self, payload: dict[str, object], usage: dict[str, object]) -> None:
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
@@ -366,7 +374,7 @@ class _TLSHandler(BaseHTTPRequestHandler):
         if self.path != "/v1/models" or not self._auth():
             self.send_error(401)
             return
-        self._write({"object": "list", "data": [{"id": "smoke/model"}]})
+        self._write_json({"object": "list", "data": [{"id": "smoke/model"}]})
 
     def do_POST(self) -> None:  # noqa: N802
         size = int(self.headers.get("Content-Length", "0"))
