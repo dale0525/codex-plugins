@@ -21,13 +21,11 @@ struct MarketplacePlugin {
     name: String,
     source: MarketplacePluginSource,
 }
-
 #[derive(Debug, Deserialize)]
 struct MarketplacePluginSource {
     source: String,
     path: String,
 }
-
 #[derive(Debug, Deserialize)]
 struct ProvisionSpec {
     schema_version: u32,
@@ -39,6 +37,11 @@ struct ProvisionSpec {
     #[serde(default)]
     arguments: Vec<String>,
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ProvisionFreshness {
+    Current,
+    NeedsRun,
+}
 #[derive(Debug, Clone)]
 pub struct RuntimeOperation {
     pub plugin_id: String,
@@ -48,10 +51,6 @@ pub struct RuntimeOperation {
     #[allow(dead_code)]
     pub action_id: Option<String>,
 }
-
-/// Durable state for one reverse-runtime operation.  Compensation is kept
-/// separate from the original action records: an original action remains
-/// `Completed` forever once its child reported success.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum CompensationStatus {
@@ -60,7 +59,6 @@ pub enum CompensationStatus {
     Completed,
     ManualRequired,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct CompensationStep {
     pub step_id: String,
@@ -82,8 +80,6 @@ pub struct OperationLog {
     pub kind: String,
     pub phase: String,
     pub actions: Vec<String>,
-    /// Schema-2 durable action records. `actions` remains for schema-1
-    /// compatibility and human-readable summaries.
     #[serde(default)]
     pub action_records: Vec<OperationAction>,
     #[serde(default)]
@@ -99,12 +95,9 @@ pub struct OperationLog {
     pub target_state_digest: Option<String>,
     #[serde(default)]
     pub supersedes: Option<String>,
-    /// Ordered reverse-runtime plan.  Schema 4 materializes this once before
-    /// touching the core backup and then advances each step independently.
     #[serde(default)]
     pub compensation_steps: Vec<CompensationStep>,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum ActionStatus {
@@ -118,7 +111,6 @@ pub enum ActionStatus {
     ManualRequired,
     NotRun,
 }
-
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct OperationAction {
     #[serde(default)]
@@ -143,12 +135,8 @@ pub struct OperationAction {
 }
 #[allow(dead_code)]
 pub type Action = OperationAction;
-
 include!("provision_wal.rs");
 include!("provision_compensation.rs");
-
-// Platform launcher helpers are included with the WAL support module.
-
 fn directory_sha256(root: &Path) -> Result<String> {
     fn visit(root: &Path, current: &Path, files: &mut Vec<(String, Vec<u8>)>) -> Result<()> {
         for entry in fs::read_dir(current)? {
@@ -180,7 +168,6 @@ fn directory_sha256(root: &Path) -> Result<String> {
     }
     Ok(hex::encode(digest.finalize()))
 }
-
 fn resolve_plugin_root(plugin_id: &str) -> Result<PathBuf> {
     let (plugin_name, _) = plugin_id
         .split_once('@')
@@ -205,7 +192,6 @@ fn resolve_plugin_root(plugin_id: &str) -> Result<PathBuf> {
     }
     safe_child(marketplace_root, entry.source.path.trim_start_matches("./"))
 }
-
 fn load_provision(
     plugin: &PluginSpec,
 ) -> Result<(PathBuf, PathBuf, ProvisionSpec, String, String, String)> {
@@ -244,7 +230,47 @@ fn load_provision(
         dependencies_sha256,
     ))
 }
-
+pub fn provision_freshness(
+    plugin: &PluginSpec,
+    receipt: Option<&ProvisionReceipt>,
+) -> Result<ProvisionFreshness> {
+    let Some(receipt) = receipt else {
+        return Ok(ProvisionFreshness::NeedsRun);
+    };
+    if receipt.schema_version != 2 {
+        return Ok(ProvisionFreshness::NeedsRun);
+    }
+    if receipt.plugin_id != plugin.id {
+        anyhow::bail!(
+            "provision receipt drift detected for {}; receipt belongs to {}",
+            plugin.id,
+            receipt.plugin_id
+        );
+    }
+    if verify_receipt(receipt).is_err() {
+        return Ok(ProvisionFreshness::NeedsRun);
+    }
+    let (source_root, _script, _specification, spec_sha256, script_sha256, dependencies_sha256) =
+        match load_provision(plugin) {
+            Ok(source) => source,
+            Err(_) => return Ok(ProvisionFreshness::NeedsRun),
+        };
+    let artifact_digest = match crate::artifact::digest(&source_root) {
+        Ok(digest) => digest,
+        Err(_) => return Ok(ProvisionFreshness::NeedsRun),
+    };
+    Ok(
+        if receipt.artifact_digest == artifact_digest
+            && receipt.spec_sha256 == spec_sha256
+            && receipt.script_sha256 == script_sha256
+            && receipt.dependencies_sha256 == dependencies_sha256
+        {
+            ProvisionFreshness::Current
+        } else {
+            ProvisionFreshness::NeedsRun
+        },
+    )
+}
 fn materialize_provision(
     plugin: &PluginSpec,
     data_home: &Path,
@@ -268,60 +294,73 @@ fn materialize_provision(
         dependencies_sha256,
     ))
 }
-
 pub fn materialize_new_provisioners(
     plugins: &[PluginSpec],
     receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
     data_home: &Path,
 ) -> Result<()> {
-    for plugin in plugins.iter().filter(|p| p.enabled && p.auto_provision) {
-        if !receipts.contains_key(&plugin.id) {
-            materialize_provision(plugin, data_home)?;
-        }
-    }
+    plugins
+        .iter()
+        .filter(|p| p.enabled && p.auto_provision && !receipts.contains_key(&p.id))
+        .try_for_each(|plugin| materialize_provision(plugin, data_home).map(|_| ()))?;
     Ok(())
 }
-
-fn run_script(
-    plugin_id: &str,
+#[derive(Debug)]
+enum ScriptFailure {
+    Spawn(anyhow::Error),
+    Child(anyhow::Error),
+}
+fn preflight_script(
     plugin_root: &Path,
     script: &Path,
     specification: &ProvisionSpec,
-    arguments: &[String],
     expected_script_sha256: &str,
     expected_dependencies_sha256: &str,
-) -> Result<String> {
-    let actual_script_sha256 = hex::encode(Sha256::digest(
-        &fs::read(script).with_context(|| format!("read {}", script.display()))?,
-    ));
-    if actual_script_sha256 != expected_script_sha256 {
-        anyhow::bail!(
-            "provision script changed before execution: {}",
-            script.display()
-        );
-    }
+) -> Result<(String, Vec<String>)> {
+    let actual_script_sha256 = hex::encode(Sha256::digest(&fs::read(script)?));
+    anyhow::ensure!(
+        actual_script_sha256 == expected_script_sha256,
+        "provision script changed before execution: {}",
+        script.display()
+    );
     let actual_dependencies_sha256 = directory_sha256(script.parent().unwrap_or(plugin_root))?;
-    if actual_dependencies_sha256 != expected_dependencies_sha256 {
-        anyhow::bail!(
-            "provision dependencies changed before execution: {}",
-            script.display()
-        );
-    }
-    let (launcher, launcher_arguments) = launcher_for(cfg!(windows), specification.windows_shell)?;
-    let output = Command::new(launcher)
-        .args(&launcher_arguments)
+    anyhow::ensure!(
+        actual_dependencies_sha256 == expected_dependencies_sha256,
+        "provision dependencies changed before execution: {}",
+        script.display()
+    );
+    launcher_for(cfg!(windows), specification.windows_shell)
+}
+fn run_script_with_launcher(
+    plugin_id: &str,
+    plugin_root: &Path,
+    script: &Path,
+    launcher: &str,
+    launcher_arguments: &[String],
+    arguments: &[String],
+) -> std::result::Result<String, ScriptFailure> {
+    let mut command = Command::new(launcher);
+    command
+        .args(launcher_arguments)
         .arg(script)
         .args(arguments)
         .current_dir(plugin_root)
         .env("PLUGIN_ROOT", plugin_root)
         .env_remove("CODEX_SYNC_GITHUB_TOKEN")
         .env_remove("GITHUB_TOKEN")
-        .env_remove("GH_TOKEN")
-        .output()
-        .with_context(|| format!("run provisioner for {plugin_id}"))?;
+        .env_remove("GH_TOKEN");
+    let child = command.spawn().map_err(|error| {
+        ScriptFailure::Spawn(anyhow::anyhow!("run provisioner for {plugin_id}: {error}"))
+    })?;
+    let output = child.wait_with_output().map_err(|error| {
+        ScriptFailure::Child(anyhow::anyhow!("wait for provisioner {plugin_id}: {error}"))
+    })?;
     if !output.status.success() {
         let detail = String::from_utf8_lossy(&output.stderr);
-        anyhow::bail!("provisioner for {plugin_id} failed: {}", detail.trim());
+        return Err(ScriptFailure::Child(anyhow::anyhow!(
+            "provisioner for {plugin_id} failed: {}",
+            detail.trim()
+        )));
     }
     let detail = String::from_utf8_lossy(&output.stdout).trim().to_owned();
     let operation = match arguments.first().map(String::as_str) {
@@ -334,23 +373,54 @@ fn run_script(
         format!("{operation} {plugin_id}: {detail}")
     })
 }
-
-#[allow(dead_code)]
-pub fn run_auto_provisioners(
-    plugins: &[PluginSpec],
-    receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
-    operations: &mut Vec<RuntimeOperation>,
-    data_home: &Path,
-) -> Result<(
-    Vec<String>,
-    std::collections::BTreeMap<String, ProvisionReceipt>,
-)> {
-    run_auto_provisioners_recorded(plugins, receipts, operations, data_home, None)
+fn run_script(
+    plugin_id: &str,
+    plugin_root: &Path,
+    script: &Path,
+    specification: &ProvisionSpec,
+    arguments: &[String],
+    expected_script_sha256: &str,
+    expected_dependencies_sha256: &str,
+) -> Result<String> {
+    let (launcher, launcher_arguments) = preflight_script(
+        plugin_root,
+        script,
+        specification,
+        expected_script_sha256,
+        expected_dependencies_sha256,
+    )?;
+    run_script_with_launcher(
+        plugin_id,
+        plugin_root,
+        script,
+        &launcher,
+        &launcher_arguments,
+        arguments,
+    )
+    .map_err(|failure| match failure {
+        ScriptFailure::Spawn(error) | ScriptFailure::Child(error) => error,
+    })
 }
-
+fn return_action_to_intent(
+    recorder: &mut OperationRecorder,
+    action_id: &str,
+    message: String,
+) -> Result<()> {
+    let action = recorder
+        .log
+        .action_records
+        .iter_mut()
+        .find(|action| action.action_id == action_id)
+        .context("operation action ID not found")?;
+    action.status = ActionStatus::Intent;
+    action.phase = "intent".to_owned();
+    action.message = Some(message);
+    recorder.persist()
+}
 pub fn run_auto_provisioners_recorded(
     plugins: &[PluginSpec],
     receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
+    planned_targets: &BTreeSet<String>,
     operations: &mut Vec<RuntimeOperation>,
     data_home: &Path,
     mut recorder: Option<&mut OperationRecorder>,
@@ -360,44 +430,23 @@ pub fn run_auto_provisioners_recorded(
 )> {
     let mut next = receipts.clone();
     let mut messages = Vec::new();
-    for plugin in plugins
-        .iter()
-        .filter(|plugin| plugin.enabled && plugin.auto_provision)
-    {
-        let (artifact, specification, script, spec_sha256, script_sha256, dependencies_sha256) =
-            if let Some(receipt) = receipts.get(&plugin.id).filter(|r| r.schema_version >= 2) {
-                let (root, script, specification, script_sha256, dependencies_sha256) =
-                    verify_receipt(receipt)?;
-                let spec_bytes = fs::read(root.join(".codex-sync/provision.json"))?;
-                (
-                    Artifact {
-                        root: root.clone(),
-                        digest: receipt.artifact_digest.clone(),
-                    },
-                    specification,
-                    script,
-                    hex::encode(Sha256::digest(spec_bytes)),
-                    script_sha256,
-                    dependencies_sha256,
-                )
-            } else {
-                materialize_provision(plugin, data_home)?
-            };
-        let plugin_root = artifact.root.clone();
-        if let Some(receipt) = receipts.get(&plugin.id) {
-            if receipt.plugin_id != plugin.id
-                || receipt.spec_sha256 != spec_sha256
-                || receipt.script_sha256 != script_sha256
-                || receipt.dependencies_sha256 != dependencies_sha256
-                || receipt.plugin_root != plugin_root.to_string_lossy()
-                || receipt.script != script.to_string_lossy()
-            {
-                anyhow::bail!(
-                    "provision receipt drift detected for {}; run repair/uninstall explicitly before applying",
-                    plugin.id
-                );
-            }
+    for plugin in plugins.iter().filter(|plugin| {
+        planned_targets.contains(&plugin.id) && plugin.enabled && plugin.auto_provision
+    }) {
+        let previous = receipts.get(&plugin.id);
+        if provision_freshness(plugin, previous)? == ProvisionFreshness::Current {
+            continue;
         }
+        let (artifact, specification, script, spec_sha256, script_sha256, dependencies_sha256) =
+            materialize_provision(plugin, data_home)?;
+        let plugin_root = artifact.root.clone();
+        let (launcher, launcher_arguments) = preflight_script(
+            &plugin_root,
+            &script,
+            &specification,
+            &script_sha256,
+            &dependencies_sha256,
+        )?;
         let next_receipt = ProvisionReceipt {
             schema_version: 2,
             plugin_id: plugin.id.clone(),
@@ -416,7 +465,7 @@ pub fn run_auto_provisioners_recorded(
         operations.push(RuntimeOperation {
             plugin_id: plugin.id.clone(),
             receipt: next_receipt.clone(),
-            previous: receipts.get(&plugin.id).cloned(),
+            previous: previous.cloned(),
             uninstall: false,
             action_id: None,
         });
@@ -431,17 +480,26 @@ pub fn run_auto_provisioners_recorded(
         if let Some(log) = recorder.as_deref_mut() {
             log.running(action_id.as_deref().expect("recorded action"))?;
         }
-        let message = match run_script(
+        let message = match run_script_with_launcher(
             &plugin.id,
             &plugin_root,
             &script,
-            &specification,
+            &launcher,
+            &launcher_arguments,
             &specification.arguments,
-            &script_sha256,
-            &dependencies_sha256,
         ) {
             Ok(message) => message,
-            Err(error) => {
+            Err(ScriptFailure::Spawn(error)) => {
+                if let Some(log) = recorder.as_deref_mut() {
+                    return_action_to_intent(
+                        log,
+                        action_id.as_deref().expect("recorded action"),
+                        format!("{error:#}"),
+                    )?;
+                }
+                return Err(error);
+            }
+            Err(ScriptFailure::Child(error)) => {
                 if let Some(log) = recorder.as_deref_mut() {
                     log.recovery_required(
                         action_id.as_deref().expect("recorded action"),
@@ -465,47 +523,26 @@ pub fn run_auto_provisioners_recorded(
     }
     Ok((messages, next))
 }
-
 pub fn validate_auto_provisioners(
     plugins: &[PluginSpec],
     receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
 ) -> Result<()> {
-    for plugin in plugins
-        .iter()
-        .filter(|plugin| plugin.enabled && plugin.auto_provision)
-    {
-        let Some(receipt) = receipts.get(&plugin.id) else {
-            continue;
-        };
-        if receipt.schema_version >= 2 {
-            verify_receipt(receipt)?;
-            continue;
-        }
-        let (plugin_root, script, _specification, spec_sha256, script_sha256, dependencies_sha256) =
-            load_provision(plugin)?;
-        if receipt.plugin_id != plugin.id
-            || receipt.spec_sha256 != spec_sha256
-            || receipt.script_sha256 != script_sha256
-            || receipt.dependencies_sha256 != dependencies_sha256
-            || receipt.plugin_root != plugin_root.to_string_lossy()
-            || receipt.script != script.to_string_lossy()
-        {
-            anyhow::bail!(
-                "provision receipt drift detected for {}; run repair/uninstall explicitly before applying",
-                plugin.id
+    for plugin in plugins.iter().filter(|p| p.enabled && p.auto_provision) {
+        if let Some(receipt) = receipts.get(&plugin.id) {
+            anyhow::ensure!(
+                receipt.plugin_id == plugin.id,
+                "provision receipt drift detected for {}; receipt belongs to {}",
+                plugin.id,
+                receipt.plugin_id
             );
         }
     }
     Ok(())
 }
-
 pub fn migrate_receipts(
     receipts: &mut std::collections::BTreeMap<String, ProvisionReceipt>,
     data_home: &Path,
 ) -> Result<bool> {
-    // Validate every legacy receipt before materializing or mutating the
-    // caller's state. A later malformed/drifted receipt must leave all state
-    // and runtime untouched.
     let mut validated = Vec::new();
     for (key, receipt) in receipts.iter() {
         if receipt.schema_version >= 2 {
@@ -608,11 +645,9 @@ pub fn migrate_receipts(
     *receipts = migrated;
     Ok(true)
 }
-
 fn is_sha256(value: &str) -> bool {
     value.len() == 64 && value.as_bytes().iter().all(u8::is_ascii_hexdigit)
 }
-
 fn load_provision_from_root(
     plugin_id: &str,
     plugin_root: &Path,
@@ -648,7 +683,6 @@ fn load_provision_from_root(
         dependencies_sha256,
     ))
 }
-
 pub fn removal_ids(
     changes: &[PlannedChange],
     desired: &[PluginSpec],
@@ -672,21 +706,6 @@ pub fn removal_ids(
         .into_iter()
         .collect()
 }
-
-#[allow(dead_code)]
-pub fn run_removal_provisioners(
-    changes: &[PlannedChange],
-    desired: &[PluginSpec],
-    receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
-    operations: &mut Vec<RuntimeOperation>,
-) -> Result<Vec<String>> {
-    run_uninstallers(
-        &removal_ids(changes, desired, receipts),
-        receipts,
-        operations,
-    )
-}
-
 pub fn run_removal_provisioners_recorded(
     changes: &[PlannedChange],
     desired: &[PluginSpec],
@@ -701,7 +720,6 @@ pub fn run_removal_provisioners_recorded(
         Some(recorder),
     )
 }
-
 pub fn retain_receipts(
     receipts: std::collections::BTreeMap<String, ProvisionReceipt>,
     desired: &[PluginSpec],
@@ -716,7 +734,6 @@ pub fn retain_receipts(
         .filter(|(id, _)| desired_ids.contains(id.as_str()))
         .collect()
 }
-
 #[allow(dead_code)]
 pub fn run_uninstallers(
     plugin_ids: &[String],
@@ -725,7 +742,6 @@ pub fn run_uninstallers(
 ) -> Result<Vec<String>> {
     run_uninstallers_recorded(plugin_ids, receipts, operations, None)
 }
-
 pub fn run_uninstallers_recorded(
     plugin_ids: &[String],
     receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
@@ -859,17 +875,12 @@ pub fn run_uninstallers_recorded(
     }
     Ok(messages)
 }
-
-/// Re-apply the setup contract for receipts captured in a pre-apply backup.
-/// This is used only after a failed transaction to restore runtime side
-/// effects that cannot be represented by Codex's plugin registry snapshot.
 #[allow(dead_code)]
 pub fn restore_provisioners(
     receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
 ) -> Result<()> {
     restore_provisioners_recorded(receipts, &mut Vec::new(), None)
 }
-
 pub fn restore_provisioners_recorded(
     receipts: &std::collections::BTreeMap<String, ProvisionReceipt>,
     operations: &mut Vec<RuntimeOperation>,
@@ -915,7 +926,6 @@ pub fn restore_provisioners_recorded(
     }
     Ok(())
 }
-
 fn execute_receipt(receipt: &ProvisionReceipt, uninstall: bool) -> Result<String> {
     let (root, script, spec, script_sha256, dependencies_sha256) = verify_receipt(receipt)?;
     let args = if uninstall {
@@ -939,7 +949,6 @@ fn execute_receipt(receipt: &ProvisionReceipt, uninstall: bool) -> Result<String
         &dependencies_sha256,
     )
 }
-
 fn verify_receipt(
     receipt: &ProvisionReceipt,
 ) -> Result<(PathBuf, PathBuf, ProvisionSpec, String, String)> {
@@ -985,7 +994,6 @@ fn verify_receipt(
     }
     Ok((root, script, spec, script_sha256, dependencies_sha256))
 }
-
 #[cfg(test)]
 #[path = "provision_tests.rs"]
 mod tests;

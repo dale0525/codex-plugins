@@ -16,10 +16,10 @@ use crate::profiles::{
 use crate::provision::{
     compensate_operations_recorded, create_operation_log, materialize_new_provisioners,
     migrate_receipts, new_operation_id, operation_log_path, operation_needs_recovery,
-    prepare_rollback_runtime_recorded, read_operation_log, restore_provisioners_recorded,
-    retain_receipts, run_auto_provisioners_recorded, run_removal_provisioners_recorded,
-    scan_operation_logs, validate_auto_provisioners, write_operation_log, ActionStatus,
-    OperationLog, RuntimeOperation,
+    prepare_rollback_runtime_recorded, provision_freshness, read_operation_log,
+    restore_provisioners_recorded, retain_receipts, run_auto_provisioners_recorded,
+    run_removal_provisioners_recorded, scan_operation_logs, validate_auto_provisioners,
+    write_operation_log, ActionStatus, OperationLog, ProvisionFreshness, RuntimeOperation,
 };
 use crate::reconcile::{
     installed_plugins, marketplace_names, plugin_ids_to_remove, portable_name,
@@ -302,7 +302,11 @@ fn build_plan(
                 },
             });
         }
-        if plugin.enabled && plugin.auto_provision {
+        if plugin.enabled
+            && plugin.auto_provision
+            && provision_freshness(plugin, state.provision_receipts.get(&plugin.id))?
+                == ProvisionFreshness::NeedsRun
+        {
             changes.push(PlannedChange {
                 risk: Risk::High,
                 kind: "plugin-provision".to_owned(),
@@ -348,9 +352,6 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
     let _lock = acquire_lock(&paths)?;
     let mut state = load_state(&paths)?;
     ensure_recovery_clear(&paths, &state)?;
-    if migrate_receipts(&mut state.provision_receipts, &paths.data_home)? {
-        save_state(&paths, &state)?;
-    }
     let plan: PendingPlan =
         read_json(&paths.pending_plan).context("no pending plan; run `codex-sync sync` first")?;
     if plan.id != plan_id {
@@ -449,9 +450,16 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
         state.managed_agent_profiles = plan.managed_agent_profiles.clone();
         let plugins: PluginFile =
             read_optional_toml(&paths.repository_dir.join(&manifest.plugins))?;
+        let provision_targets = plan
+            .changes
+            .iter()
+            .filter(|change| change.kind == "plugin-provision")
+            .map(|change| change.target.clone())
+            .collect::<BTreeSet<_>>();
         let (messages, receipts) = run_auto_provisioners_recorded(
             &plugins.plugins,
             &state.provision_receipts,
+            &provision_targets,
             &mut runtime_operations,
             &paths.data_home,
             Some(&mut recorder),
@@ -483,10 +491,6 @@ pub fn apply(plan_id: &str, approve_high_risk: bool) -> Result<()> {
                 "apply durability barrier failed after publication; target may be visible and manual recovery is required",
             );
         }
-        // A child that was durably marked Running and then exited non-zero has
-        // an observable but non-reversible outcome. Keep the WAL and recovery
-        // gate intact; restoring core or compensating another action would
-        // hide the manual intervention required for this child.
         if recorder.has_blocked_actions() || recorder.has_blocked_compensation() {
             recorder.log.phase = "manual-required".to_owned();
             recorder.log.recovery_required = true;
@@ -955,7 +959,6 @@ pub(crate) fn validate_state(state: &LocalState) -> Result<()> {
 }
 
 include!("app_recovery.rs");
-
 fn validate_device_id(value: &str) -> Result<()> {
     if value.is_empty()
         || value.len() > 64

@@ -1,4 +1,10 @@
 use super::*;
+use std::collections::BTreeMap;
+#[cfg(unix)]
+use std::sync::Mutex;
+
+#[cfg(unix)]
+static FRESHNESS_ENV_LOCK: Mutex<()> = Mutex::new(());
 
 #[test]
 fn safe_child_rejects_parent_traversal() {
@@ -225,6 +231,337 @@ fn legacy_root(temp: &tempfile::TempDir, name: &str, spec: &[u8]) -> PathBuf {
     fs::write(root.join(".codex-sync/provision.json"), spec).unwrap();
     fs::write(root.join("provision.sh"), "#!/bin/sh\nexit 0\n").unwrap();
     root
+}
+
+#[cfg(unix)]
+fn freshness_fixture() -> (tempfile::TempDir, PluginSpec, ProvisionReceipt, PathBuf) {
+    let temp = tempfile::tempdir().unwrap();
+    let marketplace = temp.path().join("marketplace");
+    let source = marketplace.join("plugins/demo");
+    fs::create_dir_all(source.join(".codex-sync")).unwrap();
+    fs::create_dir_all(marketplace.join(".agents/plugins")).unwrap();
+    fs::write(
+        marketplace.join(".agents/plugins/marketplace.json"),
+        r#"{"plugins":[{"name":"demo","source":{"source":"local","path":"./plugins/demo"}}]}"#,
+    )
+    .unwrap();
+    let spec = br#"{"schema_version":1,"risk":"high","posix_script":"provision.sh","windows_script":"provision.ps1","arguments":["setup"]}"#;
+    fs::write(source.join(".codex-sync/provision.json"), spec).unwrap();
+    fs::write(source.join("provision.sh"), "#!/bin/sh\nexit 0\n").unwrap();
+    let codex = temp.path().join("codex");
+    fs::write(
+        &codex,
+        format!(
+            "#!/bin/sh\nprintf 'MARKETPLACE ROOT\\nmarket {}\\n'\n",
+            marketplace.display()
+        ),
+    )
+    .unwrap();
+    let mut permissions = fs::metadata(&codex).unwrap().permissions();
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        permissions.set_mode(0o755);
+    }
+    fs::set_permissions(&codex, permissions).unwrap();
+    std::env::set_var("CODEX_SYNC_CODEX_BIN", &codex);
+    let plugin = PluginSpec {
+        id: "demo@market".to_owned(),
+        enabled: true,
+        auto_provision: true,
+    };
+    let artifact = crate::artifact::materialize(&source, temp.path()).unwrap();
+    let receipt = receipt_for(&artifact.root, &plugin.id);
+    (temp, plugin, receipt, source)
+}
+
+#[cfg(unix)]
+fn test_recorder(temp: &tempfile::TempDir, id: &str) -> OperationRecorder {
+    OperationRecorder::new(
+        temp.path().join(format!("{id}.json")),
+        OperationLog {
+            schema_version: 5,
+            operation_id: id.to_owned(),
+            kind: "apply".to_owned(),
+            phase: "runtime_started".to_owned(),
+            actions: Vec::new(),
+            action_records: Vec::new(),
+            backup: None,
+            recovery_required: false,
+            before_backup: None,
+            target_state: None,
+            before_state_digest: None,
+            target_state_digest: None,
+            supersedes: None,
+            compensation_steps: Vec::new(),
+        },
+    )
+    .unwrap()
+}
+
+#[cfg(unix)]
+#[test]
+fn preflight_failure_does_not_checkpoint_running_or_manual() {
+    let temp = tempfile::tempdir().unwrap();
+    let script = temp.path().join("provision.sh");
+    fs::write(&script, "#!/bin/sh\nexit 0\n").unwrap();
+    let spec: ProvisionSpec = serde_json::from_str(
+        r#"{"schema_version":1,"risk":"high","posix_script":"provision.sh","windows_script":"provision.ps1"}"#,
+    )
+    .unwrap();
+    let recorder = test_recorder(&temp, "preflight");
+    assert!(preflight_script(
+        temp.path(),
+        &script,
+        &spec,
+        &"00".repeat(32),
+        &directory_sha256(temp.path()).unwrap(),
+    )
+    .is_err());
+    assert!(recorder.log.action_records.is_empty());
+    assert!(!recorder.has_blocked_actions());
+}
+
+#[cfg(unix)]
+#[test]
+fn spawn_failure_durably_returns_action_to_intent() {
+    let temp = tempfile::tempdir().unwrap();
+    fs::create_dir_all(temp.path().join(".codex-sync")).unwrap();
+    fs::write(
+        temp.path().join(".codex-sync/provision.json"),
+        br#"{"schema_version":1,"risk":"high","posix_script":"provision.sh","windows_script":"provision.ps1"}"#,
+    )
+    .unwrap();
+    let script = temp.path().join("provision.sh");
+    fs::write(&script, "#!/bin/sh\nexit 0\n").unwrap();
+    let receipt = receipt_for(temp.path(), "spawn@market");
+    let operation = RuntimeOperation {
+        plugin_id: receipt.plugin_id.clone(),
+        receipt,
+        previous: None,
+        uninstall: false,
+        action_id: None,
+    };
+    let mut recorder = test_recorder(&temp, "spawn");
+    let id = recorder.intent(&operation).unwrap();
+    recorder.running(&id).unwrap();
+    let failure = run_script_with_launcher(
+        "spawn@market",
+        temp.path(),
+        &script,
+        "/definitely/missing-launcher",
+        &[],
+        &[],
+    )
+    .unwrap_err();
+    assert!(matches!(failure, ScriptFailure::Spawn(_)));
+    return_action_to_intent(&mut recorder, &id, "no child was obtained".to_owned()).unwrap();
+    assert_eq!(recorder.status(&id), Some(&ActionStatus::Intent));
+    assert!(!recorder.has_blocked_actions());
+}
+
+#[cfg(unix)]
+#[test]
+fn auto_nonzero_is_manual_required_and_keeps_receipt() {
+    let _guard = FRESHNESS_ENV_LOCK.lock().unwrap();
+    let (temp, plugin, receipt, source) = freshness_fixture();
+    fs::write(source.join("provision.sh"), "#!/bin/sh\nexit 17\n").unwrap();
+    let mut receipts = std::collections::BTreeMap::new();
+    receipts.insert(plugin.id.clone(), receipt.clone());
+    let targets = BTreeSet::from([plugin.id.clone()]);
+    let mut recorder = test_recorder(&temp, "nonzero");
+    let error = run_auto_provisioners_recorded(
+        &[plugin],
+        &receipts,
+        &targets,
+        &mut Vec::new(),
+        temp.path(),
+        Some(&mut recorder),
+    )
+    .unwrap_err();
+    assert!(error
+        .to_string()
+        .contains("provisioner for demo@market failed"));
+    assert_eq!(receipts.get("demo@market"), Some(&receipt));
+    assert!(matches!(
+        recorder
+            .log
+            .action_records
+            .first()
+            .map(|action| &action.status),
+        Some(ActionStatus::ManualRequired)
+    ));
+    assert!(recorder.log.recovery_required);
+    std::env::remove_var("CODEX_SYNC_CODEX_BIN");
+}
+
+#[cfg(unix)]
+#[test]
+fn planned_legacy_receipt_executes_once_and_upgrades_on_success() {
+    let _guard = FRESHNESS_ENV_LOCK.lock().unwrap();
+    let (temp, plugin, _receipt, source) = freshness_fixture();
+    let sentinel = temp.path().join("legacy-runs");
+    fs::write(
+        source.join("provision.sh"),
+        format!(
+            "#!/bin/sh\nprintf '%s' \"$1\" >> '{}'\n",
+            sentinel.display()
+        ),
+    )
+    .unwrap();
+    let legacy = legacy_receipt(&source, &plugin.id);
+    let mut receipts = BTreeMap::new();
+    receipts.insert(plugin.id.clone(), legacy.clone());
+    let targets = BTreeSet::from([plugin.id.clone()]);
+    let (messages, next) = run_auto_provisioners_recorded(
+        &[plugin],
+        &receipts,
+        &targets,
+        &mut Vec::new(),
+        temp.path(),
+        None,
+    )
+    .unwrap();
+    assert_eq!(messages.len(), 1);
+    assert_eq!(fs::read_to_string(sentinel).unwrap(), "setup");
+    assert_eq!(receipts.get("demo@market"), Some(&legacy));
+    assert_eq!(next["demo@market"].schema_version, 2);
+    assert_ne!(next["demo@market"].artifact_digest, legacy.artifact_digest);
+    std::env::remove_var("CODEX_SYNC_CODEX_BIN");
+}
+
+#[cfg(unix)]
+#[test]
+fn unplanned_source_drift_cannot_spawn_or_replace_receipt() {
+    let _guard = FRESHNESS_ENV_LOCK.lock().unwrap();
+    let (temp, plugin, receipt, source) = freshness_fixture();
+    let sentinel = temp.path().join("unplanned-spawn");
+    fs::write(
+        source.join("provision.sh"),
+        format!("#!/bin/sh\nprintf spawned > '{}'\n", sentinel.display()),
+    )
+    .unwrap();
+    let mut receipts = BTreeMap::new();
+    receipts.insert(plugin.id.clone(), receipt.clone());
+    let targets = BTreeSet::new();
+    let (messages, next) = run_auto_provisioners_recorded(
+        &[plugin],
+        &receipts,
+        &targets,
+        &mut Vec::new(),
+        temp.path(),
+        None,
+    )
+    .unwrap();
+    assert!(messages.is_empty());
+    assert_eq!(next, receipts);
+    assert!(!sentinel.exists());
+    std::env::remove_var("CODEX_SYNC_CODEX_BIN");
+}
+
+#[cfg(unix)]
+#[test]
+fn planned_changed_target_runs_once_and_replaces_receipt() {
+    let _guard = FRESHNESS_ENV_LOCK.lock().unwrap();
+    let (temp, plugin, receipt, source) = freshness_fixture();
+    let sentinel = temp.path().join("planned-runs");
+    fs::write(
+        source.join("provision.sh"),
+        format!(
+            "#!/bin/sh\nprintf '%s' \"$1\" >> '{}'\n",
+            sentinel.display()
+        ),
+    )
+    .unwrap();
+    let mut receipts = BTreeMap::new();
+    receipts.insert(plugin.id.clone(), receipt.clone());
+    let targets = BTreeSet::from([plugin.id.clone()]);
+    let (messages, next) = run_auto_provisioners_recorded(
+        &[plugin],
+        &receipts,
+        &targets,
+        &mut Vec::new(),
+        temp.path(),
+        None,
+    )
+    .unwrap();
+    assert_eq!(messages.len(), 1);
+    assert_eq!(fs::read_to_string(sentinel).unwrap(), "setup");
+    assert_eq!(receipts.get("demo@market"), Some(&receipt));
+    assert_eq!(next["demo@market"].schema_version, 2);
+    assert_ne!(next["demo@market"].artifact_digest, receipt.artifact_digest);
+    std::env::remove_var("CODEX_SYNC_CODEX_BIN");
+}
+
+#[test]
+#[cfg(unix)]
+fn freshness_requires_verified_schema2_bindings() {
+    let _guard = FRESHNESS_ENV_LOCK.lock().unwrap();
+    let (temp, plugin, receipt, source) = freshness_fixture();
+    assert_eq!(
+        provision_freshness(&plugin, Some(&receipt)).unwrap(),
+        ProvisionFreshness::Current
+    );
+    assert_eq!(
+        provision_freshness(&plugin, None).unwrap(),
+        ProvisionFreshness::NeedsRun
+    );
+    let mut legacy = receipt.clone();
+    legacy.schema_version = 1;
+    assert_eq!(
+        provision_freshness(&plugin, Some(&legacy)).unwrap(),
+        ProvisionFreshness::NeedsRun
+    );
+    let mut invalid = receipt.clone();
+    invalid.artifact_digest = "00".repeat(32);
+    assert_eq!(
+        provision_freshness(&plugin, Some(&invalid)).unwrap(),
+        ProvisionFreshness::NeedsRun
+    );
+    fs::write(source.join("provision.sh"), "#!/bin/sh\nexit 3\n").unwrap();
+    assert_eq!(
+        provision_freshness(&plugin, Some(&receipt)).unwrap(),
+        ProvisionFreshness::NeedsRun
+    );
+    std::env::remove_var("CODEX_SYNC_CODEX_BIN");
+    drop(temp);
+}
+
+#[test]
+#[cfg(unix)]
+fn execution_recheck_skips_current_receipt_without_spawn() {
+    let _guard = FRESHNESS_ENV_LOCK.lock().unwrap();
+    let (temp, plugin, _receipt, source) = freshness_fixture();
+    let sentinel = temp.path().join("spawned");
+    fs::write(
+        source.join("provision.sh"),
+        format!("#!/bin/sh\nprintf spawned > '{}'\n", sentinel.display()),
+    )
+    .unwrap();
+    // The source is now stale, so refresh the artifact and receipt to make the
+    // recheck genuinely current before invoking the executor.
+    let artifact = crate::artifact::materialize(&source, temp.path()).unwrap();
+    let current = receipt_for(&artifact.root, &plugin.id);
+    assert_eq!(
+        provision_freshness(&plugin, Some(&current)).unwrap(),
+        ProvisionFreshness::Current
+    );
+    let mut receipts = std::collections::BTreeMap::new();
+    receipts.insert(plugin.id.clone(), current);
+    let targets = BTreeSet::from([plugin.id.clone()]);
+    let (messages, next) = run_auto_provisioners_recorded(
+        &[plugin],
+        &receipts,
+        &targets,
+        &mut Vec::new(),
+        temp.path(),
+        None,
+    )
+    .unwrap();
+    assert!(messages.is_empty());
+    assert_eq!(next, receipts);
+    assert!(!sentinel.exists());
+    std::env::remove_var("CODEX_SYNC_CODEX_BIN");
 }
 
 #[test]
