@@ -103,6 +103,13 @@ where
             fs::create_dir_all(parent)?;
         }
         fs::copy(source, destination)?;
+        #[cfg(windows)]
+        fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(destination)?
+            .sync_all()?;
+        #[cfg(not(windows))]
         fs::File::open(destination)?.sync_all()?;
     }
     Ok(())
@@ -206,6 +213,25 @@ mod tests {
         );
         let changed = materialize(&source, temp.path()).unwrap();
         assert_ne!(artifact.digest, changed.digest);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn read_only_source_file_is_materialized() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let temp = tempfile::tempdir().unwrap();
+        let source = temp.path().join("source");
+        let script = source.join("script.sh");
+        fs::create_dir_all(&source).unwrap();
+        fs::write(&script, "read-only").unwrap();
+        fs::set_permissions(&script, fs::Permissions::from_mode(0o444)).unwrap();
+
+        let artifact = materialize(&source, temp.path()).unwrap();
+        assert_eq!(
+            fs::read_to_string(artifact.root.join("script.sh")).unwrap(),
+            "read-only"
+        );
     }
 
     #[test]

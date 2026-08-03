@@ -1,4 +1,5 @@
 use super::*;
+#[cfg(unix)]
 use std::collections::BTreeMap;
 #[cfg(unix)]
 use std::sync::Mutex;
@@ -120,6 +121,7 @@ fn new_auto_provisioner_is_deferred_until_reconcile() {
     assert!(validate_auto_provisioners(&[plugin], &std::collections::BTreeMap::new()).is_ok());
 }
 
+#[cfg(unix)]
 #[test]
 fn compensation_reverses_multi_and_removal_operations() {
     let temporary = tempfile::tempdir().unwrap();
