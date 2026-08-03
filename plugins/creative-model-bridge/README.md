@@ -14,7 +14,7 @@ The plugin manifest includes a standard bundled MCP declaration in
 starting `scripts/bootstrap.sh serve` (the current bundled fixture is verified
 on macOS). Its server ID is `creative-model-bridge-bundled`, deliberately
 distinct from the legacy global `creative-model-bridge` provision ID so an
-existing 0.1.5–0.1.11 entry cannot shadow the bundled 0.1.12 runtime. No global
+existing 0.1.5–0.1.12 entry cannot shadow the bundled 0.1.13 runtime. No global
 MCP provisioning is required for that discovery path. The
 platform provisioners remain available for users who want a global owner-marked
 entry: run `scripts/bootstrap.sh setup --yes` on POSIX, or
@@ -45,8 +45,8 @@ variable by default and keeps the native trust store. The selected path is
 recorded in schema-2 state and in the owned MCP environment. If that bundle is
 later removed, status reports drift while uninstall remains available.
 
-An internally consistent 0.1.5 through 0.1.11 owned block/state is upgraded
-transactionally to 0.1.12. The migration recognizes the one known
+An internally consistent 0.1.5 through 0.1.12 owned block/state is upgraded
+transactionally to 0.1.13. The migration recognizes the one known
 begin-only marker repair shape only when the legacy state, install ID, and both
 canonical CMB table values match exactly. Complete markers may surround
 unrelated tables; migration and uninstall remove only the two CMB table spans
@@ -102,7 +102,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.12` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.13` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test

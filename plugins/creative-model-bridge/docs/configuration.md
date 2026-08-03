@@ -23,7 +23,7 @@ The bundled declaration forwards `CODEX_HOME`, `CREATIVE_MODEL_API_KEY`, the
 explicit CA channels, and the offline/runtime override channels. The
 development-only `CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a cached version/target asset only.
-The default release version is 0.1.12. The binary's `provision setup`,
+The default release version is 0.1.13. The binary's `provision setup`,
 `status`, `repair`, and `uninstall` commands own the global MCP entry
 transactionally.
 
@@ -48,7 +48,7 @@ Windows leaves `SSL_CERT_FILE` out unless an explicit override is supplied.
 The selected value is appended to `env_vars` after the credential entries and
 stored as optional `ssl_cert_file` state. A missing configured file is reported
 as drift, but does not prevent owned-block uninstall. A consistent 0.1.5
-through 0.1.11 state is upgraded to 0.1.12 under the same byte-exact
+through 0.1.12 state is upgraded to 0.1.13 under the same byte-exact
 WAL transaction. The ownership parser removes only canonical CMB table and
 marker line spans, and accepts begin-only markers only when matching legacy
 state proves the command, home, provider environment, and CA values.

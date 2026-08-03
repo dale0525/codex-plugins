@@ -5,15 +5,15 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $null = [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.1.12' }
+$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.1.13' }
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'creative-model-bridge: invalid version' }
 
 $override = $env:CREATIVE_MODEL_BRIDGE_BIN
-$home = if ($env:CODEX_HOME) { [Environment]::ExpandEnvironmentVariables($env:CODEX_HOME) } else { Join-Path $HOME '.codex' }
-$home = [IO.Path]::GetFullPath($home)
+$codexHome = if ($env:CODEX_HOME) { [Environment]::ExpandEnvironmentVariables($env:CODEX_HOME) } else { Join-Path $HOME '.codex' }
+$codexHome = [IO.Path]::GetFullPath($codexHome)
 $target = 'x86_64-pc-windows-msvc'
 $asset = 'creative-model-bridge-x86_64-pc-windows-msvc.exe'
-$runtime = Join-Path $home ('creative-model-bridge\runtime\v' + $version)
+$runtime = Join-Path $codexHome ('creative-model-bridge\runtime\v' + $version)
 $targetRoot = Join-Path $runtime ('objects\' + $target)
 $active = Join-Path $targetRoot 'active'
 New-Item -ItemType Directory -Force -Path $targetRoot | Out-Null

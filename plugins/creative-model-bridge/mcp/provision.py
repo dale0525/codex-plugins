@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover
 
 INSTALL_NAME = "creative-model-bridge"
 SCHEMA_VERSION = 2
-PROVISION_VERSION = "0.1.12"
+PROVISION_VERSION = "0.1.13"
 SSL_CERT_ENV = "SSL_CERT_FILE"
 # Ordered, deterministic Linux candidates.  The first readable, non-empty
 # regular file wins; callers/tests may provide an explicit candidate sequence.
@@ -306,14 +306,14 @@ def _state_values_valid(state: dict[str, Any]) -> bool:
 
 
 def _legacy_state_shape(state: dict[str, Any]) -> bool:
-    """Accept only reviewed pre-0.1.12 state contracts for migration/removal."""
+    """Accept only reviewed pre-0.1.13 state contracts for migration/removal."""
 
     has_version = "bridge_version" in state
     version = state.get("bridge_version")
-    if has_version and version not in {"0.1.5", "0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11"}:
+    if has_version and version not in {"0.1.5", "0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11", "0.1.12"}:
         return False
     base = LEGACY_STATE_KEYS | ({"bridge_version"} if has_version else set())
-    if version in {"0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11"}:
+    if version in {"0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11", "0.1.12"}:
         # CA016/CA017 emitted ssl_cert_file on POSIX and omitted it when
         # Windows kept the native trust store. Both exact shapes are
         # migratable; arbitrary extra fields remain fail-closed.
