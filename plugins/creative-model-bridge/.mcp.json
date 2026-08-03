@@ -4,6 +4,7 @@
       "command": "./scripts/bootstrap.sh",
       "args": ["serve"],
       "cwd": ".",
+      "startup_timeout_sec": 45,
       "env_vars": [
         "CODEX_HOME",
         "CREATIVE_MODEL_API_KEY",

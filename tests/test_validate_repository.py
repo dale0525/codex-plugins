@@ -123,6 +123,7 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                                 "command": "./bin/launch",
                                 "cwd": ".",
                                 "args": [],
+                                "startup_timeout_sec": 45,
                                 "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"],
                             }
                         }
@@ -138,6 +139,37 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                     validation,
                 )
             self.assertEqual(validation.errors, [])
+
+    def test_mcp_companion_rejects_invalid_startup_timeout(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mcp-validator-test-") as temporary:
+            root = Path(temporary)
+            plugin = root / "plugins/example"
+            launcher = plugin / "bin/launch"
+            launcher.parent.mkdir(parents=True)
+            launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+            launcher.chmod(0o755)
+            companion = plugin / ".mcp.json"
+            companion.write_text(
+                json.dumps(
+                    {
+                        "mcpServers": {
+                            "example": {
+                                "command": "./bin/launch",
+                                "startup_timeout_sec": 0,
+                            }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin,
+                    {"mcpServers": "./.mcp.json"},
+                    validation,
+                )
+            self.assertTrue(any("startup_timeout_sec must be a positive number" in error for error in validation.errors))
 
     def test_mcp_companion_rejects_escape_and_unallowlisted_environment(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mcp-validator-test-") as temporary:

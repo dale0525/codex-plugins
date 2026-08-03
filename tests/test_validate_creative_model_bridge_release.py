@@ -19,8 +19,8 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
     def _workflow(self) -> str:
         return (ROOT / ".github/workflows/release-creative-model-bridge.yml").read_text(encoding="utf-8")
 
-    def test_checked_in_contract_matches_v0111(self) -> None:
-        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.11"), [])
+    def test_checked_in_contract_matches_v0112(self) -> None:
+        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.12"), [])
 
     def test_bundled_mcp_contract_rejects_absolute_command_and_unapproved_env(self) -> None:
         plugin_manifest = {"mcpServers": "./.mcp.json"}
@@ -34,6 +34,7 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
                                 "command": "/tmp/bootstrap.sh",
                                 "args": ["serve"],
                                 "cwd": ".",
+                                "startup_timeout_sec": 45,
                                 "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY", "HOME"],
                             }
                         }
@@ -241,14 +242,14 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
 
     def test_provisioner_default_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/scripts/provision.ps1").read_text(encoding="utf-8")
-        mismatched = text.replace("else { '0.1.11' }", "else { '0.1.7' }")
-        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.11")
+        mismatched = text.replace("else { '0.1.12' }", "else { '0.1.7' }")
+        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.12")
         self.assertTrue(any("default version" in error for error in errors))
 
     def test_provision_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/mcp/provision.py").read_text(encoding="utf-8")
-        mismatched = text.replace('PROVISION_VERSION = "0.1.11"', 'PROVISION_VERSION = "0.1.7"', 1)
-        errors = release_validator.validate_provision_version(mismatched, "0.1.11")
+        mismatched = text.replace('PROVISION_VERSION = "0.1.12"', 'PROVISION_VERSION = "0.1.7"', 1)
+        errors = release_validator.validate_provision_version(mismatched, "0.1.12")
         self.assertTrue(any("PROVISION_VERSION" in error for error in errors))
 
 
