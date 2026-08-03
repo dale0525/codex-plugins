@@ -40,16 +40,17 @@ class MockResponsesHandler(BaseHTTPRequestHandler):
         self.__class__.calls.append((self.path, payload))
         self.__class__.request_headers.append((self.path, {key.lower(): value for key, value in self.headers.items()}))
         body = self.__class__.response_payload or {
-            "id": "response-request",
-            "output": [{"type": "message", "content": [{"type": "output_text", "text": "原样返回"}]}],
-            "usage": {"input_tokens": 7, "output_tokens": 3},
+            "id": "chat-request",
+            "choices": [{"delta": {"content": "原样返回"}, "finish_reason": "stop"}],
         }
         self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        encoded = json.dumps(body, ensure_ascii=False).encode("utf-8")
-        self.send_header("Content-Length", str(len(encoded)))
+        self.send_header("Content-Type", "text/event-stream")
         self.end_headers()
-        self.wfile.write(encoded)
+        self.wfile.write(("data: " + json.dumps(body, ensure_ascii=False) + "\n\n").encode("utf-8"))
+        if isinstance(body.get("usage"), dict):
+            usage = {"choices": [], "usage": body["usage"]}
+            self.wfile.write(("data: " + json.dumps(usage, ensure_ascii=False) + "\n\n").encode("utf-8"))
+        self.wfile.write(b"data: [DONE]\n\n")
 
 
 class MockResponsesIntegrationTests(unittest.TestCase):
@@ -79,13 +80,13 @@ class MockResponsesIntegrationTests(unittest.TestCase):
                     generated = bridge.creative_generate({"task": "写作", "temperature": 0.2})
                 self.assertEqual(models["models"], ["mock/model-v1"])
                 self.assertEqual(generated["text"], "原样返回")
-                self.assertEqual([path for path, _ in MockResponsesHandler.calls], ["/v1/models", "/v1/responses"])
+                self.assertEqual([path for path, _ in MockResponsesHandler.calls], ["/v1/models", "/v1/chat/completions"])
                 self.assertEqual(
                     [path for path, _ in MockResponsesHandler.request_headers],
-                    ["/v1/models", "/v1/responses"],
+                    ["/v1/models", "/v1/chat/completions"],
                 )
                 for _, headers in MockResponsesHandler.request_headers:
-                    self.assertEqual(headers["user-agent"], "creative-model-bridge/0.1.13")
+                    self.assertEqual(headers["user-agent"], "creative-model-bridge/0.1.14")
                     self.assertFalse(
                         any(
                             key.startswith(("codex", "x-codex", "originator")) or key in {"session", "x-session"}
@@ -95,7 +96,10 @@ class MockResponsesIntegrationTests(unittest.TestCase):
                 response_payload = MockResponsesHandler.calls[1][1]
                 self.assertEqual(response_payload["model"], "mock/model-v1")
                 self.assertEqual(response_payload["temperature"], 0.2)
-                self.assertEqual(response_payload["instructions"], "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。")
+                self.assertEqual(response_payload["max_tokens"], 60000)
+                self.assertTrue(response_payload["stream"])
+                self.assertEqual(response_payload["stream_options"], {"include_usage": True})
+                self.assertEqual(response_payload["messages"][0], {"role": "system", "content": "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"})
         finally:
             server.shutdown()
             server.server_close()
@@ -106,12 +110,7 @@ class MockResponsesIntegrationTests(unittest.TestCase):
         MockResponsesHandler.request_headers = []
         MockResponsesHandler.response_payload = {
             "id": "response-cpa-shape",
-            "output": [
-                {
-                    "type": "message",
-                    "content": [{"type": "text", "text": {"value": "第一行\n第二行"}}],
-                }
-            ],
+            "choices": [{"delta": {"content": "第一行\n第二行"}, "finish_reason": "stop"}],
         }
         server = ThreadingHTTPServer(("127.0.0.1", 0), MockResponsesHandler)
         thread = threading.Thread(target=server.serve_forever, daemon=True)

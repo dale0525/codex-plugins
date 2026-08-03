@@ -1,12 +1,12 @@
 # Creative Model Bridge
 
 Creative Model Bridge exposes three stdio MCP tools backed by the OpenAI
-Responses API shape:
+Chat Completions API shape:
 
 - `creative_models` calls the configured provider's `/models` endpoint.
 - `creative_preview` validates files and builds the exact outbound payload
   without network access.
-- `creative_generate` makes one `/responses` request and returns generated text
+- `creative_generate` makes one `/chat/completions` streaming request and returns generated text
   verbatim with usage, request ID, and a prompt report.
 
 The plugin manifest includes a standard bundled MCP declaration in
@@ -14,7 +14,7 @@ The plugin manifest includes a standard bundled MCP declaration in
 starting `scripts/bootstrap.sh serve` (the current bundled fixture is verified
 on macOS). Its server ID is `creative-model-bridge-bundled`, deliberately
 distinct from the legacy global `creative-model-bridge` provision ID so an
-existing 0.1.5–0.1.12 entry cannot shadow the bundled 0.1.13 runtime. No global
+existing 0.1.5–0.1.13 entry cannot shadow the bundled 0.1.14 runtime. No global
 MCP provisioning is required for that discovery path. The
 platform provisioners remain available for users who want a global owner-marked
 entry: run `scripts/bootstrap.sh setup --yes` on POSIX, or
@@ -46,7 +46,7 @@ recorded in schema-2 state and in the owned MCP environment. If that bundle is
 later removed, status reports drift while uninstall remains available.
 
 An internally consistent 0.1.5 through 0.1.12 owned block/state is upgraded
-transactionally to 0.1.13. The migration recognizes the one known
+transactionally to 0.1.14. The migration recognizes the one known
 begin-only marker repair shape only when the legacy state, install ID, and both
 canonical CMB table values match exactly. Complete markers may surround
 unrelated tables; migration and uninstall remove only the two CMB table spans
@@ -69,12 +69,13 @@ CREATIVE_MODEL_DEFAULT = "my-opaque-model"
 
 [model_providers.my-provider]
 base_url = "https://provider.example/v1"
-wire_api = "responses"
+wire_api = "responses" # "responses" or "chat_completions"; bridge uses /chat/completions
 env_key = "MY_PROVIDER_API_KEY"
 # experimental_bearer_token = "development-only-value"
 ```
 
-`wire_api` must be exactly `"responses"`. An explicitly supplied request model
+`wire_api` may be `"responses"` or `"chat_completions"`; the bridge always uses
+the provider's `/chat/completions` endpoint. An explicitly supplied request model
 overrides `CREATIVE_MODEL_DEFAULT` exactly; no model auto-selection or adapter
 is performed. A bundled stdio MCP cannot dynamically forward arbitrary
 provider-specific environment names from its host, so the provisioned entry
@@ -102,7 +103,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.13` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.14` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test

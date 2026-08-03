@@ -1,4 +1,4 @@
-"""Provider-neutral bridge for OpenAI Responses-compatible creative models.
+"""Provider-neutral bridge for OpenAI-compatible Chat Completions models.
 
 The module deliberately uses only Python's standard library.  Keeping the
 transport small makes the outbound boundary easy to audit and lets the same
@@ -31,7 +31,7 @@ except ImportError:  # direct mcp/ path execution
 
 
 SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"
-BRIDGE_VERSION = "0.1.13"
+BRIDGE_VERSION = "0.1.14"
 USER_AGENT = f"creative-model-bridge/{BRIDGE_VERSION}"
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_CHARS = 180_000
@@ -229,8 +229,8 @@ class ConfigLoader:
         if not isinstance(base_url, str) or not base_url.strip():
             raise ConfigError("configured creative model provider has no base_url")
         wire_api = provider.get("wire_api")
-        if wire_api != "responses":
-            raise ConfigError("creative model provider must use wire_api = responses")
+        if wire_api not in {"responses", "chat_completions"}:
+            raise ConfigError("creative model provider must use wire_api = responses or chat_completions")
         env_key = provider.get("env_key")
         if env_key is not None and (not isinstance(env_key, str) or not env_key):
             raise ConfigError("provider env_key must be a non-empty string")
@@ -843,9 +843,17 @@ class Bridge:
         prompt = build_prompt(task, blocks, files, constraints, output_spec)
         if len(prompt) > MAX_TOTAL_CHARS:
             raise BridgeError("assembled user prompt exceeds the 180000-character limit")
-        body: dict[str, Any] = {"model": model, "input": prompt, "max_output_tokens": max_tokens}
+        messages: list[dict[str, str]] = []
         if system_mode == "minimal":
-            body["instructions"] = SYSTEM_PROMPT
+            messages.append({"role": "system", "content": SYSTEM_PROMPT})
+        messages.append({"role": "user", "content": prompt})
+        body: dict[str, Any] = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "stream": True,
+            "stream_options": {"include_usage": True},
+        }
         if temperature is not None:
             body["temperature"] = temperature
         section_order = ["task", "constraints", "output_spec", "context_text", "context_files"]
@@ -871,7 +879,7 @@ class Bridge:
             "usage": None,
             "request_id": None,
             "prompt_report": report,
-            "prompt": body["input"],
+            "prompt": body["messages"][-1]["content"],
             "payload": body,
             "network": False,
         }
@@ -879,16 +887,12 @@ class Bridge:
     def creative_generate(self, request: dict[str, Any]) -> dict[str, Any]:
         provider, model, body, report = self._prepare(request)
         client = self._client(provider, "responses")
-        payload, request_id = client.responses(body)
+        text, usage, request_id = client.chat_completions(body)
         return {
-            "text": _extract_output_text(
-                payload,
-                request_id=request_id,
-                http_status=client.last_http_status,
-            ),
+            "text": text,
             "provider": provider.name,
             "model": model,
-            "usage": payload.get("usage") if isinstance(payload.get("usage"), dict) else None,
+            "usage": usage,
             "request_id": request_id,
             "prompt_report": report,
         }

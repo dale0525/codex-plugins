@@ -105,7 +105,7 @@ def _validate_transport_diagnostic(value: object) -> dict[str, object] | None:
 def _handler_seen_fingerprint() -> list[str]:
     allowed = {
         ("GET", "/v1/models"): "GET /v1/models",
-        ("POST", "/v1/responses"): "POST /v1/responses",
+        ("POST", "/v1/chat/completions"): "POST /v1/chat/completions",
     }
     return [label for event, label in allowed.items() if event in _TLSHandler.seen]
 
@@ -347,13 +347,16 @@ class _TLSHandler(BaseHTTPRequestHandler):
     def log_message(self, format: str, *args: object) -> None:
         return None
 
-    def _write(self, payload: dict[str, object]) -> None:
-        encoded = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    def _write_sse(self, payload: dict[str, object], usage: dict[str, object]) -> None:
         self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(encoded)))
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
         self.end_headers()
-        self.wfile.write(encoded)
+        first = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        tail = json.dumps({"id": payload.get("id"), "choices": [], "usage": usage}, ensure_ascii=False).encode("utf-8")
+        self.wfile.write(b"data: " + first + b"\n\n")
+        self.wfile.write(b"data: " + tail + b"\n\n")
+        self.wfile.write(b"data: [DONE]\n\n")
 
     def _auth(self) -> bool:
         return self.headers.get("Authorization") == "Bearer placeholder-smoke-token"
@@ -369,10 +372,13 @@ class _TLSHandler(BaseHTTPRequestHandler):
         size = int(self.headers.get("Content-Length", "0"))
         self.rfile.read(size)
         _TLSHandler.seen.append((self.command, self.path))
-        if self.path != "/v1/responses" or not self._auth():
+        if self.path != "/v1/chat/completions" or not self._auth():
             self.send_error(401)
             return
-        self._write({"id": "tls-response", "output_text": "TLS 烟雾成功", "usage": {"input_tokens": 4, "output_tokens": 3}})
+        self._write_sse(
+            {"id": "tls-response", "choices": [{"delta": {"content": "TLS 烟雾成功"}, "finish_reason": "stop"}]},
+            {"input_tokens": 4, "output_tokens": 3},
+        )
 
 
 class _LocalTLSHTTPServer(ThreadingHTTPServer):
@@ -466,7 +472,7 @@ def _tls_smoke(binary: Path, root: Path) -> None:
             for item in responses
         ):
             raise _SmokeFailure("trusted-response", "assertion")
-        if _TLSHandler.seen != [("GET", "/v1/models"), ("POST", "/v1/responses")]:
+        if _TLSHandler.seen != [("GET", "/v1/models"), ("POST", "/v1/chat/completions")]:
             raise _SmokeFailure("trusted-assertion", "assertion")
         _TLSHandler.seen = []
         untrusted_environment = environment.copy()

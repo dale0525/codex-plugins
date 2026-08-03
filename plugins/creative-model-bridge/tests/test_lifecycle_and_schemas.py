@@ -23,9 +23,16 @@ from server import TOOL_DEFINITIONS  # noqa: E402
 
 class FakeResponse:
     def __init__(self, payload: object, request_id: str | None = None) -> None:
+        if isinstance(payload, dict) and "choices" not in payload and isinstance(payload.get("output_text"), str):
+            payload = {
+                "id": payload.get("id", request_id or "schema-response"),
+                "choices": [{"message": {"content": payload["output_text"]}}],
+            }
         self.body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self.status = 200
-        self.headers = {"x-request-id": request_id} if request_id else {}
+        self.headers = {"Content-Type": "application/json"}
+        if request_id:
+            self.headers["x-request-id"] = request_id
 
     def read(self) -> bytes:
         return self.body

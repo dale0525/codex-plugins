@@ -75,18 +75,36 @@ def _prompt_report_schema() -> dict[str, Any]:
 
 
 def _payload_schema() -> dict[str, Any]:
-    """Return a fresh, strict schema for the exact outbound Responses payload."""
+    """Return a fresh, strict schema for the exact outbound Chat payload."""
 
     return {
         "type": "object",
         "properties": {
             "model": {"type": "string"},
-            "input": {"type": "string"},
-            "instructions": {"type": "string"},
-            "max_output_tokens": {"type": "integer", "minimum": 1},
+            "messages": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "role": {"type": "string", "enum": ["system", "user"]},
+                        "content": {"type": "string"},
+                    },
+                    "required": ["role", "content"],
+                    "additionalProperties": False,
+                },
+                "minItems": 1,
+            },
+            "max_tokens": {"type": "integer", "minimum": 1},
+            "stream": {"const": True},
+            "stream_options": {
+                "type": "object",
+                "properties": {"include_usage": {"const": True}},
+                "required": ["include_usage"],
+                "additionalProperties": False,
+            },
             "temperature": {"type": "number", "minimum": 0, "maximum": 2},
         },
-        "required": ["model", "input", "max_output_tokens"],
+        "required": ["model", "messages", "max_tokens", "stream", "stream_options"],
         "additionalProperties": False,
     }
 
@@ -231,7 +249,7 @@ def _configure_ssl_cert_file() -> None:
 TOOL_DEFINITIONS = [
     {
         "name": "creative_models",
-        "description": "List models exposed by the configured Responses provider.",
+        "description": "List models exposed by the configured provider.",
         "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
         "outputSchema": _models_output_schema(),
     },
@@ -243,7 +261,7 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "creative_generate",
-        "description": "Generate creative text through the configured Responses provider.",
+        "description": "Generate creative text through the configured Chat Completions provider.",
         "inputSchema": REQUEST_SCHEMA,
         "outputSchema": _generate_output_schema(),
     },

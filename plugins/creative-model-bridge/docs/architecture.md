@@ -22,12 +22,12 @@ task + labeled text blocks + ordered file text
         │
         ▼
 deterministic user input string
-        │  (optional exact minimal instructions)
+        │  (optional exact minimal system message)
         ▼
-{ model, input, instructions?, max_output_tokens, temperature? }
+{ model, messages, max_tokens, stream: true, stream_options: { include_usage: true }, temperature? }
         │
         ▼
-configured-provider /responses
+configured-provider /chat/completions (SSE; JSON fallback when media type is not SSE)
 ```
 
 Only the provider's bearer credential is added as an HTTP `Authorization`
@@ -39,7 +39,7 @@ error messages. The bridge does not inject Codex instructions, model-specific
 adapters, retries, provider switching, or conversation history.
 
 Every provider request also carries the explicit honest `User-Agent`
-`creative-model-bridge/0.1.13`. This stable product identifier is a transport
+`creative-model-bridge/0.1.14`. This stable product identifier is a transport
 compatibility measure for provider edges that reject Python's default user
 agent; it does not claim to be Codex and is not accompanied by Codex-,
 originator-, or session-spoofing headers.
@@ -47,7 +47,11 @@ originator-, or session-spoofing headers.
 `creative_preview` stops before credential resolution and network I/O. This
 makes the returned `payload` and `prompt_report` suitable for a local audit.
 `creative_generate` resolves the credential immediately before one request and
-returns the response text without post-processing.
+returns only `choices[0].delta.content` fragments (or the JSON fallback's
+`choices[0].message.content`) without post-processing. Reasoning, tool calls,
+refusals, and other non-text fields never enter the returned body. SSE parsing
+uses an incremental UTF-8 decoder, accepts LF/CRLF and multi-line data, waits
+for usage-only tail chunks, and requires a finish reason before natural EOF.
 
 The POSIX bootstrap and PowerShell 5.1 provisioner select one of five release
 assets for macOS arm64/x64, Linux arm64/x64, or Windows x64. They download only
@@ -85,7 +89,7 @@ regular-file type; macOS uses `/etc/ssl/cert.pem`, Linux uses a fixed ordered
 candidate list, and Windows preserves the platform trust store by omitting
 `SSL_CERT_FILE` unless explicitly selected. The optional state `ssl_cert_file`
 and managed block digest make trust drift observable. Missing trust material
-does not block uninstall. A consistent prior 0.1.5 through 0.1.12 owned image
+does not block uninstall. A consistent prior 0.1.5 through 0.1.13 owned image
 is recognized as a migration input and rewritten as one setup transaction.
 Ownership removal is a strict line-span operation over the two
 canonical CMB tables and marker lines, so expanded marker regions retain

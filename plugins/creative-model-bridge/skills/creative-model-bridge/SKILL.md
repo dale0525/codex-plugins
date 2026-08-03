@@ -45,7 +45,7 @@ small or too ordinary to use the bridge.
   does not invent or cache a model list.
 - `creative_preview`: validate materials and return the exact prompt payload;
   it must be used for a no-network audit.
-- `creative_generate`: send one Responses API request and return generated
+- `creative_generate`: send one Chat Completions streaming request and return generated
   text, provider/model identity, usage, request ID, and the prompt report.
 
 The bridge's system mode is `minimal` by default and uses only its documented

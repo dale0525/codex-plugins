@@ -33,9 +33,20 @@ from server import TOOL_DEFINITIONS, handle  # noqa: E402
 
 class FakeResponse:
     def __init__(self, payload: object, status: int = 200, request_id: str | None = None) -> None:
+        if isinstance(payload, dict) and "choices" not in payload and ("output_text" in payload or "output" in payload):
+            try:
+                payload = {
+                    "id": payload.get("id", request_id or "fixture-response"),
+                    "choices": [{"message": {"content": _extract_output_text(payload)}}],
+                    **({"usage": payload["usage"]} if isinstance(payload.get("usage"), dict) else {}),
+                }
+            except BridgeError:
+                pass
         self.body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         self.status = status
-        self.headers = {"x-request-id": request_id} if request_id else {}
+        self.headers = {"Content-Type": "application/json"}
+        if request_id:
+            self.headers["x-request-id"] = request_id
 
     def read(self) -> bytes:
         return self.body
@@ -125,26 +136,26 @@ class BridgeTests(unittest.TestCase):
     def test_preview_and_generate_have_identical_prompt_and_preview_is_offline(self) -> None:
         preview = self.bridge(FakeOpener([])).creative_preview(self.request(temperature=0.4))
         self.assertFalse(preview["network"])
-        self.assertEqual(preview["payload"]["input"], preview["prompt"])
+        self.assertEqual(preview["payload"]["messages"][-1]["content"], preview["prompt"])
         opener = FakeOpener([FakeResponse({"output_text": "verbatim"})])
         with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
             self.bridge(opener).creative_generate(self.request(temperature=0.4))
         body = json.loads(opener.requests[0].data.decode("utf-8"))
-        self.assertEqual(body["input"], preview["payload"]["input"])
-        self.assertEqual(body["instructions"], SYSTEM_PROMPT)
+        self.assertEqual(body["messages"][-1]["content"], preview["payload"]["messages"][-1]["content"])
+        self.assertEqual(body["messages"][0], {"role": "system", "content": SYSTEM_PROMPT})
 
     def test_default_max_output_tokens_is_60000_and_explicit_value_wins(self) -> None:
         default_preview = self.bridge().creative_preview(self.request())
-        self.assertEqual(default_preview["payload"]["max_output_tokens"], 60000)
+        self.assertEqual(default_preview["payload"]["max_tokens"], 60000)
         explicit_preview = self.bridge().creative_preview(self.request(max_output_tokens=123))
-        self.assertEqual(explicit_preview["payload"]["max_output_tokens"], 123)
+        self.assertEqual(explicit_preview["payload"]["max_tokens"], 123)
 
     def test_system_none_omits_instruction_and_absent_temperature_is_omitted(self) -> None:
         opener = FakeOpener([FakeResponse({"output": [{"type": "message", "content": [{"type": "output_text", "text": "完成"}]}]})])
         with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
             self.bridge(opener).creative_generate(self.request(system_mode="none"))
         body = json.loads(opener.requests[0].data.decode("utf-8"))
-        self.assertNotIn("instructions", body)
+        self.assertNotIn("system", {message["role"] for message in body["messages"]})
         self.assertNotIn("temperature", body)
         self.assertNotIn("Codex", json.dumps(body, ensure_ascii=False))
 
@@ -275,7 +286,7 @@ class BridgeTests(unittest.TestCase):
         self.assertFalse(prompt_schema["properties"]["context_files"]["items"]["additionalProperties"])
         payload_schema = schemas[1]["properties"]["payload"]
         self.assertFalse(payload_schema["additionalProperties"])
-        self.assertEqual(payload_schema["required"], ["model", "input", "max_output_tokens"])
+        self.assertEqual(payload_schema["required"], ["model", "messages", "max_tokens", "stream", "stream_options"])
         with self.assertRaises(BridgeError):
             self.bridge().creative_preview(self.request(context_text=[{"label": "x", "text": "y", "extra": 1}]))
         with self.assertRaises(BridgeError):
@@ -343,7 +354,7 @@ class BridgeTests(unittest.TestCase):
         path.write_text(path.read_text(encoding="utf-8").replace("[model_providers.missing]", "[model_providers.other]"), encoding="utf-8")
         with self.assertRaises(ConfigError):
             Bridge(path).creative_preview(self.request())
-        wrong = config_file(self.root, wire_api="chat_completions")
+        wrong = config_file(self.root, wire_api="unsupported")
         with self.assertRaises(ConfigError):
             Bridge(wrong).creative_preview(self.request())
 

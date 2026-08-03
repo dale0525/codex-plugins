@@ -8,8 +8,8 @@ the platform default `Path.home()/.codex` (Windows: `%USERPROFILE%\.codex`).
 | --- | --- | --- |
 | `shell_environment_policy.set.CREATIVE_MODEL_PROVIDER` | yes | Exact key under `model_providers` to use |
 | `shell_environment_policy.set.CREATIVE_MODEL_DEFAULT` | for omitted request model | Opaque default model identifier |
-| `model_providers.<provider>.base_url` | yes | Responses-compatible API root |
-| `model_providers.<provider>.wire_api` | yes | Must be exactly `responses` |
+| `model_providers.<provider>.base_url` | yes | OpenAI-compatible API root; bridge posts to `/chat/completions` |
+| `model_providers.<provider>.wire_api` | yes | `responses` or `chat_completions`; bridge uses the Chat Completions endpoint for both |
 | `model_providers.<provider>.env_key` | no | Preferred provider environment variable; if unavailable, the fixed `CREATIVE_MODEL_API_KEY` channel is used |
 | `CREATIVE_MODEL_API_KEY` | host channel | Fixed environment variable forwarded by the provisioned MCP entry for provider credentials |
 | `model_providers.<provider>.experimental_bearer_token` | no | Development-only credential, used only without `env_key` and the fixed channel |
@@ -23,7 +23,7 @@ The bundled declaration forwards `CODEX_HOME`, `CREATIVE_MODEL_API_KEY`, the
 explicit CA channels, and the offline/runtime override channels. The
 development-only `CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a cached version/target asset only.
-The default release version is 0.1.13. The binary's `provision setup`,
+The default release version is 0.1.14. The binary's `provision setup`,
 `status`, `repair`, and `uninstall` commands own the global MCP entry
 transactionally.
 
@@ -48,7 +48,7 @@ Windows leaves `SSL_CERT_FILE` out unless an explicit override is supplied.
 The selected value is appended to `env_vars` after the credential entries and
 stored as optional `ssl_cert_file` state. A missing configured file is reported
 as drift, but does not prevent owned-block uninstall. A consistent 0.1.5
-through 0.1.12 state is upgraded to 0.1.13 under the same byte-exact
+through 0.1.13 state is upgraded to 0.1.14 under the same byte-exact
 WAL transaction. The ownership parser removes only canonical CMB table and
 marker line spans, and accepts begin-only markers only when matching legacy
 state proves the command, home, provider environment, and CA values.
