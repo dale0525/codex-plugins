@@ -532,7 +532,7 @@ class ProvisionTests(unittest.TestCase):
             self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
             with patch.object(provision.sys, "platform", "win32"), patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
                 migrated = provision.setup(home=self.home)
-            self.assertEqual(migrated["bridge_version"], "0.1.8")
+            self.assertEqual(migrated["bridge_version"], "0.1.9")
             self.assertEqual(migrated["ssl_cert_file"], str(ca))
             self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
             self.assertEqual(legacy["status"], "installed")
@@ -556,7 +556,7 @@ class ProvisionTests(unittest.TestCase):
             state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
             with patch.object(provision.sys, "platform", "darwin"):
                 migrated = provision.setup(home=self.home, ssl_cert_file=ca)
-            self.assertEqual(migrated["bridge_version"], "0.1.8")
+            self.assertEqual(migrated["bridge_version"], "0.1.9")
             self.assertEqual(migrated["ssl_cert_file"], str(ca))
 
             windows_home = self.home.parent / "windows-home"
@@ -569,8 +569,226 @@ class ProvisionTests(unittest.TestCase):
             windows_state_path.write_text(json.dumps(windows_state, sort_keys=True) + "\n", encoding="utf-8")
             with patch.object(provision.sys, "platform", "win32"):
                 migrated_windows = provision.setup(home=windows_home)
-            self.assertEqual(migrated_windows["bridge_version"], "0.1.8")
+            self.assertEqual(migrated_windows["bridge_version"], "0.1.9")
             self.assertNotIn("ssl_cert_file", migrated_windows)
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_begin_only_and_expanded_markers_remove_only_cmb_spans(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        external = (
+            '[mcp_servers.blender]\ncommand = "blender"\n# blender note\n\n'
+            '[mcp_servers.computer-use]\ncommand = "computer"\n\n'
+            '[mcp_servers.openaiDeveloperDocs]\ncommand = "docs"\n'
+        )
+        try:
+            for expanded in (False, True):
+                with self.subTest(expanded=expanded):
+                    home = self.home.parent / ("expanded" if expanded else "begin-only")
+                    home.mkdir()
+                    with patch.object(provision.sys, "platform", "win32"):
+                        installed = provision.setup(home=home)
+                    config_path = home / "config.toml"
+                    config = config_path.read_text(encoding="utf-8")
+                    end = f'# creative-model-bridge:end install_id="{installed["install_id"]}"\n'
+                    self.assertIn(end, config)
+                    config = config.replace(end, "") + external
+                    if expanded:
+                        config += end
+                    config_path.write_text(config, encoding="utf-8")
+                    state_path = provision.state_path(home)
+                    state = json.loads(state_path.read_text(encoding="utf-8"))
+                    state["bridge_version"] = "0.1.8"
+                    state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+                    with patch.object(provision.sys, "platform", "win32"):
+                        migrated = provision.setup(home=home)
+                    result = config_path.read_text(encoding="utf-8")
+                    self.assertIn(external, result)
+                    self.assertEqual(result.count("[mcp_servers.blender]"), 1)
+                    self.assertEqual(result.count("[mcp_servers.computer-use]"), 1)
+                    self.assertEqual(result.count("[mcp_servers.openaiDeveloperDocs]"), 1)
+                    self.assertEqual(migrated["install_id"], installed["install_id"])
+                    self.assertEqual(migrated["bridge_version"], "0.1.9")
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_begin_only_without_exact_legacy_state_fails_without_wal_or_writes(self) -> None:
+        install_id = "123e4567-e89b-12d3-a456-426614174000"
+        config = (
+            f'# creative-model-bridge:begin schema=1 install_id="{install_id}"\n'
+            '[mcp_servers.creative-model-bridge]\ncommand = "other"\nargs = []\nenv_vars = []\n\n'
+            '[mcp_servers.creative-model-bridge.env]\nCODEX_HOME = "/tmp/foreign"\n'
+            '[mcp_servers.blender]\ncommand = "blender"\n'
+        )
+        path = self.home / "config.toml"
+        path.write_text(config, encoding="utf-8")
+        before = path.read_bytes()
+        with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+            provision.setup(home=self.home)
+        self.assertEqual(path.read_bytes(), before)
+        self.assertFalse(provision.state_path(self.home).exists())
+        self.assertFalse(provision.wal_path(self.home).exists())
+
+    def test_begin_only_uninstall_preserves_external_tables(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                installed = provision.setup(home=self.home)
+            config_path = self.home / "config.toml"
+            end = f'# creative-model-bridge:end install_id="{installed["install_id"]}"\n'
+            external = '[mcp_servers.blender]\ncommand = "blender"\n'
+            config_path.write_text(config_path.read_text(encoding="utf-8").replace(end, "") + external, encoding="utf-8")
+            state_path = provision.state_path(self.home)
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["bridge_version"] = "0.1.8"
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            with patch.object(provision.sys, "platform", "win32"):
+                removed = provision.uninstall(home=self.home)
+            self.assertEqual(removed["status"], "uninstalled")
+            self.assertEqual(config_path.read_text(encoding="utf-8"), external)
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_comment_between_owned_env_table_and_external_table_fails_closed(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                installed = provision.setup(home=self.home)
+            config_path = self.home / "config.toml"
+            end = f'# creative-model-bridge:end install_id="{installed["install_id"]}"\n'
+            original = config_path.read_text(encoding="utf-8")
+            expanded = original.replace(end, "# external note before next table\n[mcp_servers.blender]\ncommand = \"blender\"\n\n" + end)
+            config_path.write_text(expanded, encoding="utf-8")
+            state_path = provision.state_path(self.home)
+            before_state = state_path.read_bytes()
+            before_config = config_path.read_bytes()
+            with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+            self.assertEqual(config_path.read_bytes(), before_config)
+            self.assertEqual(state_path.read_bytes(), before_state)
+            self.assertFalse(provision.wal_path(self.home).exists())
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_begin_only_managed_digest_tamper_fails_closed(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                installed = provision.setup(home=self.home)
+            config_path = self.home / "config.toml"
+            end = f'# creative-model-bridge:end install_id="{installed["install_id"]}"\n'
+            config_path.write_text(config_path.read_text(encoding="utf-8").replace(end, ""), encoding="utf-8")
+            state_path = provision.state_path(self.home)
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["bridge_version"] = "0.1.8"
+            state["managed_digest"] = "0" * 64
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            before_config = config_path.read_bytes()
+            before_state = state_path.read_bytes()
+            with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+            self.assertEqual(config_path.read_bytes(), before_config)
+            self.assertEqual(state_path.read_bytes(), before_state)
+            self.assertFalse(provision.wal_path(self.home).exists())
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_current_expanded_setup_and_uninstall_are_structural(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        external = '[mcp_servers.blender]\ncommand = "blender"\n'
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                installed = provision.setup(home=self.home)
+            config_path = self.home / "config.toml"
+            end = f'# creative-model-bridge:end install_id="{installed["install_id"]}"\n'
+            expanded = config_path.read_text(encoding="utf-8").replace(end, "") + external + end
+            config_path.write_text(expanded, encoding="utf-8")
+            with patch.object(provision.sys, "platform", "win32"):
+                converged = provision.setup(home=self.home)
+            self.assertEqual(converged["bridge_version"], "0.1.9")
+            self.assertEqual(config_path.read_text(encoding="utf-8").count("[mcp_servers.blender]"), 1)
+            self.assertEqual(provision.status(home=self.home)["status"], "installed")
+
+            canonical = config_path.read_text(encoding="utf-8")
+            end = f'# creative-model-bridge:end install_id="{converged["install_id"]}"\n'
+            canonical = canonical.replace(external, "", 1)
+            config_path.write_text(canonical.replace(end, "") + external + end, encoding="utf-8")
+            with patch.object(provision.sys, "platform", "win32"):
+                removed = provision.uninstall(home=self.home)
+            self.assertEqual(removed["status"], "uninstalled")
+            self.assertEqual(config_path.read_text(encoding="utf-8"), "\n" + external)
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_current_expanded_managed_digest_tamper_fails_closed(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                installed = provision.setup(home=self.home)
+            config_path = self.home / "config.toml"
+            end = f'# creative-model-bridge:end install_id="{installed["install_id"]}"\n'
+            config_path.write_text(config_path.read_text(encoding="utf-8").replace(end, "") + '[mcp_servers.blender]\ncommand = "blender"\n' + end, encoding="utf-8")
+            state_path = provision.state_path(self.home)
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            state["managed_digest"] = "0" * 64
+            state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+            before_config = config_path.read_bytes()
+            before_state = state_path.read_bytes()
+            with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+                provision.setup(home=self.home)
+            self.assertEqual(config_path.read_bytes(), before_config)
+            self.assertEqual(state_path.read_bytes(), before_state)
+            self.assertFalse(provision.wal_path(self.home).exists())
+        finally:
+            if old is None:
+                provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
+            else:
+                provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
+
+    def test_owned_ca_missing_blocks_setup_and_repair_before_writes(self) -> None:
+        old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
+        provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
+        ca = self.home / "ca.pem"
+        ca.write_text("CA", encoding="utf-8")
+        try:
+            with patch.object(provision.sys, "platform", "win32"):
+                provision.setup(home=self.home, ssl_cert_file=ca)
+            ca.unlink()
+            config_path = self.home / "config.toml"
+            state_path = provision.state_path(self.home)
+            before_config = config_path.read_bytes()
+            before_state = state_path.read_bytes()
+            for repair in (False, True):
+                with self.subTest(repair=repair):
+                    with patch.object(provision.sys, "platform", "win32"), self.assertRaises(provision.ProvisionError):
+                        provision.setup(home=self.home, repair=repair)
+                    self.assertEqual(config_path.read_bytes(), before_config)
+                    self.assertEqual(state_path.read_bytes(), before_state)
+                    self.assertFalse(provision.wal_path(self.home).exists())
         finally:
             if old is None:
                 provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
