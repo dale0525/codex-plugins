@@ -116,11 +116,44 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<()> {
         .as_file()
         .sync_all()
         .context("sync temporary file")?;
+    #[cfg(not(windows))]
     temporary
         .persist(path)
         .map_err(|error| error.error)
         .with_context(|| format!("replace {}", path.display()))?;
+    #[cfg(windows)]
+    {
+        let temporary_path = temporary.into_temp_path();
+        replace_file_on_windows(&temporary_path, path)?;
+    }
     sync_open_directory(&directory, path)?;
+    Ok(())
+}
+
+#[cfg(windows)]
+fn replace_file_on_windows(source: &Path, destination: &Path) -> Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    use windows_sys::Win32::Storage::FileSystem::{
+        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
+    };
+
+    let destination_display = destination.display().to_string();
+    let source_wide = source
+        .as_os_str()
+        .encode_wide()
+        .chain(Some(0))
+        .collect::<Vec<_>>();
+    let destination_wide = destination
+        .as_os_str()
+        .encode_wide()
+        .chain(Some(0))
+        .collect::<Vec<_>>();
+    let flags = MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH;
+    let replaced = unsafe { MoveFileExW(source_wide.as_ptr(), destination_wide.as_ptr(), flags) };
+    if replaced == 0 {
+        return Err(std::io::Error::last_os_error())
+            .with_context(|| format!("replace {destination_display}"));
+    }
     Ok(())
 }
 
@@ -138,6 +171,7 @@ pub fn open_directory_for_sync(path: &Path) -> Result<fs::File> {
         const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
         fs::OpenOptions::new()
             .read(true)
+            .write(true)
             .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
             .open(path)
             .with_context(|| format!("open directory for durability: {}", path.display()))
@@ -263,6 +297,19 @@ mod tests {
         atomic_write(&target, b"first").unwrap();
         atomic_write(&target, b"second").unwrap();
         assert_eq!(fs::read_to_string(target).unwrap(), "second");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn windows_write_json_replaces_existing_pending_plan() {
+        let directory = tempfile::tempdir().unwrap();
+        let target = directory.path().join("pending-plan.json");
+        fs::write(&target, br#"{"id":"stale"}"#).unwrap();
+        write_json(&target, &serde_json::json!({ "id": "current" })).unwrap();
+        assert_eq!(
+            read_json::<serde_json::Value>(&target).unwrap(),
+            serde_json::json!({ "id": "current" })
+        );
     }
 
     #[test]
