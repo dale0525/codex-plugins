@@ -91,7 +91,7 @@ class BootstrapRuntimeTests(unittest.TestCase):
         first = self.run_bootstrap()
         self.assertEqual(first.returncode, 0, first.stderr)
         self.assertEqual(first.stdout, "bridge-ok provision\n")
-        cache = self.home / "creative-model-bridge/runtime/v0.1.9/objects/aarch64-apple-darwin"
+        cache = self.home / "creative-model-bridge/runtime/v0.1.10/objects/aarch64-apple-darwin"
         active = (cache / "active").read_text(encoding="utf-8").splitlines()
         self.assertEqual(active[0], "cmb-active-v4")
         digest, generation = active[1:]
@@ -119,7 +119,7 @@ class BootstrapRuntimeTests(unittest.TestCase):
             home = self.root / ("platform-" + str(index))
             result = self.run_bootstrap(home=home, extra={"FAKE_UNAME_S": system, "FAKE_UNAME_M": machine})
             self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertTrue((home / "creative-model-bridge/runtime/v0.1.9/objects" / target / "active").is_file())
+            self.assertTrue((home / "creative-model-bridge/runtime/v0.1.10/objects" / target / "active").is_file())
 
     def test_version_bound_cache_does_not_cross_start_offline(self) -> None:
         first = self.run_bootstrap()
@@ -129,7 +129,7 @@ class BootstrapRuntimeTests(unittest.TestCase):
         self.assertIn("cached runtime", wrong_version.stderr)
 
     def test_active_pointer_digest_and_generation_traversal_are_rejected(self) -> None:
-        cache = self.home / "creative-model-bridge/runtime/v0.1.9/objects/aarch64-apple-darwin"
+        cache = self.home / "creative-model-bridge/runtime/v0.1.10/objects/aarch64-apple-darwin"
         cache.mkdir(parents=True)
         (cache / "active").write_text("cmb-active-v4\n../escape\n../../outside\n", encoding="utf-8")
         result = self.run_bootstrap(offline="1")

@@ -40,7 +40,7 @@ recorded in schema-2 state and in the owned MCP environment. If that bundle is
 later removed, status reports drift while uninstall remains available.
 
 An internally consistent 0.1.5, 0.1.6, 0.1.7, or 0.1.8 owned block/state is
-upgraded transactionally to 0.1.9. The migration recognizes the one known
+upgraded transactionally to 0.1.10. The migration recognizes the one known
 begin-only marker repair shape only when the legacy state, install ID, and both
 canonical CMB table values match exactly. Complete markers may surround
 unrelated tables; migration and uninstall remove only the two CMB table spans
@@ -96,7 +96,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.9` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.10` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test
@@ -113,7 +113,7 @@ development; a valid override performs zero network access. Set
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` to require a cached executable (an uncached
 offline start fails clearly). Downloaded assets and `checksums.txt` come from
 the same GitHub release and therefore provide integrity checking, not an
-independent supply-chain attestation. No `creative-model-bridge-v0.1.9`
+independent supply-chain attestation. No `creative-model-bridge-v0.1.10`
 release is claimed to exist until the workflow is run; before that tag, use the
 override for local smoke tests.
 

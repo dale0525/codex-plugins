@@ -119,7 +119,7 @@ def owned_config(text: str, parse_toml: Callable[[str], dict[str, Any]]) -> dict
             continue
         heading_indices.append(index)
         kind, path = heading
-        if "creative-model-bridge" not in path:
+        if not path.startswith("mcp_servers.") or "creative-model-bridge" not in path:
             continue
         expected_kind = "root" if path == canonical["root"] else "env" if path == canonical["env"] else ""
         if kind != "table" or not expected_kind or raw.rstrip("\r\n") != f"[{canonical[expected_kind]}]":
