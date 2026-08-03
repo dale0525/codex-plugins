@@ -233,7 +233,7 @@ def validate_bundled_mcp_contract(plugin: Path, manifest: dict[str, Any]) -> lis
     entry = servers[BUNDLED_MCP_SERVER]
     if not isinstance(entry, dict):
         return errors + ["bundled creative-model-bridge server must be an object"]
-    if set(entry) != {"command", "args", "cwd", "env_vars"}:
+    if set(entry) != {"command", "args", "cwd", "startup_timeout_sec", "env_vars"}:
         errors.append("bundled creative-model-bridge server fields are not the stdio contract")
     if entry.get("command") != "./scripts/bootstrap.sh":
         errors.append("bundled creative-model-bridge command must be relative ./scripts/bootstrap.sh")
@@ -241,6 +241,8 @@ def validate_bundled_mcp_contract(plugin: Path, manifest: dict[str, Any]) -> lis
         errors.append("bundled creative-model-bridge args must be ['serve']")
     if entry.get("cwd") != ".":
         errors.append("bundled creative-model-bridge cwd must be '.'")
+    if entry.get("startup_timeout_sec") != 45:
+        errors.append("bundled creative-model-bridge startup_timeout_sec must be 45")
     env_vars = entry.get("env_vars")
     valid_env_vars = isinstance(env_vars, list) and all(isinstance(value, str) for value in env_vars)
     if not valid_env_vars or len(env_vars) != len(set(env_vars)) or set(env_vars) != BUNDLED_MCP_ALLOWED_ENV_VARS:

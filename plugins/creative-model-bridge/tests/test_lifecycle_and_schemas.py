@@ -186,6 +186,12 @@ class OutputSchemaTests(unittest.TestCase):
 
 
 class LauncherLifecycleTests(unittest.TestCase):
+    def test_bundled_mcp_allows_for_cold_runtime_startup(self) -> None:
+        config = json.loads((PLUGIN_ROOT / ".mcp.json").read_text(encoding="utf-8"))
+        server = config["mcpServers"]["creative-model-bridge-bundled"]
+
+        self.assertEqual(server["startup_timeout_sec"], 45)
+
     def test_read_only_copy_has_no_temp_leak_or_tree_mutation(self) -> None:
         with tempfile.TemporaryDirectory(prefix="creative-launcher-") as temporary:
             root = Path(temporary)

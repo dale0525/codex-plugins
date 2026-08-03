@@ -180,7 +180,7 @@ def _validate_creative_provision(
                 validation.error(f"{companion.relative_to(ROOT)}: bundled declaration must contain exactly one creative-model-bridge-bundled server")
             else:
                 entry = servers["creative-model-bridge-bundled"]
-                if set(entry) != {"command", "args", "cwd", "env_vars"}:
+                if set(entry) != {"command", "args", "cwd", "startup_timeout_sec", "env_vars"}:
                     validation.error(f"{companion.relative_to(ROOT)}: bundled server fields are not the stdio contract")
                 if entry.get("command") != "./scripts/bootstrap.sh":
                     validation.error(f"{companion.relative_to(ROOT)}: bundled command must be relative ./scripts/bootstrap.sh")
@@ -188,6 +188,8 @@ def _validate_creative_provision(
                     validation.error(f"{companion.relative_to(ROOT)}: bundled args must be ['serve']")
                 if entry.get("cwd") != ".":
                     validation.error(f"{companion.relative_to(ROOT)}: bundled cwd must be '.'")
+                if entry.get("startup_timeout_sec") != 45:
+                    validation.error(f"{companion.relative_to(ROOT)}: bundled startup_timeout_sec must be 45")
                 env_vars = entry.get("env_vars")
                 allowed = {
                     "CODEX_HOME",
@@ -355,10 +357,17 @@ def _validate_pixi_launcher(
 
 
 def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str, Any], validation: Validation) -> None:
-    allowed_fields = {"command", "args", "cwd", "env_vars", "url"}
+    allowed_fields = {"command", "args", "cwd", "env_vars", "url", "startup_timeout_sec"}
     unknown = set(server) - allowed_fields
     if unknown:
         validation.error(f"{context}: unsupported fields {sorted(unknown)}")
+    startup_timeout = server.get("startup_timeout_sec")
+    if startup_timeout is not None and (
+        isinstance(startup_timeout, bool)
+        or not isinstance(startup_timeout, (int, float))
+        or startup_timeout <= 0
+    ):
+        validation.error(f"{context}: startup_timeout_sec must be a positive number")
     env_vars = server.get("env_vars", [])
     if not isinstance(env_vars, list) or any(not isinstance(item, str) or not item for item in env_vars):
         validation.error(f"{context}: env_vars must be an array of non-empty strings")
