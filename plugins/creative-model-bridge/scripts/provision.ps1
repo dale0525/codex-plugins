@@ -1,11 +1,11 @@
 param(
-  [Parameter(Position = 0)] [ValidateSet('setup','status','repair','uninstall')] [string]$Action = 'setup',
+  [Parameter(Position = 0)] [ValidateSet('setup','status','repair','uninstall','serve')] [string]$Action = 'setup',
   [Parameter(ValueFromRemainingArguments = $true)] [string[]]$RemainingArgs
 )
 
 $ErrorActionPreference = 'Stop'
 $null = [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.1.15' }
+$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.1.16' }
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'creative-model-bridge: invalid version' }
 
 $override = $env:CREATIVE_MODEL_BRIDGE_BIN
@@ -19,7 +19,31 @@ $active = Join-Path $targetRoot 'active'
 New-Item -ItemType Directory -Force -Path $targetRoot | Out-Null
 
 function Get-Sha256([string]$Path) {
-  return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToLowerInvariant()
+  $hash = $null
+  if (Get-Command -Name Get-FileHash -ErrorAction SilentlyContinue) {
+    try {
+      $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash
+    } catch {
+      $hash = $null
+    }
+  }
+  if (-not $hash) {
+    $stream = [IO.File]::OpenRead($Path)
+    try {
+      $algorithm = [Security.Cryptography.SHA256]::Create()
+      try {
+        $bytes = $algorithm.ComputeHash($stream)
+      } finally {
+        $algorithm.Dispose()
+      }
+    } finally {
+      $stream.Dispose()
+    }
+    $hash = -join ($bytes | ForEach-Object { $_.ToString('x2') })
+  }
+  $hash = $hash.ToLowerInvariant()
+  if ($hash -notmatch '^[0-9a-f]{64}$') { throw 'creative-model-bridge: invalid SHA-256 digest' }
+  return $hash
 }
 
 function Get-CachedBinary {
@@ -100,5 +124,9 @@ if (-not $binary) {
 }
 
 $env:CREATIVE_MODEL_BRIDGE_EXECUTABLE = $binary
-& $binary 'provision' $Action @RemainingArgs
+if ($Action -eq 'serve') {
+  & $binary 'serve' @RemainingArgs
+} else {
+  & $binary 'provision' $Action @RemainingArgs
+}
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -39,7 +39,7 @@ error messages. The bridge does not inject Codex instructions, model-specific
 adapters, retries, provider switching, or conversation history.
 
 Every provider request also carries the explicit honest `User-Agent`
-`creative-model-bridge/0.1.15`. This stable product identifier is a transport
+`creative-model-bridge/0.1.16`. This stable product identifier is a transport
 compatibility measure for provider edges that reject Python's default user
 agent; it does not claim to be Codex and is not accompanied by Codex-,
 originator-, or session-spoofing headers.
@@ -89,7 +89,7 @@ regular-file type; macOS uses `/etc/ssl/cert.pem`, Linux uses a fixed ordered
 candidate list, and Windows preserves the platform trust store by omitting
 `SSL_CERT_FILE` unless explicitly selected. The optional state `ssl_cert_file`
 and managed block digest make trust drift observable. Missing trust material
-does not block uninstall. A consistent prior 0.1.5 through 0.1.14 owned image
+does not block uninstall. A consistent prior 0.1.5 through 0.1.15 owned image
 is recognized as a migration input and rewritten as one setup transaction.
 Ownership removal is a strict line-span operation over the two
 canonical CMB tables and marker lines, so expanded marker regions retain

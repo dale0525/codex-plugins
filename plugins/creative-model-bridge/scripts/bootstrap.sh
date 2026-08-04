@@ -3,7 +3,7 @@
 # intentionally dependency-light and does not require Git, Pixi, or Python.
 set -eu
 
-version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.15}"
+version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.16}"
 case "$version" in
   *[!0-9.]*|"") echo "creative-model-bridge: invalid version" >&2; exit 1 ;;
 esac
@@ -18,6 +18,32 @@ if [ "${1:-}" = "serve" ]; then
   shift
 fi
 
+# The bundled MCP entrypoint is a POSIX shell script even on Windows, where
+# MSYS/Git Bash reports a Windows-like uname value.  Hand `serve` to the
+# PowerShell launcher so cache/download/override handling runs natively.
+script_dir="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
+system="$(uname -s 2>/dev/null || printf unknown)"
+machine="$(uname -m 2>/dev/null || printf unknown)"
+windows_shell=0
+case "$system" in
+  MSYS*|MINGW*|CYGWIN*|Windows_NT*) windows_shell=1 ;;
+esac
+if [ "$mode" = "serve" ] && [ "$windows_shell" -eq 1 ]; then
+  powershell_command=""
+  for candidate in powershell.exe powershell pwsh; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      powershell_command="$candidate"
+      break
+    fi
+  done
+  [ -n "$powershell_command" ] || { echo "creative-model-bridge: PowerShell is required on Windows" >&2; exit 1; }
+  provisioner="$script_dir/provision.ps1"
+  if command -v cygpath >/dev/null 2>&1; then
+    provisioner="$(cygpath -w "$provisioner")"
+  fi
+  exec "$powershell_command" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$provisioner" serve "$@"
+fi
+
 if [ -n "${CREATIVE_MODEL_BRIDGE_BIN:-}" ]; then
   binary="$CREATIVE_MODEL_BRIDGE_BIN"
   [ -f "$binary" ] && [ -x "$binary" ] || { echo "creative-model-bridge: override is not executable" >&2; exit 1; }
@@ -29,8 +55,6 @@ if [ -n "${CREATIVE_MODEL_BRIDGE_BIN:-}" ]; then
   exec "$binary" provision "$@"
 fi
 
-system="$(uname -s 2>/dev/null || printf unknown)"
-machine="$(uname -m 2>/dev/null || printf unknown)"
 case "$system-$machine" in
   Darwin-arm64) target="aarch64-apple-darwin"; asset="creative-model-bridge-aarch64-apple-darwin" ;;
   Darwin-x86_64) target="x86_64-apple-darwin"; asset="creative-model-bridge-x86_64-apple-darwin" ;;
