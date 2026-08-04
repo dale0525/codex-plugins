@@ -1,13 +1,1 @@
-schema_version = 2
-agents = "AGENTS.md"
-agent_profiles = "agents"
-common_config = "config/common.toml"
-devices = "devices"
-marketplaces = "marketplaces.toml"
-plugins = "plugins.toml"
-providers = "providers.toml"
-
-[[external_agents_sections]]
-id = "fastctx"
-begin_marker = "<!-- fastctx:begin -->"
-end_marker = "<!-- fastctx:end -->"
+schema_version = 3

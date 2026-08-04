@@ -1,16 +1,12 @@
-mod agents;
 mod app;
-mod artifact;
-mod auth;
-mod capture;
+#[cfg(test)]
+mod app_tests;
+mod codex;
 mod config;
-mod github;
+mod migration;
 mod model;
 mod profiles;
-mod provision;
-mod reconcile;
 mod storage;
-mod transaction;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -19,7 +15,7 @@ use clap::{Parser, Subcommand};
 #[command(
     name = "codex-sync",
     version,
-    about = "Synchronize Codex configuration safely"
+    about = "Synchronize Codex configuration through Git"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -28,63 +24,29 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Configure the private GitHub repository and this device identity.
+    /// Bind this device to a Git repository.
     Setup {
         #[arg(long)]
-        repository: String,
+        repository: Option<String>,
         #[arg(long)]
-        device: String,
+        device: Option<String>,
         #[arg(long, default_value = "main")]
-        git_ref: String,
-        #[arg(long)]
-        github_client_id: Option<String>,
-        /// Replace an existing local setup after backing up its state.
-        #[arg(long)]
-        replace_existing: bool,
+        branch: String,
     },
-    /// Authenticate to GitHub with the configured GitHub App device flow.
-    Login {
+    /// Fetch the remote branch and converge local Codex state.
+    Pull {
         #[arg(long)]
-        client_id: Option<String>,
-        #[arg(long)]
-        no_browser: bool,
+        dry_run: bool,
     },
-    /// Delete the locally stored GitHub credential.
-    Logout,
-    /// Fetch the private repository and create a reviewable synchronization plan.
-    Sync {
-        /// Discard unpublished edits in the local repository cache.
+    /// Capture this device and commit it to the remote branch.
+    Push {
         #[arg(long)]
-        discard_local: bool,
-    },
-    /// Apply a previously reviewed plan transactionally.
-    Apply {
-        plan_id: String,
+        dry_run: bool,
         #[arg(long)]
-        approve_high_risk: bool,
+        message: Option<String>,
     },
-    /// Show local synchronization state.
-    Status {
-        #[arg(long)]
-        json: bool,
-    },
-    /// Validate state, repository schema, secret policy, and Codex availability.
-    Doctor,
-    /// Capture current managed configuration and portable installed plugins into the repository cache.
-    Capture,
-    /// Restore the latest or a named pre-apply backup.
-    Rollback {
-        backup: Option<String>,
-        #[arg(long)]
-        approve: bool,
-    },
-    /// Publish reviewed edits in the local repository cache as one GitHub commit.
-    Publish {
-        #[arg(long, default_value = "Update synchronized Codex configuration")]
-        message: String,
-        #[arg(long)]
-        approve: bool,
-    },
+    /// Show the binding and convergence state.
+    Status,
 }
 
 fn main() {
@@ -100,30 +62,10 @@ fn run() -> Result<()> {
         Commands::Setup {
             repository,
             device,
-            git_ref,
-            github_client_id,
-            replace_existing,
-        } => app::setup(
-            &repository,
-            &device,
-            &git_ref,
-            github_client_id,
-            replace_existing,
-        ),
-        Commands::Login {
-            client_id,
-            no_browser,
-        } => app::login(client_id.as_deref(), !no_browser),
-        Commands::Logout => app::logout(),
-        Commands::Sync { discard_local } => app::sync(discard_local).map(|_| ()),
-        Commands::Apply {
-            plan_id,
-            approve_high_risk,
-        } => app::apply(&plan_id, approve_high_risk),
-        Commands::Status { json } => app::status(json),
-        Commands::Doctor => app::doctor(),
-        Commands::Capture => capture::capture(),
-        Commands::Rollback { backup, approve } => app::rollback(backup.as_deref(), approve),
-        Commands::Publish { message, approve } => app::publish(&message, approve),
+            branch,
+        } => app::setup(repository.as_deref(), device.as_deref(), &branch),
+        Commands::Pull { dry_run } => app::pull(dry_run),
+        Commands::Push { dry_run, message } => app::push(dry_run, message.as_deref()),
+        Commands::Status => app::status(),
     }
 }

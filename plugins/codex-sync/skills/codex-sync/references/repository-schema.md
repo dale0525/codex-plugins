@@ -1,208 +1,37 @@
-# Configuration repository schema
+# Codex Sync repository schema v3
 
-## Contents
-
-- Required layout
-- Root manifest
-- Agent profiles
-- Portable and device configuration
-- Providers
-- Marketplaces
-- Plugins
-- Ownership behavior
-
-## Required layout
-
-```text
-codex-sync.toml
-AGENTS.md
-agents/*.toml
-config/common.toml
-devices/<device-id>.toml
-marketplaces.toml
-plugins.toml
-providers.toml
-```
-
-`codex-sync.toml`, the referenced `AGENTS.md`, and a non-empty agent profiles directory are required. Missing optional TOML files are treated as empty. All text must be UTF-8.
-
-## Root manifest
+The root manifest is intentionally exact:
 
 ```toml
-schema_version = 2
-agents = "AGENTS.md"
-agent_profiles = "agents"
-common_config = "config/common.toml"
-devices = "devices"
-marketplaces = "marketplaces.toml"
-plugins = "plugins.toml"
-providers = "providers.toml"
-
-[[external_agents_sections]]
-id = "fastctx"
-begin_marker = "<!-- fastctx:begin -->"
-end_marker = "<!-- fastctx:end -->"
+schema_version = 3
 ```
 
-Every path must be relative and remain inside the repository. Parent traversal and absolute paths are rejected.
+Managed files are fixed to `AGENTS.md`, `agents/*.toml`,
+`config/common.toml`, `devices/<device>.toml`, `marketplaces.toml`, and
+`plugins.toml`. Do not add path mappings, `providers.toml`, or external AGENTS
+sections.
 
-An external AGENTS section declares a marker-delimited block owned by another
-reviewed tool. The synchronized repository `AGENTS.md` must not contain that
-block. Apply preserves one valid live block while replacing the canonical base;
-capture strips it before updating the repository cache. Duplicate, unmatched,
-reversed, or overlapping marker declarations are rejected.
-
-## Agent profiles
-
-Put the shared native subagent profiles under the directory selected by `agent_profiles`:
-
-```text
-agents/default.toml
-agents/creative_text.toml
-agents/image.toml
-```
-
-All synchronized devices use the same profile files. Each file must be UTF-8 TOML, use a portable filename, and declare matching `name`, `description`, and `developer_instructions` strings. Model and reasoning settings may also be declared in the profile.
-
-Agent profiles inherit session settings that they omit. Keep complete custom provider definitions in `providers.toml` and omit partial `[model_providers.<name>]` tables from profile files so they inherit the synchronized parent provider. This avoids a partial profile definition shadowing provider authentication fields.
-
-Profile additions, replacements, and removals are high-risk changes. The engine owns only the filenames it previously synchronized and preserves unrelated files under `$CODEX_HOME/agents/`.
-
-## Portable and device configuration
-
-Put portable Codex keys in `config/common.toml`:
+Common configuration is overlaid by the current device file. Existing local
+keys outside the set previously managed by Codex Sync are preserved on pull.
+Push only samples already declared leaves and reports new local keys.
 
 ```toml
-model = "gpt-5.6"
-model_reasoning_effort = "medium"
-web_search = "cached"
+# plugins.toml
+plugins = ["my-plugin@my-market"]
 
-[features]
-apps = true
-multi_agent = true
-```
-
-Put host-specific paths, hooks, notification commands, and local MCP commands in `devices/<device-id>.toml`. Device values override common values at the same key path.
-
-The engine remembers every managed leaf key. On a later apply it removes keys that were previously managed but have disappeared from the repository, then applies the new common and device values. Unmanaged Codex tables such as project trust, desktop state, and marketplace revision metadata remain intact.
-
-## Providers
-
-Define providers under a `providers` table. Each child table becomes `model_providers.<name>` in Codex config:
-
-```toml
-[providers.company]
-name = "Company API"
-base_url = "https://api.example.com/v1"
-wire_api = "responses"
-env_key = "COMPANY_OPENAI_API_KEY"
-requires_openai_auth = false
-```
-
-Prefer `env_key` or command-backed authentication. When a private configuration repository must make a provider immediately usable on every device, the provider file may explicitly store Codex's dev-only plaintext field:
-
-```toml
-[providers.company]
-name = "Company API"
-base_url = "https://api.example.com/v1"
-wire_api = "responses"
-experimental_bearer_token = "replace-with-the-real-token"
-```
-
-Only `providers.<name>.experimental_bearer_token` receives this exception. The engine still rejects `bearer_token`, access tokens, API keys, passwords, client secrets, refresh tokens, private keys, and secret-looking fields elsewhere. The plaintext value is copied into global `config.toml` and remains in Git history, clones, backups, and GitHub audit surfaces even after replacement. Use only a private repository with narrowly selected access and rotate the token after any suspected exposure.
-
-## Marketplaces
-
-Public Git source:
-
-```toml
+# marketplaces.toml
 [[marketplaces]]
 source = "git"
-name = "dale0525-codex-plugins"
-url = "https://github.com/dale0525/codex-plugins.git"
+name = "my-market"
+url = "https://example.test/my-market.git"
 git_ref = "main"
 sparse = []
 ```
 
-Private GitHub snapshot source:
+Only Git marketplace sources are portable. The `openai` and `openai-*`
+namespaces are application-managed and are never changed by Codex Sync.
 
-```toml
-[[marketplaces]]
-source = "github-snapshot"
-name = "personal-private"
-repository = "owner/private-codex-plugins"
-git_ref = "3f8d27c..."
-```
-
-Private sources are resolved to a commit SHA, downloaded through the authenticated GitHub API, validated, and registered as versioned local marketplace snapshots. Pin releases or commit SHAs for reproducibility.
-
-## Plugins
-
-```toml
-[[plugins]]
-id = "codex-sync@dale0525-codex-plugins"
-enabled = true
-
-[[plugins]]
-id = "private-tool@personal-private"
-enabled = true
-
-[[plugins]]
-id = "fastctx@dale0525-codex-plugins"
-enabled = true
-auto_provision = true
-```
-
-Plugin IDs must use `plugin@marketplace` syntax. For each non-OpenAI marketplace declared in `marketplaces.toml`, `plugins.toml` is the complete synchronized plugin set. Removing an installed plugin's entry schedules a high-risk uninstall through `codex plugin remove`, which removes its local configuration and cache. Plugins from undeclared marketplaces are preserved.
-
-Use presence in this file to express the desired installed set; remove a plugin's entire entry when it should be absent. `enabled = false` remains accepted for backward compatibility and also requests removal, but capture does not generate or retain disabled entries.
-
-`auto_provision = true` opts an enabled plugin into its bundled
-`.codex-sync/provision.json` contract. The synchronization plan marks the action
-high risk. After marketplace refresh and plugin installation succeed, Codex
-Sync resolves the local plugin root and runs the platform provision script with
-GitHub credentials removed from its environment. Provisioning runs last; if it
-fails, the complete apply (including core configuration and plugin registry)
-is rolled back and the runtime setup is restored from the pre-apply receipt.
-Successful runs record content hashes of `provision.json`, the selected script,
-and its script-directory dependencies together with the immutable script path
-and plugin root in local state. Every execution rechecks these hashes immediately
-before spawning the interpreter; a later apply hard-stops on any receipt drift.
-Removing a provisioned plugin first invokes that script with the single
-`uninstall` argument; a missing or changed receipt blocks removal until the
-operator repairs it explicitly.
-
-Provision specs may set `windows_shell = "windows-powershell"` to select the
-Windows PowerShell 5.1 executable (`%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe`,
-then `powershell.exe` from `PATH`). The omitted value remains `"pwsh"` for
-backward compatibility.
-
-## Ownership behavior
-
-The repository declares desired portable state. It does not own or transport:
-
-- `auth.json` or provider secrets other than an explicitly declared `experimental_bearer_token`
-- sessions, history, memories, goals, logs, or SQLite databases
-- project trust decisions
-- hook trust decisions
-- desktop runtime state unless explicitly placed in portable or device config
-- downloaded marketplace or plugin caches
-
-## Current-device capture
-
-`codex-sync capture` transactionally updates the repository cache from the current device. It captures:
-
-- current values for leaf keys already declared by common and current-device configuration, while preserving common values shadowed by a device override
-- complete current `model_providers` tables into `providers.toml`, subject to the normal secret policy
-- the canonical portion of global `AGENTS.md`, excluding declared external sections, and the profile files already synchronized by the repository
-- installed and enabled plugins outside marketplaces named `openai` or beginning with `openai-`
-
-Capture removes OpenAI-managed plugin and marketplace declarations from the cache. It also removes entries for portable plugins that are absent or disabled on the current device. After reviewed publication, other devices interpret the missing entry as a high-risk uninstall because `plugins.toml` is the complete desired set for declared marketplaces.
-
-When an installed plugin uses an undeclared marketplace, capture can add that marketplace only when current Codex configuration records a portable HTTPS Git source and ref. Local marketplaces, including the implicit personal marketplace, are skipped with a warning because the configuration repository does not transport plugin source code.
-
-Capture does not discover arbitrary new common or device configuration keys. Add a new key to the appropriate repository file once to establish its ownership and portability; later captures update its current value automatically. `model_reasoning_effort` is the exception: normal capture canonicalizes it to `medium` in common configuration and removes device overrides. A different shared value requires an explicit user request followed by a reviewed repository-cache edit and publication; capture never infers that intent from the live session value.
-
-Capture preserves `auto_provision = true` for a plugin already carrying that
-declaration. It never infers auto-provisioning merely because an installed
-plugin happens to contain executable files.
+Repositories using schema v2 are converted in the engine-owned Git cache. V2
+provider tables are merged into `[model_providers.*]`; disabled and
+auto-provisioned plugin metadata is discarded. A `github-snapshot` marketplace
+must be replaced with a Git source before migration can complete.
