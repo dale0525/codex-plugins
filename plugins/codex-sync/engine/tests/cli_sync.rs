@@ -65,7 +65,10 @@ fn fixture() -> (TempDir, PathBuf, PathBuf, PathBuf) {
     let sync_home = temp.path().join("sync");
     fs::create_dir_all(&codex_home).unwrap();
     run_git(temp.path(), &["init", "--bare", remote.to_str().unwrap()]);
-    run_git(temp.path(), &["init", seed.to_str().unwrap()]);
+    run_git(
+        temp.path(),
+        &["init", "--initial-branch=main", seed.to_str().unwrap()],
+    );
     run_git(&seed, &["config", "user.name", "Seed"]);
     run_git(&seed, &["config", "user.email", "seed@example.test"]);
     fs::create_dir_all(seed.join("config")).unwrap();
