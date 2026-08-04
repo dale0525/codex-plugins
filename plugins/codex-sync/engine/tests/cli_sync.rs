@@ -64,7 +64,15 @@ fn fixture() -> (TempDir, PathBuf, PathBuf, PathBuf) {
     let codex_home = temp.path().join("codex");
     let sync_home = temp.path().join("sync");
     fs::create_dir_all(&codex_home).unwrap();
-    run_git(temp.path(), &["init", "--bare", remote.to_str().unwrap()]);
+    run_git(
+        temp.path(),
+        &[
+            "init",
+            "--bare",
+            "--initial-branch=main",
+            remote.to_str().unwrap(),
+        ],
+    );
     run_git(
         temp.path(),
         &["init", "--initial-branch=main", seed.to_str().unwrap()],
@@ -91,7 +99,7 @@ fn fixture() -> (TempDir, PathBuf, PathBuf, PathBuf) {
         &seed,
         &["remote", "add", "origin", remote.to_str().unwrap()],
     );
-    run_git(&seed, &["push", "-u", "origin", "main"]);
+    run_git(&seed, &["push", "-u", "origin", "HEAD:refs/heads/main"]);
     let codex_bin = temp.path().join("codex-cli");
     fake_codex(&codex_bin);
     (temp, remote, codex_home, sync_home)
