@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover
 
 INSTALL_NAME = "creative-model-bridge"
 SCHEMA_VERSION = 2
-PROVISION_VERSION = "0.1.17"
+PROVISION_VERSION = "0.1.18"
 SSL_CERT_ENV = "SSL_CERT_FILE"
 # Ordered, deterministic Linux candidates.  The first readable, non-empty
 # regular file wins; callers/tests may provide an explicit candidate sequence.
@@ -49,11 +49,11 @@ DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 RESERVED_ENV_KEYS = frozenset({"CODEX_HOME", "CREATIVE_MODEL_API_KEY", SSL_CERT_ENV})
 LEGACY_VERSIONS = frozenset({
     "0.1.5", "0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11",
-    "0.1.12", "0.1.13", "0.1.14", "0.1.15", "0.1.16",
+    "0.1.12", "0.1.13", "0.1.14", "0.1.15", "0.1.16", "0.1.17",
 })
 LEGACY_SSL_VERSIONS = frozenset({
     "0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11",
-    "0.1.12", "0.1.13", "0.1.14", "0.1.15", "0.1.16",
+    "0.1.12", "0.1.13", "0.1.14", "0.1.15", "0.1.16", "0.1.17",
 })
 LEGACY_STATE_KEYS = frozenset({
     "schema_version", "status", "install_id", "config_path", "config_digest",
@@ -314,7 +314,7 @@ def _state_values_valid(state: dict[str, Any]) -> bool:
 
 
 def _legacy_state_shape(state: dict[str, Any]) -> bool:
-    """Accept only reviewed pre-0.1.17 state contracts for migration/removal."""
+    """Accept only reviewed pre-0.1.18 state contracts for migration/removal."""
 
     has_version = "bridge_version" in state
     version = state.get("bridge_version")
@@ -413,10 +413,10 @@ def _render_block(install_id: str, command: Path, home: Path, env_key: str | Non
 
 
 def _validate_final(text: str, install_id: str, command: Path, home: Path, env_key: str | None, ssl_cert_file: str | None) -> dict[str, Any]:
-    marker = _marker(text)
-    if marker is None or marker["install_id"] != install_id:
+    owned = _owned_config(text)
+    if owned is None or not owned["complete"] or owned["install_id"] != install_id:
         raise ProvisionError("final config does not contain the owned marker pair")
-    value = _parse_toml(text)
+    value = owned["value"]
     servers = value.get("mcp_servers", {})
     entry = servers.get(INSTALL_NAME) if isinstance(servers, dict) else None
     envs = ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"] + ([env_key] if env_key and env_key not in {"CODEX_HOME", "CREATIVE_MODEL_API_KEY"} else [])
@@ -437,7 +437,11 @@ def _validate_final(text: str, install_id: str, command: Path, home: Path, env_k
             raise ProvisionError("final MCP CA environment config failed validation")
     elif SSL_CERT_ENV in env_table:
         raise ProvisionError("final MCP CA environment config is unexpected")
-    return {"managed_digest": _digest(marker["block"].encode("utf-8")), "env_key": env_key}
+    # Digest only the canonical validated CMB block.  Marker spans may
+    # surround unrelated MCP tables; those bytes are preserved but are not
+    # part of the managed configuration identity.
+    canonical = _render_block(str(install_id), command, home, env_key, ssl_cert_file)
+    return {"managed_digest": _digest(canonical.encode("utf-8")), "env_key": env_key}
 
 
 def _legacy_ssl_cert(state: dict[str, Any]) -> str | None:
@@ -924,8 +928,16 @@ def uninstall(*, home: Path | None = None) -> dict[str, Any]:
             healthy = _legacy_state_shape(state) and _structural_owned_healthy(state, owned, text, home, allow_missing_ssl=True)
         if not healthy:
             raise ProvisionError("owned configuration drift detected; run provision repair")
-        updated, managed_digest = _remove_owned(text, str(state["install_id"]))
+        updated, _ = _remove_owned(text, str(state["install_id"]))
         _parse_toml(updated)
+        canonical = _render_block(
+            str(state["install_id"]),
+            Path(str(state["command"])),
+            home,
+            state.get("env_key"),
+            _legacy_ssl_cert(state),
+        )
+        managed_digest = _digest(canonical.encode("utf-8"))
         new_state = {**state, "status": "uninstalled", "config_digest": _digest(updated.encode("utf-8")), "managed_digest": managed_digest, "updated_at": int(time.time())}
         after_state = (json.dumps(new_state, indent=2, sort_keys=True) + "\n").encode("utf-8")
         _transaction(home, "uninstall", before_config, updated.encode("utf-8"), (state_exists, state_bytes, _digest(state_bytes)), after_state)

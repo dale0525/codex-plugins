@@ -19,8 +19,8 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
     def _workflow(self) -> str:
         return (ROOT / ".github/workflows/release-creative-model-bridge.yml").read_text(encoding="utf-8")
 
-    def test_checked_in_contract_matches_v0117(self) -> None:
-        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.17"), [])
+    def test_checked_in_contract_matches_v0118(self) -> None:
+        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.18"), [])
 
     def test_global_provision_contract_rejects_local_companion(self) -> None:
         plugin_manifest = {"mcpServers": "./.mcp.json"}
@@ -263,14 +263,14 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
 
     def test_provisioner_default_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/scripts/provision.ps1").read_text(encoding="utf-8")
-        mismatched = text.replace("else { '0.1.17' }", "else { '0.1.7' }")
-        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.17")
+        mismatched = text.replace("else { '0.1.18' }", "else { '0.1.7' }")
+        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.18")
         self.assertTrue(any("default version" in error for error in errors))
 
     def test_provision_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/mcp/provision.py").read_text(encoding="utf-8")
-        mismatched = text.replace('PROVISION_VERSION = "0.1.17"', 'PROVISION_VERSION = "0.1.7"', 1)
-        errors = release_validator.validate_provision_version(mismatched, "0.1.17")
+        mismatched = text.replace('PROVISION_VERSION = "0.1.18"', 'PROVISION_VERSION = "0.1.7"', 1)
+        errors = release_validator.validate_provision_version(mismatched, "0.1.18")
         self.assertTrue(any("PROVISION_VERSION" in error for error in errors))
 
 

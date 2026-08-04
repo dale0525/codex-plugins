@@ -41,8 +41,8 @@ variable by default and keeps the native trust store. The selected path is
 recorded in schema-2 state and in the owned MCP environment. If that bundle is
 later removed, status reports drift while uninstall remains available.
 
-An internally consistent 0.1.5 through 0.1.16 owned block/state is upgraded
-transactionally to 0.1.17. The migration recognizes the one known
+An internally consistent 0.1.5 through 0.1.17 owned block/state is upgraded
+transactionally to 0.1.18. The migration recognizes the one known
 begin-only marker repair shape only when the legacy state, install ID, and both
 canonical CMB table values match exactly. Complete markers may surround
 unrelated tables; migration and uninstall remove only the two CMB table spans
@@ -99,7 +99,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.17` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.18` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test
