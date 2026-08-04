@@ -19,39 +19,60 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
     def _workflow(self) -> str:
         return (ROOT / ".github/workflows/release-creative-model-bridge.yml").read_text(encoding="utf-8")
 
-    def test_checked_in_contract_matches_v0116(self) -> None:
-        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.16"), [])
+    def test_checked_in_contract_matches_v0117(self) -> None:
+        self.assertEqual(release_validator.validate(ROOT, "creative-model-bridge-v0.1.17"), [])
 
-    def test_bundled_mcp_contract_rejects_absolute_command_and_unapproved_env(self) -> None:
+    def test_global_provision_contract_rejects_local_companion(self) -> None:
         plugin_manifest = {"mcpServers": "./.mcp.json"}
         with tempfile.TemporaryDirectory(prefix="creative-mcp-contract-") as raw_root:
             plugin = Path(raw_root)
-            (plugin / ".mcp.json").write_text(
-                json.dumps(
-                    {
-                        "mcpServers": {
-                            "creative-model-bridge-bundled": {
-                                "command": "/tmp/bootstrap.sh",
-                                "args": ["serve"],
-                                "cwd": ".",
-                                "startup_timeout_sec": 45,
-                                "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY", "HOME"],
-                            }
-                        }
-                    }
-                ),
-                encoding="utf-8",
+            (plugin / ".mcp.json").write_text("{}\n", encoding="utf-8")
+            (plugin / ".codex-sync").mkdir()
+            (plugin / ".codex-sync/provision.json").write_text(
+                json.dumps(release_validator.PROVISION_CONTRACT) + "\n", encoding="utf-8"
             )
-            errors = release_validator.validate_bundled_mcp_contract(plugin, plugin_manifest)
-        self.assertTrue(any("relative ./scripts/bootstrap.sh" in error for error in errors))
-        self.assertTrue(any("approved runtime environment" in error for error in errors))
+            (plugin / "skills/creative-model-bridge").mkdir(parents=True)
+            (plugin / "skills/creative-model-bridge/SKILL.md").write_text("global only\n", encoding="utf-8")
+            errors = release_validator.validate_global_provision_contract(plugin, plugin_manifest)
+        self.assertTrue(any("must not declare mcpServers" in error for error in errors))
+        self.assertTrue(any(".mcp.json must not exist" in error for error in errors))
 
-    def test_bundled_mcp_server_id_does_not_collide_with_legacy_global_provision(self) -> None:
-        self.assertEqual(release_validator.BUNDLED_MCP_SERVER, "creative-model-bridge-bundled")
-        self.assertNotEqual(
-            release_validator.BUNDLED_MCP_SERVER,
-            release_validator.LEGACY_GLOBAL_MCP_SERVER,
-        )
+    def test_global_provision_contract_rejects_bundled_skill_reference(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="creative-mcp-contract-") as raw_root:
+            plugin = Path(raw_root)
+            (plugin / ".codex-sync").mkdir()
+            (plugin / ".codex-sync/provision.json").write_text(
+                json.dumps(release_validator.PROVISION_CONTRACT) + "\n", encoding="utf-8"
+            )
+            (plugin / "skills/creative-model-bridge").mkdir(parents=True)
+            (plugin / "skills/creative-model-bridge/SKILL.md").write_text(
+                "creative-model-bridge-bundled\n", encoding="utf-8"
+            )
+            errors = release_validator.validate_global_provision_contract(plugin, {})
+        self.assertTrue(any("must not reference" in error for error in errors))
+
+    def test_global_provision_contract_requires_complete_fail_closed_skill_contract(self) -> None:
+        checked_in_skill = (
+            ROOT / "plugins/creative-model-bridge/skills/creative-model-bridge/SKILL.md"
+        ).read_text(encoding="utf-8")
+        for marker in release_validator.SKILL_REQUIRED_MARKERS:
+            with self.subTest(marker=marker), tempfile.TemporaryDirectory(
+                prefix="creative-mcp-contract-"
+            ) as raw_root:
+                plugin = Path(raw_root)
+                (plugin / ".codex-sync").mkdir()
+                (plugin / ".codex-sync/provision.json").write_text(
+                    json.dumps(release_validator.PROVISION_CONTRACT) + "\n", encoding="utf-8"
+                )
+                (plugin / "skills/creative-model-bridge").mkdir(parents=True)
+                (plugin / "skills/creative-model-bridge/SKILL.md").write_text(
+                    checked_in_skill.replace(marker, ""), encoding="utf-8"
+                )
+                errors = release_validator.validate_global_provision_contract(plugin, {})
+                self.assertTrue(
+                    any(marker in error for error in errors),
+                    (marker, errors),
+                )
 
     def test_wrong_tag_version_is_rejected(self) -> None:
         errors = release_validator.validate(ROOT, "creative-model-bridge-v0.1.7")
@@ -242,14 +263,14 @@ class CreativeReleaseValidatorTests(unittest.TestCase):
 
     def test_provisioner_default_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/scripts/provision.ps1").read_text(encoding="utf-8")
-        mismatched = text.replace("else { '0.1.16' }", "else { '0.1.7' }")
-        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.16")
+        mismatched = text.replace("else { '0.1.17' }", "else { '0.1.7' }")
+        errors = release_validator.validate_provisioner_contract(mismatched, "0.1.17")
         self.assertTrue(any("default version" in error for error in errors))
 
     def test_provision_version_mismatch_fails(self) -> None:
         text = (ROOT / "plugins/creative-model-bridge/mcp/provision.py").read_text(encoding="utf-8")
-        mismatched = text.replace('PROVISION_VERSION = "0.1.16"', 'PROVISION_VERSION = "0.1.7"', 1)
-        errors = release_validator.validate_provision_version(mismatched, "0.1.16")
+        mismatched = text.replace('PROVISION_VERSION = "0.1.17"', 'PROVISION_VERSION = "0.1.7"', 1)
+        errors = release_validator.validate_provision_version(mismatched, "0.1.17")
         self.assertTrue(any("PROVISION_VERSION" in error for error in errors))
 
 

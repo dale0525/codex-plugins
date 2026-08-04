@@ -25,7 +25,7 @@ assembled in the fixed order `task` → `constraints` → `output_spec` →
 adapter. `prompt_report` records the exact system prompt (or `null`), section
 order, user/total character counts, context details, and `truncated: false`.
 
-The HTTP transport sends `User-Agent: creative-model-bridge/0.1.16` on both
+The HTTP transport sends `User-Agent: creative-model-bridge/0.1.17` on both
 `/models` and `/chat/completions`. Chat requests advertise
 `Accept: text/event-stream`; a non-SSE content type is parsed as one JSON
 Chat Completions object. This is an honest bridge identifier used for edge

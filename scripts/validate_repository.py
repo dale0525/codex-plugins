@@ -21,6 +21,14 @@ SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 WORKFLOW_ACTION_REF_PATTERN = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
+CREATIVE_SKILL_REQUIRED_MARKERS = (
+    "provisioned global MCP server `creative-model-bridge`",
+    "`creative_models`",
+    "`creative_preview`",
+    "`creative_generate`",
+    "If any of the three tools is missing, fail closed",
+    "direct HTTP/API client",
+)
 
 
 class Validation:
@@ -158,65 +166,45 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
 def _validate_creative_provision(
     plugin_path: Path, manifest: dict[str, Any], validation: Validation
 ) -> None:
-    """Validate the bundled stdio handoff and optional provision metadata."""
+    """Validate global provisioning metadata for Creative Model Bridge."""
+    manifest_path = plugin_path / ".codex-plugin/plugin.json"
+    if "mcpServers" in manifest:
+        validation.error(f"{manifest_path.relative_to(ROOT)}: mcpServers must be omitted; use global provisioning")
     companion = plugin_path / ".mcp.json"
-    if manifest.get("mcpServers") != "./.mcp.json":
-        validation.error(
-            f"{plugin_path.relative_to(ROOT)}/.codex-plugin/plugin.json: mcpServers must equal './.mcp.json'"
-        )
-    if not companion.is_file():
-        validation.error(f"{companion.relative_to(ROOT)}: bundled MCP declaration is missing")
-    else:
-        try:
-            bundled = json.loads(companion.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as error:
-            validation.error(f"{companion.relative_to(ROOT)}: invalid bundled MCP declaration: {error}")
-            bundled = None
-        if isinstance(bundled, dict):
-            servers = bundled.get("mcpServers")
-            if set(bundled) != {"mcpServers"} or not isinstance(servers, dict):
-                validation.error(f"{companion.relative_to(ROOT)}: bundled declaration must contain only mcpServers")
-            elif set(servers) != {"creative-model-bridge-bundled"} or not isinstance(servers.get("creative-model-bridge-bundled"), dict):
-                validation.error(f"{companion.relative_to(ROOT)}: bundled declaration must contain exactly one creative-model-bridge-bundled server")
-            else:
-                entry = servers["creative-model-bridge-bundled"]
-                if set(entry) != {"command", "args", "cwd", "startup_timeout_sec", "env_vars"}:
-                    validation.error(f"{companion.relative_to(ROOT)}: bundled server fields are not the stdio contract")
-                if entry.get("command") != "./scripts/bootstrap.sh":
-                    validation.error(f"{companion.relative_to(ROOT)}: bundled command must be relative ./scripts/bootstrap.sh")
-                if entry.get("args") != ["serve"]:
-                    validation.error(f"{companion.relative_to(ROOT)}: bundled args must be ['serve']")
-                if entry.get("cwd") != ".":
-                    validation.error(f"{companion.relative_to(ROOT)}: bundled cwd must be '.'")
-                if entry.get("startup_timeout_sec") != 45:
-                    validation.error(f"{companion.relative_to(ROOT)}: bundled startup_timeout_sec must be 45")
-                env_vars = entry.get("env_vars")
-                allowed = {
-                    "CODEX_HOME",
-                    "CREATIVE_MODEL_API_KEY",
-                    "SSL_CERT_FILE",
-                    "CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE",
-                    "CREATIVE_MODEL_BRIDGE_BIN",
-                    "CREATIVE_MODEL_BRIDGE_VERSION",
-                    "CREATIVE_MODEL_BRIDGE_OFFLINE",
-                }
-                valid_env_vars = isinstance(env_vars, list) and all(isinstance(item, str) for item in env_vars)
-                if not valid_env_vars or len(env_vars) != len(set(env_vars)) or set(env_vars) != allowed:
-                    validation.error(f"{companion.relative_to(ROOT)}: bundled env_vars are not the approved runtime set")
+    if companion.exists():
+        validation.error(f"{companion.relative_to(ROOT)} must not exist")
     path = plugin_path / ".codex-sync/provision.json"
     payload = _read_json(path, validation)
     if payload is None:
         return
-    if payload.get("schema_version") != 1 or payload.get("risk") != "high":
-        validation.error(f"{path.relative_to(ROOT)}: schema_version=1 and risk=high are required")
-    if payload.get("posix_script") != "./scripts/bootstrap.sh":
-        validation.error(f"{path.relative_to(ROOT)}: posix_script must reference bootstrap.sh")
-    if payload.get("windows_script") != "./scripts/provision.ps1":
-        validation.error(f"{path.relative_to(ROOT)}: windows_script must reference provision.ps1")
-    if payload.get("windows_shell") != "windows-powershell":
-        validation.error(f"{path.relative_to(ROOT)}: windows_shell must be windows-powershell")
-    if payload.get("arguments") != ["setup", "--yes"]:
-        validation.error(f"{path.relative_to(ROOT)}: arguments must be [setup, --yes]")
+    expected = {
+        "schema_version": 1,
+        "risk": "high",
+        "posix_script": "./scripts/bootstrap.sh",
+        "windows_script": "./scripts/provision.ps1",
+        "windows_shell": "windows-powershell",
+        "arguments": ["setup", "--yes"],
+    }
+    if set(payload) != set(expected):
+        validation.error(f"{path.relative_to(ROOT)}: fields must exactly match the cross-platform contract")
+    for key, value in expected.items():
+        if payload.get(key) != value:
+            validation.error(f"{path.relative_to(ROOT)}: {key} must equal {value!r}")
+    skill = plugin_path / "skills/creative-model-bridge/SKILL.md"
+    try:
+        skill_text = skill.read_text(encoding="utf-8")
+    except OSError:
+        validation.error(f"{skill.relative_to(ROOT)} must be readable")
+        skill_text = ""
+    skill_lower = skill_text.lower()
+    for forbidden in ("creative-model-bridge-bundled", "bundled mcp", "bundled server"):
+        if forbidden in skill_lower:
+            validation.error(f"{skill.relative_to(ROOT)} must not reference {forbidden}")
+    for marker in CREATIVE_SKILL_REQUIRED_MARKERS:
+        if marker not in skill_text:
+            validation.error(
+                f"{skill.relative_to(ROOT)} must contain the global fail-closed contract marker {marker!r}"
+            )
     for relative in ("scripts/bootstrap.sh", "scripts/provision.ps1", "mcp/provision.py"):
         target = plugin_path / relative
         if not target.is_file():

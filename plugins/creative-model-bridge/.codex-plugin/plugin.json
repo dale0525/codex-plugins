@@ -1,6 +1,6 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Route creative writing requests to a configured Chat Completions provider with auditable prompts.",
   "author": {
     "name": "Logic Tan",
@@ -11,7 +11,6 @@
   "repository": "https://github.com/dale0525/codex-plugins",
   "license": "MIT",
   "keywords": ["creative-writing", "chat-completions", "mcp", "model-provider"],
-  "mcpServers": "./.mcp.json",
   "skills": "./skills/",
   "interface": {
     "displayName": "Creative Model Bridge",

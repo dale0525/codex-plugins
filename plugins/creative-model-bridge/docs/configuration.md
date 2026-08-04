@@ -19,11 +19,14 @@ configured default byte-for-byte. The bridge never guesses a model from
 `creative_models`; that tool reports only the provider's current `/models`
 response.
 
-The bundled declaration forwards `CODEX_HOME`, `CREATIVE_MODEL_API_KEY`, the
-explicit CA channels, and the offline/runtime override channels. The
-development-only `CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
+The provisioned global MCP entry forwards `CODEX_HOME`,
+`CREATIVE_MODEL_API_KEY`, the selected provider environment key, and the
+optional CA path. Run `scripts/bootstrap.sh setup --yes` on POSIX or
+`powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/provision.ps1 setup --yes`
+on Windows, then restart Codex or start a new task. The development-only
+`CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
 `CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a cached version/target asset only.
-The default release version is 0.1.16. The binary's `provision setup`,
+The default release version is 0.1.17. The binary's `provision setup`,
 `status`, `repair`, and `uninstall` commands own the global MCP entry
 transactionally.
 
@@ -48,12 +51,12 @@ Windows leaves `SSL_CERT_FILE` out unless an explicit override is supplied.
 The selected value is appended to `env_vars` after the credential entries and
 stored as optional `ssl_cert_file` state. A missing configured file is reported
 as drift, but does not prevent owned-block uninstall. A consistent 0.1.5
-through 0.1.15 state is upgraded to 0.1.16 under the same byte-exact
+through 0.1.16 state is upgraded to 0.1.17 under the same byte-exact
 WAL transaction. The ownership parser removes only canonical CMB table and
 marker line spans, and accepts begin-only markers only when matching legacy
 state proves the command, home, provider environment, and CA values.
 
-The bundled stdio server runs this same CA resolver before constructing the
+The provisioned stdio server runs this same CA resolver before constructing the
 bridge or making any provider request. If `SSL_CERT_FILE` is absent on POSIX,
 the selected system bundle is assigned to it; Windows keeps native trust by
 default. An explicit `SSL_CERT_FILE` is validated and preserved unless the

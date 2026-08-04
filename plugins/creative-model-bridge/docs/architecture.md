@@ -1,12 +1,8 @@
 # Architecture and outbound boundary
 
-The plugin ships a standard bundled `.mcp.json` whose
-`creative-model-bridge-bundled` `serve` entry starts the POSIX bootstrap and
-exposes the three MCP tools without mutating global configuration. That server
-ID intentionally differs from the legacy global `creative-model-bridge` ID, so
-an older provisioned entry cannot shadow the bundled runtime. Its optional
-provision launcher downloads an immutable binary
-and asks that binary to write one owner-marked global
+The plugin manifest declares no local MCP companion. The global provision
+launcher downloads an immutable binary and asks that binary to write one
+owner-marked global
 `[mcp_servers.creative-model-bridge]` entry to `$CODEX_HOME/config.toml`.
 `mcp/server.py` is a small newline-delimited
 JSON-RPC adapter. It exposes
@@ -31,15 +27,14 @@ configured-provider /chat/completions (SSE; JSON fallback when media type is not
 ```
 
 Only the provider's bearer credential is added as an HTTP `Authorization`
-header. The bundled stdio declaration forwards the fixed
-`CREATIVE_MODEL_API_KEY` channel and explicit runtime/CA override channels;
-the optional provisioned entry additionally appends the selected provider
+header. The provisioned entry forwards the fixed `CREATIVE_MODEL_API_KEY`
+channel and explicit runtime/CA override channels; it additionally appends the selected provider
 `env_key`. These are never placed in the JSON payload, prompt report, logs, or
 error messages. The bridge does not inject Codex instructions, model-specific
 adapters, retries, provider switching, or conversation history.
 
 Every provider request also carries the explicit honest `User-Agent`
-`creative-model-bridge/0.1.16`. This stable product identifier is a transport
+`creative-model-bridge/0.1.17`. This stable product identifier is a transport
 compatibility measure for provider edges that reject Python's default user
 agent; it does not claim to be Codex and is not accompanied by Codex-,
 originator-, or session-spoofing headers.
@@ -89,8 +84,10 @@ regular-file type; macOS uses `/etc/ssl/cert.pem`, Linux uses a fixed ordered
 candidate list, and Windows preserves the platform trust store by omitting
 `SSL_CERT_FILE` unless explicitly selected. The optional state `ssl_cert_file`
 and managed block digest make trust drift observable. Missing trust material
-does not block uninstall. A consistent prior 0.1.5 through 0.1.15 owned image
-is recognized as a migration input and rewritten as one setup transaction.
+does not block uninstall. A consistent prior 0.1.5 through 0.1.16 owned image
+is recognized as a migration input and rewritten as one setup transaction. The
+0.1.16 legacy state accepts `ssl_cert_file` on POSIX and omits it on Windows,
+with no extra fields.
 Ownership removal is a strict line-span operation over the two
 canonical CMB tables and marker lines, so expanded marker regions retain
 unrelated tables/comments verbatim; foreign, quoted, repeated, nested, or

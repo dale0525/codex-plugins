@@ -3,24 +3,24 @@
 # intentionally dependency-light and does not require Git, Pixi, or Python.
 set -eu
 
-version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.16}"
+version="${CREATIVE_MODEL_BRIDGE_VERSION:-0.1.17}"
 case "$version" in
   *[!0-9.]*|"") echo "creative-model-bridge: invalid version" >&2; exit 1 ;;
 esac
 printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "creative-model-bridge: invalid version" >&2; exit 1; }
 
-# The bundled MCP declaration uses `serve`.  Provisioning remains the
-# default for existing callers that invoke this launcher with setup/status/
-# repair/uninstall arguments.
+# `serve` remains available for diagnostics. Provisioning is the default for
+# callers that invoke this launcher with setup/status/repair/uninstall
+# arguments.
 mode="provision"
 if [ "${1:-}" = "serve" ]; then
   mode="serve"
   shift
 fi
 
-# The bundled MCP entrypoint is a POSIX shell script even on Windows, where
-# MSYS/Git Bash reports a Windows-like uname value.  Hand `serve` to the
-# PowerShell launcher so cache/download/override handling runs natively.
+# This POSIX launcher may also be invoked from MSYS/Git Bash on Windows, where
+# uname reports a Windows-like value. Hand `serve` to the PowerShell launcher
+# so cache/download/override handling runs natively.
 script_dir="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
 system="$(uname -s 2>/dev/null || printf unknown)"
 machine="$(uname -m 2>/dev/null || printf unknown)"

@@ -12,10 +12,15 @@ small or too ordinary to use the bridge.
 
 ## Operating rules
 
-1. Use the tools from the bundled MCP server `creative-model-bridge-bundled`.
-   Do not select the legacy global `creative-model-bridge` server when both are
-   visible, route through the built-in `creative_text` profile, or invent a
-   second provider adapter.
+1. Use only the provisioned global MCP server `creative-model-bridge`.
+   Verify that all three tools (`creative_models`, `creative_preview`, and
+   `creative_generate`) are visible before starting. Never use another server,
+   a direct HTTP/API client, a `creative_text` profile, or a second provider
+   adapter. If any of the three tools is missing, fail closed: do not draft,
+   call another server, or silently continue. Ask the user to provision the
+   global server and then restart Codex or start a new task. On POSIX run
+   `scripts/bootstrap.sh setup --yes`; on Windows run
+   `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/provision.ps1 setup --yes`.
 2. Preserve the user's material, language, point of view, tense, format, and
    named constraints. Put source text in labeled `context_text` blocks and
    source files in ordered absolute `context_files` paths.

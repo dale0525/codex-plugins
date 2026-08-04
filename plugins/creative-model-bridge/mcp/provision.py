@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover
 
 INSTALL_NAME = "creative-model-bridge"
 SCHEMA_VERSION = 2
-PROVISION_VERSION = "0.1.16"
+PROVISION_VERSION = "0.1.17"
 SSL_CERT_ENV = "SSL_CERT_FILE"
 # Ordered, deterministic Linux candidates.  The first readable, non-empty
 # regular file wins; callers/tests may provide an explicit candidate sequence.
@@ -47,6 +47,14 @@ ENV_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 GENERATION_RE = re.compile(r"^[A-Za-z0-9_-]+$")
 DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 RESERVED_ENV_KEYS = frozenset({"CODEX_HOME", "CREATIVE_MODEL_API_KEY", SSL_CERT_ENV})
+LEGACY_VERSIONS = frozenset({
+    "0.1.5", "0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11",
+    "0.1.12", "0.1.13", "0.1.14", "0.1.15", "0.1.16",
+})
+LEGACY_SSL_VERSIONS = frozenset({
+    "0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11",
+    "0.1.12", "0.1.13", "0.1.14", "0.1.15", "0.1.16",
+})
 LEGACY_STATE_KEYS = frozenset({
     "schema_version", "status", "install_id", "config_path", "config_digest",
     "managed_digest", "command", "command_sha256", "env_key", "updated_at",
@@ -306,14 +314,14 @@ def _state_values_valid(state: dict[str, Any]) -> bool:
 
 
 def _legacy_state_shape(state: dict[str, Any]) -> bool:
-    """Accept only reviewed pre-0.1.16 state contracts for migration/removal."""
+    """Accept only reviewed pre-0.1.17 state contracts for migration/removal."""
 
     has_version = "bridge_version" in state
     version = state.get("bridge_version")
-    if has_version and version not in {"0.1.5", "0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11", "0.1.12", "0.1.13", "0.1.14", "0.1.15"}:
+    if has_version and version not in LEGACY_VERSIONS:
         return False
     base = LEGACY_STATE_KEYS | ({"bridge_version"} if has_version else set())
-    if version in {"0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11", "0.1.12", "0.1.13", "0.1.14", "0.1.15"}:
+    if version in LEGACY_SSL_VERSIONS:
         # CA016/CA017 emitted ssl_cert_file on POSIX and omitted it when
         # Windows kept the native trust store. Both exact shapes are
         # migratable; arbitrary extra fields remain fail-closed.
@@ -434,7 +442,7 @@ def _validate_final(text: str, install_id: str, command: Path, home: Path, env_k
 
 def _legacy_ssl_cert(state: dict[str, Any]) -> str | None:
     version = state.get("bridge_version")
-    return state.get("ssl_cert_file") if version in {"0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11", "0.1.12", "0.1.13", "0.1.14", "0.1.15", PROVISION_VERSION} else None
+    return state.get("ssl_cert_file") if version in LEGACY_SSL_VERSIONS | {PROVISION_VERSION} else None
 
 
 def _validate_owned_semantics(
@@ -751,7 +759,7 @@ def _healthy(
         env_key = _provider_env_key(text)
         # The 0.1.6 state contract already recorded CA ownership when one was
         # configured; only the older pre-CA shape omits it.
-        ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") in {"0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11", "0.1.12", "0.1.13", "0.1.14", "0.1.15"}) else None
+        ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") in LEGACY_SSL_VERSIONS) else None
         details = _validate_final(text, str(state["install_id"]), command, home, env_key, ssl_cert_file)
     except ProvisionError:
         return False
@@ -759,7 +767,7 @@ def _healthy(
         return False
     if not legacy and state.get("bridge_version") != PROVISION_VERSION:
         return False
-    ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") in {"0.1.6", "0.1.7", "0.1.8", "0.1.9", "0.1.10", "0.1.11", "0.1.12", "0.1.13", "0.1.14", "0.1.15"}) else None
+    ssl_cert_file = state.get("ssl_cert_file") if (not legacy or state.get("bridge_version") in LEGACY_SSL_VERSIONS) else None
     if ssl_cert_file is not None and (not isinstance(ssl_cert_file, str) or not Path(ssl_cert_file).is_absolute()):
         return False
     if ssl_cert_file and not allow_missing_ssl and not _valid_ca_file(Path(ssl_cert_file)):

@@ -9,22 +9,18 @@ Chat Completions API shape:
 - `creative_generate` makes one `/chat/completions` streaming request and returns generated text
   verbatim with usage, request ID, and a prompt report.
 
-The plugin manifest includes a standard bundled MCP declaration in
-`.mcp.json`. After the plugin is enabled, Codex can discover all three tools by
-starting `scripts/bootstrap.sh serve` (the current bundled fixture is verified
-on macOS). Its server ID is `creative-model-bridge-bundled`, deliberately
-distinct from the legacy global `creative-model-bridge` provision ID so an
-existing 0.1.5–0.1.15 entry cannot shadow the bundled 0.1.16 runtime. No global
-MCP provisioning is required for that discovery path. The
-platform provisioners remain available for users who want a global owner-marked
-entry: run `scripts/bootstrap.sh setup --yes` on POSIX, or
-`powershell.exe -ExecutionPolicy Bypass -File scripts/provision.ps1 setup --yes`
-on Windows PowerShell 5.1. The launcher downloads a versioned, self-contained
+The plugin manifest declares no local MCP companion. Global MCP provisioning is
+required before Codex can discover all three tools. Run
+`scripts/bootstrap.sh setup --yes` on POSIX, or
+`powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/provision.ps1 setup --yes`
+on Windows PowerShell 5.1, then restart Codex or start a new task. The
+provisioners download a versioned, self-contained
 PyInstaller executable, verifies its SHA-256 entry, and atomically caches it at
 `$CODEX_HOME/creative-model-bridge/runtime/v<version>/objects/<target>/<sha256>/<generation>/`.
 The executable transactionally writes the global `$CODEX_HOME/config.toml` MCP
-entry only for that optional provisioning path. `provision status`, `repair`,
-and `uninstall` are available from the same binary. Objects are immutable and
+entry. `provision status`, `repair`, and `uninstall` are available from the same
+binary. `serve` remains available on the launchers for local diagnostics only;
+it is not an automatic plugin discovery path. Objects are immutable and
 never garbage-collected, so a Windows binary in use is never overwritten or
 deleted. Target machines need neither Git, Pixi, Python, nor PowerShell 7; only
 native Windows PowerShell 5.1 is required.
@@ -45,8 +41,8 @@ variable by default and keeps the native trust store. The selected path is
 recorded in schema-2 state and in the owned MCP environment. If that bundle is
 later removed, status reports drift while uninstall remains available.
 
-An internally consistent 0.1.5 through 0.1.15 owned block/state is upgraded
-transactionally to 0.1.16. The migration recognizes the one known
+An internally consistent 0.1.5 through 0.1.16 owned block/state is upgraded
+transactionally to 0.1.17. The migration recognizes the one known
 begin-only marker repair shape only when the legacy state, install ID, and both
 canonical CMB table values match exactly. Complete markers may surround
 unrelated tables; migration and uninstall remove only the two CMB table spans
@@ -77,7 +73,7 @@ env_key = "MY_PROVIDER_API_KEY"
 `wire_api` may be `"responses"` or `"chat_completions"`; the bridge always uses
 the provider's `/chat/completions` endpoint. An explicitly supplied request model
 overrides `CREATIVE_MODEL_DEFAULT` exactly; no model auto-selection or adapter
-is performed. A bundled stdio MCP cannot dynamically forward arbitrary
+is performed. The stdio MCP process cannot dynamically forward arbitrary
 provider-specific environment names from its host, so the provisioned entry
 forwards `CREATIVE_MODEL_API_KEY` and the selected provider's `env_key` when configured.
 Credential precedence is: the configured `env_key`, then
@@ -103,7 +99,7 @@ CPA routing, logging, retention, moderation, or model internals. Review the
 provider's policy separately before sending sensitive material. The bridge does
 not retry, switch providers, or hide additional prompts.
 Provider requests identify themselves honestly as
-`User-Agent: creative-model-bridge/0.1.16` for transport compatibility; no
+`User-Agent: creative-model-bridge/0.1.17` for transport compatibility; no
 Codex-specific identity or session headers are sent.
 
 ## Install and test

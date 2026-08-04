@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -10,13 +11,34 @@ from scripts import validate_repository
 
 
 class RepositorySyncMetadataValidationTests(unittest.TestCase):
-    def test_creative_model_bridge_bundled_mcp_contract_is_checked(self) -> None:
+    def test_creative_model_bridge_global_mcp_contract_is_checked(self) -> None:
         plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
         manifest = json.loads((plugin / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
         validation = validate_repository.Validation()
         with patch.object(validate_repository, "ROOT", plugin.parents[1]):
             validate_repository._validate_creative_provision(plugin, manifest, validation)
         self.assertEqual(validation.errors, [])
+
+        skill = plugin / "skills/creative-model-bridge/SKILL.md"
+        original = skill.read_text(encoding="utf-8")
+        for marker in validate_repository.CREATIVE_SKILL_REQUIRED_MARKERS:
+            with self.subTest(marker=marker), tempfile.TemporaryDirectory(
+                prefix="repository-validator-test-"
+            ) as temporary:
+                root = Path(temporary)
+                copied_plugin = root / "plugins/creative-model-bridge"
+                shutil.copytree(plugin, copied_plugin)
+                copied_skill = copied_plugin / "skills/creative-model-bridge/SKILL.md"
+                copied_skill.write_text(original.replace(marker, ""), encoding="utf-8")
+                validation = validate_repository.Validation()
+                with patch.object(validate_repository, "ROOT", root):
+                    validate_repository._validate_creative_provision(
+                        copied_plugin, manifest, validation
+                    )
+                self.assertTrue(
+                    any(marker in error for error in validation.errors),
+                    (marker, validation.errors),
+                )
 
     def test_release_lock_requires_v2_and_checksum_digest(self) -> None:
         with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
