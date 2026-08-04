@@ -25,12 +25,16 @@ class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
         return None
 
 
-_NO_REDIRECT_OPENER = urllib.request.build_opener(_NoRedirectHandler())
 _STREAM_CHUNK_SIZE = 4096
 
 
 def _open_without_redirects(request: urllib.request.Request, timeout: float) -> Any:
-    return _NO_REDIRECT_OPENER.open(request, timeout=timeout)
+    # Build the urllib opener at the request boundary.  ``server.main`` sets
+    # ``SSL_CERT_FILE`` after importing the bridge modules; constructing the
+    # opener lazily ensures the provider request observes that initialized CA
+    # environment instead of a module-import snapshot.
+    opener = urllib.request.build_opener(_NoRedirectHandler())
+    return opener.open(request, timeout=timeout)
 
 
 def _header(headers: Any, name: str) -> str | None:

@@ -1,6 +1,6 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Route creative writing requests to a configured Chat Completions provider with auditable prompts.",
   "author": {
     "name": "Logic Tan",

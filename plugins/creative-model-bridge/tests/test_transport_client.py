@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import json
+import importlib
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
+import urllib.request
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PLUGIN_ROOT / "mcp"))
@@ -36,6 +39,9 @@ class Opener:
         self.requests: list[object] = []
 
     def __call__(self, request: object, timeout: float) -> Response:
+        return self.open(request, timeout)
+
+    def open(self, request: object, timeout: float) -> Response:
         self.requests.append(request)
         return self.response
 
@@ -62,6 +68,30 @@ def frame(payload: object, *, event: str | None = None) -> bytes:
 
 
 class ChatStreamingTests(unittest.TestCase):
+    def test_no_redirect_opener_is_created_at_request_boundary(self) -> None:
+        import transport_client
+
+        original_build_opener = urllib.request.build_opener
+        with patch.object(urllib.request, "build_opener", wraps=original_build_opener) as build_opener:
+            transport_client = importlib.reload(transport_client)
+            # Importing the module must not construct an opener before server
+            # startup has initialized SSL_CERT_FILE.
+            build_opener.assert_not_called()
+
+            response = Response([b'{"data":[{"id":"model"}]}'], content_type="application/json")
+            opener = Opener(response)
+            build_opener.return_value = opener
+            request = urllib.request.Request("https://provider.test/v1/models")
+            opened = transport_client._open_without_redirects(request, timeout=3.0)
+
+        self.assertIs(opened, response)
+        build_opener.assert_called_once()
+        handlers = build_opener.call_args.args
+        self.assertEqual(len(handlers), 1)
+        self.assertIsInstance(handlers[0], transport_client._NoRedirectHandler)
+        self.assertIsNone(handlers[0].redirect_request(request, None, 302, "Found", {}, "https://other.test"))
+        self.assertEqual(opener.requests, [request])
+
     def test_split_utf8_lf_crlf_comments_multidata_reasoning_tool_and_usage_tail(self) -> None:
         first = b": keepalive\r\n\r\nevent: message\r\ndata: {\"id\":\"chat-1\",\"choices\":[{\"delta\":{\"reasoning_content\":\"hidden\",\"content\":\"\xe4\xb8\x80\"},\"finish_reason\":null}]}\r\n\r\n"
         second = b"data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"id\":\"tool\"}],\"content\":\"\xe4\xb8\x8b\"},\"finish_reason\":\"stop\"}]}\n\n"

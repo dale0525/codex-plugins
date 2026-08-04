@@ -31,7 +31,7 @@ except ImportError:  # direct mcp/ path execution
 
 
 SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"
-BRIDGE_VERSION = "0.1.14"
+BRIDGE_VERSION = "0.1.15"
 USER_AGENT = f"creative-model-bridge/{BRIDGE_VERSION}"
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_CHARS = 180_000

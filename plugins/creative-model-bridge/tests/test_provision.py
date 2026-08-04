@@ -532,7 +532,7 @@ class ProvisionTests(unittest.TestCase):
             self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
             with patch.object(provision.sys, "platform", "win32"), patch.dict(provision.os.environ, {"SSL_CERT_FILE": str(ca)}, clear=False):
                 migrated = provision.setup(home=self.home)
-            self.assertEqual(migrated["bridge_version"], "0.1.14")
+            self.assertEqual(migrated["bridge_version"], "0.1.15")
             self.assertEqual(migrated["ssl_cert_file"], str(ca))
             self.assertIn("SSL_CERT_FILE", config.read_text(encoding="utf-8"))
             self.assertEqual(legacy["status"], "installed")
@@ -542,7 +542,20 @@ class ProvisionTests(unittest.TestCase):
             else:
                 provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = old
 
-    def test_consistent_v017_posix_and_v0112_windows_shapes_migrate_to_v0113(self) -> None:
+    def test_v014_state_is_accepted_as_legacy_input_for_v015(self) -> None:
+        with patch.object(provision.sys, "platform", "win32"):
+            installed = provision.setup(home=self.home)
+        state_path = provision.state_path(self.home)
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state["bridge_version"] = "0.1.14"
+        state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
+        self.assertTrue(provision._legacy_state_shape(state))
+        with patch.object(provision.sys, "platform", "win32"):
+            migrated = provision.setup(home=self.home)
+        self.assertEqual(migrated["install_id"], installed["install_id"])
+        self.assertEqual(migrated["bridge_version"], "0.1.15")
+
+    def test_consistent_v017_posix_and_v0112_windows_shapes_migrate_to_v0115(self) -> None:
         old = provision.os.environ.get("CREATIVE_MODEL_BRIDGE_EXECUTABLE")
         provision.os.environ["CREATIVE_MODEL_BRIDGE_EXECUTABLE"] = str(self.binary)
         try:
@@ -556,7 +569,7 @@ class ProvisionTests(unittest.TestCase):
             state_path.write_text(json.dumps(state, sort_keys=True) + "\n", encoding="utf-8")
             with patch.object(provision.sys, "platform", "darwin"):
                 migrated = provision.setup(home=self.home, ssl_cert_file=ca)
-            self.assertEqual(migrated["bridge_version"], "0.1.14")
+            self.assertEqual(migrated["bridge_version"], "0.1.15")
             self.assertEqual(migrated["ssl_cert_file"], str(ca))
 
             windows_home = self.home.parent / "windows-home"
@@ -569,7 +582,7 @@ class ProvisionTests(unittest.TestCase):
             windows_state_path.write_text(json.dumps(windows_state, sort_keys=True) + "\n", encoding="utf-8")
             with patch.object(provision.sys, "platform", "win32"):
                 migrated_windows = provision.setup(home=windows_home)
-            self.assertEqual(migrated_windows["bridge_version"], "0.1.14")
+            self.assertEqual(migrated_windows["bridge_version"], "0.1.15")
             self.assertNotIn("ssl_cert_file", migrated_windows)
         finally:
             if old is None:
@@ -617,7 +630,7 @@ class ProvisionTests(unittest.TestCase):
                     self.assertEqual(result.count("[mcp_servers.computer-use]"), 1)
                     self.assertEqual(result.count("[mcp_servers.openaiDeveloperDocs]"), 1)
                     self.assertEqual(migrated["install_id"], installed["install_id"])
-                    self.assertEqual(migrated["bridge_version"], "0.1.14")
+                    self.assertEqual(migrated["bridge_version"], "0.1.15")
         finally:
             if old is None:
                 provision.os.environ.pop("CREATIVE_MODEL_BRIDGE_EXECUTABLE", None)
@@ -730,7 +743,7 @@ class ProvisionTests(unittest.TestCase):
             config_path.write_text(expanded, encoding="utf-8")
             with patch.object(provision.sys, "platform", "win32"):
                 converged = provision.setup(home=self.home)
-            self.assertEqual(converged["bridge_version"], "0.1.14")
+            self.assertEqual(converged["bridge_version"], "0.1.15")
             self.assertEqual(config_path.read_text(encoding="utf-8").count("[mcp_servers.blender]"), 1)
             self.assertEqual(provision.status(home=self.home)["status"], "installed")
 
