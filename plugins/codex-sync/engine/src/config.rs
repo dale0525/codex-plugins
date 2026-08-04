@@ -3,131 +3,188 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use toml_edit::{DocumentMut, Item};
+use toml_edit::{DocumentMut, Item, TableLike};
 
-use crate::model::{ProviderFile, RepositoryManifest, Risk};
-use crate::storage::{atomic_write, read_optional_toml, read_toml};
+use crate::storage::atomic_write;
 
 pub type ManagedValues = BTreeMap<Vec<String>, toml::Value>;
 
-pub const DEFAULT_MODEL_REASONING_EFFORT: &str = "medium";
+const SECRET_PARTS: &[&str] = &[
+    "access_token",
+    "api_key",
+    "bearer_token",
+    "client_secret",
+    "password",
+    "private_key",
+    "refresh_token",
+    "secret",
+];
 
-pub fn load_managed_values(
-    repository: &Path,
-    manifest: &RepositoryManifest,
-    device_id: &str,
-) -> Result<ManagedValues> {
-    let mut values = ManagedValues::new();
-    let mut allowed_secret_paths = BTreeSet::new();
-    let common_path = repository.join(&manifest.common_config);
-    if common_path.exists() {
-        let common: toml::Value = read_toml(&common_path)?;
-        flatten_table(&mut values, Vec::new(), common)?;
-    }
-    let device_path = repository
-        .join(&manifest.devices)
-        .join(format!("{device_id}.toml"));
-    if device_path.exists() {
-        let device: toml::Value = read_toml(&device_path)?;
-        flatten_table(&mut values, Vec::new(), device)?;
-    }
-    let providers: ProviderFile = read_optional_toml(&repository.join(&manifest.providers))?;
-    for (name, provider) in providers.providers {
-        validate_segment(&name)?;
-        if let Some(token) = provider
-            .as_table()
-            .and_then(|table| table.get("experimental_bearer_token"))
-        {
-            let token = token
-                .as_str()
-                .context("provider experimental_bearer_token must be a non-empty string")?;
-            if token.trim().is_empty() {
-                anyhow::bail!("provider experimental_bearer_token must be a non-empty string");
-            }
-            allowed_secret_paths.insert(vec![
-                "model_providers".to_owned(),
-                name.clone(),
-                "experimental_bearer_token".to_owned(),
-            ]);
-        }
-        flatten_table(
-            &mut values,
-            vec!["model_providers".to_owned(), name],
-            provider,
-        )?;
-    }
-    validate_no_secrets(&values, &allowed_secret_paths)?;
-    Ok(values)
+pub fn flatten(value: &toml::Value) -> Result<ManagedValues> {
+    let mut result = ManagedValues::new();
+    flatten_into(&mut result, Vec::new(), value)?;
+    Ok(result)
 }
 
-fn flatten_table(
+fn flatten_into(
     output: &mut ManagedValues,
     prefix: Vec<String>,
-    value: toml::Value,
+    value: &toml::Value,
 ) -> Result<()> {
     match value {
         toml::Value::Table(table) => {
-            for (key, value) in table {
-                validate_segment(&key)?;
+            for (key, child) in table {
+                if key.is_empty() || key.contains('\0') {
+                    anyhow::bail!("configuration contains an invalid key");
+                }
                 let mut path = prefix.clone();
-                path.push(key);
-                flatten_table(output, path, value)?;
+                path.push(key.clone());
+                flatten_into(output, path, child)?;
             }
         }
-        value => {
+        child => {
             if prefix.is_empty() {
                 anyhow::bail!("configuration root must be a TOML table");
             }
-            output.insert(prefix, value);
+            output.insert(prefix, child.clone());
         }
     }
     Ok(())
 }
 
-fn validate_segment(value: &str) -> Result<()> {
-    if value.is_empty() || value.contains('\0') {
-        anyhow::bail!("configuration contains an invalid key");
+pub fn load_managed_values(repository: &Path, device: &str) -> Result<ManagedValues> {
+    let mut result = ManagedValues::new();
+    let common_path = repository.join("config/common.toml");
+    let common: toml::Value = match fs::read_to_string(&common_path) {
+        Ok(text) => {
+            toml::from_str(&text).with_context(|| format!("parse {}", common_path.display()))?
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            toml::Value::Table(toml::map::Map::new())
+        }
+        Err(error) => return Err(error).with_context(|| format!("read {}", common_path.display())),
+    };
+    for (path, value) in flatten(&common)? {
+        result.insert(path, value);
     }
-    Ok(())
+    let device_file = repository.join("devices").join(format!("{device}.toml"));
+    match fs::read_to_string(&device_file) {
+        Ok(text) => {
+            let device_value: toml::Value = toml::from_str(&text)
+                .with_context(|| format!("parse {}", device_file.display()))?;
+            for (path, value) in flatten(&device_value)? {
+                result.insert(path, value);
+            }
+        }
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+        Err(error) => return Err(error).with_context(|| format!("read {}", device_file.display())),
+    }
+    validate_values(&result)?;
+    Ok(result)
 }
 
-fn validate_no_secrets(
-    values: &ManagedValues,
-    allowed_secret_paths: &BTreeSet<Vec<String>>,
-) -> Result<()> {
-    const SECRET_KEYS: &[&str] = &[
-        "access_token",
-        "api_key",
-        "bearer_token",
-        "client_secret",
-        "password",
-        "private_key",
-        "refresh_token",
-    ];
-    for path in values.keys() {
-        if allowed_secret_paths.contains(path) {
-            continue;
-        }
+pub fn validate_values(values: &ManagedValues) -> Result<()> {
+    for (path, value) in values {
+        let allowed = path.len() == 3
+            && path[0] == "model_providers"
+            && path[2] == "experimental_bearer_token";
         let key = path
             .last()
-            .expect("managed path is non-empty")
-            .to_lowercase();
-        if key == "env_key" || key.ends_with("_env") {
-            continue;
-        }
-        if SECRET_KEYS.iter().any(|candidate| key.contains(candidate)) {
+            .map(String::as_str)
+            .unwrap_or_default()
+            .to_ascii_lowercase();
+        if !allowed
+            && key != "env_key"
+            && !key.ends_with("_env")
+            && SECRET_PARTS.iter().any(|part| key.contains(part))
+        {
             anyhow::bail!(
-                "refusing to synchronize probable secret at {}; use an environment variable or OS credential store",
+                "refusing to synchronize probable secret at {}",
                 display_path(path)
             );
         }
+        validate_value_strings(value, path)?;
+        if allowed {
+            let Some(token) = value.as_str() else {
+                anyhow::bail!("model_providers.*.experimental_bearer_token must be a string");
+            };
+            if token.trim().is_empty() {
+                anyhow::bail!("model_providers.*.experimental_bearer_token must be non-empty");
+            }
+        }
     }
     Ok(())
+}
+
+fn validate_value_strings(value: &toml::Value, path: &[String]) -> Result<()> {
+    match value {
+        toml::Value::String(text) => {
+            if has_embedded_url_credentials(text) {
+                anyhow::bail!(
+                    "refusing to synchronize URL with embedded credentials at {}",
+                    display_path(path)
+                );
+            }
+        }
+        toml::Value::Array(values) => {
+            for child in values {
+                validate_value_strings(child, path)?;
+            }
+        }
+        toml::Value::Table(table) => {
+            for (key, child) in table {
+                let mut nested = path.to_vec();
+                nested.push(key.clone());
+                validate_value_strings(child, &nested)?;
+            }
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+pub fn has_embedded_url_credentials(value: &str) -> bool {
+    for prefix in ["http://", "https://", "ssh://"] {
+        let mut offset = 0;
+        while let Some(relative) = value[offset..].find(prefix) {
+            let start = offset + relative + prefix.len();
+            let authority = value[start..]
+                .split(['/', ' ', '\n', '\r', '"', '\'', ']', ')', ','])
+                .next()
+                .unwrap_or_default();
+            if authority.contains('@') {
+                return true;
+            }
+            offset = start;
+            if offset >= value.len() {
+                break;
+            }
+        }
+    }
+    false
+}
+
+pub fn read_current(codex_home: &Path) -> Result<String> {
+    match fs::read_to_string(codex_home.join("config.toml")) {
+        Ok(value) => Ok(value),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(String::new()),
+        Err(error) => Err(error).context("read Codex config.toml"),
+    }
+}
+
+pub fn read_optional_value(path: &Path) -> Result<toml::Value> {
+    match fs::read_to_string(path) {
+        Ok(text) => toml::from_str(&text).with_context(|| format!("parse {}", path.display())),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            Ok(toml::Value::Table(toml::map::Map::new()))
+        }
+        Err(error) => Err(error).with_context(|| format!("read {}", path.display())),
+    }
 }
 
 pub fn render_config(
     current: &str,
-    previous_managed_paths: &[Vec<String>],
+    previous: &[Vec<String>],
     desired: &ManagedValues,
 ) -> Result<String> {
     let mut document = if current.trim().is_empty() {
@@ -135,11 +192,11 @@ pub fn render_config(
     } else {
         current
             .parse::<DocumentMut>()
-            .context("parse current Codex config.toml")?
+            .context("parse Codex config.toml")?
     };
-    let mut old_paths = previous_managed_paths.to_vec();
-    old_paths.sort_by_key(|path| std::cmp::Reverse(path.len()));
-    for path in old_paths {
+    let mut paths = previous.to_vec();
+    paths.sort_by_key(|path| std::cmp::Reverse(path.len()));
+    for path in paths {
         remove_path(document.as_item_mut(), &path);
     }
     for (path, value) in desired {
@@ -162,11 +219,7 @@ fn remove_path(item: &mut Item, path: &[String]) -> bool {
         return false;
     };
     let removed = remove_path(child, &path[1..]);
-    if removed
-        && child
-            .as_table_like()
-            .is_some_and(|child_table| child_table.is_empty())
-    {
+    if removed && child.as_table_like().is_some_and(TableLike::is_empty) {
         table.remove(&path[0]);
     }
     removed
@@ -174,11 +227,11 @@ fn remove_path(item: &mut Item, path: &[String]) -> bool {
 
 fn set_path(item: &mut Item, path: &[String], value: &toml::Value) -> Result<()> {
     if path.is_empty() {
-        anyhow::bail!("managed configuration path cannot be empty");
+        anyhow::bail!("managed path cannot be empty");
     }
     let table = item
         .as_table_like_mut()
-        .context("managed configuration parent is not a table")?;
+        .context("configuration parent is not a table")?;
     if path.len() == 1 {
         table.insert(&path[0], value_to_item(value)?);
         return Ok(());
@@ -188,7 +241,7 @@ fn set_path(item: &mut Item, path: &[String], value: &toml::Value) -> Result<()>
     }
     let child = table
         .get_mut(&path[0])
-        .context("managed configuration parent disappeared")?;
+        .context("configuration parent disappeared")?;
     if !child.is_table_like() {
         *child = Item::Table(toml_edit::Table::new());
     }
@@ -196,63 +249,32 @@ fn set_path(item: &mut Item, path: &[String], value: &toml::Value) -> Result<()>
 }
 
 fn value_to_item(value: &toml::Value) -> Result<Item> {
-    let mut wrapper = BTreeMap::new();
-    wrapper.insert("codex_sync_value", value.clone());
-    let serialized = toml::to_string(&wrapper).context("serialize managed TOML value")?;
-    let mut document = serialized
-        .parse::<DocumentMut>()
-        .context("convert managed TOML value")?;
-    document
-        .remove("codex_sync_value")
-        .context("converted TOML value is missing")
+    let mut wrapper = toml::map::Map::new();
+    wrapper.insert("value".to_owned(), value.clone());
+    let text = toml::to_string(&toml::Value::Table(wrapper))?;
+    let mut document = text.parse::<DocumentMut>()?;
+    document.remove("value").context("convert TOML value")
 }
 
-pub fn classify_path(path: &[String]) -> Risk {
-    let top = path.first().map(String::as_str).unwrap_or_default();
-    if matches!(
-        top,
-        "approval_policy"
-            | "approvals_reviewer"
-            | "hooks"
-            | "mcp_servers"
-            | "model_providers"
-            | "permissions"
-            | "sandbox_mode"
-            | "shell_environment_policy"
-    ) {
-        Risk::High
-    } else {
-        Risk::Low
-    }
+pub fn leaf_paths(value: &toml::Value) -> Vec<Vec<String>> {
+    let mut result = Vec::new();
+    collect_leaf_paths(value, Vec::new(), &mut result);
+    result
 }
 
-pub fn changed_paths(
-    current: &str,
-    rendered: &str,
-    desired: &ManagedValues,
-    previous_managed_paths: &[Vec<String>],
-) -> Vec<Vec<String>> {
-    let current_value = current
-        .parse::<toml::Value>()
-        .unwrap_or_else(|_| toml::Value::Table(toml::map::Map::new()));
-    let rendered_value = rendered
-        .parse::<toml::Value>()
-        .unwrap_or_else(|_| toml::Value::Table(toml::map::Map::new()));
-    let mut changes = BTreeSet::new();
-    let candidates: BTreeSet<_> = desired
-        .keys()
-        .cloned()
-        .chain(previous_managed_paths.iter().cloned())
-        .collect();
-    for path in candidates {
-        if get_value(&current_value, &path) != get_value(&rendered_value, &path) {
-            changes.insert(path);
+fn collect_leaf_paths(value: &toml::Value, prefix: Vec<String>, output: &mut Vec<Vec<String>>) {
+    if let Some(table) = value.as_table() {
+        for (key, child) in table {
+            let mut path = prefix.clone();
+            path.push(key.clone());
+            collect_leaf_paths(child, path, output);
         }
+    } else if !prefix.is_empty() {
+        output.push(prefix);
     }
-    changes.into_iter().collect()
 }
 
-fn get_value<'a>(value: &'a toml::Value, path: &[String]) -> Option<&'a toml::Value> {
+pub fn value_at<'a>(value: &'a toml::Value, path: &[String]) -> Option<&'a toml::Value> {
     let mut current = value;
     for segment in path {
         current = current.as_table()?.get(segment)?;
@@ -260,12 +282,53 @@ fn get_value<'a>(value: &'a toml::Value, path: &[String]) -> Option<&'a toml::Va
     Some(current)
 }
 
+pub fn capture_declared(
+    current: &str,
+    target: &Path,
+    declared: &[Vec<String>],
+) -> Result<Vec<Vec<String>>> {
+    let current_value = if current.trim().is_empty() {
+        toml::Value::Table(toml::map::Map::new())
+    } else {
+        current
+            .parse::<toml::Value>()
+            .context("parse current Codex config.toml")?
+    };
+    let previous_text = match fs::read_to_string(target) {
+        Ok(text) => text,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => String::new(),
+        Err(error) => return Err(error).with_context(|| format!("read {}", target.display())),
+    };
+    let mut document = if previous_text.trim().is_empty() {
+        DocumentMut::new()
+    } else {
+        previous_text
+            .parse::<DocumentMut>()
+            .context("parse synchronized config")?
+    };
+    let mut kept = Vec::new();
+    for path in declared {
+        if let Some(value) = value_at(&current_value, path) {
+            set_path(document.as_item_mut(), path, value)?;
+            kept.push(path.clone());
+        } else {
+            remove_path(document.as_item_mut(), path);
+        }
+    }
+    let rendered = document.to_string();
+    if rendered != previous_text {
+        atomic_write(target, rendered.as_bytes())?;
+    }
+    Ok(kept)
+}
+
 pub fn display_path(path: &[String]) -> String {
     path.iter()
         .map(|segment| {
-            if segment.chars().all(|character| {
-                character.is_ascii_alphanumeric() || matches!(character, '_' | '-')
-            }) {
+            if segment
+                .chars()
+                .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '_' | '-'))
+            {
                 segment.clone()
             } else {
                 format!("\"{}\"", segment.replace('"', "\\\""))
@@ -275,177 +338,21 @@ pub fn display_path(path: &[String]) -> String {
         .join(".")
 }
 
-pub fn read_current_config(codex_home: &Path) -> Result<String> {
-    let path = codex_home.join("config.toml");
-    match fs::read_to_string(&path) {
-        Ok(value) => Ok(value),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(String::new()),
-        Err(error) => Err(error).with_context(|| format!("read {}", path.display())),
-    }
-}
-
-pub fn managed_value_paths(target: &Path) -> Result<BTreeSet<Vec<String>>> {
-    if !target.exists() {
-        return Ok(BTreeSet::new());
-    }
-    let target_text = fs::read_to_string(target)
-        .with_context(|| format!("read managed configuration {}", target.display()))?;
-    let target_value = target_text
-        .parse::<toml::Value>()
-        .with_context(|| format!("parse managed configuration {}", target.display()))?;
-    let mut paths = Vec::new();
-    collect_leaf_paths(&target_value, Vec::new(), &mut paths);
-    Ok(paths.into_iter().collect())
-}
-
-pub fn capture_existing_managed_values(
+pub fn unmanaged_paths(
     current: &str,
-    target: &Path,
-    excluded: &BTreeSet<Vec<String>>,
-) -> Result<()> {
-    if !target.exists() {
-        return Ok(());
-    }
-    let current_value = current
-        .parse::<toml::Value>()
-        .context("parse current Codex config.toml")?;
-    let target_text = fs::read_to_string(target)
-        .with_context(|| format!("read managed configuration {}", target.display()))?;
-    let target_value = target_text
-        .parse::<toml::Value>()
-        .with_context(|| format!("parse managed configuration {}", target.display()))?;
-    let mut paths = Vec::new();
-    collect_leaf_paths(&target_value, Vec::new(), &mut paths);
-    let mut document = if target_text.trim().is_empty() {
-        DocumentMut::new()
+    declared: &BTreeSet<Vec<String>>,
+) -> Result<Vec<Vec<String>>> {
+    let value = if current.trim().is_empty() {
+        toml::Value::Table(toml::map::Map::new())
     } else {
-        target_text
-            .parse::<DocumentMut>()
-            .with_context(|| format!("parse managed configuration {}", target.display()))?
+        current
+            .parse::<toml::Value>()
+            .context("parse current Codex config.toml")?
     };
-    for path in paths {
-        if excluded.contains(&path) {
-            continue;
-        }
-        match get_value(&current_value, &path) {
-            Some(value) => set_path(document.as_item_mut(), &path, value)?,
-            None => {
-                remove_path(document.as_item_mut(), &path);
-            }
-        }
-    }
-    let captured = document.to_string();
-    if captured != target_text {
-        atomic_write(target, captured.as_bytes())?;
-    }
-    Ok(())
-}
-
-pub fn enforce_default_model_reasoning_effort(
-    repository: &Path,
-    manifest: &RepositoryManifest,
-) -> Result<()> {
-    let path = vec!["model_reasoning_effort".to_owned()];
-    let value = toml::Value::String(DEFAULT_MODEL_REASONING_EFFORT.to_owned());
-    update_managed_document(
-        &repository.join(&manifest.common_config),
-        &path,
-        Some(&value),
-    )?;
-
-    let devices = repository.join(&manifest.devices);
-    if !devices.is_dir() {
-        return Ok(());
-    }
-    for entry in fs::read_dir(&devices)
-        .with_context(|| format!("read device configuration directory {}", devices.display()))?
-    {
-        let entry = entry.context("read device configuration entry")?;
-        if !entry
-            .file_type()
-            .context("inspect device configuration entry")?
-            .is_file()
-            || entry.path().extension().and_then(|value| value.to_str()) != Some("toml")
-        {
-            continue;
-        }
-        update_managed_document(&entry.path(), &path, None)?;
-    }
-    Ok(())
-}
-
-fn update_managed_document(
-    target: &Path,
-    path: &[String],
-    value: Option<&toml::Value>,
-) -> Result<()> {
-    let target_text = match fs::read_to_string(target) {
-        Ok(value) => value,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => String::new(),
-        Err(error) => {
-            return Err(error)
-                .with_context(|| format!("read managed configuration {}", target.display()))
-        }
-    };
-    let mut document = if target_text.trim().is_empty() {
-        DocumentMut::new()
-    } else {
-        target_text
-            .parse::<DocumentMut>()
-            .with_context(|| format!("parse managed configuration {}", target.display()))?
-    };
-    match value {
-        Some(value) => set_path(document.as_item_mut(), path, value)?,
-        None => {
-            remove_path(document.as_item_mut(), path);
-        }
-    }
-    let rendered = document.to_string();
-    if rendered != target_text {
-        if let Some(parent) = target.parent() {
-            fs::create_dir_all(parent).with_context(|| {
-                format!("create managed configuration parent {}", parent.display())
-            })?;
-        }
-        atomic_write(target, rendered.as_bytes())?;
-    }
-    Ok(())
-}
-
-pub fn capture_current_providers(current: &str, target: &Path) -> Result<()> {
-    let current_value = current
-        .parse::<toml::Value>()
-        .context("parse current Codex config.toml")?;
-    let providers = current_value
-        .as_table()
-        .and_then(|table| table.get("model_providers"))
-        .and_then(toml::Value::as_table)
-        .map(|table| {
-            table
-                .iter()
-                .map(|(name, value)| (name.clone(), value.clone()))
-                .collect()
-        })
-        .unwrap_or_default();
-    let captured = toml::to_string_pretty(&ProviderFile { providers })
-        .context("serialize captured model providers")?;
-    let previous = fs::read_to_string(target).unwrap_or_default();
-    if captured != previous {
-        atomic_write(target, captured.as_bytes())?;
-    }
-    Ok(())
-}
-
-fn collect_leaf_paths(value: &toml::Value, prefix: Vec<String>, output: &mut Vec<Vec<String>>) {
-    if let Some(table) = value.as_table() {
-        for (key, value) in table {
-            let mut path = prefix.clone();
-            path.push(key.clone());
-            collect_leaf_paths(value, path, output);
-        }
-    } else if !prefix.is_empty() {
-        output.push(prefix);
-    }
+    Ok(leaf_paths(&value)
+        .into_iter()
+        .filter(|path| !declared.contains(path))
+        .collect())
 }
 
 #[cfg(test)]
@@ -453,117 +360,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn merge_preserves_unmanaged_tables_and_removes_old_managed_values() {
-        let current = r#"
-model = "old"
-[projects."/tmp/example"]
-trust_level = "trusted"
-[hooks.state]
-hash = "device-only"
-"#;
-        let previous = vec![vec!["model".to_owned()]];
-        let mut desired = ManagedValues::new();
-        desired.insert(
-            vec!["model_reasoning_effort".to_owned()],
-            toml::Value::String("high".to_owned()),
+    fn every_url_occurrence_is_scanned() {
+        assert!(has_embedded_url_credentials(
+            "https://safe.example/v1 and https://user:pass@example.test/v2"
+        ));
+        let mut values = ManagedValues::new();
+        values.insert(
+            vec!["urls".into()],
+            toml::Value::Array(vec![
+                toml::Value::String("https://safe.example".into()),
+                toml::Value::String("https://user:pass@example.test".into()),
+            ]),
         );
-        let rendered = render_config(current, &previous, &desired).unwrap();
-        assert!(!rendered.contains("model = \"old\""));
-        assert!(rendered.contains("model_reasoning_effort = \"high\""));
-        assert!(rendered.contains("device-only"));
-        assert!(rendered.contains("/tmp/example"));
+        assert!(validate_values(&values).is_err());
     }
 
     #[test]
-    fn secret_fields_are_rejected_but_env_key_is_allowed() {
+    fn bearer_exception_is_exact_and_non_empty() {
         let mut values = ManagedValues::new();
-        values.insert(
-            vec!["model_providers".into(), "safe".into(), "env_key".into()],
-            toml::Value::String("SAFE_TOKEN".into()),
-        );
-        assert!(validate_no_secrets(&values, &BTreeSet::new()).is_ok());
         values.insert(
             vec![
                 "model_providers".into(),
-                "bad".into(),
-                "access_token".into(),
+                "company".into(),
+                "experimental_bearer_token".into(),
             ],
-            toml::Value::String("secret".into()),
+            toml::Value::String("token".into()),
         );
-        assert!(validate_no_secrets(&values, &BTreeSet::new()).is_err());
-    }
-
-    #[test]
-    fn plaintext_bearer_token_is_allowed_only_in_providers_file() {
-        let directory = tempfile::tempdir().unwrap();
-        fs::write(
-            directory.path().join("providers.toml"),
-            "[providers.company]\nexperimental_bearer_token = \"plain-text-token\"\n",
-        )
-        .unwrap();
-        let manifest = RepositoryManifest {
-            schema_version: 2,
-            agents: "AGENTS.md".to_owned(),
-            agent_profiles: "agents".to_owned(),
-            common_config: "common.toml".to_owned(),
-            devices: "devices".to_owned(),
-            marketplaces: "marketplaces.toml".to_owned(),
-            plugins: "plugins.toml".to_owned(),
-            providers: "providers.toml".to_owned(),
-            external_agents_sections: Vec::new(),
-        };
-        let values = load_managed_values(directory.path(), &manifest, "test-device").unwrap();
-        let token_path = vec![
-            "model_providers".to_owned(),
-            "company".to_owned(),
-            "experimental_bearer_token".to_owned(),
-        ];
-        assert_eq!(
-            values.get(&token_path),
-            Some(&toml::Value::String("plain-text-token".to_owned()))
+        assert!(validate_values(&values).is_ok());
+        values.insert(
+            vec!["other".into(), "experimental_bearer_token".into()],
+            toml::Value::String("token".into()),
         );
-
-        fs::write(
-            directory.path().join("common.toml"),
-            "[model_providers.other]\nexperimental_bearer_token = \"rejected\"\n",
-        )
-        .unwrap();
-        assert!(load_managed_values(directory.path(), &manifest, "test-device").is_err());
-    }
-
-    #[test]
-    fn reasoning_effort_is_canonical_in_common_and_removed_from_devices() {
-        let directory = tempfile::tempdir().unwrap();
-        fs::create_dir_all(directory.path().join("devices")).unwrap();
-        fs::write(
-            directory.path().join("common.toml"),
-            "model_reasoning_effort = \"xhigh\"\nmodel = \"test\"\n",
-        )
-        .unwrap();
-        fs::write(
-            directory.path().join("devices/test-device.toml"),
-            "model_reasoning_effort = \"high\"\nweb_search = \"live\"\n",
-        )
-        .unwrap();
-        let manifest = RepositoryManifest {
-            schema_version: 2,
-            agents: "AGENTS.md".to_owned(),
-            agent_profiles: "agents".to_owned(),
-            common_config: "common.toml".to_owned(),
-            devices: "devices".to_owned(),
-            marketplaces: "marketplaces.toml".to_owned(),
-            plugins: "plugins.toml".to_owned(),
-            providers: "providers.toml".to_owned(),
-            external_agents_sections: Vec::new(),
-        };
-
-        enforce_default_model_reasoning_effort(directory.path(), &manifest).unwrap();
-
-        let common = fs::read_to_string(directory.path().join("common.toml")).unwrap();
-        assert!(common.contains("model_reasoning_effort = \"medium\""));
-        assert!(common.contains("model = \"test\""));
-        let device = fs::read_to_string(directory.path().join("devices/test-device.toml")).unwrap();
-        assert!(!device.contains("model_reasoning_effort"));
-        assert!(device.contains("web_search = \"live\""));
+        assert!(validate_values(&values).is_err());
     }
 }

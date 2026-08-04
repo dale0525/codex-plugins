@@ -1,52 +1,54 @@
 #![cfg(unix)]
 
 use std::fs;
-use std::io::{Cursor, Read, Write};
-use std::net::TcpListener;
+use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
-use std::path::Path;
-use std::thread;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
-use assert_cmd::Command;
-use zip::write::SimpleFileOptions;
+use assert_cmd::Command as AssertCommand;
+use tempfile::TempDir;
 
-const DEFAULT_PROFILE: &str = "name = \"default\"\ndescription = \"General-purpose scout\"\nmodel = \"gpt-test\"\nmodel_reasoning_effort = \"medium\"\ndeveloper_instructions = \"Return compact evidence.\"\n\n[features]\nimage_generation = false\n";
-const UPDATED_DEFAULT_PROFILE: &str = "name = \"default\"\ndescription = \"Updated general-purpose scout\"\nmodel = \"gpt-test\"\nmodel_reasoning_effort = \"high\"\ndeveloper_instructions = \"Return updated compact evidence.\"\n\n[features]\nimage_generation = false\n";
-const IMAGE_PROFILE: &str = "name = \"image\"\ndescription = \"Image specialist\"\nmodel = \"gpt-test\"\nmodel_reasoning_effort = \"max\"\ndeveloper_instructions = \"Handle raster image work.\"\n\n[features]\nimage_generation = true\n";
-
-fn command(sync_home: &Path, codex_home: &Path, codex_bin: &Path) -> Command {
-    let mut command = Command::cargo_bin("codex-sync").unwrap();
-    command
-        .env("CODEX_SYNC_HOME", sync_home)
-        .env("CODEX_HOME", codex_home)
-        .env("CODEX_SYNC_CODEX_BIN", codex_bin)
-        .env("CODEX_SYNC_GITHUB_TOKEN", "test-token");
-    command
+fn run_git(cwd: &Path, args: &[&str]) {
+    let output = Command::new("git")
+        .current_dir(cwd)
+        .args(args)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "git {:?}: {}",
+        args,
+        String::from_utf8_lossy(&output.stderr)
+    );
 }
 
 fn fake_codex(path: &Path) {
     fs::write(
         path,
-        r#"#!/usr/bin/env sh
+        r#"#!/bin/sh
 set -eu
-if [ -n "${CODEX_SYNC_GITHUB_TOKEN:-}" ]; then
-  echo "GitHub token leaked to Codex child" >&2
-  exit 9
-fi
-if [ "${1:-}" = "--version" ]; then
-  echo "codex 1.0.0"
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "list" ]; then
-  printf 'MARKETPLACE ROOT\n'
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ]; then
-  if [ -n "${FAKE_CODEX_INSTALLED_JSON:-}" ]; then
-    cat "$FAKE_CODEX_INSTALLED_JSON"
-  else
-    printf '{"installed":[]}'
+if [ "${1:-}" = "--version" ]; then echo 'codex test'; exit 0; fi
+if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ] && [ -n "${FAKE_CODEX_PLUGINS_JSON:-}" ]; then cat "$FAKE_CODEX_PLUGINS_JSON"; exit 0; fi
+if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "list" ] && [ -n "${FAKE_CODEX_MARKETS_JSON:-}" ]; then cat "$FAKE_CODEX_MARKETS_JSON"; exit 0; fi
+if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ]; then echo '{"installed":[]}'; exit 0; fi
+if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "list" ]; then echo '{"marketplaces":[]}'; exit 0; fi
+if [ "${1:-}" = "plugin" ]; then
+  mutation=0
+  if [ "${2:-}" = "add" ] || [ "${2:-}" = "remove" ] || [ "${2:-}" = "upgrade" ]; then
+    mutation=1
+  elif [ "${2:-}" = "marketplace" ]; then
+    case "${3:-}" in
+      add|remove|upgrade) mutation=1 ;;
+    esac
   fi
-else
-  echo "unexpected codex invocation: $*" >&2
-  exit 1
+  if [ "$mutation" -eq 1 ]; then
+    if [ -n "${FAKE_CODEX_LOG:-}" ]; then echo "$*" >> "$FAKE_CODEX_LOG"; fi
+    if [ "${2:-}" = "add" ] && [ -n "${FAKE_CODEX_FAIL_ID:-}" ] && [ "${3:-}" = "$FAKE_CODEX_FAIL_ID" ]; then exit 17; fi
+    exit 0
+  fi
 fi
+exit 0
 "#,
     )
     .unwrap();
@@ -55,929 +57,884 @@ fi
     fs::set_permissions(path, permissions).unwrap();
 }
 
-fn repository_zip(model: Option<&str>) -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let common = model
-            .map(|value| format!("model = \"{value}\"\n"))
-            .unwrap_or_default();
-        let files = [
-            (
-                "owner-config-commit/codex-sync.toml",
-                "schema_version = 2\n",
-            ),
-            (
-                "owner-config-commit/AGENTS.md",
-                "# Synchronized instructions\n",
-            ),
-            ("owner-config-commit/config/common.toml", common.as_str()),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_profiles(profiles: &[(&str, &str)]) -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        for (path, content) in [
-            (
-                "owner-config-commit/codex-sync.toml",
-                "schema_version = 2\n",
-            ),
-            (
-                "owner-config-commit/AGENTS.md",
-                "# Synchronized instructions\n",
-            ),
-        ] {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        for (name, content) in profiles {
-            zip.start_file(format!("owner-config-commit/agents/{name}.toml"), options)
-                .unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_plaintext_provider_token() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
-            ("owner-config-commit/AGENTS.md", "# Synchronized\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-            (
-                "owner-config-commit/providers.toml",
-                "[providers.company]\nname = \"Company API\"\nbase_url = \"https://api.example.com/v1\"\nwire_api = \"responses\"\nenv_key = \"COMPANY_OPENAI_API_KEY\"\nexperimental_bearer_token = \"test-provider-bearer-token\"\n",
-            ),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_plugins() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
-            ("owner-config-commit/AGENTS.md", "# New\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-            (
-                "owner-config-commit/plugins.toml",
-                "[[plugins]]\nid = \"good@market\"\nenabled = true\n\n[[plugins]]\nid = \"fail@market\"\nenabled = true\n",
-            ),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_external_agents() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            (
-                "owner-config-commit/codex-sync.toml",
-                "schema_version = 2\n\n[[external_agents_sections]]\nid = \"fastctx\"\nbegin_marker = \"<!-- fastctx:begin -->\"\nend_marker = \"<!-- fastctx:end -->\"\n",
-            ),
-            ("owner-config-commit/AGENTS.md", "# Canonical\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_auto_provisioned_plugin() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
-            ("owner-config-commit/AGENTS.md", "# Canonical\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-            (
-                "owner-config-commit/marketplaces.toml",
-                "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.com/market.git\"\ngit_ref = \"main\"\n",
-            ),
-            (
-                "owner-config-commit/plugins.toml",
-                "[[plugins]]\nid = \"fastctx@market\"\nenabled = true\nauto_provision = true\n",
-            ),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_managed_marketplace_and_no_plugins() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
-            ("owner-config-commit/AGENTS.md", "# New\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-            (
-                "owner-config-commit/marketplaces.toml",
-                "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.com/market.git\"\ngit_ref = \"main\"\n",
-            ),
-            ("owner-config-commit/plugins.toml", ""),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_for_capture() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
-            ("owner-config-commit/AGENTS.md", "# Remote instructions\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-            (
-                "owner-config-commit/config/common.toml",
-                "model = \"remote-model\"\nmodel_reasoning_effort = \"low\"\n",
-            ),
-            (
-                "owner-config-commit/devices/test-device.toml",
-                "model = \"device-model\"\nmodel_reasoning_effort = \"low\"\nweb_search = \"cached\"\n",
-            ),
-            (
-                "owner-config-commit/providers.toml",
-                "[providers.cpa]\nname = \"Old\"\nbase_url = \"https://old.example/v1\"\n",
-            ),
-            (
-                "owner-config-commit/marketplaces.toml",
-                "[[marketplaces]]\nsource = \"git\"\nname = \"private-market\"\nurl = \"https://example.com/private.git\"\ngit_ref = \"main\"\nsparse = []\n",
-            ),
-            (
-                "owner-config-commit/plugins.toml",
-                "[[plugins]]\nid = \"existing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"missing@private-market\"\nenabled = true\n\n[[plugins]]\nid = \"legacy-disabled@private-market\"\nenabled = false\n\n[[plugins]]\nid = \"documents@openai-primary-runtime\"\nenabled = true\n",
-            ),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_marketplace_failure() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
-            ("owner-config-commit/AGENTS.md", "# New\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-            (
-                "owner-config-commit/marketplaces.toml",
-                "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.com/new-market.git\"\ngit_ref = \"main\"\n",
-            ),
-            (
-                "owner-config-commit/plugins.toml",
-                "[[plugins]]\nid = \"fail@market\"\nenabled = true\n",
-            ),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn repository_zip_with_disabled_plugin_failure() -> Vec<u8> {
-    let mut cursor = Cursor::new(Vec::new());
-    {
-        let mut zip = zip::ZipWriter::new(&mut cursor);
-        let options = SimpleFileOptions::default();
-        let files = [
-            ("owner-config-commit/codex-sync.toml", "schema_version = 2\n"),
-            ("owner-config-commit/AGENTS.md", "# New\n"),
-            ("owner-config-commit/agents/default.toml", DEFAULT_PROFILE),
-            (
-                "owner-config-commit/plugins.toml",
-                "[[plugins]]\nid = \"old@market\"\nenabled = false\n\n[[plugins]]\nid = \"fail@market\"\nenabled = true\n",
-            ),
-        ];
-        for (path, content) in files {
-            zip.start_file(path, options).unwrap();
-            zip.write_all(content.as_bytes()).unwrap();
-        }
-        zip.finish().unwrap();
-    }
-    cursor.into_inner()
-}
-
-fn stateful_fake_codex(path: &Path) {
+fn fixture() -> (TempDir, PathBuf, PathBuf, PathBuf) {
+    let temp = tempfile::tempdir().unwrap();
+    let remote = temp.path().join("remote.git");
+    let seed = temp.path().join("seed");
+    let codex_home = temp.path().join("codex");
+    let sync_home = temp.path().join("sync");
+    fs::create_dir_all(&codex_home).unwrap();
+    run_git(temp.path(), &["init", "--bare", remote.to_str().unwrap()]);
+    run_git(temp.path(), &["init", seed.to_str().unwrap()]);
+    run_git(&seed, &["config", "user.name", "Seed"]);
+    run_git(&seed, &["config", "user.email", "seed@example.test"]);
+    fs::create_dir_all(seed.join("config")).unwrap();
+    fs::create_dir_all(seed.join("devices")).unwrap();
+    fs::create_dir_all(seed.join("agents")).unwrap();
+    fs::write(seed.join("codex-sync.toml"), "schema_version = 3\n").unwrap();
+    fs::write(seed.join("AGENTS.md"), "# Shared\n").unwrap();
     fs::write(
-        path,
-        r#"#!/usr/bin/env sh
-set -eu
-if [ -n "${CODEX_SYNC_GITHUB_TOKEN:-}" ]; then
-  echo "GitHub token leaked to Codex child" >&2
-  exit 9
-fi
-state="${FAKE_CODEX_STATE:?}"
-if [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "list" ]; then
-  if [ "${4:-}" = "--json" ]; then
-    if [ -n "${FAKE_MARKETPLACE_STATE:-}" ] && [ -s "$FAKE_MARKETPLACE_STATE" ]; then
-      printf '{"marketplaces":[{"name":"%s","root":"%s","marketplaceSource":{"sourceType":"git","source":"%s"}}]}' \
-        "${FAKE_MARKETPLACE_NAME:-market}" \
-        "$(cat "$FAKE_MARKETPLACE_STATE")" \
-        "${FAKE_MARKETPLACE_SOURCE:-https://example.com/market.git}"
-    else
-      printf '{"marketplaces":[]}'
-    fi
-  else
-    printf 'MARKETPLACE ROOT\n'
-    if [ -n "${FAKE_MARKETPLACE_STATE:-}" ] && [ -s "$FAKE_MARKETPLACE_STATE" ]; then
-      printf '%s %s\n' "${FAKE_MARKETPLACE_NAME:-market}" "$(cat "$FAKE_MARKETPLACE_STATE")"
-    fi
-  fi
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "remove" ]; then
-  if [ -n "${FAKE_MARKETPLACE_STATE:-}" ] && [ -s "$FAKE_MARKETPLACE_STATE" ]; then
-    root="$(cat "$FAKE_MARKETPLACE_STATE")"
-    if [ "${FAKE_DAMAGE_MARKETPLACE_ON_REMOVE:-}" = "1" ] && [ -d "$root" ]; then
-      printf 'damaged\n' > "$root/sentinel.txt"
-    fi
-    : > "$FAKE_MARKETPLACE_STATE"
-  fi
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "add" ]; then
-  printf '%s' "${FAKE_MARKETPLACE_ADD_ROOT:-${4:-}}" > "${FAKE_MARKETPLACE_STATE:?}"
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "marketplace" ] && [ "${3:-}" = "upgrade" ]; then
-  if [ -n "${FAKE_REMOVE_CWD_ON_UPGRADE:-}" ]; then
-    rm -rf -- "$FAKE_REMOVE_CWD_ON_UPGRADE"
-  fi
-  :
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "list" ]; then
-  if [ -s "$state" ]; then
-    entry="$(cat "$state")"
-    id="${entry%%|*}"
-    enabled="${entry#*|}"
-    if [ "$enabled" = "$entry" ]; then
-      enabled=true
-    fi
-    printf '{"installed":[{"pluginId":"%s","installed":true,"enabled":%s}]}' "$id" "$enabled"
-  else
-    printf '{"installed":[]}'
-  fi
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "add" ]; then
-  if [ "${3:-}" = "fail@market" ]; then
-    echo "simulated plugin failure" >&2
-    exit 2
-  fi
-  printf '%s|true' "${3:-}" > "$state"
-  if [ -n "${FAKE_CODEX_CONFIG:-}" ]; then
-    printf '[plugins."%s"]\nenabled = true\n' "${3:-}" > "$FAKE_CODEX_CONFIG"
-  fi
-elif [ "${1:-}" = "plugin" ] && [ "${2:-}" = "remove" ]; then
-  : > "$state"
-elif [ "${1:-}" = "--version" ]; then
-  echo "codex 1.0.0"
-else
-  echo "unexpected codex invocation: $*" >&2
-  exit 1
-fi
-"#,
+        seed.join("config/common.toml"),
+        "model = \"remote\"\nmodel_reasoning_effort = \"high\"\n",
     )
     .unwrap();
-    let mut permissions = fs::metadata(path).unwrap().permissions();
-    permissions.set_mode(0o755);
-    fs::set_permissions(path, permissions).unwrap();
+    fs::write(seed.join("devices/test.toml"), "web_search = \"live\"\n").unwrap();
+    fs::write(seed.join("marketplaces.toml"), "marketplaces = []\n").unwrap();
+    fs::write(seed.join("plugins.toml"), "plugins = []\n").unwrap();
+    run_git(&seed, &["add", "."]);
+    run_git(&seed, &["commit", "-m", "initial"]);
+    run_git(&seed, &["branch", "-M", "main"]);
+    run_git(
+        &seed,
+        &["remote", "add", "origin", remote.to_str().unwrap()],
+    );
+    run_git(&seed, &["push", "-u", "origin", "main"]);
+    let codex_bin = temp.path().join("codex-cli");
+    fake_codex(&codex_bin);
+    (temp, remote, codex_home, sync_home)
 }
 
-fn serve_github(commit: &'static str, archive: Vec<u8>) -> (String, thread::JoinHandle<()>) {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let address = listener.local_addr().unwrap();
-    let handle = thread::spawn(move || {
-        for expected in ["/commits/main".to_owned(), format!("/zipball/{commit}")] {
-            let (mut stream, _) = listener.accept().unwrap();
-            let mut request = [0_u8; 8192];
-            let size = stream.read(&mut request).unwrap();
-            let request = String::from_utf8_lossy(&request[..size]);
-            assert!(request.contains(&expected), "unexpected request: {request}");
-            if expected.starts_with("/commits") {
-                let body = format!(r#"{{"sha":"{commit}"}}"#);
-                write!(
-                    stream,
-                    "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-                    body.len()
-                )
-                .unwrap();
-                stream.write_all(body.as_bytes()).unwrap();
-            } else {
-                write!(
-                    stream,
-                    "HTTP/1.1 200 OK\r\nContent-Type: application/zip\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-                    archive.len()
-                )
-                .unwrap();
-                stream.write_all(&archive).unwrap();
-            }
-        }
-    });
-    (format!("http://{address}"), handle)
+fn command(codex_home: &Path, sync_home: &Path, codex_bin: &Path) -> AssertCommand {
+    let mut command = AssertCommand::cargo_bin("codex-sync").unwrap();
+    command
+        .env("CODEX_HOME", codex_home)
+        .env("CODEX_SYNC_HOME", sync_home)
+        .env("CODEX_SYNC_CODEX_BIN", codex_bin)
+        .env("CODEX_SYNC_ALLOW_LOCAL_REPOSITORY", "1");
+    command
 }
 
-fn serve_commit(commit: &'static str) -> (String, thread::JoinHandle<()>) {
-    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-    let address = listener.local_addr().unwrap();
-    let handle = thread::spawn(move || {
-        let (mut stream, _) = listener.accept().unwrap();
-        let mut request = [0_u8; 8192];
-        let size = stream.read(&mut request).unwrap();
-        assert!(String::from_utf8_lossy(&request[..size]).contains("/commits/main"));
-        let body = format!(r#"{{"sha":"{commit}"}}"#);
-        write!(
-            stream,
-            "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
-            body.len(),
-            body
-        )
-        .unwrap();
-    });
-    (format!("http://{address}"), handle)
+fn fake_market_json(name: &str, url: &str, git_ref: &str, sparse: &str) -> String {
+    let sparse = if sparse.is_empty() {
+        "[]".to_owned()
+    } else {
+        format!("[\"{sparse}\"]")
+    };
+    format!(
+        r#"{{"marketplaces":[{{"name":"{name}","marketplaceSource":{{"sourceType":"git","source":"{url}","ref":"{git_ref}","sparse":{sparse}}}}}]}}"#
+    )
+}
+
+fn fake_plugin_json(ids: &[&str]) -> String {
+    let installed = ids
+        .iter()
+        .map(|id| format!(r#"{{"pluginId":"{id}","installed":true,"enabled":true}}"#))
+        .collect::<Vec<_>>()
+        .join(",");
+    format!(r#"{{"installed":[{installed}]}}"#)
+}
+
+fn write_fake_json(path: &Path, contents: &str) {
+    fs::write(path, contents).unwrap();
 }
 
 #[test]
-fn setup_sync_and_apply_preserve_unmanaged_config() {
-    let temporary = tempfile::tempdir().unwrap();
-    let sync_home = temporary.path().join("sync");
-    let codex_home = temporary.path().join("codex");
-    fs::create_dir_all(&codex_home).unwrap();
-    fs::write(
-        codex_home.join("config.toml"),
-        "[projects.\"/tmp/example\"]\ntrust_level = \"trusted\"\n",
-    )
-    .unwrap();
-    fs::write(codex_home.join("AGENTS.md"), "# Old\n").unwrap();
-    let codex_bin = temporary.path().join("codex-fake");
-    fake_codex(&codex_bin);
-
-    command(&sync_home, &codex_home, &codex_bin)
+fn setup_pull_and_push_use_git_and_fixed_author() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
         .args([
             "setup",
             "--repository",
-            "owner/config",
+            remote.to_str().unwrap(),
             "--device",
-            "test-device",
+            "test",
         ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    assert!(fs::read_to_string(codex_home.join("config.toml"))
+        .unwrap()
+        .contains("model = \"remote\""));
+    fs::write(
+        codex_home.join("config.toml"),
+        "model = \"local\"\nmodel_reasoning_effort = \"xhigh\"\nweb_search = \"live\"\n",
+    )
+    .unwrap();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push"])
+        .assert()
+        .success();
+    let check = temp.path().join("check");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), check.to_str().unwrap()],
+    );
+    let common = fs::read_to_string(check.join("config/common.toml")).unwrap();
+    assert!(common.contains("model = \"local\""));
+    assert!(common.contains("model_reasoning_effort = \"xhigh\""));
+    let log = Command::new("git")
+        .current_dir(&check)
+        .args(["log", "-1", "--format=%an <%ae>"])
+        .output()
+        .unwrap();
+    assert_eq!(
+        String::from_utf8_lossy(&log.stdout).trim(),
+        "Logic Tan <logictan89@gmail.com>"
+    );
+}
+
+#[test]
+fn device_overlay_capture_keeps_shadowed_common_baseline() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("overlay-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::write(
+        edit.join("config/common.toml"),
+        "model = \"A\"\nmodel_reasoning_effort = \"high\"\n",
+    )
+    .unwrap();
+    fs::write(
+        edit.join("devices/test.toml"),
+        "model = \"B\"\nweb_search = \"live\"\n",
+    )
+    .unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "overlay"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push"])
+        .assert()
+        .success();
+    let check = temp.path().join("overlay-check");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), check.to_str().unwrap()],
+    );
+    assert!(fs::read_to_string(check.join("config/common.toml"))
+        .unwrap()
+        .contains("model = \"A\""));
+    assert!(fs::read_to_string(check.join("devices/test.toml"))
+        .unwrap()
+        .contains("model = \"B\""));
+}
+
+#[test]
+fn pull_removes_managed_remote_deletion_and_preserves_unmanaged_local_key() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    fs::OpenOptions::new()
+        .append(true)
+        .open(codex_home.join("config.toml"))
+        .unwrap()
+        .write_all(b"custom_local = \"keep\"\n")
+        .unwrap();
+    let edit = temp.path().join("delete-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::write(
+        edit.join("config/common.toml"),
+        "model_reasoning_effort = \"high\"\n",
+    )
+    .unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "delete model"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    let config = fs::read_to_string(codex_home.join("config.toml")).unwrap();
+    assert!(!config.contains("model = \"remote\""));
+    assert!(config.contains("custom_local = \"keep\""));
+}
+
+#[test]
+fn dry_run_does_not_create_a_remote_commit() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    let before = Command::new("git")
+        .args([
+            "--git-dir",
+            remote.to_str().unwrap(),
+            "rev-parse",
+            "refs/heads/main",
+        ])
+        .output()
+        .unwrap();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push", "--dry-run"])
+        .assert()
+        .success();
+    let after = Command::new("git")
+        .args([
+            "--git-dir",
+            remote.to_str().unwrap(),
+            "rev-parse",
+            "refs/heads/main",
+        ])
+        .output()
+        .unwrap();
+    assert_eq!(before.stdout, after.stdout);
+}
+
+#[test]
+fn push_rejects_remote_race_and_retries_from_latest_baseline() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+
+    let race_clone = temp.path().join("race-clone");
+    run_git(
+        temp.path(),
+        &[
+            "clone",
+            remote.to_str().unwrap(),
+            race_clone.to_str().unwrap(),
+        ],
+    );
+    run_git(&race_clone, &["config", "user.name", "Concurrent"]);
+    run_git(
+        &race_clone,
+        &["config", "user.email", "concurrent@example.test"],
+    );
+    fs::write(race_clone.join("concurrent.txt"), "concurrent\n").unwrap();
+    run_git(&race_clone, &["add", "concurrent.txt"]);
+    run_git(&race_clone, &["commit", "-m", "concurrent update"]);
+
+    fs::write(
+        codex_home.join("config.toml"),
+        "model = \"before-race\"\nmodel_reasoning_effort = \"high\"\nweb_search = \"live\"\n",
+    )
+    .unwrap();
+    let wrapper_dir = temp.path().join("git-wrapper");
+    fs::create_dir_all(&wrapper_dir).unwrap();
+    let wrapper = wrapper_dir.join("git");
+    let real_git = Command::new("sh")
+        .args(["-c", "command -v git"])
+        .output()
+        .unwrap();
+    assert!(real_git.status.success());
+    let real_git = String::from_utf8(real_git.stdout)
+        .unwrap()
+        .trim()
+        .to_owned();
+    fs::write(
+        &wrapper,
+        "#!/bin/sh\nset -eu\nif [ \"$1\" = \"status\" ] && [ \"$2\" = \"--porcelain\" ] && [ ! -e \"$RACE_DONE\" ]; then\n  touch \"$RACE_DONE\"\n  \"$CODEX_SYNC_REAL_GIT\" -C \"$RACE_CLONE\" push origin main\nfi\nexec \"$CODEX_SYNC_REAL_GIT\" \"$@\"\n",
+    )
+    .unwrap();
+    let mut permissions = fs::metadata(&wrapper).unwrap().permissions();
+    permissions.set_mode(0o755);
+    fs::set_permissions(&wrapper, permissions).unwrap();
+    let path = std::env::var_os("PATH").unwrap_or_default();
+    let path = format!("{}:{}", wrapper_dir.display(), path.to_string_lossy());
+    let race_done = temp.path().join("race-done");
+
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("PATH", &path)
+        .env("CODEX_SYNC_REAL_GIT", &real_git)
+        .env("RACE_CLONE", &race_clone)
+        .env("RACE_DONE", &race_done)
+        .args(["push"])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("remote branch advanced"));
+    assert!(race_done.exists());
+    assert!(race_clone.join("concurrent.txt").exists());
+
+    let remote_check = temp.path().join("race-check");
+    run_git(
+        temp.path(),
+        &[
+            "clone",
+            remote.to_str().unwrap(),
+            remote_check.to_str().unwrap(),
+        ],
+    );
+    assert_eq!(
+        fs::read_to_string(remote_check.join("concurrent.txt")).unwrap(),
+        "concurrent\n"
+    );
+
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    fs::write(
+        codex_home.join("config.toml"),
+        "model = \"after-race\"\nmodel_reasoning_effort = \"high\"\nweb_search = \"live\"\n",
+    )
+    .unwrap();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push"])
+        .assert()
+        .success();
+    let final_check = temp.path().join("race-final");
+    run_git(
+        temp.path(),
+        &[
+            "clone",
+            remote.to_str().unwrap(),
+            final_check.to_str().unwrap(),
+        ],
+    );
+    assert!(final_check.join("concurrent.txt").exists());
+    assert!(fs::read_to_string(final_check.join("config/common.toml"))
+        .unwrap()
+        .contains("model = \"after-race\""));
+}
+
+#[test]
+fn market_source_ref_and_sparse_replacement_detaches_plugins_first() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("market-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::write(
+        edit.join("marketplaces.toml"),
+        "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://old.test/market.git\"\ngit_ref = \"main\"\nsparse = [\"old/plugins\"]\n",
+    )
+    .unwrap();
+    fs::write(edit.join("plugins.toml"), "plugins = [\"old@market\"]\n").unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "old market"]);
+    run_git(&edit, &["push", "origin", "main"]);
+
+    let codex_bin = temp.path().join("codex-cli");
+    let markets_json = temp.path().join("markets.json");
+    let plugins_json = temp.path().join("plugins.json");
+    write_fake_json(
+        &markets_json,
+        &fake_market_json(
+            "market",
+            "https://old.test/market.git",
+            "main",
+            "old/plugins",
+        ),
+    );
+    write_fake_json(&plugins_json, &fake_plugin_json(&["old@market"]));
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .args(["pull"])
+        .assert()
+        .success();
+
+    fs::write(
+        edit.join("marketplaces.toml"),
+        "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://new.test/market.git\"\ngit_ref = \"release\"\nsparse = [\"new/plugins\"]\n",
+    )
+    .unwrap();
+    fs::write(
+        edit.join("plugins.toml"),
+        "plugins = [\"desired@market\"]\n",
+    )
+    .unwrap();
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "replace market source"]);
+    run_git(&edit, &["push", "origin", "main"]);
+
+    let log = temp.path().join("market-actions.log");
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .env("FAKE_CODEX_LOG", &log)
+        .args(["pull"])
+        .assert()
+        .success();
+    let actions = fs::read_to_string(log).unwrap();
+    let lines = actions.lines().collect::<Vec<_>>();
+    assert_eq!(
+        lines,
+        vec![
+            "plugin remove old@market",
+            "plugin marketplace remove market",
+            "plugin marketplace add https://new.test/market.git --ref release --sparse new/plugins",
+            "plugin marketplace upgrade market",
+            "plugin add desired@market",
+        ]
+    );
+}
+
+#[test]
+fn pull_removes_managed_market_but_protects_unmanaged_and_openai_items() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("protection-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::write(
+        edit.join("marketplaces.toml"),
+        "[[marketplaces]]\nsource = \"git\"\nname = \"managed\"\nurl = \"https://example.test/managed.git\"\n",
+    )
+    .unwrap();
+    fs::write(edit.join("plugins.toml"), "plugins = [\"old@managed\"]\n").unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "managed market"]);
+    run_git(&edit, &["push", "origin", "main"]);
+
+    let codex_bin = temp.path().join("codex-cli");
+    let markets_json = temp.path().join("protected-markets.json");
+    let plugins_json = temp.path().join("protected-plugins.json");
+    write_fake_json(
+        &markets_json,
+        r#"{"marketplaces":[
+          {"name":"managed","marketplaceSource":{"sourceType":"git","source":"https://example.test/managed.git","ref":"main"}},
+          {"name":"personal","marketplaceSource":{"sourceType":"git","source":"https://example.test/personal.git","ref":"main"}},
+          {"name":"openai-bundled","marketplaceSource":{"sourceType":"git","source":"https://example.test/openai.git","ref":"main"}}
+        ]}"#,
+    );
+    write_fake_json(
+        &plugins_json,
+        &fake_plugin_json(&["old@managed", "local@personal", "browser@openai-bundled"]),
+    );
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .args(["pull"])
+        .assert()
+        .success();
+
+    fs::write(edit.join("marketplaces.toml"), "marketplaces = []\n").unwrap();
+    fs::write(edit.join("plugins.toml"), "plugins = []\n").unwrap();
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "remove managed market"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    let log = temp.path().join("protection-actions.log");
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .env("FAKE_CODEX_LOG", &log)
+        .args(["pull"])
+        .assert()
+        .success();
+    let actions = fs::read_to_string(log).unwrap();
+    assert!(actions.contains("plugin remove old@managed"));
+    assert!(actions.contains("plugin marketplace remove managed"));
+    assert!(!actions.contains("local@personal"));
+    assert!(!actions.contains("personal\n"));
+    assert!(!actions.contains("browser@openai-bundled"));
+    assert!(!actions.contains("openai-bundled\n"));
+}
+
+#[test]
+fn failed_plugin_convergence_retries_without_losing_core_state() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("plugin-failure-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::write(
+        edit.join("marketplaces.toml"),
+        "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.test/market.git\"\n",
+    )
+    .unwrap();
+    fs::write(edit.join("plugins.toml"), "plugins = [\"fail@market\"]\n").unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "plugin failure"]);
+    run_git(&edit, &["push", "origin", "main"]);
+
+    let codex_bin = temp.path().join("codex-cli");
+    let markets_json = temp.path().join("failure-markets.json");
+    let plugins_json = temp.path().join("failure-plugins.json");
+    write_fake_json(
+        &markets_json,
+        &fake_market_json("market", "https://example.test/market.git", "main", ""),
+    );
+    write_fake_json(&plugins_json, &fake_plugin_json(&[]));
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .env("FAKE_CODEX_FAIL_ID", "fail@market")
+        .args(["pull"])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("convergence failed"));
+    assert!(fs::read_to_string(sync_home.join("state.toml"))
+        .unwrap()
+        .contains("converged = false"));
+    assert!(codex_home.join("config.toml").exists());
+
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .env("FAKE_CODEX_LOG", temp.path().join("retry-actions.log"))
+        .args(["pull"])
         .assert()
         .success();
     assert!(fs::read_to_string(sync_home.join("state.toml"))
         .unwrap()
-        .contains("Iv23liN2J2Ryzkd99etp"));
-    command(&sync_home, &codex_home, &codex_bin)
-        .arg("doctor")
-        .assert()
-        .success()
-        .stdout(predicates::str::contains(format!(
-            "Codex CLI: {}",
-            codex_bin.display()
-        )));
-
-    let (api_url, server) = serve_github("abc123", repository_zip(Some("gpt-test")));
-    let sync = command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .output()
-        .unwrap();
-    assert!(
-        sync.status.success(),
-        "{}",
-        String::from_utf8_lossy(&sync.stderr)
-    );
-    server.join().unwrap();
-    let stdout = String::from_utf8(sync.stdout).unwrap();
-    let plan_id = stdout
-        .lines()
-        .find_map(|line| line.strip_prefix("Plan "))
-        .and_then(|line| line.split_whitespace().next())
-        .unwrap();
-
-    command(&sync_home, &codex_home, &codex_bin)
-        .args(["apply", plan_id, "--approve-high-risk"])
-        .assert()
-        .success();
-
-    let config = fs::read_to_string(codex_home.join("config.toml")).unwrap();
-    assert!(config.contains("model = \"gpt-test\""));
-    assert!(config.contains("/tmp/example"));
-    assert_eq!(
-        fs::read_to_string(codex_home.join("AGENTS.md")).unwrap(),
-        "# Synchronized instructions\n"
-    );
-
-    fs::write(
-        sync_home.join("repository/config/common.toml"),
-        "model = \"unpublished\"\n",
-    )
-    .unwrap();
-    let (api_url, server) = serve_commit("abc123");
-    command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .assert()
-        .failure()
-        .stderr(predicates::str::contains("unpublished edits"));
-    server.join().unwrap();
-
-    let (api_url, server) = serve_github("abc123", repository_zip(Some("gpt-test")));
-    command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .args(["sync", "--discard-local"])
-        .assert()
-        .success();
-    server.join().unwrap();
-
-    let (api_url, server) = serve_github("def456", repository_zip(None));
-    let removal = command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .output()
-        .unwrap();
-    assert!(
-        removal.status.success(),
-        "{}",
-        String::from_utf8_lossy(&removal.stderr)
-    );
-    server.join().unwrap();
-    let stdout = String::from_utf8(removal.stdout).unwrap();
-    assert!(stdout.contains("remove previously synchronized value"));
-    let removal_plan = stdout
-        .lines()
-        .find_map(|line| line.strip_prefix("Plan "))
-        .and_then(|line| line.split_whitespace().next())
-        .unwrap();
-    command(&sync_home, &codex_home, &codex_bin)
-        .args(["apply", removal_plan])
-        .assert()
-        .success();
-    let config = fs::read_to_string(codex_home.join("config.toml")).unwrap();
-    assert!(!config.contains("model ="));
-    assert!(config.contains("/tmp/example"));
+        .contains("converged = true"));
 }
 
 #[test]
-fn sync_apply_and_capture_preserve_external_agents_ownership() {
-    let temporary = tempfile::tempdir().unwrap();
-    let sync_home = temporary.path().join("sync");
-    let codex_home = temporary.path().join("codex");
-    fs::create_dir_all(&codex_home).unwrap();
-    let marker = "<!-- fastctx:begin -->\nFastCtx live\n<!-- fastctx:end -->";
+fn v2_repository_is_migrated_on_first_push() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let legacy = temp.path().join("legacy");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), legacy.to_str().unwrap()],
+    );
+    fs::create_dir_all(legacy.join("old")).unwrap();
     fs::write(
-        codex_home.join("AGENTS.md"),
-        format!("# Local\n\n{marker}\n"),
+        legacy.join("codex-sync.toml"),
+        "schema_version = 2\nagents = \"AGENTS.md\"\nagent_profiles = \"agents\"\ncommon_config = \"old/common.toml\"\ndevices = \"devices\"\nmarketplaces = \"marketplaces.toml\"\nplugins = \"plugins.toml\"\nproviders = \"old/providers.toml\"\n",
     )
     .unwrap();
-    let codex_bin = temporary.path().join("codex-fake");
-    fake_codex(&codex_bin);
-    command(&sync_home, &codex_home, &codex_bin)
+    fs::write(legacy.join("README.md"), "Keep this documentation\n").unwrap();
+    fs::write(legacy.join("old/common.toml"), "model = \"v2\"\n").unwrap();
+    fs::write(
+        legacy.join("old/providers.toml"),
+        "[providers.company]\nbase_url = \"https://example.test/v1\"\n",
+    )
+    .unwrap();
+    fs::write(
+        legacy.join("plugins.toml"),
+        "[[plugins]]\nid = \"disabled@market\"\nenabled = false\n\n[[plugins]]\nid = \"enabled@market\"\nenabled = true\nauto_provision = true\n",
+    )
+    .unwrap();
+    fs::write(
+        legacy.join("marketplaces.toml"),
+        "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.test/market.git\"\n",
+    )
+    .unwrap();
+    run_git(&legacy, &["config", "user.name", "Seed"]);
+    run_git(&legacy, &["config", "user.email", "seed@example.test"]);
+    run_git(&legacy, &["add", "."]);
+    run_git(&legacy, &["commit", "-m", "legacy"]);
+    run_git(&legacy, &["push", "origin", "main"]);
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
         .args([
             "setup",
             "--repository",
-            "owner/config",
+            remote.to_str().unwrap(),
             "--device",
-            "test-device",
+            "test",
         ])
         .assert()
         .success();
-    let (api_url, server) = serve_github("abc123", repository_zip_with_external_agents());
-    let sync = command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .output()
-        .unwrap();
-    server.join().unwrap();
-    assert!(sync.status.success());
-    let output = String::from_utf8(sync.stdout).unwrap();
-    let plan_id = output
-        .lines()
-        .find_map(|line| line.strip_prefix("Plan "))
-        .and_then(|line| line.split_whitespace().next())
-        .unwrap();
-    command(&sync_home, &codex_home, &codex_bin)
-        .args(["apply", plan_id, "--approve-high-risk"])
+    fs::create_dir_all(sync_home.join("backups")).unwrap();
+    fs::create_dir_all(sync_home.join("provision-artifacts")).unwrap();
+    fs::create_dir_all(sync_home.join("provision-operations")).unwrap();
+    fs::create_dir_all(sync_home.join("marketplaces")).unwrap();
+    fs::write(sync_home.join("pending-plan.json"), "pending\n").unwrap();
+    fs::create_dir_all(sync_home.join("setup-backups")).unwrap();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
         .assert()
         .success();
-    assert_eq!(
-        fs::read_to_string(codex_home.join("AGENTS.md")).unwrap(),
-        format!("# Canonical\n\n{marker}\n")
-    );
-
-    fs::write(
-        codex_home.join("AGENTS.md"),
-        format!("# Captured base\n\n{marker}\n"),
-    )
-    .unwrap();
-    command(&sync_home, &codex_home, &codex_bin)
-        .arg("capture")
-        .assert()
-        .success();
-    assert_eq!(
-        fs::read_to_string(sync_home.join("repository/AGENTS.md")).unwrap(),
-        "# Captured base\n"
-    );
-}
-
-#[test]
-fn clean_marketplace_auto_provision_reconciles_before_execution() {
-    let temporary = tempfile::tempdir().unwrap();
-    let sync_home = temporary.path().join("sync");
-    let codex_home = temporary.path().join("codex");
-    fs::create_dir_all(&codex_home).unwrap();
-    fs::write(codex_home.join("AGENTS.md"), "# Local\n").unwrap();
-    let codex_bin = temporary.path().join("codex-fake");
-    stateful_fake_codex(&codex_bin);
-    let codex_state = temporary.path().join("codex-state");
-    fs::write(&codex_state, "").unwrap();
-    let marketplace_root = temporary.path().join("marketplace");
-    let plugin_root = marketplace_root.join("plugins/fastctx");
-    fs::create_dir_all(plugin_root.join(".codex-sync")).unwrap();
-    fs::create_dir_all(plugin_root.join("scripts")).unwrap();
-    fs::create_dir_all(marketplace_root.join(".agents/plugins")).unwrap();
-    fs::write(
-        marketplace_root.join(".agents/plugins/marketplace.json"),
-        r#"{"plugins":[{"name":"fastctx","source":{"source":"local","path":"./plugins/fastctx"}}]}"#,
-    )
-    .unwrap();
-    fs::write(
-        plugin_root.join(".codex-sync/provision.json"),
-        r#"{"schema_version":1,"risk":"high","posix_script":"./scripts/provision.sh","windows_script":"./scripts/provision.ps1","arguments":["setup","--yes"]}"#,
-    )
-    .unwrap();
-    let provision_script = plugin_root.join("scripts/provision.sh");
-    fs::write(
-        &provision_script,
-        "#!/usr/bin/env sh\nset -eu\n[ -z \"${CODEX_SYNC_GITHUB_TOKEN:-}\" ]\n[ -z \"${GITHUB_TOKEN:-}\" ]\n[ -z \"${GH_TOKEN:-}\" ]\nif [ \"${1:-}\" = uninstall ]; then printf uninstalled > \"${PROVISION_SENTINEL:?}\"; else printf provisioned > \"${PROVISION_SENTINEL:?}\"; fi\n",
-    )
-    .unwrap();
-    let mut permissions = fs::metadata(&provision_script).unwrap().permissions();
-    permissions.set_mode(0o755);
-    fs::set_permissions(&provision_script, permissions).unwrap();
-    let marketplace_state = temporary.path().join("marketplace-state");
-    fs::write(&marketplace_state, b"").unwrap();
-    let sentinel = temporary.path().join("provisioned");
-
-    let configured = |command: &mut Command| {
-        command
-            .env("FAKE_CODEX_STATE", &codex_state)
-            .env("FAKE_MARKETPLACE_STATE", &marketplace_state)
-            .env("FAKE_MARKETPLACE_NAME", "market")
-            .env("FAKE_MARKETPLACE_SOURCE", "https://example.com/market.git")
-            .env("FAKE_MARKETPLACE_ADD_ROOT", &marketplace_root)
-            .env("GITHUB_TOKEN", "test-github-token")
-            .env("GH_TOKEN", "test-gh-token")
-            .env("PROVISION_SENTINEL", &sentinel);
-    };
-    let mut setup = command(&sync_home, &codex_home, &codex_bin);
-    configured(&mut setup);
-    setup
-        .args([
-            "setup",
-            "--repository",
-            "owner/config",
-            "--device",
-            "test-device",
-        ])
-        .assert()
-        .success();
-    let (api_url, server) = serve_github("abc123", repository_zip_with_auto_provisioned_plugin());
-    let mut sync = command(&sync_home, &codex_home, &codex_bin);
-    configured(&mut sync);
-    let output = sync
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .output()
-        .unwrap();
-    server.join().unwrap();
-    assert!(output.status.success());
-    let stdout = String::from_utf8(output.stdout).unwrap();
-    assert!(stdout.contains("plugin-provision"));
-    let plan_id = stdout
-        .lines()
-        .find_map(|line| line.strip_prefix("Plan "))
-        .and_then(|line| line.split_whitespace().next())
-        .unwrap();
-    let mut apply = command(&sync_home, &codex_home, &codex_bin);
-    configured(&mut apply);
-    apply
-        .args(["apply", plan_id, "--approve-high-risk"])
-        .assert()
-        .success()
-        .stdout(predicates::str::contains("provisioned fastctx@market"));
-    assert_eq!(fs::read_to_string(&sentinel).unwrap(), "provisioned");
-    assert!(fs::read_to_string(&codex_state)
-        .unwrap()
-        .starts_with("fastctx@market|true"));
-    let local_state = fs::read_to_string(sync_home.join("state.toml")).unwrap();
-    assert!(local_state.contains("provision_receipts"));
-    assert!(local_state.contains("fastctx@market"));
-    let mut rollback = command(&sync_home, &codex_home, &codex_bin);
-    configured(&mut rollback);
-    rollback.args(["rollback", "--approve"]).assert().success();
-    assert_eq!(fs::read_to_string(&sentinel).unwrap(), "uninstalled");
-}
-
-#[test]
-fn capture_updates_managed_state_and_excludes_openai_plugins() {
-    let temporary = tempfile::tempdir().unwrap();
-    let sync_home = temporary.path().join("sync");
-    let codex_home = temporary.path().join("codex");
-    fs::create_dir_all(codex_home.join("agents")).unwrap();
-    fs::write(codex_home.join("AGENTS.md"), "# Local instructions\n").unwrap();
-    fs::write(
-        codex_home.join("agents/default.toml"),
-        UPDATED_DEFAULT_PROFILE,
-    )
-    .unwrap();
+    assert!(!codex_home.join("config.toml").exists());
+    assert!(sync_home.join("backups").exists());
     fs::write(
         codex_home.join("config.toml"),
-        r#"model = "local-model"
-model_reasoning_effort = "high"
-web_search = "live"
-
-[model_providers.cpa]
-name = "New CPA"
-base_url = "https://new.example/v1"
-wire_api = "responses"
-experimental_bearer_token = "test-captured-token"
-
-[marketplaces.new-private]
-source_type = "git"
-source = "https://example.com/new-private.git"
-ref = "stable"
-"#,
+        "model = \"v2\"\n[model_providers.company]\nbase_url = \"https://example.test/v1\"\n",
     )
     .unwrap();
-    let installed = temporary.path().join("installed.json");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push"])
+        .assert()
+        .success();
+    let check = temp.path().join("migrated");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), check.to_str().unwrap()],
+    );
+    assert_eq!(
+        fs::read_to_string(check.join("codex-sync.toml"))
+            .unwrap()
+            .trim(),
+        "schema_version = 3"
+    );
+    assert_eq!(
+        fs::read_to_string(check.join("README.md")).unwrap(),
+        "Keep this documentation\n"
+    );
+    let common = fs::read_to_string(check.join("config/common.toml")).unwrap();
+    assert!(common.contains("model_providers"));
+    let plugins = fs::read_to_string(check.join("plugins.toml")).unwrap();
+    assert!(!plugins.contains("disabled@market"));
+
+    // Migration cleanup is gated on a successful v3 pull. A plugin failure
+    // after the migration push must retain every legacy directory for retry.
+    assert!(sync_home.join("backups").exists());
+    assert!(sync_home.join("provision-artifacts").exists());
+    let post_migration = temp.path().join("post-migration");
+    run_git(
+        temp.path(),
+        &[
+            "clone",
+            remote.to_str().unwrap(),
+            post_migration.to_str().unwrap(),
+        ],
+    );
     fs::write(
-        &installed,
-        r#"{"installed":[
-{"pluginId":"existing@private-market","installed":true,"enabled":true},
-{"pluginId":"new-tool@new-private","installed":true,"enabled":true},
-{"pluginId":"documents@openai-primary-runtime","installed":true,"enabled":true},
-{"pluginId":"browser@openai-bundled","installed":true,"enabled":true},
-{"pluginId":"local-tool@personal","installed":true,"enabled":true}
-]}"#,
+        post_migration.join("marketplaces.toml"),
+        "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.test/market.git\"\n",
     )
     .unwrap();
-    let codex_bin = temporary.path().join("codex-fake");
-    fake_codex(&codex_bin);
-
-    command(&sync_home, &codex_home, &codex_bin)
-        .args([
-            "setup",
-            "--repository",
-            "owner/config",
-            "--device",
-            "test-device",
-        ])
-        .assert()
-        .success();
-    let (api_url, server) = serve_github("abc123", repository_zip_for_capture());
-    command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .assert()
-        .success();
-    server.join().unwrap();
-
-    command(&sync_home, &codex_home, &codex_bin)
-        .env("FAKE_CODEX_INSTALLED_JSON", &installed)
-        .arg("capture")
-        .assert()
-        .success()
-        .stdout(predicates::str::contains(
-            "captured 2 installed non-OpenAI plugin(s)",
-        ))
-        .stdout(predicates::str::contains(
-            "excluded 2 OpenAI-managed plugin(s)",
-        ))
-        .stdout(predicates::str::contains(
-            "restored portable model_reasoning_effort to the reviewed default: medium",
-        ))
-        .stdout(predicates::str::contains("skipped local-tool@personal"));
-
-    let repository = sync_home.join("repository");
-    let common = fs::read_to_string(repository.join("config/common.toml")).unwrap();
-    assert!(common.contains("model = \"remote-model\""));
-    assert!(common.contains("model_reasoning_effort = \"medium\""));
-    let device = fs::read_to_string(repository.join("devices/test-device.toml")).unwrap();
-    assert!(device.contains("model = \"local-model\""));
-    assert!(device.contains("web_search = \"live\""));
-    assert!(!device.contains("model_reasoning_effort"));
-    let providers = fs::read_to_string(repository.join("providers.toml")).unwrap();
-    assert!(providers.contains("name = \"New CPA\""));
-    assert!(providers.contains("experimental_bearer_token = \"test-captured-token\""));
-    assert_eq!(
-        fs::read_to_string(repository.join("AGENTS.md")).unwrap(),
-        "# Local instructions\n"
+    fs::write(
+        post_migration.join("plugins.toml"),
+        "plugins = [\"fail@market\"]\n",
+    )
+    .unwrap();
+    run_git(&post_migration, &["config", "user.name", "Seed"]);
+    run_git(
+        &post_migration,
+        &["config", "user.email", "seed@example.test"],
     );
-    assert_eq!(
-        fs::read_to_string(repository.join("agents/default.toml")).unwrap(),
-        UPDATED_DEFAULT_PROFILE
-    );
-    let plugins = fs::read_to_string(repository.join("plugins.toml")).unwrap();
-    assert!(plugins.contains("existing@private-market"));
-    assert!(plugins.contains("new-tool@new-private"));
-    assert!(!plugins.contains("missing@private-market"));
-    assert!(!plugins.contains("legacy-disabled@private-market"));
-    assert!(!plugins.contains("enabled = false"));
-    assert!(!plugins.contains("openai-"));
-    assert!(!plugins.contains("local-tool@personal"));
-    let marketplaces = fs::read_to_string(repository.join("marketplaces.toml")).unwrap();
-    assert!(marketplaces.contains("name = \"new-private\""));
-    assert!(marketplaces.contains("git_ref = \"stable\""));
+    run_git(&post_migration, &["add", "."]);
+    run_git(&post_migration, &["commit", "-m", "post migration plugin"]);
+    run_git(&post_migration, &["push", "origin", "main"]);
 
-    command(&sync_home, &codex_home, &codex_bin)
-        .env("FAKE_CODEX_INSTALLED_JSON", &installed)
-        .arg("capture")
+    let markets_json = temp.path().join("migration-markets.json");
+    let plugins_json = temp.path().join("migration-plugins.json");
+    write_fake_json(
+        &markets_json,
+        &fake_market_json("market", "https://example.test/market.git", "main", ""),
+    );
+    write_fake_json(&plugins_json, &fake_plugin_json(&[]));
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .env("FAKE_CODEX_FAIL_ID", "fail@market")
+        .args(["pull"])
         .assert()
         .failure()
-        .stderr(predicates::str::contains("unpublished edits"));
+        .stderr(predicates::str::contains("convergence failed"));
+    assert!(fs::read_to_string(sync_home.join("state.toml"))
+        .unwrap()
+        .contains("converged = false"));
+    assert!(sync_home.join("backups").exists());
+    assert!(sync_home.join("provision-artifacts").exists());
+    assert!(sync_home.join("provision-operations").exists());
+    assert!(sync_home.join("marketplaces").exists());
+    assert!(sync_home.join("pending-plan.json").exists());
+    assert!(sync_home.join("setup-backups").exists());
+
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .args(["pull"])
+        .assert()
+        .success();
+    for path in [
+        "backups",
+        "provision-artifacts",
+        "provision-operations",
+        "marketplaces",
+        "pending-plan.json",
+        "setup-backups",
+    ] {
+        assert!(
+            !sync_home.join(path).exists(),
+            "legacy path still exists: {path}"
+        );
+    }
+    assert!(sync_home.join("backup/previous").exists());
+    let state = fs::read_to_string(sync_home.join("state.toml")).unwrap();
+    assert!(state.contains("migration_cleanup_pending = false"));
+    assert!(state.contains("converged = true"));
 }
 
 #[test]
-fn agent_profiles_are_transactional_and_preserve_unmanaged_profiles() {
-    let temporary = tempfile::tempdir().unwrap();
-    let sync_home = temporary.path().join("sync");
-    let codex_home = temporary.path().join("codex");
-    let agents = codex_home.join("agents");
-    fs::create_dir_all(&agents).unwrap();
-    fs::write(agents.join("personal.toml"), "personal\n").unwrap();
-    fs::write(agents.join("default.toml"), "local drift\n").unwrap();
-    let codex_bin = temporary.path().join("codex-fake");
-    fake_codex(&codex_bin);
-
-    command(&sync_home, &codex_home, &codex_bin)
+fn push_rejects_probable_secret_but_allows_provider_bearer_exception() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("secret-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::create_dir_all(edit.join("agents")).unwrap();
+    fs::write(edit.join("config/common.toml"), "api_key = \"nope\"\n").unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "secret"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
         .args([
             "setup",
             "--repository",
-            "owner/config",
+            remote.to_str().unwrap(),
             "--device",
-            "test-device",
+            "test",
         ])
         .assert()
         .success();
-
-    let initial_archive =
-        repository_zip_with_profiles(&[("default", DEFAULT_PROFILE), ("image", IMAGE_PROFILE)]);
-    let (api_url, server) = serve_github("abc123", initial_archive);
-    let output = command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .output()
-        .unwrap();
-    assert!(output.status.success());
-    server.join().unwrap();
-    let stdout = String::from_utf8(output.stdout).unwrap();
-    assert!(stdout.contains("agent-profile default.toml"));
-    assert!(stdout.contains("agent-profile image.toml"));
-    let plan_id = stdout
-        .lines()
-        .find_map(|line| line.strip_prefix("Plan "))
-        .and_then(|line| line.split_whitespace().next())
-        .unwrap();
-
-    fs::write(agents.join("default.toml"), "changed after planning\n").unwrap();
-    command(&sync_home, &codex_home, &codex_bin)
-        .args(["apply", plan_id, "--approve-high-risk"])
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push"])
         .assert()
         .failure()
-        .stderr(predicates::str::contains(
-            "Codex configuration changed after planning",
-        ));
-
-    let (api_url, server) = serve_commit("abc123");
-    let output = command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .output()
-        .unwrap();
-    assert!(output.status.success());
-    server.join().unwrap();
-    let stdout = String::from_utf8(output.stdout).unwrap();
-    let plan_id = stdout
-        .lines()
-        .find_map(|line| line.strip_prefix("Plan "))
-        .and_then(|line| line.split_whitespace().next())
-        .unwrap();
-    command(&sync_home, &codex_home, &codex_bin)
-        .args(["apply", plan_id, "--approve-high-risk"])
-        .assert()
-        .success();
-    assert_eq!(
-        fs::read_to_string(agents.join("default.toml")).unwrap(),
-        DEFAULT_PROFILE
-    );
-    assert_eq!(
-        fs::read_to_string(agents.join("image.toml")).unwrap(),
-        IMAGE_PROFILE
-    );
-    assert_eq!(
-        fs::read_to_string(agents.join("personal.toml")).unwrap(),
-        "personal\n"
-    );
-
-    let updated_archive = repository_zip_with_profiles(&[("default", UPDATED_DEFAULT_PROFILE)]);
-    let (api_url, server) = serve_github("def456", updated_archive);
-    let output = command(&sync_home, &codex_home, &codex_bin)
-        .env("CODEX_SYNC_GITHUB_API_URL", api_url)
-        .arg("sync")
-        .output()
-        .unwrap();
-    assert!(output.status.success());
-    server.join().unwrap();
-    let stdout = String::from_utf8(output.stdout).unwrap();
-    assert!(stdout.contains("remove previously synchronized agent profile"));
-    let plan_id = stdout
-        .lines()
-        .find_map(|line| line.strip_prefix("Plan "))
-        .and_then(|line| line.split_whitespace().next())
-        .unwrap();
-    command(&sync_home, &codex_home, &codex_bin)
-        .args(["apply", plan_id, "--approve-high-risk"])
-        .assert()
-        .success();
-    assert_eq!(
-        fs::read_to_string(agents.join("default.toml")).unwrap(),
-        UPDATED_DEFAULT_PROFILE
-    );
-    assert!(!agents.join("image.toml").exists());
-    assert_eq!(
-        fs::read_to_string(agents.join("personal.toml")).unwrap(),
-        "personal\n"
-    );
-
-    command(&sync_home, &codex_home, &codex_bin)
-        .args(["rollback", "--approve"])
-        .assert()
-        .success();
-    assert_eq!(
-        fs::read_to_string(agents.join("default.toml")).unwrap(),
-        DEFAULT_PROFILE
-    );
-    assert_eq!(
-        fs::read_to_string(agents.join("image.toml")).unwrap(),
-        IMAGE_PROFILE
-    );
-    assert_eq!(
-        fs::read_to_string(agents.join("personal.toml")).unwrap(),
-        "personal\n"
-    );
+        .stderr(predicates::str::contains("probable secret"));
 }
 
-include!("support/cli_sync_tail.rs");
+#[test]
+fn malformed_v3_arrays_fail_instead_of_becoming_empty() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("schema-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::write(edit.join("marketplaces.toml"), "market = []\n").unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "malformed schema"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("top-level marketplaces array"));
+}
+
+#[test]
+fn profile_only_pull_dry_run_reports_without_mutating_codex() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("profile-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::create_dir_all(edit.join("agents")).unwrap();
+    fs::write(
+        edit.join("agents/new.toml"),
+        "name = \"new\"\ndescription = \"New\"\ndeveloper_instructions = \"Do work\"\n",
+    )
+    .unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "profile"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    let log = temp.path().join("codex-actions.log");
+    let output = command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_LOG", &log)
+        .args(["pull", "--dry-run"])
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    assert!(String::from_utf8_lossy(&output.stdout).contains("add agent profile new.toml"));
+    assert!(!log.exists());
+    assert!(!codex_home.join("agents/new.toml").exists());
+}

@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Sync"
   short_description: "Synchronize Codex settings across devices"
-  default_prompt: "Use $codex-sync to upload, set up, or synchronize my Codex configuration."
+  default_prompt: "Use $codex-sync to set up, pull, push, or inspect my Codex configuration."

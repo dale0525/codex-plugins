@@ -41,17 +41,6 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/codex-sync-v')
         run: python scripts/validate_codex_sync_release.py "${{ github.ref_name }}"
 
-      - name: Validate vendored Linux D-Bus
-        if: runner.os == 'Linux'
-        shell: bash
-        working-directory: plugins/codex-sync/engine
-        run: |
-          cargo tree \
-            --locked \
-            --target "${{ matrix.target }}" \
-            --edges features \
-            --invert libdbus-sys | grep -F 'libdbus-sys feature "vendored"'
-
       - name: Test engine on release platform
         working-directory: plugins/codex-sync/engine
         run: cargo test --locked --target "${{ matrix.target }}"

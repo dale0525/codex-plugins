@@ -1,328 +1,339 @@
-use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::path::PathBuf;
 
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
-pub const LOCAL_STATE_SCHEMA_VERSION: u32 = 1;
-pub const REPOSITORY_SCHEMA_VERSION: u32 = 2;
+pub const STATE_SCHEMA_VERSION: u32 = 3;
+#[allow(dead_code)]
+pub const REPOSITORY_SCHEMA_VERSION: u32 = 3;
 
+/// The local state intentionally contains only binding and convergence data.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct RepositoryRef {
-    pub owner: String,
-    pub name: String,
-    #[serde(default = "default_git_ref")]
-    pub git_ref: String,
-}
-
-fn default_git_ref() -> String {
-    "main".to_owned()
-}
-
-impl RepositoryRef {
-    pub fn parse(value: &str, git_ref: String) -> anyhow::Result<Self> {
-        let (owner, name) = value
-            .split_once('/')
-            .ok_or_else(|| anyhow::anyhow!("repository must use owner/name syntax"))?;
-        if owner.is_empty()
-            || name.is_empty()
-            || owner.contains(['/', '\\'])
-            || name.contains(['/', '\\'])
-        {
-            anyhow::bail!("repository must use owner/name syntax");
-        }
-        Ok(Self {
-            owner: owner.to_owned(),
-            name: name.trim_end_matches(".git").to_owned(),
-            git_ref,
-        })
-    }
-
-    pub fn slug(&self) -> String {
-        format!("{}/{}", self.owner, self.name)
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LocalState {
+    #[serde(default = "state_schema_version")]
     pub schema_version: u32,
-    pub repository: RepositoryRef,
-    pub device_id: String,
-    #[serde(default)]
-    pub github_client_id: Option<String>,
-    #[serde(default)]
-    pub last_fetched_commit: Option<String>,
-    #[serde(default)]
-    pub fetched_repository_sha256: Option<String>,
+    pub repository: String,
+    pub branch: String,
+    pub device: String,
     #[serde(default)]
     pub last_applied_commit: Option<String>,
     #[serde(default)]
     pub managed_paths: Vec<Vec<String>>,
     #[serde(default)]
-    pub managed_agent_profiles: Vec<String>,
+    pub managed_profiles: Vec<String>,
     #[serde(default)]
-    pub latest_backup: Option<String>,
-    /// Successful plugin provisioners keyed by their stable plugin ID.
-    /// Receipts are intentionally part of synchronized local state so a later
-    /// apply can detect contract drift before touching Codex configuration.
+    pub managed_markets: BTreeSet<String>,
     #[serde(default)]
-    pub provision_receipts: BTreeMap<String, ProvisionReceipt>,
+    pub migration_cleanup_pending: bool,
     #[serde(default)]
-    pub operation_log: Option<String>,
-    #[serde(default)]
-    pub recovery_required: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ProvisionReceipt {
-    #[serde(default = "default_receipt_version")]
-    pub schema_version: u32,
-    pub plugin_id: String,
-    #[serde(default)]
-    pub artifact_digest: String,
-    #[serde(default)]
-    pub artifact_root: String,
-    pub spec_sha256: String,
-    #[serde(default)]
-    pub script_sha256: String,
-    #[serde(default)]
-    pub dependencies_sha256: String,
-    #[serde(default)]
-    pub setup_args: Vec<String>,
-    #[serde(default)]
-    pub uninstall_args: Vec<String>,
-    #[serde(default)]
-    pub windows_shell: String,
-    pub plugin_root: String,
-    pub script: String,
-    #[serde(default)]
-    pub provisioned_at: String,
-}
-
-fn default_receipt_version() -> u32 {
-    1
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RepositoryManifest {
-    pub schema_version: u32,
-    #[serde(default = "default_agents_path")]
-    pub agents: String,
-    #[serde(default = "default_agent_profiles_path")]
-    pub agent_profiles: String,
-    #[serde(default = "default_common_config_path")]
-    pub common_config: String,
-    #[serde(default = "default_devices_path")]
-    pub devices: String,
-    #[serde(default = "default_marketplaces_path")]
-    pub marketplaces: String,
-    #[serde(default = "default_plugins_path")]
-    pub plugins: String,
-    #[serde(default = "default_providers_path")]
-    pub providers: String,
-    #[serde(default)]
-    pub external_agents_sections: Vec<ExternalAgentsSection>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct ExternalAgentsSection {
-    pub id: String,
-    pub begin_marker: String,
-    pub end_marker: String,
-}
-
-fn default_agents_path() -> String {
-    "AGENTS.md".to_owned()
-}
-
-fn default_agent_profiles_path() -> String {
-    "agents".to_owned()
-}
-
-fn default_common_config_path() -> String {
-    "config/common.toml".to_owned()
-}
-
-fn default_devices_path() -> String {
-    "devices".to_owned()
-}
-
-fn default_marketplaces_path() -> String {
-    "marketplaces.toml".to_owned()
-}
-
-fn default_plugins_path() -> String {
-    "plugins.toml".to_owned()
-}
-
-fn default_providers_path() -> String {
-    "providers.toml".to_owned()
-}
-
-impl RepositoryManifest {
-    pub fn validate(&self) -> anyhow::Result<()> {
-        if self.schema_version != REPOSITORY_SCHEMA_VERSION {
-            anyhow::bail!(
-                "unsupported repository schema version {}; expected {}",
-                self.schema_version,
-                REPOSITORY_SCHEMA_VERSION
-            );
-        }
-        for value in [
-            &self.agents,
-            &self.agent_profiles,
-            &self.common_config,
-            &self.devices,
-            &self.marketplaces,
-            &self.plugins,
-            &self.providers,
-        ] {
-            validate_relative_path(value)?;
-        }
-        let mut section_ids = std::collections::BTreeSet::new();
-        let mut markers = std::collections::BTreeSet::new();
-        for section in &self.external_agents_sections {
-            if section.id.is_empty()
-                || !section.id.chars().all(|character| {
-                    character.is_ascii_lowercase() || character.is_ascii_digit() || character == '-'
-                })
-            {
-                anyhow::bail!(
-                    "external AGENTS section id must use lower-case letters, digits, and hyphens"
-                )
-            }
-            if !section_ids.insert(&section.id) {
-                anyhow::bail!("duplicate external AGENTS section id: {}", section.id)
-            }
-            if section.begin_marker.is_empty()
-                || section.end_marker.is_empty()
-                || section.begin_marker == section.end_marker
-                || section.begin_marker.contains(['\r', '\n'])
-                || section.end_marker.contains(['\r', '\n'])
-            {
-                anyhow::bail!(
-                    "external AGENTS section markers must be distinct single-line strings"
-                )
-            }
-            if !markers.insert(&section.begin_marker) || !markers.insert(&section.end_marker) {
-                anyhow::bail!("external AGENTS section markers must be unique")
-            }
-        }
-        Ok(())
-    }
-}
-
-fn validate_relative_path(value: &str) -> anyhow::Result<()> {
-    let path = std::path::Path::new(value);
-    if value.is_empty()
-        || path.is_absolute()
-        || path
-            .components()
-            .any(|part| matches!(part, std::path::Component::ParentDir))
-    {
-        anyhow::bail!("repository manifest path must stay inside the repository: {value}");
-    }
-    Ok(())
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct MarketplaceFile {
-    #[serde(default)]
-    pub marketplaces: Vec<MarketplaceSpec>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "source", rename_all = "kebab-case")]
-pub enum MarketplaceSpec {
-    Git {
-        name: String,
-        url: String,
-        #[serde(default = "default_git_ref")]
-        git_ref: String,
-        #[serde(default)]
-        sparse: Vec<String>,
-    },
-    GithubSnapshot {
-        name: String,
-        repository: String,
-        #[serde(default = "default_git_ref")]
-        git_ref: String,
-    },
-}
-
-impl MarketplaceSpec {
-    pub fn name(&self) -> &str {
-        match self {
-            Self::Git { name, .. } | Self::GithubSnapshot { name, .. } => name,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct PluginFile {
-    #[serde(default)]
-    pub plugins: Vec<PluginSpec>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PluginSpec {
-    pub id: String,
+    pub migration_pushed_commit: Option<String>,
     #[serde(default = "default_true")]
-    pub enabled: bool,
-    #[serde(default)]
-    pub auto_provision: bool,
+    pub converged: bool,
+}
+
+fn state_schema_version() -> u32 {
+    STATE_SCHEMA_VERSION
 }
 
 fn default_true() -> bool {
     true
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct ProviderFile {
+/// A compatibility reader for the v0.4 state file.  It is deliberately not
+/// persisted: setup normalizes it into [`LocalState`].
+#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
+pub struct LegacyState {
     #[serde(default)]
-    pub providers: BTreeMap<String, toml::Value>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PendingPlan {
-    pub id: String,
-    pub generated_at: String,
-    pub commit: String,
-    pub device_id: String,
-    pub base_config_sha256: String,
-    pub base_agents_sha256: String,
+    pub schema_version: u32,
     #[serde(default)]
-    pub base_agent_profiles_sha256: String,
-    pub repository_sha256: String,
-    pub high_risk: bool,
-    pub changes: Vec<PlannedChange>,
+    pub repository: Option<LegacyRepository>,
+    #[serde(default)]
+    pub device_id: Option<String>,
+    #[serde(default)]
+    pub device: Option<String>,
+    #[serde(default)]
+    pub branch: Option<String>,
+    #[serde(default)]
     pub managed_paths: Vec<Vec<String>>,
+    #[serde(default, alias = "managed_agent_profiles")]
+    pub managed_profiles: Vec<String>,
     #[serde(default)]
-    pub managed_agent_profiles: Vec<String>,
+    pub last_applied_commit: Option<String>,
+    #[serde(default)]
+    pub managed_markets: BTreeSet<String>,
+    #[serde(default)]
+    pub migration_cleanup_pending: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PlannedChange {
-    pub risk: Risk,
-    pub kind: String,
-    pub target: String,
-    pub summary: String,
+#[derive(Debug, Deserialize)]
+pub struct LegacyRepository {
+    #[serde(default)]
+    pub owner: String,
+    #[serde(default)]
+    pub name: String,
+    #[serde(default, alias = "git_ref")]
+    pub branch: Option<String>,
+    #[serde(default)]
+    pub url: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "kebab-case")]
-pub enum Risk {
-    Low,
-    High,
+impl LocalState {
+    pub fn validate(&self) -> Result<()> {
+        if self.schema_version != STATE_SCHEMA_VERSION {
+            anyhow::bail!(
+                "unsupported local state schema {}; expected {}",
+                self.schema_version,
+                STATE_SCHEMA_VERSION
+            );
+        }
+        if self.repository.trim().is_empty() || self.branch.trim().is_empty() {
+            anyhow::bail!("local state repository and branch are required");
+        }
+        validate_repository_safety(&self.repository)?;
+        validate_device(&self.device)
+    }
 }
 
-#[derive(Debug)]
+pub fn validate_device(value: &str) -> Result<()> {
+    if value.is_empty()
+        || value.len() > 64
+        || !value
+            .chars()
+            .all(|ch| ch.is_ascii_alphanumeric() || matches!(ch, '-' | '_' | '.'))
+    {
+        anyhow::bail!("device must use 1-64 letters, numbers, '.', '-', or '_': {value}");
+    }
+    Ok(())
+}
+
+pub fn normalize_repository(value: &str) -> Result<String> {
+    let value = value.trim();
+    if value.is_empty() {
+        anyhow::bail!("repository is required");
+    }
+    validate_repository_safety(value)?;
+    if std::path::Path::new(value).exists() {
+        if std::env::var("CODEX_SYNC_ALLOW_LOCAL_REPOSITORY")
+            .ok()
+            .as_deref()
+            == Some("1")
+        {
+            return Ok(value.to_owned());
+        }
+        anyhow::bail!(
+            "local repository paths require CODEX_SYNC_ALLOW_LOCAL_REPOSITORY=1 for offline tests"
+        );
+    }
+    if let Some((owner, name)) = value.split_once('/') {
+        let looks_like_owner_name = !owner.contains(':')
+            && !owner.contains('.')
+            && !name.contains('/')
+            && !name.contains('\\')
+            && !name.is_empty();
+        if looks_like_owner_name && !value.contains("://") {
+            let owner = validate_repository_segment(owner, "owner")?;
+            let name = validate_repository_segment(name.trim_end_matches(".git"), "name")?;
+            return Ok(format!("https://github.com/{owner}/{name}.git"));
+        }
+    }
+    if value.starts_with("https://") || value.starts_with("git@") || value.starts_with("ssh://") {
+        return Ok(value.to_owned());
+    }
+    if value.contains('@')
+        && value
+            .split_once(':')
+            .is_some_and(|(_, path)| !path.is_empty())
+    {
+        return Ok(value.to_owned());
+    }
+    anyhow::bail!("repository must be owner/name or a complete HTTPS/SSH Git URL")
+}
+
+/// Validate security-sensitive parts of a repository reference without
+/// echoing the reference itself. Local paths are allowed here because the
+/// offline test gate is enforced by [`normalize_repository`].
+pub fn validate_repository_safety(value: &str) -> Result<()> {
+    if value
+        .chars()
+        .any(|ch| ch.is_control() || ch.is_whitespace())
+    {
+        anyhow::bail!("repository reference contains whitespace or control characters");
+    }
+    if value.starts_with("http://") {
+        anyhow::bail!("repository must use HTTPS or SSH; HTTP is not allowed");
+    }
+    if value.starts_with("https://") {
+        if repository_authority(value, "https://").is_some_and(|authority| authority.contains('@'))
+        {
+            anyhow::bail!("repository URL must not contain embedded credentials");
+        }
+        return Ok(());
+    }
+    if value.starts_with("ssh://") {
+        let authority = repository_authority(value, "ssh://").unwrap_or_default();
+        if let Some(at) = authority.rfind('@') {
+            if authority[..at].contains(':') {
+                anyhow::bail!("repository SSH URL must not contain a password");
+            }
+        }
+        return Ok(());
+    }
+    Ok(())
+}
+
+fn repository_authority<'a>(value: &'a str, scheme: &str) -> Option<&'a str> {
+    value
+        .strip_prefix(scheme)
+        .and_then(|rest| rest.split(['/', '?', '#']).next())
+}
+
+fn validate_repository_segment(value: &str, label: &str) -> Result<String> {
+    if value.is_empty() || value == "." || value == ".." || value.contains(['/', '\\', ':', '@']) {
+        anyhow::bail!("invalid repository {label}: {value}");
+    }
+    Ok(value.to_owned())
+}
+
+#[derive(Debug, Clone)]
 pub struct Paths {
     pub data_home: PathBuf,
     pub state_file: PathBuf,
     pub lock_file: PathBuf,
-    pub repository_dir: PathBuf,
-    pub marketplaces_dir: PathBuf,
-    pub backups_dir: PathBuf,
-    pub pending_plan: PathBuf,
+    pub cache: PathBuf,
+    pub backup: PathBuf,
     pub codex_home: PathBuf,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct Marketplace {
+    pub name: String,
+    pub url: String,
+    #[serde(default = "default_branch")]
+    pub git_ref: String,
+    #[serde(default)]
+    pub sparse: Vec<String>,
+}
+
+fn default_branch() -> String {
+    "main".to_owned()
+}
+
+impl Marketplace {
+    pub fn validate(&self) -> Result<()> {
+        if !portable_name(&self.name) {
+            anyhow::bail!("invalid marketplace name: {}", self.name);
+        }
+        if !(self.url.starts_with("https://")
+            || self.url.starts_with("git@")
+            || self.url.starts_with("ssh://"))
+        {
+            anyhow::bail!("marketplace {} must use a Git source URL", self.name);
+        }
+        validate_git_ref(&self.git_ref)?;
+        validate_sparse(&self.sparse)?;
+        if self.url.contains('@')
+            && (self.url.starts_with("http://") || self.url.starts_with("https://"))
+        {
+            anyhow::bail!("marketplace {} URL has embedded credentials", self.name);
+        }
+        Ok(())
+    }
+}
+
+pub fn validate_git_ref(value: &str) -> Result<()> {
+    if value.is_empty()
+        || value.starts_with('-')
+        || value.starts_with('.')
+        || value.ends_with('.')
+        || value == "@"
+        || value.ends_with('/')
+        || value.contains("..")
+        || value.contains("@{")
+        || value.contains([' ', '\t', '\r', '\n', '~', '^', ':', '?', '*', '[', '\\'])
+        || value.chars().any(char::is_control)
+        || value
+            .split('/')
+            .any(|part| part.is_empty() || part.starts_with('.') || part.ends_with(".lock"))
+    {
+        anyhow::bail!("invalid Git ref: {value}");
+    }
+    Ok(())
+}
+
+pub fn validate_sparse(paths: &[String]) -> Result<()> {
+    for value in paths {
+        if value.is_empty()
+            || value.starts_with('-')
+            || value.starts_with('/')
+            || value.contains(['\\', '\0', '\r', '\n', '\t'])
+            || value.contains("//")
+            || value.chars().any(char::is_control)
+        {
+            anyhow::bail!("invalid marketplace sparse path: {value}");
+        }
+        let path = std::path::Path::new(value);
+        if path.is_absolute()
+            || path.components().any(|part| {
+                matches!(
+                    part,
+                    std::path::Component::ParentDir | std::path::Component::CurDir
+                )
+            })
+            || path.components().any(|part| part.as_os_str() == ".git")
+        {
+            anyhow::bail!("invalid marketplace sparse path: {value}");
+        }
+    }
+    Ok(())
+}
+
+pub fn portable_name(value: &str) -> bool {
+    !value.is_empty()
+        && value.len() <= 128
+        && value.split('-').all(|part| {
+            !part.is_empty()
+                && part
+                    .chars()
+                    .all(|ch| ch.is_ascii_lowercase() || ch.is_ascii_digit())
+        })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn repository_inputs_reject_http_and_local_without_offline_gate() {
+        assert!(normalize_repository("http://example.test/repo.git").is_err());
+        let temporary = tempfile::tempdir().unwrap();
+        assert!(normalize_repository(temporary.path().to_str().unwrap()).is_err());
+        assert!(normalize_repository("ssh://git@example.test/repo.git").is_ok());
+        assert!(normalize_repository("alice@example.test:repo.git").is_ok());
+    }
+
+    #[test]
+    fn ssh_passwords_are_rejected_without_echoing_the_secret() {
+        for value in [
+            "ssh://user:secret@example.test/repo.git",
+            "ssh://user:@example.test/repo.git",
+        ] {
+            let error = normalize_repository(value).unwrap_err().to_string();
+            assert!(error.contains("password"));
+            assert!(!error.contains("secret"));
+            assert!(!error.contains(value));
+        }
+        assert!(normalize_repository("ssh://git@example.test/repo.git").is_ok());
+        assert!(normalize_repository("git@example.test:repo.git").is_ok());
+    }
+
+    #[test]
+    fn refs_and_sparse_paths_reject_option_injection_and_traversal() {
+        assert!(validate_git_ref("--upload-pack=bad").is_err());
+        assert!(validate_git_ref("feature/new").is_ok());
+        assert!(validate_sparse(&["--delete".to_owned()]).is_err());
+        assert!(validate_sparse(&["../outside".to_owned()]).is_err());
+        assert!(validate_sparse(&["marketplace/plugins".to_owned()]).is_ok());
+    }
 }

@@ -1,50 +1,23 @@
-# Security and approval policy
+# Codex Sync security boundary
 
-## High-risk changes
+Codex Sync invokes the system `git` and Codex CLI. It does not use a GitHub API,
+GitHub App, keyring, ZIP snapshot, or token store. Git credentials are inherited
+by the child process and are never read, printed, or persisted by the engine.
 
-Always require explicit user confirmation before applying or publishing changes involving:
+Push rejects probable secret keys and URLs with embedded credentials. The sole
+portable literal exception is
+`model_providers.<name>.experimental_bearer_token`; it remains visible in Git
+history and should be used only when explicitly required. Prefer environment
+keys and the Codex credential mechanisms for all other providers.
 
-- global `AGENTS.md`
-- native agent profiles
-- hooks or executable commands
-- MCP servers
-- model providers or provider base URLs
-- sandbox, permissions, or approval policy
-- shell environment policy
-- marketplace registration or replacement
-- plugin installation or removal
-- automatic plugin provisioning
-- publication to GitHub
-- rollback
+The engine uses a process lock, an engine-owned Git cache, atomic core writes,
+and one rolling pre-pull backup. A plugin or marketplace failure does not roll
+back already-applied core files; state remains not converged so a later pull is
+an idempotent retry. Remote pushes are ordinary non-force fast-forward pushes;
+remote races fail instead of overwriting someone else's commit.
 
-Codex Sync ships without lifecycle hooks. Synchronization, drift checks, and apply operations run only when the user invokes them.
-
-## Credential rules
-
-GitHub access and refresh tokens belong in the operating-system credential store. `CODEX_SYNC_GITHUB_TOKEN` is an ephemeral automation override for trusted noninteractive environments only. Inject it for one process, ensure the process environment is not logged, and unset it immediately afterward. Never persist it in shell profiles, repository files, logs, or prompts. The engine strips it before invoking Codex child processes.
-
-Provider secrets should use an OS credential store, `env_key`, or command-backed authentication. As an explicit exception for private configuration repositories, `providers.<name>.experimental_bearer_token` may contain a plaintext static bearer token for zero-setup cross-device synchronization. It is copied into global `config.toml` and persists in Git history, clones, backups, and GitHub audit surfaces. Confirm the repository is private with narrowly selected access before publishing, never place the token in chat or logs, and rotate it after any suspected exposure. No other probable secret field is allowed.
-
-Current-device capture copies complete `model_providers` tables into the repository cache. Validate them with the same secret policy before replacing the cache, never print an `experimental_bearer_token` value in capture output or review summaries, and retain the explicit publication approval gate.
-
-Publication rejects obvious private-key filenames, `.env`, `auth.json`, GitHub token prefixes, and private-key markers. Treat a rejection as a security incident to investigate; do not rename a secret merely to bypass detection.
-
-## Supply-chain controls
-
-- Resolve private repositories and marketplaces to immutable commit SHAs before downloading.
-- Follow GitHub archive redirects only through the engine's bounded HTTPS client.
-- Reject ZIP path traversal and multiple archive roots.
-- Verify released engine binaries with the published SHA-256 checksum.
-- Keep marketplace source changes visible in the synchronization plan.
-- Exclude app-managed `openai` and `openai-*` marketplaces and plugins from current-device capture. This exclusion affects synchronized declarations only and never uninstalls the desktop App's local runtime plugins.
-- Applying a plan may download and register plugins, but never invoke their new capabilities in the current task. Start a new task before use.
-- Auto-provisioning is opt-in per plugin, must declare high risk, resolves its contract and scripts inside the registered marketplace root, rejects path traversal, and removes `CODEX_SYNC_GITHUB_TOKEN`, `GITHUB_TOKEN`, and `GH_TOKEN` before execution. A provisioner runs only after the core synchronization transaction succeeds.
-- On Windows, Codex Sync launches only that resolved reviewed provision script with PowerShell's process-scoped `-ExecutionPolicy Bypass`; it does not modify user, machine, or Group Policy execution-policy settings. Higher-precedence enterprise application-control policy may still reject execution and must not be bypassed by ad hoc code.
-
-## Concurrency and rollback
-
-The engine uses a per-user process lock and hashes `config.toml`, `AGENTS.md`, and every managed agent profile into each pending plan. Apply is rejected if any managed input changes after planning. Writes are atomic per file, and a pre-apply backup is restored automatically when the file or plugin transaction fails.
-
-The fetched repository cache also has a deterministic tree digest. Synchronization refuses to replace or apply unpublished cache edits unless the user explicitly selects `--discard-local`.
-
-GitHub publication compares the current remote branch SHA with the fetched base and uses a non-forced reference update. It never force-pushes.
+Never synchronize auth/session/history, SQLite state, project trust, caches, or
+plugin provision artifacts. Existing declared configuration leaves (including
+hook settings) remain within the normal config policy; Codex Sync never adds
+lifecycle hooks. OpenAI-managed marketplaces and plugins
+remain untouched, as do marketplaces that were never recorded as managed.
