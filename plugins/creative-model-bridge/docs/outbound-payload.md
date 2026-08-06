@@ -1,11 +1,11 @@
 # Outbound payload boundary
 
-For a request with model `opaque/model`, default limits, and minimal system
-mode, the one HTTP POST body is:
+For a request without a model, with any caller-supplied token limit, and with
+minimal system mode, the one HTTP POST body is:
 
 ```json
 {
-  "model": "opaque/model",
+  "model": "gemini-3-pro",
   "messages": [
     {"role": "system", "content": "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"},
     {"role": "user", "content": "任务:\n..."}
@@ -17,9 +17,10 @@ mode, the one HTTP POST body is:
 ```
 
 `temperature` is added only when supplied. `system_mode: "none"` omits the
-system message. The request model is passed byte-for-byte, and the bearer is
-only an HTTP header. No hidden Codex prompt, adapter, or conversation state is
-added.
+system message. A request model is passed byte-for-byte; otherwise
+`gemini-3-pro` is used. Caller-provided `max_tokens` and `max_output_tokens`
+values are ignored. The bearer is only an HTTP header. No hidden Codex prompt,
+adapter, or conversation state is added.
 
 SSE `data:` frames are parsed until `[DONE]`. Text from
 `choices[0].delta.reasoning_content` (or the compatible `reasoning` key) is

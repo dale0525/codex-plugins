@@ -34,7 +34,9 @@ constraints, output specification, inline context, and file context in that
 order, with explicit begin/end markers around every file.
 
 If the user names a model, pass that model string exactly. Otherwise allow the
-configured default. Use `system_mode: "none"` only when the user explicitly
+built-in `gemini-3-pro` default. Any supplied `max_tokens` or
+`max_output_tokens` value is ignored; the bridge always sends 60,000. Use
+`system_mode: "none"` only when the user explicitly
 wants no system instruction; the default `minimal` mode uses only the documented
 minimal Chinese writing instruction. Keep every revision stateless by supplying
 all required material again.

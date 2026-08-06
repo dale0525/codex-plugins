@@ -148,7 +148,7 @@ class CreativeModelBridgeTests(unittest.TestCase):
         body = json.loads(request.data.decode("utf-8"))
         self.assertEqual(body["model"], "vendor/name:v9+opaque")
         self.assertTrue(body["stream"])
-        self.assertEqual(body["max_tokens"], 123)
+        self.assertEqual(body["max_tokens"], 60_000)
         self.assertEqual(body["temperature"], 0.4)
         self.assertEqual(body["stream_options"], {"include_usage": True})
         self.assertEqual(body["messages"][0], {"role": "system", "content": cmb.SYSTEM_PROMPT})
@@ -276,14 +276,29 @@ class CreativeModelBridgeTests(unittest.TestCase):
         self.assertNotIn("secret body", str(raised.exception))
         self.assertEqual(len(opener.calls), 1)
 
-    def test_config_model_and_credential_precedence(self) -> None:
+    def test_default_model_fixed_limit_and_credential_precedence(self) -> None:
         response = FakeResponse(sse({"choices": [{"delta": {"content": "ok"}, "finish_reason": "stop"}]}, "[DONE]"))
         opener = FakeOpener(response)
         with patch.dict(os.environ, {"PROVIDER_KEY": "provider-key", "CREATIVE_MODEL_API_KEY": "fixed-key"}, clear=True):
             cmb.generate(self.request(), config_path=self.config, opener=opener)
         request, _ = opener.calls[0]
         self.assertEqual(request.headers["Authorization"], "Bearer provider-key")
-        self.assertEqual(json.loads(request.data.decode("utf-8"))["model"], "default/opaque:model")
+        body = json.loads(request.data.decode("utf-8"))
+        self.assertEqual(body["model"], "gemini-3-pro")
+        self.assertEqual(body["max_tokens"], 60_000)
+
+        for supplied_limits in (
+            {"max_tokens": 1},
+            {"max_output_tokens": 2},
+            {"max_tokens": 3, "max_output_tokens": 4},
+            {"max_tokens": "ignored", "max_output_tokens": None},
+        ):
+            response = FakeResponse(sse({"choices": [{"delta": {"content": "ok"}, "finish_reason": "stop"}]}, "[DONE]"))
+            opener = FakeOpener(response)
+            with patch.dict(os.environ, {"PROVIDER_KEY": "provider-key"}, clear=True):
+                cmb.generate(self.request(**supplied_limits), config_path=self.config, opener=opener)
+            request, _ = opener.calls[0]
+            self.assertEqual(json.loads(request.data.decode("utf-8"))["max_tokens"], 60_000)
 
         response = FakeResponse(sse({"choices": [{"delta": {"content": "ok"}, "finish_reason": "stop"}]}, "[DONE]"))
         opener = FakeOpener(response)

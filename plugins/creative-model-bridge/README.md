@@ -41,9 +41,9 @@ fields:
 
 `system_mode` is `minimal` by default and adds only the documented Chinese
 writing instruction. `none` omits the system message. A supplied model is
-passed byte-for-byte; otherwise `CREATIVE_MODEL_DEFAULT` is used. The legacy
-`max_output_tokens` spelling is accepted as an alias for `max_tokens`, but both
-may not be supplied together.
+passed byte-for-byte; otherwise `gemini-3-pro` is used. `max_tokens` and the
+legacy `max_output_tokens` spelling are accepted for caller compatibility, but
+their values are ignored and the outbound request always uses 60,000.
 
 Prompt sections are deterministic and ordered as `task`, `constraints`,
 `output_spec`, `context_text`, and `context_files`. Every file is wrapped in
@@ -66,7 +66,6 @@ The script reads `config.toml` from an explicit path when embedded, then
 ```toml
 [shell_environment_policy.set]
 CREATIVE_MODEL_PROVIDER = "my-provider"
-CREATIVE_MODEL_DEFAULT = "my-opaque-model"
 
 [model_providers.my-provider]
 base_url = "https://provider.example/v1"
@@ -82,8 +81,8 @@ Credentials are resolved in this order: the configured `env_key`, fixed
 ## HTTP and streaming
 
 The request body uses the Chat Completions shape with `stream: true`, the
-configured/requested opaque model, deterministic messages, `max_tokens` (the
-default is 60,000), and `stream_options.include_usage: true`. The response is
+requested model or the built-in `gemini-3-pro` default, deterministic messages,
+`max_tokens: 60000`, and `stream_options.include_usage: true`. The response is
 parsed as UTF-8 SSE. `data:` frames are accumulated independently from
 `choices[0].delta.reasoning_content` (with `reasoning` as a compatible alias)
 and `choices[0].delta.content`. A usage object is retained when present;

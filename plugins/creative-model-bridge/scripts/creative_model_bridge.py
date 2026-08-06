@@ -31,6 +31,7 @@ SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_CHARS = 180_000
 DEFAULT_MAX_TOKENS = 60_000
+DEFAULT_MODEL = "gemini-3-pro"
 REQUEST_FIELDS = frozenset(
     {
         "task",
@@ -79,7 +80,6 @@ class FileContextError(BridgeError):
 class Provider:
     name: str
     base_url: str
-    default_model: str | None
     env_key: str | None
     experimental_bearer_token: str | None
 
@@ -148,11 +148,8 @@ def load_provider(config_path: str | Path | None = None) -> Provider:
     shell = config.get("shell_environment_policy")
     values = shell.get("set") if isinstance(shell, dict) else None
     provider_name = values.get("CREATIVE_MODEL_PROVIDER") if isinstance(values, dict) else None
-    default_model = values.get("CREATIVE_MODEL_DEFAULT") if isinstance(values, dict) else None
     if not isinstance(provider_name, str) or not provider_name:
         raise ConfigError("CREATIVE_MODEL_PROVIDER is not configured")
-    if default_model is not None and (not isinstance(default_model, str) or not default_model):
-        raise ConfigError("CREATIVE_MODEL_DEFAULT must be a non-empty string")
 
     providers = config.get("model_providers")
     selected = providers.get(provider_name) if isinstance(providers, dict) else None
@@ -170,7 +167,6 @@ def load_provider(config_path: str | Path | None = None) -> Provider:
     return Provider(
         name=provider_name,
         base_url=_base_url(selected.get("base_url")),
-        default_model=default_model,
         env_key=env_key,
         experimental_bearer_token=bearer,
     )
@@ -401,20 +397,15 @@ def build_payload(request: dict[str, Any], provider: Provider, files: list[Conte
     unknown = set(request) - REQUEST_FIELDS
     if unknown:
         raise BridgeError(f"unsupported request field(s): {sorted(unknown)}")
-    model = request.get("model", provider.default_model)
+    model = request.get("model", DEFAULT_MODEL)
     if not isinstance(model, str) or not model:
-        raise ConfigError("CREATIVE_MODEL_DEFAULT is not configured and no model was requested")
+        raise BridgeError("model must be a non-empty string")
     system_mode = request.get("system_mode", "minimal")
     if system_mode not in {"minimal", "none"}:
         raise BridgeError("system_mode must be minimal or none")
     if files is None:
         files = read_context_files(request.get("context_files"))
     prompt = build_prompt(request, files)
-    max_tokens_value = request.get("max_tokens", request.get("max_output_tokens", DEFAULT_MAX_TOKENS))
-    if "max_tokens" in request and "max_output_tokens" in request:
-        raise BridgeError("provide only one of max_tokens and max_output_tokens")
-    if isinstance(max_tokens_value, bool) or not isinstance(max_tokens_value, int) or max_tokens_value <= 0:
-        raise BridgeError("max_tokens must be a positive integer")
     temperature = request.get("temperature")
     if temperature is not None:
         temperature = _number(temperature, "temperature")
@@ -427,7 +418,7 @@ def build_payload(request: dict[str, Any], provider: Provider, files: list[Conte
     payload: dict[str, Any] = {
         "model": model,
         "messages": messages,
-        "max_tokens": max_tokens_value,
+        "max_tokens": DEFAULT_MAX_TOKENS,
         "stream": True,
         "stream_options": {"include_usage": True},
     }

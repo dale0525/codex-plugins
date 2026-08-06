@@ -7,7 +7,6 @@ non-empty, otherwise `~/.codex/config.toml`.
 ```toml
 [shell_environment_policy.set]
 CREATIVE_MODEL_PROVIDER = "my-provider"
-CREATIVE_MODEL_DEFAULT = "opaque/model-name"
 
 [model_providers.my-provider]
 base_url = "https://provider.example/v1"
@@ -16,10 +15,11 @@ env_key = "MY_PROVIDER_API_KEY"
 # experimental_bearer_token = "development-only-value"
 ```
 
-`CREATIVE_MODEL_PROVIDER` selects the exact key under `model_providers`.
-`CREATIVE_MODEL_DEFAULT` is used only when a request does not supply `model`;
-model strings are opaque and are not normalized or looked up. `base_url` must
-be an absolute HTTP(S) URL without embedded credentials, query, or fragment.
+`CREATIVE_MODEL_PROVIDER` selects the exact key under `model_providers`. A
+request-supplied model is passed byte-for-byte; otherwise the built-in default
+is `gemini-3-pro`. Model strings are opaque and are not normalized or looked
+up. `base_url` must be an absolute HTTP(S) URL without embedded credentials,
+query, or fragment.
 `wire_api` may be `chat_completions` or legacy `responses`; both use the single
 Chat Completions endpoint.
 
