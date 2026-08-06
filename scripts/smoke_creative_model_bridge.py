@@ -445,22 +445,38 @@ def _config(path: Path) -> None:
     )
 
 
+def _toml_literal(value: str) -> str:
+    return json.dumps(value, ensure_ascii=False)
+
+
 def _migration_fixture(home: Path) -> tuple[str, str, Path]:
     fixture_root = Path(__file__).resolve().parents[1] / "plugins" / "creative-model-bridge" / "tests" / "fixtures" / "history" / "v0.1.18"
     state_root = home / "creative-model-bridge"
     state_root.mkdir(parents=True)
     materialized_home = home.resolve()
-    old_root = b"/private/tmp/cmb-history-materializer/v0.1.18"
-    config = (fixture_root / "config.toml").read_bytes().replace(old_root, str(materialized_home).encode())
-    config += b"\n[mcp_servers.other]\ncommand = \"other\"\n"
+    command_path = materialized_home / "legacy-command"
+    command_value = str(command_path)
+    ssl_cert_file = str(materialized_home / "legacy-cert.pem") if os.name == "nt" else "/etc/ssl/cert.pem"
+    config_text = (fixture_root / "config.toml").read_text(encoding="utf-8")
+    config_text = config_text.replace(
+        'command = "/private/tmp/cmb-history-materializer/v0.1.18/legacy-command"',
+        f"command = {_toml_literal(command_value)}",
+    ).replace(
+        'CODEX_HOME = "/private/tmp/cmb-history-materializer/v0.1.18"',
+        f"CODEX_HOME = {_toml_literal(str(materialized_home))}",
+    ).replace(
+        'SSL_CERT_FILE = "/etc/ssl/cert.pem"',
+        f"SSL_CERT_FILE = {_toml_literal(ssl_cert_file)}",
+    )
+    config = (config_text + '\n[mcp_servers.other]\ncommand = "other"\n').encode("utf-8")
     config_path = home / "config.toml"
     config_path.write_bytes(config)
-    command_path = materialized_home / "legacy-command"
     shutil.copyfile(fixture_root / "legacy-command", command_path)
     command_path.chmod(0o700)
     state = json.loads((fixture_root / "provision-state.json").read_text(encoding="utf-8"))
     state["config_path"] = str(config_path.resolve())
-    state["command"] = str(command_path)
+    state["command"] = command_value
+    state["ssl_cert_file"] = ssl_cert_file
     begin = config.decode("utf-8").index("# creative-model-bridge:begin")
     end = config.decode("utf-8").index("# creative-model-bridge:end", begin)
     end = config.decode("utf-8").index("\n", end) + 1

@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from unittest.mock import patch
 
@@ -82,6 +83,11 @@ class CreativeModelBridgeSmokeTests(unittest.TestCase):
             self.assertTrue(command.startswith("/tmp/"))
             self.assertTrue(pointer.is_file())
             self.assertIn("[mcp_servers.other]", (home / "config.toml").read_text(encoding="utf-8"))
+
+    def test_toml_literal_preserves_windows_paths(self) -> None:
+        value = r"D:\a\checkout path\legacy-command"
+        parsed = tomllib.loads(f"value = {smoke._toml_literal(value)}\n")
+        self.assertEqual(parsed["value"], value)
 
     def test_smoke_main_requires_binary_and_never_prints_secret(self) -> None:
         stream = io.StringIO()
