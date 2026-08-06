@@ -8,6 +8,6 @@ python = ">=3.11,<3.14"
 pyinstaller = ">=6.0,<7"
 
 [tasks]
-serve = "PYTHONDONTWRITEBYTECODE=1 python -B -u mcp/server.py"
+run = "PYTHONDONTWRITEBYTECODE=1 python -B -u mcp/cli.py run"
 build = "python scripts/build.py"
-provision = "python -B mcp/server.py provision setup --yes"
+migrate = "python -B mcp/cli.py migrate"

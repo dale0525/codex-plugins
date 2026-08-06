@@ -1,4 +1,4 @@
-"""Opt-in, value-free transport diagnostics for local test surfaces."""
+"""Shared non-MCP transport primitives for the bundled CLI runtime."""
 
 from __future__ import annotations
 
@@ -10,19 +10,26 @@ from typing import Literal
 
 
 TransportPhase = Literal["models", "responses"]
-_SSL_REASONS = frozenset({
-    "CERTIFICATE_VERIFY_FAILED", "HOSTNAME_MISMATCH", "SELF_SIGNED_CERTIFICATE",
-    "UNABLE_TO_GET_ISSUER", "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
-})
+_SSL_REASONS = frozenset(
+    {
+        "CERTIFICATE_VERIFY_FAILED",
+        "HOSTNAME_MISMATCH",
+        "SELF_SIGNED_CERTIFICATE",
+        "UNABLE_TO_GET_ISSUER",
+        "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+    }
+)
 _SSL_REASON_BY_VERIFY_CODE = {
-    18: "SELF_SIGNED_CERTIFICATE", 20: "UNABLE_TO_GET_ISSUER",
-    21: "UNABLE_TO_VERIFY_LEAF_SIGNATURE", 62: "HOSTNAME_MISMATCH",
+    18: "SELF_SIGNED_CERTIFICATE",
+    20: "UNABLE_TO_GET_ISSUER",
+    21: "UNABLE_TO_VERIFY_LEAF_SIGNATURE",
+    62: "HOSTNAME_MISMATCH",
 }
 
 
 @dataclass(frozen=True)
 class TransportDiagnostic:
-    """Closed-shape metadata; never contains exception text or request data."""
+    """Closed-shape, value-free metadata for opt-in local diagnostics."""
 
     phase: TransportPhase
     outer_type: str
@@ -33,9 +40,12 @@ class TransportDiagnostic:
 
     def as_dict(self) -> dict[str, object]:
         return {
-            "phase": self.phase, "outer_type": self.outer_type,
-            "reason_type": self.reason_type, "errno": self.errno,
-            "ssl_verify_code": self.ssl_verify_code, "ssl_reason": self.ssl_reason,
+            "phase": self.phase,
+            "outer_type": self.outer_type,
+            "reason_type": self.reason_type,
+            "errno": self.errno,
+            "ssl_verify_code": self.ssl_verify_code,
+            "ssl_reason": self.ssl_reason,
         }
 
 
@@ -79,9 +89,18 @@ def _exception_chain(value: BaseException) -> list[BaseException]:
 
 def diagnostic_for(error: BaseException, phase: TransportPhase) -> TransportDiagnostic:
     chain = _exception_chain(error)
-    reason_type = next((token for item in chain[1:] if (token := _exception_type(item)) != "unknown"), None)
-    error_number = next((item.errno for item in chain if type(getattr(item, "errno", None)) is int), None)
-    ssl_error = next((item for item in chain if isinstance(item, ssl.SSLCertVerificationError)), None)
+    reason_type = next(
+        (token for item in chain[1:] if (token := _exception_type(item)) != "unknown"),
+        None,
+    )
+    error_number = next(
+        (item.errno for item in chain if type(getattr(item, "errno", None)) is int),
+        None,
+    )
+    ssl_error = next(
+        (item for item in chain if isinstance(item, ssl.SSLCertVerificationError)),
+        None,
+    )
     verify_code = getattr(ssl_error, "verify_code", None) if ssl_error is not None else None
     verify_code = verify_code if type(verify_code) is int else None
     ssl_reason = None
@@ -90,6 +109,11 @@ def diagnostic_for(error: BaseException, phase: TransportPhase) -> TransportDiag
         if ssl_reason not in _SSL_REASONS:
             ssl_reason = "CERTIFICATE_VERIFY_FAILED"
     return TransportDiagnostic(
-        phase=phase, outer_type=_exception_type(error), reason_type=reason_type,
-        errno=error_number, ssl_verify_code=verify_code, ssl_reason=ssl_reason,
+        phase=phase,
+        outer_type=_exception_type(error),
+        reason_type=reason_type,
+        errno=error_number,
+        ssl_verify_code=verify_code,
+        ssl_reason=ssl_reason,
     )
+

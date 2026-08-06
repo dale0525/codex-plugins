@@ -17,22 +17,14 @@ JSON serialization to the body sent by `creative_generate`:
 }
 ```
 
-The system message is omitted for `system_mode: "none"`. `temperature` is
-added only when the caller supplied it. The bearer token is an HTTP header and never
-appears in this body, in the preview result, or in errors. The user prompt is
-assembled in the fixed order `task` → `constraints` → `output_spec` →
-`context_text` → `context_files`; there is no hidden Codex prompt or model
-adapter. `prompt_report` records the exact system prompt (or `null`), section
-order, user/total character counts, context details, and `truncated: false`.
+The system message is omitted for `system_mode: "none"`; `temperature` is
+added only when supplied. The bearer token is an HTTP header and never appears
+in this body, protocol frames, or errors. Prompt sections are ordered `task` →
+`constraints` → `output_spec` → `context_text` → `context_files`; there is no
+hidden Codex prompt or model adapter.
 
-The HTTP transport sends `User-Agent: creative-model-bridge/0.1.18` on both
-`/models` and `/chat/completions`. Chat requests advertise
-`Accept: text/event-stream`; a non-SSE content type is parsed as one JSON
-Chat Completions object. This is an honest bridge identifier used for edge
-compatibility; no Codex-specific identity, originator, or session headers are
-sent.
-
-The provisioned MCP process receives `CODEX_HOME`, the fixed credential channel,
-the selected provider `env_key`, and (when resolved) `SSL_CERT_FILE`. The CA
-variable is ordered after credential entries and is never included in the JSON
-payload or prompt report.
+The CLI's protocol v1 wraps the compact serialized result in bounded NDJSON
+frames. The response frame declares overall `sha256`, UTF-8 byte count, and
+chunk count. Data frames carry `seq`, `data`, per-chunk `chunk_sha256`, the same
+overall digest, and `done` on the final sequence only. The caller must verify
+all fields and then return the result `text` verbatim.

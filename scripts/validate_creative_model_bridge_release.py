@@ -27,20 +27,22 @@ PUBLISH_STEP_NAME = "Publish verified draft, or confirm published exact no-op"
 BUILD_PIXI_MANIFEST = "plugins/creative-model-bridge/pixi.toml"
 BOOTSTRAP_RELATIVE_PATH = "plugins/creative-model-bridge/scripts/bootstrap.sh"
 PROVISION_METADATA_PATH = ".codex-sync/provision.json"
-PROVISION_CONTRACT = {
+CLI_PROVISION_CONTRACT = {
     "schema_version": 1,
     "risk": "high",
     "posix_script": "./scripts/bootstrap.sh",
     "windows_script": "./scripts/provision.ps1",
     "windows_shell": "windows-powershell",
-    "arguments": ["setup", "--yes"],
+    "arguments": ["install"],
 }
 SKILL_REQUIRED_MARKERS = (
-    "provisioned global MCP server `creative-model-bridge`",
+    "plugin-bundled one-shot CLI",
     "`creative_models`",
     "`creative_preview`",
     "`creative_generate`",
-    "If any of the three tools is missing, fail closed",
+    "`exec_command`",
+    "`write_stdin`",
+    "`sha256`",
     "direct HTTP/API client",
 )
 
@@ -187,39 +189,53 @@ def validate_bootstrap_tracking(
     return errors
 
 
-def validate_provisioner_contract(ps_text: str, version: object) -> list[str]:
-    """Validate PowerShell safety markers and its default release version."""
+def validate_launcher_contract(ps_text: str, version: object) -> list[str]:
+    """Validate PowerShell cache/run/migrate markers and release version."""
 
     errors: list[str] = []
     if "Tls12" not in ps_text or "Get-FileHash" not in ps_text or "-in @('.', '..')" not in ps_text:
-        errors.append("PowerShell provisioner must pin TLS 1.2, verify SHA-256, and reject dot generations")
+        errors.append("PowerShell launcher must pin TLS 1.2, verify SHA-256, and reject dot generations")
     default_match = re.search(
         r"\$version\s*=\s*if\s*\([^\n]+\)\s*\{[^\n]+\}\s*else\s*\{\s*'([^']+)'\s*\}",
         ps_text,
     )
     if not default_match or default_match.group(1) != version:
-        errors.append("PowerShell provisioner default version must equal plugin manifest version")
+        errors.append("PowerShell launcher default version must equal plugin manifest version")
+    if "ValidateSet('run','cli','exec','cache','install','migrate')" not in ps_text:
+        errors.append("PowerShell launcher must expose run/cli/exec/cache/install/migrate actions")
+    if "& $binary 'run'" not in ps_text or "& $binary 'migrate'" not in ps_text:
+        errors.append("PowerShell launcher must invoke the bundled CLI run/migrate modes")
+    if "if ($Action -eq 'cache')" not in ps_text or "'--codex-home'" not in ps_text:
+        errors.append("PowerShell launcher must implement noninteractive cache/install modes")
     return errors
 
 
-def validate_provision_version(provision_text: str, version: object) -> list[str]:
-    """Require the provision implementation's release marker to match."""
-
-    match = re.search(r'^PROVISION_VERSION\s*=\s*["\']([^"\']+)', provision_text, re.MULTILINE)
-    if not match or match.group(1) != version:
-        return ["mcp/provision.py PROVISION_VERSION must equal plugin manifest version"]
-    return []
-
-
-def validate_global_provision_contract(plugin: Path, manifest: dict[str, Any]) -> list[str]:
-    """Require global provisioning and reject local MCP companion discovery."""
+def validate_cli_runtime_contract(cli_text: str, migrate_text: str, version: object) -> list[str]:
+    """Require protocol-v1 framing and strict migration hooks."""
 
     errors: list[str] = []
-    if "mcpServers" in manifest:
-        errors.append("plugin.json must not declare mcpServers; use global provisioning")
-    companion = plugin / ".mcp.json"
-    if companion.exists():
-        errors.append("plugins/creative-model-bridge/.mcp.json must not exist")
+    if not re.search(r"^PROTOCOL_VERSION\s*=\s*1\s*$", cli_text, re.MULTILINE):
+        errors.append("mcp/cli.py must declare protocol version 1")
+    for marker in ('"type": "ready"', '"type": "response"', '"type": "data"', '"sha256"', '"done"'):
+        if marker not in cli_text:
+            errors.append(f"mcp/cli.py is missing protocol marker: {marker}")
+    if "Bridge()" not in cli_text or "bridge.call(operation, arguments)" not in cli_text:
+        errors.append("mcp/cli.py must dispatch exactly one Bridge.call operation")
+    for marker in ("migrate_legacy", "migration-backups", "_owned_span", "_atomic_write"):
+        if marker not in migrate_text:
+            errors.append(f"mcp/migrate.py is missing ownership/atomicity marker: {marker}")
+    return errors
+
+
+def validate_cli_contract(plugin: Path, manifest: dict[str, Any]) -> list[str]:
+    """Require cache/run metadata and reject legacy MCP/provision surfaces."""
+
+    errors: list[str] = []
+    if "mcpServers" in manifest or "mcp_servers" in manifest:
+        errors.append("plugin.json must not declare an MCP companion")
+    for legacy in ("mcp/server.py", "mcp/provision.py", "mcp/provision_ownership.py", "mcp/transport_diagnostics.py"):
+        if (plugin / legacy).exists():
+            errors.append(f"legacy runtime surface must be removed: {legacy}")
 
     metadata_path = plugin / PROVISION_METADATA_PATH
     try:
@@ -230,9 +246,9 @@ def validate_global_provision_contract(plugin: Path, manifest: dict[str, Any]) -
         return errors + [".codex-sync/provision.json must contain valid JSON"]
     if not isinstance(payload, dict):
         return errors + [".codex-sync/provision.json must contain an object"]
-    if set(payload) != set(PROVISION_CONTRACT):
-        errors.append(".codex-sync/provision.json fields must exactly match the cross-platform contract")
-    for key, expected in PROVISION_CONTRACT.items():
+    if set(payload) != set(CLI_PROVISION_CONTRACT):
+        errors.append(".codex-sync/provision.json fields must exactly match the CLI cache/run contract")
+    for key, expected in CLI_PROVISION_CONTRACT.items():
         if payload.get(key) != expected:
             errors.append(f".codex-sync/provision.json {key} must equal {expected!r}")
 
@@ -243,12 +259,12 @@ def validate_global_provision_contract(plugin: Path, manifest: dict[str, Any]) -
         skill_text = ""
         errors.append("creative-model-bridge SKILL.md must be readable")
     skill_lower = skill_text.lower()
-    for forbidden in ("creative-model-bridge-bundled", "bundled mcp", "bundled server"):
+    for forbidden in ("global mcp server", "mcp tools", "provisioned global"):
         if forbidden in skill_lower:
             errors.append(f"SKILL.md must not reference {forbidden}")
     for marker in SKILL_REQUIRED_MARKERS:
         if marker not in skill_text:
-            errors.append(f"SKILL.md must contain the global fail-closed contract marker {marker!r}")
+            errors.append(f"SKILL.md must contain the CLI contract marker {marker!r}")
     return errors
 
 
@@ -311,13 +327,13 @@ def validate(
                 stat_fn=stat_fn,
             )
         )
-    errors.extend(validate_global_provision_contract(plugin, manifest))
+    errors.extend(validate_cli_contract(plugin, manifest))
     provision = plugin / "scripts/provision.ps1"
     if not provision.is_file():
         errors.append("scripts/provision.ps1 is required for Windows PowerShell 5.1")
     else:
         ps_text = provision.read_text(encoding="utf-8")
-        errors.extend(validate_provisioner_contract(ps_text, version))
+        errors.extend(validate_launcher_contract(ps_text, version))
     workflow = root / ".github/workflows/release-creative-model-bridge.yml"
     workflow_text = workflow.read_text(encoding="utf-8") if workflow.is_file() else ""
     if workflow.is_file():
@@ -356,17 +372,14 @@ def validate(
     if (plugin / ".pixi/config.toml").exists():
         errors.append("plugin .pixi/config.toml direct-runtime target must be removed")
     bootstrap_contract = bootstrap.read_text(encoding="utf-8") if bootstrap.is_file() else ""
-    for marker in ("runtime/v$version", "target_root", "active", "valid_digest", "cmb-active-v4", "generation", "complete", "staging.", "checksum", "provision \"$@\""):
+    for marker in ("runtime/v$version", "target_root", "active", "valid_digest", "cmb-active-v4", "generation", "complete", "staging.", "checksum", "cache", "install", "--codex-home", "exec \"$binary\" run"):
         if marker not in bootstrap_contract:
             errors.append(f"bootstrap is missing immutable/token-lock contract marker: {marker}")
     if not (root / "scripts/reconcile_creative_model_bridge_release.py").is_file():
         errors.append("release state planner is missing")
-    provision_py = plugin / "mcp/provision.py"
-    provision_text = provision_py.read_text(encoding="utf-8") if provision_py.is_file() else ""
-    errors.extend(validate_provision_version(provision_text, version))
-    for marker in ("SCHEMA_VERSION = 2", '"phase": "prepared"', '"config_after"', "manual_required", "rollback_requested", "managed_digest"):
-        if marker not in provision_text:
-            errors.append(f"provision implementation is missing schema/WAL contract marker: {marker}")
+    cli_text = (plugin / "mcp/cli.py").read_text(encoding="utf-8") if (plugin / "mcp/cli.py").is_file() else ""
+    migrate_text = (plugin / "mcp/migrate.py").read_text(encoding="utf-8") if (plugin / "mcp/migrate.py").is_file() else ""
+    errors.extend(validate_cli_runtime_contract(cli_text, migrate_text, version))
     return errors
 
 

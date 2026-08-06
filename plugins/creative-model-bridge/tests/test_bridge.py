@@ -15,7 +15,6 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PLUGIN_ROOT / "mcp"))
 
 from bridge import (  # noqa: E402
-    BRIDGE_VERSION,
     Bridge,
     BridgeError,
     ConfigLoader,
@@ -25,10 +24,9 @@ from bridge import (  # noqa: E402
     MAX_TOTAL_CHARS,
     REQUEST_SCHEMA,
     SYSTEM_PROMPT,
-    TransportDiagnostic,
     _extract_output_text,
 )
-from server import TOOL_DEFINITIONS, handle  # noqa: E402
+from core import TransportDiagnostic  # noqa: E402
 
 
 class FakeResponse:
@@ -263,30 +261,9 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(report["section_order"], ["task", "constraints", "output_spec", "context_text", "context_files"])
         self.assertEqual(report["user_chars"], len(prompt))
         self.assertFalse(report["truncated"])
-        self.assertEqual(TOOL_DEFINITIONS[1]["inputSchema"], REQUEST_SCHEMA)
-        self.assertEqual(TOOL_DEFINITIONS[2]["inputSchema"], REQUEST_SCHEMA)
         self.assertFalse(REQUEST_SCHEMA["properties"]["context_text"]["items"]["additionalProperties"])
-        self.assertIn("outputSchema", TOOL_DEFINITIONS[0])
-        self.assertIn("outputSchema", TOOL_DEFINITIONS[1])
-        self.assertIn("outputSchema", TOOL_DEFINITIONS[2])
-        schemas = [tool["outputSchema"] for tool in TOOL_DEFINITIONS]
-        self.assertEqual(
-            [set(schema["properties"]) for schema in schemas],
-            [
-                {"text", "provider", "model", "usage", "request_id", "prompt_report", "models"},
-                {"text", "provider", "model", "usage", "request_id", "prompt_report", "prompt", "payload", "network"},
-                {"text", "provider", "model", "usage", "request_id", "prompt_report"},
-            ],
-        )
-        self.assertTrue(all(schema["additionalProperties"] is False for schema in schemas))
-        self.assertEqual(len({id(schema) for schema in schemas}), 3)
-        prompt_schema = schemas[2]["properties"]["prompt_report"]
-        self.assertFalse(prompt_schema["additionalProperties"])
-        self.assertFalse(prompt_schema["properties"]["context_text"]["items"]["additionalProperties"])
-        self.assertFalse(prompt_schema["properties"]["context_files"]["items"]["additionalProperties"])
-        payload_schema = schemas[1]["properties"]["payload"]
-        self.assertFalse(payload_schema["additionalProperties"])
-        self.assertEqual(payload_schema["required"], ["model", "messages", "max_tokens", "stream", "stream_options"])
+        self.assertEqual(set(preview), {"text", "provider", "model", "usage", "request_id", "prompt_report", "prompt", "payload", "network"})
+        self.assertFalse(preview["network"])
         with self.assertRaises(BridgeError):
             self.bridge().creative_preview(self.request(context_text=[{"label": "x", "text": "y", "extra": 1}]))
         with self.assertRaises(BridgeError):
@@ -536,18 +513,9 @@ class BridgeTests(unittest.TestCase):
         self.assertIn("failed", diagnostic)
 
         opener = FakeOpener([FakeResponse(payload)])
-        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
-            response = handle(
-                {
-                    "jsonrpc": "2.0",
-                    "id": 7,
-                    "method": "tools/call",
-                    "params": {"name": "creative_generate", "arguments": self.request()},
-                },
-                self.bridge(opener),
-            )
-        self.assertTrue(response["result"]["isError"])
-        self.assertNotIn(secret, response["result"]["content"][0]["text"])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            self.bridge(opener).creative_generate(self.request())
+        self.assertNotIn(secret, str(context.exception))
 
     def test_non_completed_response_statuses_block_text_but_incomplete_text_is_allowed(self) -> None:
         for status in ("cancelled", "queued", "in_progress"):
@@ -574,18 +542,9 @@ class BridgeTests(unittest.TestCase):
         self.assertNotIn(secret, str(context.exception))
 
         opener = FakeOpener([FakeResponse(rejected[0])])
-        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
-            response = handle(
-                {
-                    "jsonrpc": "2.0",
-                    "id": 8,
-                    "method": "tools/call",
-                    "params": {"name": "creative_generate", "arguments": self.request()},
-                },
-                self.bridge(opener),
-            )
-        self.assertTrue(response["result"]["isError"])
-        self.assertNotIn(secret, response["result"]["content"][0]["text"])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            self.bridge(opener).creative_generate(self.request())
+        self.assertNotIn(secret, str(context.exception))
 
         self.assertEqual(
             _extract_output_text({"response": {"status": "incomplete", "output_text": "partial"}}),
@@ -610,18 +569,9 @@ class BridgeTests(unittest.TestCase):
                 self.assertIn(f'"response_status":"{status}"', diagnostic)
 
         opener = FakeOpener([FakeResponse(payloads[0][0])])
-        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
-            response = handle(
-                {
-                    "jsonrpc": "2.0",
-                    "id": 9,
-                    "method": "tools/call",
-                    "params": {"name": "creative_generate", "arguments": self.request()},
-                },
-                self.bridge(opener),
-            )
-        self.assertTrue(response["result"]["isError"])
-        self.assertNotIn(secret, response["result"]["content"][0]["text"])
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            self.bridge(opener).creative_generate(self.request())
+        self.assertNotIn(secret, str(context.exception))
 
         self.assertEqual(
             _extract_output_text({"response": [{"status": "incomplete", "output_text": "partial"}]}),
@@ -665,23 +615,12 @@ class BridgeTests(unittest.TestCase):
         self.assertNotIn(secret_key, diagnostic)
 
         opener = FakeOpener([FakeResponse(payload, status=207)])
-        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}):
-            response = handle(
-                {
-                    "jsonrpc": "2.0",
-                    "id": 3,
-                    "method": "tools/call",
-                    "params": {"name": "creative_generate", "arguments": self.request()},
-                },
-                self.bridge(opener),
-            )
-        self.assertTrue(response["result"]["isError"])
-        mcp_text = response["result"]["content"][0]["text"]
-        self.assertIn(f'"request_id_sha256":"{request_digest}"', mcp_text)
-        self.assertNotIn("response-diagnostic-1", mcp_text)
-        self.assertIn("top_level_fields", mcp_text)
-        self.assertNotIn(secret_text, mcp_text)
-        self.assertNotIn(secret_key, mcp_text)
+        with patch.dict(os.environ, {"BRIDGE_TEST_KEY": "placeholder-key"}), self.assertRaises(BridgeError) as context:
+            self.bridge(opener).creative_generate(self.request())
+        self.assertIn(f'"request_id_sha256":"{request_digest}"', str(context.exception))
+        self.assertNotIn("response-diagnostic-1", str(context.exception))
+        self.assertNotIn(secret_text, str(context.exception))
+        self.assertNotIn(secret_key, str(context.exception))
 
     def test_unknown_response_status_and_error_values_are_not_leaked(self) -> None:
         status_secret = "MALICIOUS_STATUS_VALUE_SHOULD_NOT_APPEAR"
@@ -830,17 +769,6 @@ class BridgeTests(unittest.TestCase):
         self.assertIn("truncated", diagnostic)
         self.assertNotIn("secret key 0", diagnostic)
         self.assertNotIn("response value must not appear", diagnostic)
-
-    def test_mcp_handle_returns_structured_tool_result(self) -> None:
-        bridge = self.bridge()
-        response = handle({"jsonrpc": "2.0", "id": 0, "method": "initialize"}, bridge)
-        self.assertEqual(response["result"]["serverInfo"]["version"], BRIDGE_VERSION)
-        response = handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}, bridge)
-        self.assertEqual(response["result"]["tools"][0]["name"], "creative_models")
-        response = handle({"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "creative_preview", "arguments": self.request()}}, bridge)
-        self.assertFalse(response["result"]["isError"])
-        self.assertEqual(response["result"]["structuredContent"]["network"], False)
-
 
 if __name__ == "__main__":
     unittest.main()

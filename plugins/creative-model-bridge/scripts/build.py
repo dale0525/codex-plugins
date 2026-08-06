@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Build the self-contained bridge executable with the locked Pixi toolchain."""
+"""Build the self-contained bridge executable with the locked Pixi toolchain.
+
+The bundled entry point is the one-shot CLI.  The separate ``migrate`` command
+is retained only for one-time cleanup of a previously owned global MCP entry.
+"""
 
 from __future__ import annotations
 
@@ -44,8 +48,8 @@ def main() -> int:
         "--hidden-import",
         "bridge",
         "--hidden-import",
-        "provision",
-        str(ROOT / "mcp/server.py"),
+        "migrate",
+        str(ROOT / "mcp/cli.py"),
     ]
     subprocess.run(command, cwd=ROOT, check=True)
     executable = output_dir / args.asset_name

@@ -15,9 +15,9 @@ import urllib.error
 import urllib.request
 
 try:
-    from .transport_diagnostics import TransportPhase
+    from .core import TransportPhase
 except ImportError:
-    from transport_diagnostics import TransportPhase
+    from core import TransportPhase
 
 
 class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):

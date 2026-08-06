@@ -1,4 +1,4 @@
-"""Implementation package for the Creative Model Bridge MCP server."""
+"""Implementation package for the Creative Model Bridge one-shot CLI."""
 
 from .bridge import (
     Bridge,

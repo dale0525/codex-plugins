@@ -1,0 +1,14 @@
+{
+  "bridge_version": "0.1.18",
+  "command": "/private/tmp/cmb-history-materializer/v0.1.18/legacy-command",
+  "command_sha256": "b20afacd04a5049918db34892d15419ff2b38ef8431847157aa9cf4a98c52ee8",
+  "config_digest": "12b4c7ae89f91ec0712400ad942aa47bede374e874b61fb884c07104bbf4bfc7",
+  "config_path": "/private/tmp/cmb-history-materializer/v0.1.18/config.toml",
+  "env_key": "HISTORY_KEY",
+  "install_id": "18181818-1818-4818-8818-181818181818",
+  "managed_digest": "c8dc3f842e63da80a328634b7f4341fac9e0e08630b0d2963f2abaa6bd2e203f",
+  "schema_version": 2,
+  "ssl_cert_file": "/etc/ssl/cert.pem",
+  "status": "installed",
+  "updated_at": 1700000018
+}

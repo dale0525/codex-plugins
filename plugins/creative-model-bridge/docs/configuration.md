@@ -1,68 +1,52 @@
 # Configuration reference
 
-The plugin reads `config.toml` using Python `tomllib`. Path precedence is:
+The bundled CLI reads `config.toml` with Python `tomllib`. Path precedence is:
 explicit `config_path` (embedding/tests), then a non-empty `CODEX_HOME`, then
-the platform default `Path.home()/.codex` (Windows: `%USERPROFILE%\.codex`).
+the platform default `Path.home()/.codex` (Windows: `%USERPROFILE%\\.codex`).
 
 | Key | Required | Meaning |
 | --- | --- | --- |
 | `shell_environment_policy.set.CREATIVE_MODEL_PROVIDER` | yes | Exact key under `model_providers` to use |
 | `shell_environment_policy.set.CREATIVE_MODEL_DEFAULT` | for omitted request model | Opaque default model identifier |
 | `model_providers.<provider>.base_url` | yes | OpenAI-compatible API root; bridge posts to `/chat/completions` |
-| `model_providers.<provider>.wire_api` | yes | `responses` or `chat_completions`; bridge uses the Chat Completions endpoint for both |
-| `model_providers.<provider>.env_key` | no | Preferred provider environment variable; if unavailable, the fixed `CREATIVE_MODEL_API_KEY` channel is used |
-| `CREATIVE_MODEL_API_KEY` | host channel | Fixed environment variable forwarded by the provisioned MCP entry for provider credentials |
-| `model_providers.<provider>.experimental_bearer_token` | no | Development-only credential, used only without `env_key` and the fixed channel |
+| `model_providers.<provider>.wire_api` | yes | `responses` or `chat_completions`; both use Chat Completions |
+| `model_providers.<provider>.env_key` | no | Preferred provider environment variable |
+| `CREATIVE_MODEL_API_KEY` | host channel | Fixed credential environment variable |
+| `model_providers.<provider>.experimental_bearer_token` | no | Development-only fallback when no `env_key` is configured |
 
-An explicit `model` in `creative_preview` or `creative_generate` wins over the
-configured default byte-for-byte. The bridge never guesses a model from
-`creative_models`; that tool reports only the provider's current `/models`
-response.
+An explicit `model` wins over the configured default byte-for-byte. The bridge
+never guesses a model from `creative_models`; that operation reports only the
+provider's current `/models` response.
 
-The provisioned global MCP entry forwards `CODEX_HOME`,
-`CREATIVE_MODEL_API_KEY`, the selected provider environment key, and the
-optional CA path. Run `scripts/bootstrap.sh setup --yes` on POSIX or
-`powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/provision.ps1 setup --yes`
-on Windows, then restart Codex or start a new task. The development-only
-`CREATIVE_MODEL_BRIDGE_BIN` override bypasses downloads, and
-`CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a cached version/target asset only.
-The default release version is 0.1.18. The binary's `provision setup`,
-`status`, `repair`, and `uninstall` commands own the global MCP entry
-transactionally.
+Invoke the normal route with `scripts/bootstrap.sh run` on POSIX or
+`powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/provision.ps1 run`
+on Windows. The development-only `CREATIVE_MODEL_BRIDGE_BIN` override bypasses
+downloads, and `CREATIVE_MODEL_BRIDGE_OFFLINE=1` permits a verified cache only.
 
-The target-machine baseline is `curl` plus either `sha256sum` or `shasum` on
-POSIX, and native Windows PowerShell 5.1 (`Invoke-WebRequest` and
-`Get-FileHash`) on Windows. Git, Python, Pixi, and PowerShell 7 are not
-required. The launchers re-verify the release checksum and asset on every
-cached start; this is integrity evidence rather than independent signing or
-provenance.
+The launcher also exposes non-interactive `cache` and `install` actions. `cache`
+only verifies or warms the current-version v4 cache and never reads stdin or
+starts the CLI. `install` is the `.codex-sync/provision.json` hook: after
+ensuring the cache it invokes `migrate --codex-home <resolved CODEX_HOME>`;
+missing historical state is a successful no-op. For these two actions a local
+`CREATIVE_MODEL_BRIDGE_BIN` is hashed and published into the normal immutable
+cache layout before migration; `run` and explicit `migrate` retain direct
+override execution.
 
-Provision lifecycle state is schema 2. `status` reports `absent`, `installed`,
-`uninstalled`, `drift`, `foreign`, or `pending_manual_recovery`; the latter
-means a retained WAL could not safely reconcile an external edit.
+The request envelope and result frames are protocol v1 NDJSON. Keep material
+and credentials on stdin/environment, never argv or temporary plaintext files.
+The caller validates all sequence, size, and SHA-256 fields before parsing.
 
-At setup time `SSL_CERT_FILE` (or `CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE`) may
-select an absolute, readable, non-empty regular CA bundle. macOS deterministically
-uses `/etc/ssl/cert.pem`; Linux checks the ordered candidates
-`/etc/ssl/certs/ca-certificates.crt`, `/etc/pki/tls/certs/ca-bundle.crt`,
-`/etc/ssl/ca-bundle.pem`, `/etc/pki/tls/cacert.pem`,
-`/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem`, then `/etc/ssl/cert.pem`.
-Windows leaves `SSL_CERT_FILE` out unless an explicit override is supplied.
-The selected value is appended to `env_vars` after the credential entries and
-stored as optional `ssl_cert_file` state. A missing configured file is reported
-as drift, but does not prevent owned-block uninstall. A consistent 0.1.5\nthrough 0.1.17 state is upgraded to 0.1.18 under the same byte-exact
-WAL transaction. The ownership parser removes only canonical CMB table and
-marker line spans, and accepts begin-only markers only when matching legacy
-state proves the command, home, provider environment, and CA values.
+An explicit `SSL_CERT_FILE` (or `CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE`) must be
+an absolute, readable, non-empty regular file; absent overrides use urllib's
+platform trust store.
 
-The provisioned stdio server runs this same CA resolver before constructing the
-bridge or making any provider request. If `SSL_CERT_FILE` is absent on POSIX,
-the selected system bundle is assigned to it; Windows keeps native trust by
-default. An explicit `SSL_CERT_FILE` is validated and preserved unless the
-plugin-specific alias is also set, in which case the alias has documented
-precedence and becomes the effective `SSL_CERT_FILE` used by urllib.
+## Historical migration
 
-Release retries reconcile state before mutating: absent creates a draft,
-existing drafts may be completed or clobbered only while still draft, unknown
-extra assets are hard failures, and an exact published release is verified
-read-only. A published mismatch fails without mutation.
+The `install` hook automatically runs the migration when this machine has the
+old managed global MCP entry; an explicit `migrate` action is also available.
+The migration requires matching marker/install ID/state,
+backs up the original bytes under
+`$CODEX_HOME/creative-model-bridge/migration-backups/`, and atomically removes
+only the CMB table, marker lines, and pre-v4 active pointer. It preserves all
+other MCP entries, credentials, and current v4 runtime objects. Any ambiguity,
+foreign same-name entry, or external edit fails closed with the backup intact.

@@ -1,0 +1,12 @@
+{
+  "command": "/private/tmp/cmb-history-materializer/v0.1.5/legacy-command",
+  "command_sha256": "884d767218d6ef05fe1de62c5ba8fea494e1d4f9a369e3d675fe201933abd69f",
+  "config_digest": "2095bd848d870a355a90c66a40de3f36504d9bfe29f03c0b20ec12fec726d9a3",
+  "config_path": "/private/tmp/cmb-history-materializer/v0.1.5/config.toml",
+  "env_key": "HISTORY_KEY",
+  "install_id": "11111111-1111-4111-8111-111111111111",
+  "managed_digest": "0d0f06d93a715aaa2ff76b6454d103ea63ee4c07697dfe38bf8d0c768497997b",
+  "schema_version": 2,
+  "status": "installed",
+  "updated_at": 1700000005
+}

@@ -1,0 +1,17 @@
+[shell_environment_policy.set]
+CREATIVE_MODEL_PROVIDER = "history"
+
+[model_providers.history]
+base_url = "https://provider.test/v1"
+wire_api = "responses"
+env_key = "HISTORY_KEY"
+
+# creative-model-bridge:begin schema=1 install_id="11111111-1111-4111-8111-111111111111"
+[mcp_servers.creative-model-bridge]
+command = "/private/tmp/cmb-history-materializer/v0.1.5/legacy-command"
+args = []
+env_vars = ["CODEX_HOME", "CREATIVE_MODEL_API_KEY", "HISTORY_KEY"]
+
+[mcp_servers.creative-model-bridge.env]
+CODEX_HOME = "/private/tmp/cmb-history-materializer/v0.1.5"
+# creative-model-bridge:end install_id="11111111-1111-4111-8111-111111111111"

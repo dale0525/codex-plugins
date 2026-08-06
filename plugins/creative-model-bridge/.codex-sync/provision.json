@@ -4,5 +4,5 @@
   "posix_script": "./scripts/bootstrap.sh",
   "windows_script": "./scripts/provision.ps1",
   "windows_shell": "windows-powershell",
-  "arguments": ["setup", "--yes"]
+  "arguments": ["install"]
 }

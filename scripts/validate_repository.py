@@ -22,11 +22,13 @@ LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 WORKFLOW_ACTION_REF_PATTERN = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 CREATIVE_SKILL_REQUIRED_MARKERS = (
-    "provisioned global MCP server `creative-model-bridge`",
+    "plugin-bundled one-shot CLI",
     "`creative_models`",
     "`creative_preview`",
     "`creative_generate`",
-    "If any of the three tools is missing, fail closed",
+    "`exec_command`",
+    "`write_stdin`",
+    "`sha256`",
     "direct HTTP/API client",
 )
 
@@ -166,13 +168,13 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
 def _validate_creative_provision(
     plugin_path: Path, manifest: dict[str, Any], validation: Validation
 ) -> None:
-    """Validate global provisioning metadata for Creative Model Bridge."""
+    """Validate bundled CLI/cache metadata for Creative Model Bridge."""
     manifest_path = plugin_path / ".codex-plugin/plugin.json"
-    if "mcpServers" in manifest:
-        validation.error(f"{manifest_path.relative_to(ROOT)}: mcpServers must be omitted; use global provisioning")
-    companion = plugin_path / ".mcp.json"
-    if companion.exists():
-        validation.error(f"{companion.relative_to(ROOT)} must not exist")
+    if "mcpServers" in manifest or "mcp_servers" in manifest:
+        validation.error(f"{manifest_path.relative_to(ROOT)}: MCP companions are not allowed")
+    for relative in ("mcp/server.py", "mcp/provision.py", "mcp/provision_ownership.py", "mcp/transport_diagnostics.py"):
+        if (plugin_path / relative).exists():
+            validation.error(f"{plugin_path.joinpath(relative).relative_to(ROOT)} must be removed")
     path = plugin_path / ".codex-sync/provision.json"
     payload = _read_json(path, validation)
     if payload is None:
@@ -183,7 +185,7 @@ def _validate_creative_provision(
         "posix_script": "./scripts/bootstrap.sh",
         "windows_script": "./scripts/provision.ps1",
         "windows_shell": "windows-powershell",
-        "arguments": ["setup", "--yes"],
+        "arguments": ["install"],
     }
     if set(payload) != set(expected):
         validation.error(f"{path.relative_to(ROOT)}: fields must exactly match the cross-platform contract")
@@ -197,15 +199,15 @@ def _validate_creative_provision(
         validation.error(f"{skill.relative_to(ROOT)} must be readable")
         skill_text = ""
     skill_lower = skill_text.lower()
-    for forbidden in ("creative-model-bridge-bundled", "bundled mcp", "bundled server"):
+    for forbidden in ("global mcp server", "mcp tools", "provisioned global"):
         if forbidden in skill_lower:
             validation.error(f"{skill.relative_to(ROOT)} must not reference {forbidden}")
     for marker in CREATIVE_SKILL_REQUIRED_MARKERS:
         if marker not in skill_text:
             validation.error(
-                f"{skill.relative_to(ROOT)} must contain the global fail-closed contract marker {marker!r}"
+                f"{skill.relative_to(ROOT)} must contain the CLI contract marker {marker!r}"
             )
-    for relative in ("scripts/bootstrap.sh", "scripts/provision.ps1", "mcp/provision.py"):
+    for relative in ("scripts/bootstrap.sh", "scripts/provision.ps1", "mcp/cli.py", "mcp/migrate.py"):
         target = plugin_path / relative
         if not target.is_file():
             validation.error(f"{path.relative_to(ROOT)}: missing {relative}")

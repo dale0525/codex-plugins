@@ -23,15 +23,15 @@ import urllib.error
 import urllib.request
 
 try:
-    from .transport_diagnostics import TransportDiagnostic, TransportPhase, diagnostic_for
+    from .core import TransportDiagnostic, TransportPhase, diagnostic_for
     from .transport_client import ResponsesClient
 except ImportError:  # direct mcp/ path execution
-    from transport_diagnostics import TransportDiagnostic, TransportPhase, diagnostic_for
+    from core import TransportDiagnostic, TransportPhase, diagnostic_for
     from transport_client import ResponsesClient
 
 
 SYSTEM_PROMPT = "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"
-BRIDGE_VERSION = "0.1.18"
+BRIDGE_VERSION = "0.2.0"
 USER_AGENT = f"creative-model-bridge/{BRIDGE_VERSION}"
 MAX_FILE_BYTES = 2 * 1024 * 1024
 MAX_TOTAL_CHARS = 180_000
@@ -927,4 +927,4 @@ class Bridge:
 
 
 if __name__ == "__main__":
-    print("Import Bridge or run mcp/server.py", file=sys.stderr)
+    print("Import Bridge or run mcp/cli.py", file=sys.stderr)

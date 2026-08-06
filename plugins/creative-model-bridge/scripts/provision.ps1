@@ -1,11 +1,11 @@
 param(
-  [Parameter(Position = 0)] [ValidateSet('setup','status','repair','uninstall','serve')] [string]$Action = 'setup',
+  [Parameter(Position = 0)] [ValidateSet('run','cli','exec','cache','install','migrate')] [string]$Action = 'run',
   [Parameter(ValueFromRemainingArguments = $true)] [string[]]$RemainingArgs
 )
 
 $ErrorActionPreference = 'Stop'
 $null = [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.1.18' }
+$version = if ($env:CREATIVE_MODEL_BRIDGE_VERSION) { $env:CREATIVE_MODEL_BRIDGE_VERSION } else { '0.2.0' }
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'creative-model-bridge: invalid version' }
 
 $override = $env:CREATIVE_MODEL_BRIDGE_BIN
@@ -58,13 +58,47 @@ function Get-CachedBinary {
   return $candidate
 }
 
+function Publish-LocalOverride([string]$Candidate) {
+  $digest = Get-Sha256 $Candidate
+  $generation = 'local.' + $PID.ToString() + '.' + [Guid]::NewGuid().ToString('N')
+  $object = Join-Path $targetRoot ($digest + '\' + $generation)
+  $stage = Join-Path $targetRoot ('staging.' + $generation)
+  New-Item -ItemType Directory -Force -Path $stage | Out-Null
+  try {
+    Copy-Item -LiteralPath $Candidate -Destination (Join-Path $stage $asset)
+    $complete = Join-Path $object 'complete'
+    New-Item -ItemType Directory -Force -Path $object | Out-Null
+    Move-Item -LiteralPath (Join-Path $stage $asset) -Destination (Join-Path $object $asset)
+    $utf8 = New-Object System.Text.UTF8Encoding($false)
+    $completeTemp = Join-Path $object ('.complete.' + $generation)
+    [IO.File]::WriteAllText($completeTemp, "cmb-object-v4`n$digest`n$generation`n", $utf8)
+    Move-Item -LiteralPath $completeTemp -Destination $complete -Force
+    $pointerTemp = Join-Path $targetRoot ('.active.' + $generation)
+    [IO.File]::WriteAllText($pointerTemp, "cmb-active-v4`n$digest`n$generation`n", $utf8)
+    Move-Item -LiteralPath $pointerTemp -Destination $active -Force
+  } finally {
+    Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue
+  }
+  return (Get-CachedBinary)
+}
+
 $binary = $null
+$overrideCandidate = $null
 if ($override) {
   $candidate = [IO.Path]::GetFullPath($override)
   if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) { throw 'creative-model-bridge: override is not a file' }
-  $binary = $candidate
+  if ($Action -in @('run','cli','exec','migrate')) { $binary = $candidate }
+  else { $overrideCandidate = $candidate }
 } elseif (Test-Path -LiteralPath $active -PathType Leaf) {
   $binary = Get-CachedBinary
+}
+
+if ($overrideCandidate) {
+  $overrideDigest = Get-Sha256 $overrideCandidate
+  $cached = Get-CachedBinary
+  if ($cached -and (Get-Sha256 $cached) -eq $overrideDigest) { $binary = $cached }
+  else { $binary = Publish-LocalOverride $overrideCandidate }
+  if (-not $binary) { throw 'creative-model-bridge: local override cache publication failed' }
 }
 
 if (-not $binary) {
@@ -124,9 +158,13 @@ if (-not $binary) {
 }
 
 $env:CREATIVE_MODEL_BRIDGE_EXECUTABLE = $binary
-if ($Action -eq 'serve') {
-  & $binary 'serve' @RemainingArgs
+if ($Action -eq 'cache') {
+  exit 0
+} elseif ($Action -eq 'install') {
+  & $binary 'migrate' '--codex-home' $codexHome @RemainingArgs
+} elseif ($Action -eq 'migrate') {
+  & $binary 'migrate' @RemainingArgs
 } else {
-  & $binary 'provision' $Action @RemainingArgs
+  & $binary 'run' @RemainingArgs
 }
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
