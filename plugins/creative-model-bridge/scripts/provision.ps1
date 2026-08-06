@@ -161,7 +161,8 @@ $env:CREATIVE_MODEL_BRIDGE_EXECUTABLE = $binary
 if ($Action -eq 'cache') {
   exit 0
 } elseif ($Action -eq 'install') {
-  & $binary 'migrate' '--codex-home' $codexHome @RemainingArgs
+  $migrateArgs = @('migrate', '--codex-home', $codexHome) + @($RemainingArgs)
+  & ([string]$binary) @migrateArgs
 } elseif ($Action -eq 'migrate') {
   & $binary 'migrate' @RemainingArgs
 } else {

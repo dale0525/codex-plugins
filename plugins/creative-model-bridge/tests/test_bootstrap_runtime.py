@@ -180,6 +180,8 @@ class BootstrapRuntimeTests(unittest.TestCase):
         self.assertNotIn("ValidateSet('setup'", text)
         self.assertIn("if ($Action -eq 'cache')", text)
         self.assertIn("'--codex-home'", text)
+        self.assertIn("$migrateArgs = @('migrate', '--codex-home', $codexHome) + @($RemainingArgs)", text)
+        self.assertIn("& ([string]$binary) @migrateArgs", text)
         self.assertIn("function Publish-LocalOverride", text)
         self.assertIn("cmb-object-v4", text)
         self.assertIn("if ($Action -eq 'migrate')", text)
