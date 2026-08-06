@@ -2,3 +2,7 @@ plugins = [
   "codex-sync@dale0525-codex-plugins",
   "fastctx@dale0525-codex-plugins",
 ]
+# The array is the complete desired set for non-protected Git marketplaces.
+# Pull unconditionally runs plugin add for every entry and verifies the exact
+# installed/enabled set. Capture includes installed disabled plugins, not
+# available entries; personal/OpenAI/non-Git resources stay outside the domain.

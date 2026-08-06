@@ -11,13 +11,20 @@ history and should be used only when explicitly required. Prefer environment
 keys and the Codex credential mechanisms for all other providers.
 
 The engine uses a process lock, an engine-owned Git cache, atomic core writes,
-and one rolling pre-pull backup. A plugin or marketplace failure does not roll
-back already-applied core files; state remains not converged so a later pull is
-an idempotent retry. Remote pushes are ordinary non-force fast-forward pushes;
-remote races fail instead of overwriting someone else's commit.
+and one rolling pre-pull backup. Pull plans before mutation, detaches plugins
+before source-mismatched/extra marketplaces, refreshes every desired
+marketplace, runs `plugin add` for every desired plugin, then re-lists to verify
+the exact marketplace/plugin sets and installed/enabled state. A plugin or
+marketplace failure does not roll back already-applied CLI operations; state
+keeps the previous commit and is marked not converged so a later pull retries
+from the actual local listing. Remote pushes are ordinary non-force
+fast-forward pushes; remote races fail instead of overwriting someone else's
+commit.
 
 Never synchronize auth/session/history, SQLite state, project trust, caches, or
 plugin provision artifacts. Existing declared configuration leaves (including
 hook settings) remain within the normal config policy; Codex Sync never adds
-lifecycle hooks. OpenAI-managed marketplaces and plugins
-remain untouched, as do marketplaces that were never recorded as managed.
+lifecycle hooks. Personal, OpenAI, and `openai-*` names are protected at
+capture, planning, mutation, and state boundaries. Non-Git marketplaces are
+outside the sync domain. A desired name colliding with a protected or
+non-portable local marketplace fails preflight before any device mutation.

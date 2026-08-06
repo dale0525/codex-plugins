@@ -28,8 +28,23 @@ git_ref = "main"
 sparse = []
 ```
 
-Only Git marketplace sources are portable. The `openai` and `openai-*`
-namespaces are application-managed and are never changed by Codex Sync.
+Only Git marketplace sources are portable. During capture, a local source is
+exported as Git only when its canonical path is the Git worktree top, `origin`
+is unique and credential-free HTTPS/SSH/scp, `HEAD` names a branch, and the
+manifest plus every captured plugin definition is tracked by `HEAD`. Dirty
+worktrees and local commits are allowed; synchronization follows `origin` and
+the current branch. Personal/non-Git local and orphan marketplaces are
+skipped. The `personal`, `openai`, and `openai-*` namespaces are application-managed and
+are never changed by Codex Sync.
+
+Capture includes every installed non-protected plugin, including disabled
+ones; available-but-uninstalled entries are excluded. Local state no longer
+stores marketplace/plugin ownership sets. Unknown legacy fields such as
+`managed_plugins` and `managed_markets` are ignored when read and disappear on
+the next save without a schema bump. Pull treats remote valid non-protected Git
+markets and their plugins as the exact desired sets; source identity is
+`(url, ref, sparse)` and a desired name colliding with a local non-portable
+market fails preflight.
 
 Repositories using schema v2 are converted in the engine-owned Git cache. V2
 provider tables are merged into `[model_providers.*]`; disabled and

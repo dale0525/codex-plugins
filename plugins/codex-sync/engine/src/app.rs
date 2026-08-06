@@ -1,9 +1,8 @@
+use anyhow::{Context, Result};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-
-use anyhow::{Context, Result};
 
 use crate::codex;
 use crate::config::{self, ManagedValues};
@@ -17,7 +16,6 @@ use crate::storage::{
     self, acquire_lock, atomic_write, git_text, git_try, load_legacy_state, load_state,
     remove_if_exists, resolve_paths, run_git, save_state,
 };
-
 pub fn setup(repository: Option<&str>, device: Option<&str>, branch: &str) -> Result<()> {
     let paths = resolve_paths()?;
     let _lock = acquire_lock(&paths)?;
@@ -30,7 +28,6 @@ pub fn setup(repository: Option<&str>, device: Option<&str>, branch: &str) -> Re
         migration_pushed,
         managed_paths,
         managed_profiles,
-        managed_markets,
         last_applied,
     ) = if paths.state_file.exists() {
         if let Ok(current) = storage::read_toml::<LocalState>(&paths.state_file) {
@@ -53,7 +50,6 @@ pub fn setup(repository: Option<&str>, device: Option<&str>, branch: &str) -> Re
                 current.migration_pushed_commit,
                 current.managed_paths,
                 current.managed_profiles,
-                current.managed_markets,
                 current.last_applied_commit,
             )
         } else {
@@ -89,7 +85,6 @@ pub fn setup(repository: Option<&str>, device: Option<&str>, branch: &str) -> Re
                 None,
                 raw.managed_paths,
                 raw.managed_profiles,
-                raw.managed_markets,
                 raw.last_applied_commit,
             )
         }
@@ -105,7 +100,6 @@ pub fn setup(repository: Option<&str>, device: Option<&str>, branch: &str) -> Re
             None,
             Vec::new(),
             Vec::new(),
-            BTreeSet::new(),
             None,
         )
     };
@@ -118,7 +112,6 @@ pub fn setup(repository: Option<&str>, device: Option<&str>, branch: &str) -> Re
         last_applied_commit: last_applied,
         managed_paths,
         managed_profiles,
-        managed_markets,
         migration_cleanup_pending: migration_pending,
         migration_pushed_commit: migration_pushed.clone(),
         converged: false,
@@ -147,14 +140,20 @@ pub fn setup(repository: Option<&str>, device: Option<&str>, branch: &str) -> Re
     }
     Ok(())
 }
-
 pub fn pull(dry_run: bool) -> Result<()> {
     let paths = resolve_paths()?;
     let _lock = acquire_lock(&paths)?;
     let mut state = load_state(&paths)?;
     state.validate()?;
-    let commit = prepare_cache(&paths, &state)?;
-    if repository_schema_version(&paths.cache)? == 2 {
+    let commit = match prepare_cache(&paths, &state) {
+        Ok(commit) => commit,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
+    let schema = match repository_schema_version(&paths.cache) {
+        Ok(schema) => schema,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
+    if schema == 2 {
         state.migration_cleanup_pending = true;
         state.migration_pushed_commit = None;
         state.converged = false;
@@ -164,12 +163,29 @@ pub fn pull(dry_run: bool) -> Result<()> {
         println!("Remote repository schema v2 is pending migration; run push before pull can apply or clean up legacy state");
         return Ok(());
     }
-    validate_v3_repository(&paths.cache)?;
-    let desired = config::load_managed_values(&paths.cache, &state.device)?;
-    let markets = read_markets(&paths.cache)?;
-    let plugins = read_plugins(&paths.cache)?;
-    let current = config::read_current(&paths.codex_home)?;
-    let rendered = config::render_config(&current, &state.managed_paths, &desired)?;
+    if let Err(error) = validate_v3_repository(&paths.cache) {
+        return fail_pull(&paths, &mut state, dry_run, error);
+    }
+    let desired = match config::load_managed_values(&paths.cache, &state.device) {
+        Ok(desired) => desired,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
+    let markets = match read_markets(&paths.cache) {
+        Ok(markets) => markets,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
+    let plugins = match read_plugins(&paths.cache) {
+        Ok(plugins) => plugins,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
+    let current = match config::read_current(&paths.codex_home) {
+        Ok(current) => current,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
+    let rendered = match config::render_config(&current, &state.managed_paths, &desired) {
+        Ok(rendered) => rendered,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
     if dry_run {
         println!("dry-run pull from {commit}");
         if current != rendered {
@@ -197,56 +213,79 @@ pub fn pull(dry_run: bool) -> Result<()> {
         {
             println!("- remove agent profile {name}.toml");
         }
-        let report = codex::reconcile(&markets, &plugins, &state.managed_markets, true)?;
+        let report = codex::reconcile(&markets, &plugins, true)?;
         for action in report.actions {
             println!("- {action}");
         }
         return Ok(());
     }
-    let backup = create_core_backup(&paths)?;
+    let preflight = codex::reconcile(&markets, &plugins, true);
+    if let Err(error) = preflight {
+        return fail_pull(
+            &paths,
+            &mut state,
+            false,
+            error.context("pull preflight failed"),
+        );
+    }
+    let backup = match create_core_backup(&paths) {
+        Ok(backup) => backup,
+        Err(error) => {
+            state.converged = false;
+            save_state(&paths, &state)?;
+            return Err(error.context("create pre-pull backup"));
+        }
+    };
     let result = apply_core(&paths, &state, &desired);
     if let Err(error) = result {
         if let Err(restore_error) = restore_core_backup(&paths, &backup) {
+            state.converged = false;
+            save_state(&paths, &state)?;
             return Err(error.context(format!(
                 "core apply failed and backup restore failed: {restore_error:#}"
             )));
         }
+        state.converged = false;
+        save_state(&paths, &state)?;
         return Err(error);
     }
-    let report = match codex::reconcile(&markets, &plugins, &state.managed_markets, false) {
-        Ok(report) => report,
-        Err(error) => {
-            state.converged = false;
-            save_state(&paths, &state)?;
-            return Err(error.context(
-                "plugin/marketplace convergence failed; core files were retained; rerun pull",
-            ));
+    if let Err(error) = codex::reconcile(&markets, &plugins, false) {
+        state.converged = false;
+        save_state(&paths, &state)?;
+        return Err(error.context(
+            "plugin/marketplace convergence failed; core files were retained; rerun pull",
+        ));
+    }
+    let cleanup_migration = state.migration_cleanup_pending
+        && state
+            .migration_pushed_commit
+            .as_deref()
+            .is_some_and(|pushed| is_commit_at_or_after(&paths.cache, pushed, &commit));
+    if cleanup_migration {
+        if let Err(error) = cleanup_legacy(&paths) {
+            return fail_pull(
+                &paths,
+                &mut state,
+                false,
+                error.context("clean up legacy sync data"),
+            );
         }
-    };
+    }
     state.last_applied_commit = Some(commit.clone());
     state.managed_paths = desired.keys().cloned().collect();
     state.managed_profiles = profiles::read_profiles(&paths.cache)?
         .keys()
         .cloned()
         .collect();
-    state.managed_markets = report.managed_markets;
     state.converged = true;
-    save_state(&paths, &state)?;
-    if state.migration_cleanup_pending
-        && state
-            .migration_pushed_commit
-            .as_deref()
-            .is_some_and(|pushed| is_commit_at_or_after(&paths.cache, pushed, &commit))
-    {
-        cleanup_legacy(&paths)?;
+    if cleanup_migration {
         state.migration_cleanup_pending = false;
         state.migration_pushed_commit = None;
-        save_state(&paths, &state)?;
     }
+    save_state(&paths, &state)?;
     println!("Pulled {commit}; Codex configuration and plugins converged");
     Ok(())
 }
-
 pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
     let paths = resolve_paths()?;
     let _lock = acquire_lock(&paths)?;
@@ -259,8 +298,6 @@ pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
         migration::migrate_repository(&paths.cache)?;
         state.converged = false;
     } else if state.migration_cleanup_pending {
-        // v3 captures are allowed after a legacy setup; a successful commit
-        // below supersedes the previous migration evidence.
         state.migration_cleanup_pending = true;
     }
     validate_v3_repository(&paths.cache)?;
@@ -271,11 +308,17 @@ pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
     scan_repository(&paths.cache)?;
     let changed = git_text(&["status", "--porcelain"], Some(&paths.cache))?;
     if changed.trim().is_empty() {
-        if state.migration_cleanup_pending && state.migration_pushed_commit.is_none() && !dry_run {
-            // Another device may have completed the v2 migration. Record the
-            // fetched v3 commit only after a real, no-op push attempt; setup,
-            // dry-run, and race paths must not open the cleanup gate.
-            state.migration_pushed_commit = Some(base_commit.clone());
+        if !dry_run {
+            state.last_applied_commit = Some(base_commit.clone());
+            state.managed_paths = capture.declared_paths;
+            state.managed_profiles = profiles::read_local_profiles(&paths.codex_home)?
+                .keys()
+                .cloned()
+                .collect();
+            state.converged = true;
+            if state.migration_cleanup_pending && state.migration_pushed_commit.is_none() {
+                state.migration_pushed_commit = Some(base_commit.clone());
+            }
             save_state(&paths, &state)?;
         }
         println!("No configuration changes to push");
@@ -318,6 +361,8 @@ pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
         .env("GIT_COMMITTER_EMAIL", "logictan89@gmail.com")
         .output()?;
     if !output.status.success() {
+        state.converged = false;
+        save_state(&paths, &state)?;
         anyhow::bail!(
             "git commit failed: {}",
             String::from_utf8_lossy(&output.stderr).trim()
@@ -348,17 +393,11 @@ pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
         .keys()
         .cloned()
         .collect();
-    state.managed_markets = capture
-        .markets
-        .iter()
-        .map(|market| market.name.clone())
-        .collect();
     state.converged = true;
     save_state(&paths, &state)?;
     println!("Pushed {new_commit}");
     Ok(())
 }
-
 pub fn status() -> Result<()> {
     let paths = resolve_paths()?;
     if !paths.state_file.exists() {
@@ -391,7 +430,6 @@ pub fn status() -> Result<()> {
     );
     Ok(())
 }
-
 fn prepare_cache(paths: &Paths, state: &LocalState) -> Result<String> {
     if !is_git_repo(&paths.cache) {
         remove_if_exists(&paths.cache)?;
@@ -503,19 +541,22 @@ fn read_markets(root: &Path) -> Result<Vec<Marketplace>> {
         let table = entry
             .as_table()
             .context("marketplace entry must be a table")?;
+        let name = table
+            .get("name")
+            .and_then(toml::Value::as_str)
+            .context("marketplace name missing")?;
+        if codex::is_protected_market(name) {
+            continue;
+        }
         let source = table
             .get("source")
             .and_then(toml::Value::as_str)
             .context("marketplace source must be the string git")?;
         if source != "git" {
-            anyhow::bail!("only Git marketplaces are supported");
+            continue;
         }
         let market = Marketplace {
-            name: table
-                .get("name")
-                .and_then(toml::Value::as_str)
-                .context("marketplace name missing")?
-                .to_owned(),
+            name: name.to_owned(),
             url: table
                 .get("url")
                 .and_then(toml::Value::as_str)
@@ -543,9 +584,6 @@ fn read_markets(root: &Path) -> Result<Vec<Marketplace>> {
             },
         };
         market.validate()?;
-        if codex::is_openai_market(&market.name) {
-            continue;
-        }
         result.push(market);
     }
     Ok(result)
@@ -574,10 +612,13 @@ fn read_plugins(root: &Path) -> Result<BTreeSet<String>> {
         let id = entry
             .as_str()
             .context("v3 plugins.toml must contain plugin ID strings")?;
-        codex::validate_plugin_id(id)?;
-        if codex::plugin_marketplace(id).is_ok_and(codex::is_openai_market) {
+        if id
+            .split_once('@')
+            .is_some_and(|(_, market)| codex::is_protected_market(market))
+        {
             continue;
         }
+        codex::validate_plugin_id(id)?;
         result.insert(id.to_owned());
     }
     Ok(result)
@@ -586,7 +627,6 @@ fn read_plugins(root: &Path) -> Result<BTreeSet<String>> {
 #[derive(Debug)]
 struct CaptureResult {
     declared_paths: Vec<Vec<String>>,
-    markets: Vec<Marketplace>,
     warnings: Vec<String>,
 }
 
@@ -639,27 +679,9 @@ fn capture_current(paths: &Paths, state: &LocalState) -> Result<CaptureResult> {
         )?;
     }
     let previous_markets = read_markets(&paths.cache)?;
-    let markets = codex::portable_git_markets_with_metadata()?
-        .into_iter()
-        .filter_map(|configured| {
-            let url = configured.url?;
-            let previous = previous_markets
-                .iter()
-                .find(|market| market.name == configured.name);
-            Some(Marketplace {
-                name: configured.name,
-                url,
-                git_ref: configured.git_ref,
-                sparse: configured
-                    .sparse
-                    .or_else(|| previous.map(|market| market.sparse.clone()))
-                    .unwrap_or_default(),
-            })
-        })
-        .collect::<Vec<_>>();
-    codex::write_markets(&paths.cache.join("marketplaces.toml"), &markets)?;
-    let plugins = codex::current_plugins()?;
-    codex::write_plugins(&paths.cache.join("plugins.toml"), &plugins)?;
+    let inventory = codex::capture_inventory(&previous_markets)?;
+    codex::write_markets(&paths.cache.join("marketplaces.toml"), &inventory.markets)?;
+    codex::write_plugins(&paths.cache.join("plugins.toml"), &inventory.plugins)?;
     config::validate_values(&config::load_managed_values(&paths.cache, &state.device)?)?;
     let declared_paths = common_kept
         .into_iter()
@@ -669,8 +691,7 @@ fn capture_current(paths: &Paths, state: &LocalState) -> Result<CaptureResult> {
         .collect();
     Ok(CaptureResult {
         declared_paths,
-        markets,
-        warnings: Vec::new(),
+        warnings: inventory.warnings,
     })
 }
 
@@ -961,4 +982,17 @@ fn read_optional_bytes(path: &Path) -> Result<Vec<u8>> {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(Vec::new()),
         Err(error) => Err(error).with_context(|| format!("read {}", path.display())),
     }
+}
+
+fn fail_pull(
+    paths: &Paths,
+    state: &mut LocalState,
+    dry_run: bool,
+    error: anyhow::Error,
+) -> Result<()> {
+    if !dry_run {
+        state.converged = false;
+        save_state(paths, state)?;
+    }
+    Err(error)
 }

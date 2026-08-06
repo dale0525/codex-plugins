@@ -1,7 +1,7 @@
 {
   "name": "codex-sync",
-  "version": "0.5.0",
-  "description": "Synchronize global Codex instructions, agent profiles, portable settings, Git marketplaces, and plugins through a Git repository.",
+  "version": "0.6.0",
+  "description": "Synchronize global Codex instructions, agent profiles, portable settings, Git marketplaces, and installed non-protected plugins through a Git repository.",
   "author": {
     "name": "Logic Tan",
     "email": "logictan89@gmail.com",
@@ -15,7 +15,7 @@
   "interface": {
     "displayName": "Codex Sync",
     "shortDescription": "Synchronize Codex safely across devices.",
-    "longDescription": "Bind to a Git repository, pull configuration and plugins, or push the current device using deterministic Git baselines and an engine-owned cache.",
+    "longDescription": "Bind to a Git repository, pull configuration and exact non-protected Git marketplace/plugin sets with convergence verification, or push the current device using deterministic Git baselines and an engine-owned cache.",
     "developerName": "Logic Tan",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],

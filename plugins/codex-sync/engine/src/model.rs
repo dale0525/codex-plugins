@@ -1,4 +1,3 @@
-use std::collections::BTreeSet;
 use std::path::PathBuf;
 
 use anyhow::Result;
@@ -22,8 +21,6 @@ pub struct LocalState {
     pub managed_paths: Vec<Vec<String>>,
     #[serde(default)]
     pub managed_profiles: Vec<String>,
-    #[serde(default)]
-    pub managed_markets: BTreeSet<String>,
     #[serde(default)]
     pub migration_cleanup_pending: bool,
     #[serde(default)]
@@ -61,8 +58,6 @@ pub struct LegacyState {
     pub managed_profiles: Vec<String>,
     #[serde(default)]
     pub last_applied_commit: Option<String>,
-    #[serde(default)]
-    pub managed_markets: BTreeSet<String>,
     #[serde(default)]
     pub migration_cleanup_pending: bool,
 }
@@ -225,16 +220,41 @@ impl Marketplace {
         if !portable_name(&self.name) {
             anyhow::bail!("invalid marketplace name: {}", self.name);
         }
-        if !(self.url.starts_with("https://")
-            || self.url.starts_with("git@")
-            || self.url.starts_with("ssh://"))
-        {
+        let scp = self.url.split_once('@').is_some_and(|(user, rest)| {
+            !user.is_empty()
+                && !user.contains(':')
+                && rest
+                    .split_once(':')
+                    .is_some_and(|(_, path)| !path.is_empty())
+        });
+        if !(self.url.starts_with("https://") || self.url.starts_with("ssh://") || scp) {
             anyhow::bail!("marketplace {} must use a Git source URL", self.name);
         }
         validate_git_ref(&self.git_ref)?;
         validate_sparse(&self.sparse)?;
         if self.url.contains('@')
             && (self.url.starts_with("http://") || self.url.starts_with("https://"))
+        {
+            anyhow::bail!("marketplace {} URL has embedded credentials", self.name);
+        }
+        if self.url.starts_with("ssh://") {
+            let authority = self
+                .url
+                .strip_prefix("ssh://")
+                .and_then(|rest| rest.split(['/', '?', '#']).next())
+                .unwrap_or_default();
+            if authority
+                .rfind('@')
+                .is_some_and(|at| authority[..at].contains(':'))
+            {
+                anyhow::bail!("marketplace {} URL has embedded credentials", self.name);
+            }
+        }
+        if !self.url.starts_with("https://")
+            && self
+                .url
+                .split_once('@')
+                .is_some_and(|(user, _)| user.contains(':'))
         {
             anyhow::bail!("marketplace {} URL has embedded credentials", self.name);
         }
@@ -335,5 +355,28 @@ mod tests {
         assert!(validate_sparse(&["--delete".to_owned()]).is_err());
         assert!(validate_sparse(&["../outside".to_owned()]).is_err());
         assert!(validate_sparse(&["marketplace/plugins".to_owned()]).is_ok());
+    }
+
+    #[test]
+    fn marketplace_urls_accept_scp_and_reject_ssh_passwords() {
+        let accepted = Marketplace {
+            name: "market".to_owned(),
+            url: "deploy@example.test:plugins.git".to_owned(),
+            git_ref: "main".to_owned(),
+            sparse: Vec::new(),
+        };
+        assert!(accepted.validate().is_ok());
+        for url in [
+            "ssh://deploy:secret@example.test/plugins.git",
+            "deploy:secret@example.test:plugins.git",
+        ] {
+            let market = Marketplace {
+                url: url.to_owned(),
+                ..accepted.clone()
+            };
+            let error = market.validate().unwrap_err().to_string();
+            assert!(error.contains("credentials") || error.contains("Git source"));
+            assert!(!error.contains("secret"));
+        }
     }
 }

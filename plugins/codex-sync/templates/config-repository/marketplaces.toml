@@ -4,3 +4,7 @@ name = "dale0525-codex-plugins"
 url = "https://github.com/dale0525/codex-plugins.git"
 git_ref = "main"
 sparse = []
+# Capture records only marketplaces referenced by installed non-protected plugins.
+# A local marketplace is recorded as its credential-free Git origin/branch only
+# after worktree, manifest, and HEAD-tracking checks succeed. Pull treats the
+# remote Git set as authoritative; personal/OpenAI/non-Git entries stay local.

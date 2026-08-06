@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.5.0 release binary otherwise.
+bootstrap downloads and verifies the 0.6.0 release binary otherwise.
 
 ## Commands
 
@@ -46,13 +46,18 @@ Pull and apply the remote branch directly:
 <bootstrap> pull --dry-run
 ```
 
-Pull overlays `config/common.toml` with `devices/<device>.toml` (device values
-win), replaces `AGENTS.md`, mirrors synchronized `agents/*.toml`, then registers
-or refreshes Git marketplaces before installing plugins. Previously managed
-markets and plugins removed from the repository are removed, except `openai`
-and `openai-*` resources and resources that were never managed. Core files are
-written atomically with one rolling backup. Plugin failure leaves core files in
-place and state marked not converged; rerun pull to retry.
+Pull first builds a strict non-protected convergence plan, then overlays
+`config/common.toml` with `devices/<device>.toml` (device values win), replaces
+`AGENTS.md`, mirrors synchronized `agents/*.toml`, and registers or refreshes
+desired Git marketplaces before running an unconditional `plugin add` for every
+desired plugin. A final marketplace/plugin listing must exactly match the
+remote non-protected Git sets and report each desired plugin as `installed =
+true` and `enabled = true`. Source identity is `(url, ref, sparse)`; source
+mismatches detach plugins before replacing a marketplace. Personal, `openai`,
+`openai-*`, and non-Git resources remain outside the sync domain. Core files are
+written atomically with one rolling backup. A plugin/marketplace failure leaves
+already-applied operations in place, keeps the previous commit, marks state not
+converged, and makes the next pull reconcile from the actual local listing.
 
 Capture and publish the current device:
 
@@ -65,10 +70,19 @@ Capture and publish the current device:
 Push updates only leaves already declared in `config/common.toml` and the
 current device file; newly discovered local keys are reported and not captured.
 It captures the complete current `AGENTS.md`, all local agent TOML profiles,
-enabled non-OpenAI plugins, and portable Git marketplaces. `push --dry-run`
-never commits or pushes. Normal pushes use a non-force fast-forward update with
-author `Logic Tan <logictan89@gmail.com>`; a remote race fails and the next
-operation starts again from the latest remote branch.
+every installed non-protected plugin (including disabled entries), and only
+marketplaces referenced by at least one such installed plugin. Personal,
+OpenAI and `openai-*` resources, available-but-uninstalled plugins, non-Git
+local marketplaces, and orphan marketplaces are excluded. A local marketplace
+is exported as Git only when its canonical source is the top of a Git worktree,
+has one credential-free HTTPS/SSH/scp `origin`, is on a branch, and its manifest
+and captured plugin definitions are tracked by `HEAD`; workspace cleanliness is
+not required. `push --dry-run` never commits, pushes, writes local state, or
+mutates Codex state. A real no-change push still records the fetched base as
+`last_applied_commit` and marks state converged.
+Normal pushes use a non-force fast-forward update with author `Logic Tan
+<logictan89@gmail.com>`; a remote race fails and the next operation starts
+again from the latest remote branch.
 
 Inspect the binding and convergence state with:
 
@@ -92,6 +106,14 @@ external AGENTS section. `plugins.toml` is a string array:
 ```toml
 plugins = ["plugin@market"]
 ```
+
+The local state stores only binding, managed configuration paths/profiles,
+commit, migration, and convergence data. Unknown fields from older state files
+(including former `managed_plugins` and `managed_markets`) are ignored on read
+and disappear on the next save; the schema version is unchanged. Pull has no
+ownership or conflict-preserve history: the remote non-protected Git sets are
+authoritative. A desired name colliding with a protected or non-portable local
+marketplace fails preflight before any device mutation.
 
 Marketplaces are `[[marketplaces]]` entries with `source = "git"`, a portable
 Git URL, and an optional ref/sparse list. A v2 manifest is migrated in the

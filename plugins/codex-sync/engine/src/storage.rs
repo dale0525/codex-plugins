@@ -59,7 +59,9 @@ pub fn acquire_lock(paths: &Paths) -> Result<ProcessLock> {
 }
 
 pub fn load_state(paths: &Paths) -> Result<LocalState> {
-    read_toml(&paths.state_file).context("Codex Sync is not configured; run setup first")
+    let state: LocalState =
+        read_toml(&paths.state_file).context("Codex Sync is not configured; run setup first")?;
+    Ok(state)
 }
 
 pub fn load_legacy_state(paths: &Paths) -> Result<Option<crate::model::LegacyState>> {
@@ -88,7 +90,6 @@ pub fn load_legacy_state(paths: &Paths) -> Result<Option<crate::model::LegacySta
             managed_paths: Vec::new(),
             managed_profiles: Vec::new(),
             last_applied_commit: None,
-            managed_markets: Default::default(),
             migration_cleanup_pending: false,
         }));
     }
