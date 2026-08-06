@@ -60,7 +60,7 @@ _REASONS = frozenset(
         "unexpected_exception",
     }
 )
-_LAUNCHERS = frozenset({"posix_bootstrap", "git_bash_bootstrap", "unknown"})
+_LAUNCHERS = frozenset({"posix_bootstrap", "git_bash_bootstrap", "windows_powershell", "unknown"})
 _ACTIONS = frozenset({"cache", "run", "install"})
 _ACTIONS_WITH_UNKNOWN = _ACTIONS | {"unknown"}
 _EXCEPTIONS = frozenset({"file_not_found", "permission", "timeout", "unicode", "os_error", "other"})
@@ -238,6 +238,12 @@ def _bootstrap_basename(value: object) -> bool:
     return value.replace("\\", "/").rsplit("/", 1)[-1] == "bootstrap.sh"
 
 
+def _provision_basename(value: object) -> bool:
+    if type(value) is not str:
+        return False
+    return value.replace("\\", "/").rsplit("/", 1)[-1] == "provision.ps1"
+
+
 def _classify_command(command: object) -> tuple[str, str]:
     """Classify only the exact internal launcher shapes; never return tokens."""
 
@@ -252,6 +258,18 @@ def _classify_command(command: object) -> tuple[str, str]:
         and command[2] in _ACTIONS
     ):
         return "git_bash_bootstrap", command[2]
+    if (
+        len(command) == 8
+        and command[0] == "powershell.exe"
+        and command[1] == "-NoProfile"
+        and command[2] == "-NonInteractive"
+        and command[3] == "-ExecutionPolicy"
+        and command[4] == "Bypass"
+        and command[5] == "-File"
+        and _provision_basename(command[6])
+        and command[7] in _ACTIONS
+    ):
+        return "windows_powershell", command[7]
     return "unknown", "unknown"
 
 
@@ -468,7 +486,8 @@ def main() -> int:
         if not binary.is_file():
             raise _failure("startup", "binary_missing")
         launcher = Path(__file__).resolve().parents[1] / "plugins" / "creative-model-bridge" / "scripts" / "bootstrap.sh"
-        if not launcher.is_file():
+        entrypoint = launcher.with_name("provision.ps1") if os.name == "nt" else launcher
+        if not entrypoint.is_file():
             raise _failure("startup", "launcher_missing")
         with tempfile.TemporaryDirectory(prefix="creative-smoke-") as temporary:
             root = Path(temporary)
@@ -561,10 +580,21 @@ def main() -> int:
 
 
 def _launcher_command(launcher: Path, action: str) -> list[str]:
-    """Run the POSIX launcher through Git Bash when smoke runs on Windows."""
+    """Select the platform-native provision entrypoint for one approved action."""
 
+    _enum(action, _ACTIONS)
     if os.name == "nt":
-        return ["bash", launcher.as_posix(), action]
+        provision = launcher.with_name("provision.ps1")
+        return [
+            "powershell.exe",
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(provision),
+            action,
+        ]
     return [str(launcher), action]
 
 

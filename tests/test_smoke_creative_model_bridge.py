@@ -105,12 +105,29 @@ class CreativeModelBridgeSmokeTests(unittest.TestCase):
             )
             self.assertNotIn(secret, stream.getvalue())
 
-    def test_windows_launcher_command_uses_git_bash(self) -> None:
-        launcher = Path("D:/checkout/plugins/creative-model-bridge/scripts/bootstrap.sh")
+    def test_windows_launcher_command_uses_native_powershell_for_all_actions(self) -> None:
+        launcher = Path("D:/checkout path/plugins/creative-model-bridge/scripts/bootstrap.sh")
+        provision = str(launcher.with_name("provision.ps1"))
         with patch.object(smoke.os, "name", "nt"):
-            self.assertEqual(smoke._launcher_command(launcher, "cache"), ["bash", launcher.as_posix(), "cache"])
+            for action in ("cache", "run", "install"):
+                self.assertEqual(
+                    smoke._launcher_command(launcher, action),
+                    [
+                        "powershell.exe",
+                        "-NoProfile",
+                        "-NonInteractive",
+                        "-ExecutionPolicy",
+                        "Bypass",
+                        "-File",
+                        provision,
+                        action,
+                    ],
+                )
         with patch.object(smoke.os, "name", "posix"):
-            self.assertEqual(smoke._launcher_command(launcher, "cache"), [str(launcher), "cache"])
+            for action in ("cache", "run", "install"):
+                self.assertEqual(smoke._launcher_command(launcher, action), [str(launcher), action])
+        with self.assertRaises(ValueError):
+            smoke._launcher_command(launcher, "migrate")
 
     def test_smoke_failure_renderer_has_exact_allowlist_order(self) -> None:
         failure = smoke.SmokeFailure(
@@ -148,6 +165,19 @@ class CreativeModelBridgeSmokeTests(unittest.TestCase):
             (["/private/secret/bootstrap.sh", "cache"], ("posix_bootstrap", "cache")),
             (["bash", "/private/secret/bootstrap.sh", "run"], ("git_bash_bootstrap", "run")),
             (["bash.exe", "D:/private/secret/bootstrap.sh", "install"], ("git_bash_bootstrap", "install")),
+            (
+                [
+                    "powershell.exe",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    "D:/private secret/provision.ps1",
+                    "run",
+                ],
+                ("windows_powershell", "run"),
+            ),
         )
         for command, expected in known:
             self.assertEqual(smoke._classify_command(command), expected)
@@ -158,6 +188,11 @@ class CreativeModelBridgeSmokeTests(unittest.TestCase):
             ["bash-secret", "/private/secret/bootstrap.sh", "cache"],
             [b"/private/secret/bootstrap.sh", "cache"],
             ["bash", "/private/secret/bootstrap.sh", "cache", "\x00"],
+            ["pwsh", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", "/private/provision.ps1", "cache"],
+            ["powershell.exe", "-NonInteractive", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "/private/provision.ps1", "cache"],
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", "/private/bootstrap.sh", "cache"],
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", "/private/provision.ps1", "cache", "extra"],
+            ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", b"/private/provision.ps1", "cache"],
         )
         for command in unknown:
             self.assertEqual(smoke._classify_command(command), ("unknown", "unknown"))
