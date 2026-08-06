@@ -16,20 +16,19 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKETPLACE = ROOT / ".agents/plugins/marketplace.json"
-SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+$")
+SEMVER_PATTERN = re.compile(r"^\d+\.\d+\.\d+(?:\+codex\.[0-9A-Za-z.-]+)?$")
 SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 WORKFLOW_ACTION_REF_PATTERN = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 CREATIVE_SKILL_REQUIRED_MARKERS = (
-    "plugin-bundled one-shot CLI",
-    "`creative_models`",
-    "`creative_preview`",
-    "`creative_generate`",
-    "`exec_command`",
-    "`write_stdin`",
-    "`sha256`",
-    "direct HTTP/API client",
+    "pixi run --manifest-path",
+    "`reasoning`",
+    "`output`",
+    "`context_files`",
+    "`stream: true`",
+    "Do not send more than one request per process",
+    "run an MCP server",
 )
 
 
@@ -161,37 +160,26 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
                 _validate_skill(skill_directory, validation)
     _validate_mcp_servers(plugin_path, manifest, validation)
     if plugin_path.name == "creative-model-bridge":
-        _validate_creative_provision(plugin_path, manifest, validation)
+        _validate_creative_script(plugin_path, manifest, validation)
     validation.plugin_count += 1
 
 
-def _validate_creative_provision(
+def _validate_creative_script(
     plugin_path: Path, manifest: dict[str, Any], validation: Validation
 ) -> None:
-    """Validate bundled CLI/cache metadata for Creative Model Bridge."""
+    """Validate the one-shot Python shape for Creative Model Bridge."""
     manifest_path = plugin_path / ".codex-plugin/plugin.json"
     if "mcpServers" in manifest or "mcp_servers" in manifest:
         validation.error(f"{manifest_path.relative_to(ROOT)}: MCP companions are not allowed")
-    for relative in ("mcp/server.py", "mcp/provision.py", "mcp/provision_ownership.py", "mcp/transport_diagnostics.py"):
+    for relative in (
+        ".codex-sync/provision.json",
+        "mcp",
+        "scripts/bootstrap.sh",
+        "scripts/provision.ps1",
+        "scripts/build.py",
+    ):
         if (plugin_path / relative).exists():
             validation.error(f"{plugin_path.joinpath(relative).relative_to(ROOT)} must be removed")
-    path = plugin_path / ".codex-sync/provision.json"
-    payload = _read_json(path, validation)
-    if payload is None:
-        return
-    expected = {
-        "schema_version": 1,
-        "risk": "high",
-        "posix_script": "./scripts/bootstrap.sh",
-        "windows_script": "./scripts/provision.ps1",
-        "windows_shell": "windows-powershell",
-        "arguments": ["install"],
-    }
-    if set(payload) != set(expected):
-        validation.error(f"{path.relative_to(ROOT)}: fields must exactly match the cross-platform contract")
-    for key, value in expected.items():
-        if payload.get(key) != value:
-            validation.error(f"{path.relative_to(ROOT)}: {key} must equal {value!r}")
     skill = plugin_path / "skills/creative-model-bridge/SKILL.md"
     try:
         skill_text = skill.read_text(encoding="utf-8")
@@ -205,15 +193,20 @@ def _validate_creative_provision(
     for marker in CREATIVE_SKILL_REQUIRED_MARKERS:
         if marker not in skill_text:
             validation.error(
-                f"{skill.relative_to(ROOT)} must contain the CLI contract marker {marker!r}"
+                f"{skill.relative_to(ROOT)} must contain the script contract marker {marker!r}"
             )
-    for relative in ("scripts/bootstrap.sh", "scripts/provision.ps1", "mcp/cli.py", "mcp/migrate.py"):
+    for relative in ("scripts/creative_model_bridge.py", "pixi.toml", "pixi.lock"):
         target = plugin_path / relative
         if not target.is_file():
-            validation.error(f"{path.relative_to(ROOT)}: missing {relative}")
-    bootstrap = plugin_path / "scripts/bootstrap.sh"
-    if bootstrap.is_file() and not os.access(bootstrap, os.X_OK):
-        validation.error(f"{bootstrap.relative_to(ROOT)} must be executable")
+            validation.error(f"{plugin_path.relative_to(ROOT)}: missing {relative}")
+    script = plugin_path / "scripts/creative_model_bridge.py"
+    if script.is_file():
+        script_text = script.read_text(encoding="utf-8")
+        for marker in ('"/chat/completions"', '"stream": True', '"reasoning_content"', '"output"'):
+            if marker not in script_text:
+                validation.error(
+                    f"{script.relative_to(ROOT)} must contain the runtime marker {marker!r}"
+                )
 
 
 def _inside(root: Path, candidate: Path) -> bool:

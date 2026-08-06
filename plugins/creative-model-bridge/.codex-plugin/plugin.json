@@ -1,7 +1,7 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.2.0",
-  "description": "Route creative writing requests through a bundled, auditable one-shot CLI.",
+  "version": "0.2.0+codex.20260806142554",
+  "description": "Route creative writing requests through a bundled, auditable one-shot Python bridge.",
   "author": {
     "name": "Logic Tan",
     "email": "logictan89@gmail.com",
@@ -20,7 +20,7 @@
   "interface": {
     "displayName": "Creative Model Bridge",
     "shortDescription": "Use configured creative models through a transparent bundled CLI.",
-    "longDescription": "Builds deterministic prompts from the requested task and supplied materials, previews the exact outbound payload, lists models from the configured provider, and returns generated text verbatim with request metadata over a bounded stdin/stdout protocol.",
+    "longDescription": "Builds deterministic prompts from the requested task and supplied materials, sends one streaming OpenAI-compatible Chat Completions request, and returns reasoning and generated output verbatim as one JSON result.",
     "developerName": "Logic Tan",
     "category": "Writing",
     "capabilities": [
@@ -29,9 +29,8 @@
       "Execute"
     ],
     "defaultPrompt": [
-      "Preview this creative writing request.",
-      "List the creative models configured for this device.",
-      "Generate a draft using the exact model I name."
+      "Generate a draft using the exact model I name.",
+      "Revise this creative work while preserving the supplied material."
     ]
   }
 }

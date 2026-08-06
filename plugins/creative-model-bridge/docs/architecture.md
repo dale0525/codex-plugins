@@ -1,70 +1,44 @@
-# Architecture and outbound boundary
+# Architecture
 
-The plugin bundles one self-contained executable. Its normal entry point is a
-one-shot stdin/stdout CLI; no MCP server, Codex profile, daemon, or global
-configuration entry is required. The CLI imports the stateless `Bridge` and
-keeps the provider boundary in `transport_client.py`.
+The plugin has one runtime: `scripts/creative_model_bridge.py`. A process reads
+one UTF-8 JSON object from stdin, validates it, builds one deterministic Chat
+Completions body, performs one HTTP POST, parses the SSE stream, and writes one
+JSON object to stdout.
 
 ```text
-Codex exec session
-      │  request JSON on stdin
-      ▼
-ready → response metadata → bounded data frames
-      │
-      ▼
-Bridge.call(operation, arguments)
-      │
-      ├─ creative_preview: validate/build, stop before credential/network
-      ├─ creative_models: one GET /models
-      └─ creative_generate: one streaming POST /chat/completions
+stdin JSON
+   │
+   ├─ config.toml → selected provider, opaque default, credential
+   ├─ ordered context text/files → bounded prompt with file markers
+   ▼
+one POST /chat/completions (stream=true)
+   ▼
+SSE choices[0].delta.reasoning_content / reasoning → reasoning
+SSE choices[0].delta.content                         → output
+   ▼
+stdout JSON {reasoning, output, usage, request_id, model, provider}
 ```
 
-Protocol v1 is newline-delimited JSON. A process emits exactly one `ready`
-frame before config/provider setup. The caller sends one request envelope:
+There is no protocol envelope, readiness frame, bounded NDJSON stream, MCP
+server, daemon, profile, cache, launcher, model listing, preview route, retry,
+provider switch, or hidden conversation state. The process exits non-zero for
+validation, HTTP, malformed-stream, or provider errors and emits a single safe
+JSON error object with empty `reasoning` and `output` fields.
 
-```json
-{"protocol":1,"type":"request","id":"1","operation":"creative_generate","arguments":{"task":"..."}}
-```
+## Prompt boundary
 
-The response metadata frame declares `ok`, total UTF-8 `bytes`, `chunks`, and
-the SHA-256 of the serialized result. Each `data` frame carries contiguous
-zero-based `seq`, the serialized JSON substring, `chunk_sha256`, the overall
-`sha256`, and `done`. Four-kilobyte UTF-8 chunks keep each NDJSON line bounded
-even when a result exceeds 70,000 characters. No ACK is needed: stdin is one
-request and stdout is one finite response.
+Sections are ordered `task`, `constraints`, `output_spec`, `context_text`, then
+`context_files`. Inline blocks accept strings or `{label, text}` objects. Files
+must be absolute regular non-symlink paths and are decoded deterministically;
+each file is at most 2 MiB, total decoded files and the assembled prompt are at
+most 180,000 characters. File content is enclosed by explicit begin/end
+markers, preserving request order and exact decoded text.
 
-The request builder remains unchanged: task, constraints, output specification,
-labeled context text, and ordered context files form one deterministic user
-prompt. The only optional system instruction is the exact documented Chinese
-sentence. The provider receives one Chat Completions request with SSE parsing,
-usage tail handling, and verbatim text extraction. No retry, provider/model
-switch, hidden context, or session state is introduced by the CLI.
+## Provider boundary
 
-Credential precedence remains configured `env_key`, fixed
-`CREATIVE_MODEL_API_KEY`, then development-only `experimental_bearer_token`
-when no `env_key` is configured. Credentials are not placed in argv, protocol
-frames, logs, prompts, or errors. A preview stops before credential resolution
-and network I/O.
-
-The POSIX and PowerShell launchers select a target asset, verify the published
-SHA-256 checksum, and atomically publish an immutable v4 cache object plus
-`active` pointer. Cached starts re-hash the executable and never download;
-offline uncached or tampered starts fail. A bounded lock handles concurrent
-cold starts and stale owners without deleting immutable objects. `cache` is a
-non-interactive verification/warm-up action that exits before the CLI; the
-metadata `install` hook performs that action and then calls
-`migrate --codex-home <resolved CODEX_HOME>`, treating absent historical state
-as success. A local executable override follows the same object/pointer/digest
-path for `cache` and `install`, while `run` keeps its direct override behavior.
-
-## One-time legacy cleanup
-
-`mcp/migrate.py` is not a provisioner. Its `migrate` command (called by the
-normal `install` hook, or explicitly for a direct run) accepts
-only a historical CMB ownership marker whose install ID, runtime command,
-`CODEX_HOME`, credential-channel list, and state file all agree. It writes a
-byte-for-byte backup, atomically removes that marker/table and any pre-v4
-`active` pointer, and rolls back on failure. It refuses repeated/mismatched
-markers, foreign same-name entries, unrelated tables inside the marker, or
-concurrent config edits. Current v4 pointers and all non-CMB configuration are
-left untouched.
+`base_url` is validated as an absolute HTTP(S) URL with no credentials, query,
+or fragment; `/chat/completions` is appended once. Bearer selection is the
+configured `env_key`, then `CREATIVE_MODEL_API_KEY`, then the development-only
+`experimental_bearer_token` when no `env_key` is configured. No credential is
+written into the body or result. Redirects, retries, and response-body error
+echoes are refused.

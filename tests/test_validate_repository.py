@@ -11,12 +11,12 @@ from scripts import validate_repository
 
 
 class RepositorySyncMetadataValidationTests(unittest.TestCase):
-    def test_creative_model_bridge_global_mcp_contract_is_checked(self) -> None:
+    def test_creative_model_bridge_one_shot_script_contract_is_checked(self) -> None:
         plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
         manifest = json.loads((plugin / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
         validation = validate_repository.Validation()
         with patch.object(validate_repository, "ROOT", plugin.parents[1]):
-            validate_repository._validate_creative_provision(plugin, manifest, validation)
+            validate_repository._validate_creative_script(plugin, manifest, validation)
         self.assertEqual(validation.errors, [])
 
         skill = plugin / "skills/creative-model-bridge/SKILL.md"
@@ -32,7 +32,7 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 copied_skill.write_text(original.replace(marker, ""), encoding="utf-8")
                 validation = validate_repository.Validation()
                 with patch.object(validate_repository, "ROOT", root):
-                    validate_repository._validate_creative_provision(
+                    validate_repository._validate_creative_script(
                         copied_plugin, manifest, validation
                     )
                 self.assertTrue(

@@ -1,15 +1,14 @@
 # Outbound payload boundary
 
-`creative_preview` and `creative_generate` share the same request builder. For
-the same arguments, the preview's `payload` is byte-for-byte equivalent after
-JSON serialization to the body sent by `creative_generate`:
+For a request with model `opaque/model`, default limits, and minimal system
+mode, the one HTTP POST body is:
 
 ```json
 {
-  "model": "the-requested-or-configured-opaque-name",
+  "model": "opaque/model",
   "messages": [
     {"role": "system", "content": "你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。"},
-    {"role": "user", "content": "the deterministic user prompt"}
+    {"role": "user", "content": "任务:\n..."}
   ],
   "max_tokens": 60000,
   "stream": true,
@@ -17,14 +16,14 @@ JSON serialization to the body sent by `creative_generate`:
 }
 ```
 
-The system message is omitted for `system_mode: "none"`; `temperature` is
-added only when supplied. The bearer token is an HTTP header and never appears
-in this body, protocol frames, or errors. Prompt sections are ordered `task` →
-`constraints` → `output_spec` → `context_text` → `context_files`; there is no
-hidden Codex prompt or model adapter.
+`temperature` is added only when supplied. `system_mode: "none"` omits the
+system message. The request model is passed byte-for-byte, and the bearer is
+only an HTTP header. No hidden Codex prompt, adapter, or conversation state is
+added.
 
-The CLI's protocol v1 wraps the compact serialized result in bounded NDJSON
-frames. The response frame declares overall `sha256`, UTF-8 byte count, and
-chunk count. Data frames carry `seq`, `data`, per-chunk `chunk_sha256`, the same
-overall digest, and `done` on the final sequence only. The caller must verify
-all fields and then return the result `text` verbatim.
+SSE `data:` frames are parsed until `[DONE]`. Text from
+`choices[0].delta.reasoning_content` (or the compatible `reasoning` key) is
+accumulated into `reasoning`; text from `choices[0].delta.content` is
+accumulated into `output`. Whitespace, newlines, and empty strings in output
+are not trimmed or otherwise post-processed. A usage object, provider request
+ID, and response model are retained when present.
