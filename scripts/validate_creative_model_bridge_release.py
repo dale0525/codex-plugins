@@ -208,7 +208,8 @@ def validate_launcher_contract(ps_text: str, version: object) -> list[str]:
     if (
         "if ($Action -eq 'cache')" not in ps_text
         or "$env:CODEX_HOME = $codexHome" not in ps_text
-        or "& ([string]$binary) 'migrate' @RemainingArgs" not in ps_text
+        or "& ([string]$binary) 'migrate'" not in ps_text
+        or "& ([string]$binary) 'migrate' @RemainingArgs" in ps_text
     ):
         errors.append("PowerShell launcher must implement noninteractive cache/install modes")
     return errors

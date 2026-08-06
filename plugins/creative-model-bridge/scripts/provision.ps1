@@ -165,7 +165,7 @@ if ($Action -eq 'cache') {
   # Keep the mode literal and pass the canonical home through the environment,
   # which migrate already treats as its default input.
   $env:CODEX_HOME = $codexHome
-  & ([string]$binary) 'migrate' @RemainingArgs
+  & ([string]$binary) 'migrate'
 } elseif ($Action -eq 'migrate') {
   & $binary 'migrate' @RemainingArgs
 } else {
