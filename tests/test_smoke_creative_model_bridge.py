@@ -329,6 +329,17 @@ class CreativeModelBridgeSmokeTests(unittest.TestCase):
         )
         self.assertNotIn("spawn-secret", raised.exception.render())
 
+    def test_run_decodes_utf8_independently_of_platform_locale(self) -> None:
+        command = [sys.executable, "-c", "import os; os.write(1, b'\\xff')"]
+        result = smoke._run(command, {}, phase="preview")
+        self.assertEqual(result.stdout, "\ufffd")
+
+        completed = self._completed(stdout="中文🙂", returncode=0)
+        with patch.object(smoke.subprocess, "run", return_value=completed) as run:
+            self.assertIs(smoke._run(["/tmp/bootstrap.sh", "run"], {}, phase="preview"), completed)
+        self.assertEqual(run.call_args.kwargs["encoding"], "utf-8")
+        self.assertEqual(run.call_args.kwargs["errors"], "replace")
+
     def test_run_permission_oserror_and_unicode_failures_are_fixed(self) -> None:
         cases = (
             (PermissionError("permission-secret"), "permission", "spawn_failed"),
