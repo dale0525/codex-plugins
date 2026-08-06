@@ -161,8 +161,11 @@ $env:CREATIVE_MODEL_BRIDGE_EXECUTABLE = $binary
 if ($Action -eq 'cache') {
   exit 0
 } elseif ($Action -eq 'install') {
-  $migrateArgs = @('migrate', '--codex-home', $codexHome) + @($RemainingArgs)
-  & ([string]$binary) @migrateArgs
+  # Windows PowerShell 5.1 can collapse a splatted native-EXE argument array.
+  # Keep the mode literal and pass the canonical home through the environment,
+  # which migrate already treats as its default input.
+  $env:CODEX_HOME = $codexHome
+  & ([string]$binary) 'migrate' @RemainingArgs
 } elseif ($Action -eq 'migrate') {
   & $binary 'migrate' @RemainingArgs
 } else {
