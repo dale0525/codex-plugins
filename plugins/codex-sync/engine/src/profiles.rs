@@ -17,6 +17,22 @@ pub fn read_local_profiles(codex_home: &Path) -> Result<Profiles> {
     read_profile_dir(&codex_home.join("agents"))
 }
 
+pub fn used_profile_names(agents: &[u8], available: &Profiles) -> Result<Vec<String>> {
+    let text = std::str::from_utf8(agents).context("decode AGENTS.md")?;
+    let mut names = Vec::new();
+    let mut parts = text.split('`');
+    while let (Some(_), Some(name)) = (parts.next(), parts.next()) {
+        if available.contains_key(name) && !names.iter().any(|item| item == name) {
+            names.push(name.to_owned());
+        }
+    }
+    if names.is_empty() {
+        return Ok(available.keys().cloned().collect());
+    }
+    names.sort();
+    Ok(names)
+}
+
 fn read_profile_dir(directory: &Path) -> Result<Profiles> {
     let mut result = Profiles::new();
     match fs::symlink_metadata(directory) {
@@ -63,7 +79,13 @@ pub fn mirror_profiles(
     codex_home: &Path,
     _previous: &[String],
 ) -> Result<Vec<String>> {
-    let desired = read_profiles(repository)?;
+    let all = read_profiles(repository)?;
+    let agents = fs::read(repository.join("AGENTS.md")).unwrap_or_default();
+    let used = used_profile_names(&agents, &all)?;
+    let desired = all
+        .into_iter()
+        .filter(|(name, _)| used.contains(name))
+        .collect::<Profiles>();
     let target = codex_home.join("agents");
     fs::create_dir_all(&target)?;
     for entry in fs::read_dir(&target)? {
@@ -109,6 +131,40 @@ mod tests {
         assert!(read_profile_dir(&temporary.path().join("agents"))
             .unwrap()
             .is_empty());
+    }
+
+    #[test]
+    fn used_profiles_are_read_from_backtick_references() {
+        let mut available = Profiles::new();
+        available.insert("default".into(), Vec::new());
+        available.insert("unused".into(), Vec::new());
+        assert_eq!(
+            used_profile_names(b"Use `default` for this task.", &available).unwrap(),
+            vec!["default"]
+        );
+    }
+
+    #[test]
+    fn mirror_removes_profiles_not_referenced_by_agents() {
+        let repository = tempfile::tempdir().unwrap();
+        fs::create_dir_all(repository.path().join("agents")).unwrap();
+        fs::write(repository.path().join("AGENTS.md"), b"Use `default`.\n").unwrap();
+        fs::write(
+            repository.path().join("agents/default.toml"),
+            b"name = \"default\"\n",
+        )
+        .unwrap();
+        fs::write(
+            repository.path().join("agents/old.toml"),
+            b"name = \"old\"\n",
+        )
+        .unwrap();
+        let codex_home = tempfile::tempdir().unwrap();
+        fs::create_dir_all(codex_home.path().join("agents")).unwrap();
+        fs::write(codex_home.path().join("agents/old.toml"), b"stale\n").unwrap();
+        mirror_profiles(repository.path(), codex_home.path(), &[]).unwrap();
+        assert!(codex_home.path().join("agents/default.toml").exists());
+        assert!(!codex_home.path().join("agents/old.toml").exists());
     }
 
     #[test]

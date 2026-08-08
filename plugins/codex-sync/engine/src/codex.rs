@@ -91,7 +91,21 @@ pub fn binary() -> Result<PathBuf> {
         }
         return Ok(path);
     }
-    Ok(PathBuf::from("codex"))
+    let codex_home = std::env::var_os("CODEX_HOME")
+        .map(PathBuf::from)
+        .or_else(|| directories::BaseDirs::new().map(|dirs| dirs.home_dir().join(".codex")))
+        .context("CODEX_HOME is not available")?;
+    let appserver = codex_home.join("plugins").join(".plugin-appserver");
+    for name in ["codex", "codex.exe", "codex.cmd", "codex.bat"] {
+        let path = appserver.join(name);
+        if path.is_file() {
+            return Ok(path);
+        }
+    }
+    anyhow::bail!(
+        "Codex plugin appserver executable was not found under {}; set CODEX_SYNC_CODEX_BIN to a reviewed executable",
+        appserver.display()
+    )
 }
 
 fn command(arguments: &[String]) -> Result<Output> {

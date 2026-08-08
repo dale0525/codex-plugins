@@ -1,6 +1,6 @@
 {
   "name": "codex-sync",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Synchronize global Codex instructions, agent profiles, portable settings, Git marketplaces, and installed non-protected plugins through a Git repository.",
   "author": {
     "name": "Logic Tan",

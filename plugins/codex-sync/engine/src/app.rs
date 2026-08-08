@@ -196,7 +196,14 @@ pub fn pull(dry_run: bool) -> Result<()> {
         {
             println!("- replace AGENTS.md");
         }
-        let desired_profiles = profiles::read_profiles(&paths.cache)?;
+        let all_profiles = profiles::read_profiles(&paths.cache)?;
+        let agents = fs::read(paths.cache.join("AGENTS.md"))?;
+        let used_profiles = profiles::used_profile_names(&agents, &all_profiles)?;
+        let desired_profiles = all_profiles
+            .iter()
+            .filter(|(name, _)| used_profiles.contains(name))
+            .map(|(name, bytes)| (name.clone(), bytes.clone()))
+            .collect::<profiles::Profiles>();
         let local_profiles = profiles::read_local_profiles(&paths.codex_home)?;
         for name in desired_profiles.keys() {
             match local_profiles.get(name) {
@@ -273,10 +280,9 @@ pub fn pull(dry_run: bool) -> Result<()> {
     }
     state.last_applied_commit = Some(commit.clone());
     state.managed_paths = desired.keys().cloned().collect();
-    state.managed_profiles = profiles::read_profiles(&paths.cache)?
-        .keys()
-        .cloned()
-        .collect();
+    let remote_profiles = profiles::read_profiles(&paths.cache)?;
+    state.managed_profiles =
+        profiles::used_profile_names(&fs::read(paths.cache.join("AGENTS.md"))?, &remote_profiles)?;
     state.converged = true;
     if cleanup_migration {
         state.migration_cleanup_pending = false;
@@ -311,10 +317,11 @@ pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
         if !dry_run {
             state.last_applied_commit = Some(base_commit.clone());
             state.managed_paths = capture.declared_paths;
-            state.managed_profiles = profiles::read_local_profiles(&paths.codex_home)?
-                .keys()
-                .cloned()
-                .collect();
+            let local_profiles = profiles::read_local_profiles(&paths.codex_home)?;
+            state.managed_profiles = profiles::used_profile_names(
+                &fs::read(paths.codex_home.join("AGENTS.md")).unwrap_or_default(),
+                &local_profiles,
+            )?;
             state.converged = true;
             if state.migration_cleanup_pending && state.migration_pushed_commit.is_none() {
                 state.migration_pushed_commit = Some(base_commit.clone());
@@ -389,10 +396,11 @@ pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
         state.migration_pushed_commit = Some(new_commit.clone());
     }
     state.managed_paths = capture.declared_paths;
-    state.managed_profiles = profiles::read_local_profiles(&paths.codex_home)?
-        .keys()
-        .cloned()
-        .collect();
+    let local_profiles = profiles::read_local_profiles(&paths.codex_home)?;
+    state.managed_profiles = profiles::used_profile_names(
+        &fs::read(paths.codex_home.join("AGENTS.md")).unwrap_or_default(),
+        &local_profiles,
+    )?;
     state.converged = true;
     save_state(&paths, &state)?;
     println!("Pushed {new_commit}");
@@ -666,13 +674,21 @@ fn capture_current(paths: &Paths, state: &LocalState) -> Result<CaptureResult> {
     atomic_write(&paths.cache.join("AGENTS.md"), &agents)?;
     let local_profiles = profiles::read_local_profiles(&paths.codex_home)?;
     let remote_profiles = profiles::read_profiles(&paths.cache)?;
+    let used_profiles = profiles::used_profile_names(&agents, &local_profiles)?;
+    for name in local_profiles
+        .keys()
+        .filter(|name| !used_profiles.contains(name))
+    {
+        println!("unused agent profile {name}.toml: omitted from push");
+    }
     for name in remote_profiles
         .keys()
-        .filter(|name| !local_profiles.contains_key(*name))
+        .filter(|name| !used_profiles.contains(name))
     {
         remove_if_exists(&paths.cache.join("agents").join(format!("{name}.toml")))?;
     }
-    for (name, bytes) in &local_profiles {
+    for name in &used_profiles {
+        let bytes = local_profiles.get(name).expect("used profile exists");
         atomic_write(
             &paths.cache.join("agents").join(format!("{name}.toml")),
             bytes,

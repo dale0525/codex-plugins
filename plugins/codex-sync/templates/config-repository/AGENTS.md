@@ -14,4 +14,6 @@ Choose exactly one profile for every delegated task:
 
 Never route image work to `default` or text-only creative work to `image`. Set `fork_turns = "none"` and make every assignment self-contained with the scope, concrete question, expected output, and constraints. Keep secrets in the main thread. Wait for all required children before synthesis and treat their results as evidence to verify rather than final user-facing conclusions.
 
+Codex Sync publishes only profiles whose names are referenced in this file using backticks. During pull, profiles no longer referenced here are removed from the device; during push, they are omitted and reported as unused.
+
 If a profile is missing or stale, invoke `$codex-sync` and use its explicit `pull` workflow. Do not repair profiles automatically or through hooks.

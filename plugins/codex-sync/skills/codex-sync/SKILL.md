@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.6.0 release binary otherwise.
+bootstrap downloads and verifies the 0.6.1 release binary otherwise.
 
 ## Commands
 
@@ -48,7 +48,8 @@ Pull and apply the remote branch directly:
 
 Pull first builds a strict non-protected convergence plan, then overlays
 `config/common.toml` with `devices/<device>.toml` (device values win), replaces
-`AGENTS.md`, mirrors synchronized `agents/*.toml`, and registers or refreshes
+`AGENTS.md`, mirrors only agent profiles referenced by backtick names in that
+file (removing profiles that are no longer referenced), and registers or refreshes
 desired Git marketplaces before running an unconditional `plugin add` for every
 desired plugin. A final marketplace/plugin listing must exactly match the
 remote non-protected Git sets and report each desired plugin as `installed =
@@ -69,8 +70,9 @@ Capture and publish the current device:
 
 Push updates only leaves already declared in `config/common.toml` and the
 current device file; newly discovered local keys are reported and not captured.
-It captures the complete current `AGENTS.md`, all local agent TOML profiles,
-every installed non-protected plugin (including disabled entries), and only
+It captures the complete current `AGENTS.md`, only local agent TOML profiles
+referenced by backtick names in that file, and reports profiles that are no
+longer needed. It also captures every installed non-protected plugin (including disabled entries), and only
 marketplaces referenced by at least one such installed plugin. Personal,
 OpenAI and `openai-*` resources, available-but-uninstalled plugins, non-Git
 local marketplaces, and orphan marketplaces are excluded. A local marketplace
