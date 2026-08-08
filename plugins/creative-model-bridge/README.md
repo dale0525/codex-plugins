@@ -14,6 +14,10 @@ From this plugin directory:
 pixi run run < request.json
 ```
 
+The process reads stdin to EOF before sending the request. Use a pipe or
+heredoc for automation; an interactive terminal that remains open will leave
+the process waiting and no provider request has started yet.
+
 `stdout` contains one compact JSON object. Successful results always include
 `reasoning` and `output`; the output string is the provider text verbatim.
 Failures include those same two empty fields plus a safe `error` string and exit

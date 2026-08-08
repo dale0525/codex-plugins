@@ -1,6 +1,6 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.2.0+codex.20260806145620",
+  "version": "0.2.1+codex.20260809153000",
   "description": "Route creative writing requests through a bundled, auditable one-shot Python bridge.",
   "author": {
     "name": "Logic Tan",

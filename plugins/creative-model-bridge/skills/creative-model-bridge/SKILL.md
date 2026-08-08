@@ -20,10 +20,27 @@ files, or stderr:
 pixi run --manifest-path <plugin-root>/pixi.toml run
 ```
 
+The command is a one-shot process: provide the complete UTF-8 JSON request and
+close stdin (EOF) in the same invocation. Prefer a non-interactive pipe or
+heredoc; do not type JSON into a live PTY and leave it open, because the script
+uses `stdin.read()` and will correctly wait for EOF before making the network
+request. For example:
+
+```bash
+pixi run --manifest-path <plugin-root>/pixi.toml run <<'JSON'
+{"task":"Revise the supplied scene.","context_text":["..."]}
+JSON
+```
+
 The script reads one JSON object and emits one JSON object. Successful output
 always has `reasoning` and `output`; return `output` verbatim. If the process
 exits non-zero, surface its safe `error` rather than retrying or drafting a
 replacement. Do not send more than one request per process.
+
+If a process produces no output, first verify that stdin reached EOF. A process
+waiting before any provider request is usually an input/EOF problem; a process
+that has reached the provider is bounded by the bridge's HTTP timeout. Do not
+retry until the first process has exited.
 
 ## Request rules
 
