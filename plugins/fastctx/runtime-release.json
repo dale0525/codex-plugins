@@ -3,32 +3,32 @@
   "distribution": "codex-plugin",
   "transitional": false,
   "repository": "dale0525/codex-plugins",
-  "version": "0.2.5",
-  "tag": "fastctx-v0.2.5",
+  "version": "0.2.6",
+  "tag": "fastctx-v0.2.6",
   "assets": {
     "aarch64-apple-darwin": {
       "name": "fastctx-aarch64-apple-darwin.tar.gz",
-      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.5/fastctx-aarch64-apple-darwin.tar.gz",
-      "size": 25259301,
-      "sha256": "cf2cada0600e5b4bdf4697a983d4b4445e4c6737c481c6044477211a737badf1"
+      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.6/fastctx-aarch64-apple-darwin.tar.gz",
+      "size": 25258797,
+      "sha256": "d0e53899028e8069eef4d3288d66ef6126534a9063bb5079293a578957233bc3"
     },
     "x86_64-apple-darwin": {
       "name": "fastctx-x86_64-apple-darwin.tar.gz",
-      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.5/fastctx-x86_64-apple-darwin.tar.gz",
-      "size": 25438266,
-      "sha256": "b0df16d0b7775e5bf6f0bf30b06709d41c9cb0fda6a8fc28f7eb9ebebf02f8b9"
+      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.6/fastctx-x86_64-apple-darwin.tar.gz",
+      "size": 25438247,
+      "sha256": "a333a5d647fd4dcd5c6e98f4d16626ea96221e9526efdcdbcf188d6647824c07"
     },
     "x86_64-pc-windows-msvc": {
       "name": "fastctx-x86_64-pc-windows-msvc.zip",
-      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.5/fastctx-x86_64-pc-windows-msvc.zip",
-      "size": 26343612,
-      "sha256": "db0bd847561b0eb47f2ee91bea03dca81e3b1b47c918c31631c51992d070c3ac"
+      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.6/fastctx-x86_64-pc-windows-msvc.zip",
+      "size": 26343190,
+      "sha256": "e4be4d7fe6ec42591e0e9a7fedb2b141d37a3718dde7c42855e1e29d69121a2a"
     },
     "x86_64-unknown-linux-gnu": {
       "name": "fastctx-x86_64-unknown-linux-gnu.tar.gz",
-      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.5/fastctx-x86_64-unknown-linux-gnu.tar.gz",
-      "size": 25618545,
-      "sha256": "12673af0407ab17001c9acccfd6d3b40cdd69af69609dd0f54d3dbe39c88a730"
+      "url": "https://github.com/dale0525/codex-plugins/releases/download/fastctx-v0.2.6/fastctx-x86_64-unknown-linux-gnu.tar.gz",
+      "size": 25618368,
+      "sha256": "c44dea7c604e176f8d69a77f51ab9d49fbd93ed71390e3213c034e244c6a6f51"
     }
   }
 }

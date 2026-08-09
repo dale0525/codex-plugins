@@ -6,7 +6,7 @@
 `third-party/fastctx-LICENSE-APACHE` and `third-party/fastctx-NOTICE`.
 
 The checked `runtime-release.json` pins the repository-owned
-`fastctx-v0.2.5` release and its four platform archives. Do not manually edit
+`fastctx-v0.2.6` release and its four platform archives. Do not manually edit
 release hashes. To update metadata for a later explicit `fastctx-v*` release,
 download its four archives and run:
 

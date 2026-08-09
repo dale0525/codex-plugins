@@ -30,8 +30,8 @@ class FastCtxPluginTests(unittest.TestCase):
         self.assertEqual(metadata["distribution"], "codex-plugin")
         self.assertFalse(metadata["transitional"])
         self.assertEqual(metadata["repository"], "dale0525/codex-plugins")
-        self.assertEqual(metadata["version"], "0.2.5")
-        self.assertEqual(metadata["tag"], "fastctx-v0.2.5")
+        self.assertEqual(metadata["version"], "0.2.6")
+        self.assertEqual(metadata["tag"], "fastctx-v0.2.6")
         self.assertNotIn("transition_note", metadata)
         self.assertEqual(set(metadata["assets"]), {
             "aarch64-apple-darwin",
@@ -44,7 +44,7 @@ class FastCtxPluginTests(unittest.TestCase):
             self.assertGreater(asset["size"], 0)
             self.assertTrue(asset["url"].endswith("/" + asset["name"]))
             self.assertIn(
-                "/dale0525/codex-plugins/releases/download/fastctx-v0.2.5/",
+                "/dale0525/codex-plugins/releases/download/fastctx-v0.2.6/",
                 asset["url"],
             )
 
