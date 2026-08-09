@@ -51,8 +51,8 @@ pub(crate) struct SectionEdit {
 /// model prefers these tools. Delimited by markers for idempotent replacement.
 pub const AGENTS_SECTION: &str = concat!(
     "<!-- fastctx:begin -->\n",
-    "For local files, prefer `mcp__fastctx__read`, `mcp__fastctx__grep`, and\n",
-    "`mcp__fastctx__glob`; pass absolute paths and follow `Partial` pagination exactly.\n",
+    "- Prefer FastCtx tools for local file inspection and mechanical batch replacement when available; follow their tool schemas for invocation details.\n",
+    "- When FastCtx shell tools are enabled, prefer them for non-interactive Bash commands and background jobs.\n",
     "<!-- fastctx:end -->"
 );
 
@@ -337,15 +337,19 @@ mod tests {
     }
 
     #[test]
-    fn compact_contract_is_shared_by_file_and_shell_configurations() {
-        assert_eq!(section(false), AGENTS_SECTION);
-        assert_eq!(section(true), AGENTS_SECTION);
+    fn managed_contract_bytes_are_exact_and_shared_by_file_and_shell_configurations() {
+        let expected = concat!(
+            "<!-- fastctx:begin -->\n",
+            "- Prefer FastCtx tools for local file inspection and mechanical batch replacement when available; follow their tool schemas for invocation details.\n",
+            "- When FastCtx shell tools are enabled, prefer them for non-interactive Bash commands and background jobs.\n",
+            "<!-- fastctx:end -->",
+        );
+        assert_eq!(AGENTS_SECTION.as_bytes(), expected.as_bytes());
+        assert_eq!(section(false), expected);
+        assert_eq!(section(true), expected);
         assert_eq!(AGENTS_SECTION.matches(BEGIN_MARKER).count(), 1);
         assert_eq!(AGENTS_SECTION.matches(END_MARKER).count(), 1);
-        assert!(AGENTS_SECTION.contains("`mcp__fastctx__read`"));
-        assert!(AGENTS_SECTION.contains("`mcp__fastctx__grep`"));
-        assert!(AGENTS_SECTION.contains("`mcp__fastctx__glob`"));
-        assert!(AGENTS_SECTION.lines().count() <= 4);
+        assert_eq!(AGENTS_SECTION.lines().count(), 4);
     }
 
     #[test]
@@ -358,5 +362,23 @@ mod tests {
         assert!(!source.contains("mcp__fastctx__paste"));
         assert!(source.starts_with("before\n\n"));
         assert!(source.ends_with("\nafter\n"));
+    }
+
+    #[test]
+    fn reapply_migrates_the_prior_short_block_and_preserves_crlf_neighbors() {
+        let original = b"before\r\n<!-- fastctx:begin -->\r\nFor local files, prefer `mcp__fastctx__read`, `mcp__fastctx__grep`, and\r\n`mcp__fastctx__glob`; pass absolute paths and follow `Partial` pagination exactly.\r\n<!-- fastctx:end -->\r\nafter\r\n";
+        let applied = apply_section(original).unwrap();
+        let expected = concat!(
+            "before\r\n",
+            "<!-- fastctx:begin -->\n",
+            "- Prefer FastCtx tools for local file inspection and mechanical batch replacement when available; follow their tool schemas for invocation details.\n",
+            "- When FastCtx shell tools are enabled, prefer them for non-interactive Bash commands and background jobs.\n",
+            "<!-- fastctx:end -->",
+            "\r\nafter\r\n",
+        );
+        assert_eq!(applied, expected.as_bytes());
+        assert!(has_exact_section(&applied).unwrap());
+        assert_eq!(apply_section(&applied).unwrap(), applied);
+        assert_eq!(remove_section(&applied).unwrap(), b"before\r\nafter\r\n");
     }
 }

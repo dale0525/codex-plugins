@@ -13,7 +13,7 @@ fn help_version_ui_guard_and_language_errors_are_scriptable() {
     assert!(version.status.success());
     assert_eq!(
         String::from_utf8(version.stdout).unwrap(),
-        format!("fastctx {}\n", env!("CARGO_PKG_VERSION"))
+        "fastctx 0.2.6\n"
     );
 
     let help = command().arg("--help").output().unwrap();
@@ -560,7 +560,7 @@ fn noninteractive_apply_is_idempotent_and_unapply_restores_user_files() {
 
     let drifted_agents = String::from_utf8(user_extended_agents)
         .unwrap()
-        .replace("mcp__fastctx__read", "mcp__fastctx__read_broken");
+        .replace("FastCtx tools", "FastCtx tools broken");
     std::fs::write(codex.join("AGENTS.md"), drifted_agents).unwrap();
     let mut agents_drift_command = isolated_command(temp.path());
     agents_drift_command.arg("status").env("PATH", &empty_path);

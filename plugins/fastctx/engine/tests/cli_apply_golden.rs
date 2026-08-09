@@ -65,9 +65,12 @@ fn micro_edit_golden_preserves_every_unowned_byte_and_writes_the_exact_private_s
 #[test]
 fn agents_golden_appends_the_exact_contract_after_one_blank_line() {
     let original = "# User rules\n\nKeep exact.\n";
-    let expected = format!(
-        "# User rules\n\nKeep exact.\n\n{}\n",
-        agents::AGENTS_SECTION
+    let expected = concat!(
+        "# User rules\n\nKeep exact.\n\n",
+        "<!-- fastctx:begin -->\n",
+        "- Prefer FastCtx tools for local file inspection and mechanical batch replacement when available; follow their tool schemas for invocation details.\n",
+        "- When FastCtx shell tools are enabled, prefer them for non-interactive Bash commands and background jobs.\n",
+        "<!-- fastctx:end -->\n",
     );
     assert_eq!(
         agents::apply_section(original.as_bytes()).unwrap(),

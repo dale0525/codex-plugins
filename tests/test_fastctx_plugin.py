@@ -53,7 +53,7 @@ class FastCtxPluginTests(unittest.TestCase):
         shell = (PLUGIN / "scripts/provision.sh").read_text(encoding="utf-8")
         powershell = (PLUGIN / "scripts/provision.ps1").read_text(encoding="utf-8")
         cargo = (PLUGIN / "engine/Cargo.toml").read_text(encoding="utf-8")
-        self.assertIn('version = "0.2.5"', cargo)
+        self.assertIn('version = "0.2.6"', cargo)
         self.assertIn('repository = "https://github.com/dale0525/codex-plugins"', cargo)
         self.assertIn('CODEX_PLUGIN_DISTRIBUTION: &str = "codex-plugin"',
                       (PLUGIN / "engine/src/update/check.rs").read_text(encoding="utf-8"))

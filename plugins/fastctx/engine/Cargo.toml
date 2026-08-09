@@ -1,7 +1,7 @@
 # Modified by dale0525/codex-plugins for the repository-owned Codex plugin distribution.
 [package]
 name = "fastctx"
-version = "0.2.5"
+version = "0.2.6"
 edition = "2024"
 rust-version = "1.88"
 description = "FastCtx — fast, context-efficient repository tools for AI agents."
