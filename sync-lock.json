@@ -14,50 +14,6 @@
       "ref": "main",
       "commit": "d15eabbe5d2122eedc060bae8a771381e9873d1b",
       "destination": "plugins/prompt-master/skills/prompt-master"
-    },
-    "fastctx-release": {
-      "kind": "github-release",
-      "repository": "yc-duan/fastctx",
-      "version": "0.2.4",
-      "tag": "v0.2.4",
-      "release_id": 363956024,
-      "published_at": "2026-08-03T02:18:48Z",
-      "tag_object_sha": "0ae9136ef0901fb4ca7521cfe3b9e83ddf1fc7a7",
-      "commit": "86dac0c99efae7859ed2be468f68c16e58f5e16a",
-      "metadata_destination": "plugins/fastctx/upstream-release.json",
-      "assets": {
-        "aarch64-apple-darwin": {
-          "name": "fastctx-aarch64-apple-darwin.tar.gz",
-          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.4/fastctx-aarch64-apple-darwin.tar.gz",
-          "size": 25339975,
-          "sha256": "dd4d78a6f8cfffb30ac17326b2512edd8c4e2e9fb53bbc575317d932b15bdfa5"
-        },
-        "x86_64-apple-darwin": {
-          "name": "fastctx-x86_64-apple-darwin.tar.gz",
-          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.4/fastctx-x86_64-apple-darwin.tar.gz",
-          "size": 25522609,
-          "sha256": "ed896902b2efb3064977ae0825d01a0165e630b41e2f40ab3ed6f5b3d1174deb"
-        },
-        "x86_64-pc-windows-msvc": {
-          "name": "fastctx-x86_64-pc-windows-msvc.zip",
-          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.4/fastctx-x86_64-pc-windows-msvc.zip",
-          "size": 26444080,
-          "sha256": "c7e8e255e92024f4e4d9c3b5a101844216dbf5b417dbe8b9c3284847dd137823"
-        },
-        "x86_64-unknown-linux-gnu": {
-          "name": "fastctx-x86_64-unknown-linux-gnu.tar.gz",
-          "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.4/fastctx-x86_64-unknown-linux-gnu.tar.gz",
-          "size": 25708097,
-          "sha256": "6a0fb160d4eb9bcf020eca21b38a88c3b9cda54099e18bcbe3f1253a2ceb1232"
-        }
-      },
-      "checksum_asset": {
-        "name": "SHA256SUMS",
-        "url": "https://github.com/yc-duan/fastctx/releases/download/v0.2.4/SHA256SUMS",
-        "size": 410,
-        "sha256": "eebd2f9606323d4ca321ce873099932b7bf6c14c63ed5423ae4c708a9d47abc3"
-      },
-      "ignored_assets": []
     }
   }
 }

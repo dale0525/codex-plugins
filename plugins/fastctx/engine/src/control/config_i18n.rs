@@ -1,0 +1,841 @@
+//! Localized strings for the numeric setting editors, the explicit save, and the destructive reset.
+
+use super::i18n::Language;
+
+/// Complete editor, save, and reset string set for one language.
+#[derive(Debug)]
+pub(crate) struct ConfigMessages {
+    pub(crate) editing_group_title: &'static str,
+    pub(crate) replace_limit_label: &'static str,
+    pub(crate) replace_limit_note: &'static str,
+    pub(crate) replace_limit_saved_note: &'static str,
+    pub(crate) search_group_title: &'static str,
+    pub(crate) cpu_limit_label: &'static str,
+    /// Shown wherever a setting tracks something else instead of holding a chosen value.
+    pub(crate) automatic_label: &'static str,
+    pub(crate) cpu_limit_note: &'static str,
+    pub(crate) cpu_edit_title: &'static str,
+    pub(crate) cpu_edit_prompt: &'static str,
+    /// Shared by every numeric editor: the wording carries no CPU- or budget-specific detail.
+    pub(crate) input_error_empty: &'static str,
+    /// Shared by every numeric editor; see `input_error_empty`.
+    pub(crate) input_error_not_integer: &'static str,
+    /// Shared by every numeric editor; `{maximum}` is filled in by the caller.
+    pub(crate) input_error_range: &'static str,
+    pub(crate) reset_group_title: &'static str,
+    pub(crate) reset_all_label: &'static str,
+    pub(crate) reset_all_note: &'static str,
+    pub(crate) reset_confirm: &'static str,
+    pub(crate) reset_success: &'static str,
+    pub(crate) footer_edit: &'static str,
+    pub(crate) footer_accept: &'static str,
+    /// Badge shown beside the settings title while the draft differs from the saved settings.
+    pub(crate) unsaved_changes: &'static str,
+    pub(crate) discard_confirm: &'static str,
+    pub(crate) budget_edit_title: &'static str,
+    /// `{tool}` is replaced with the name of the tool whose share is being edited.
+    pub(crate) budget_edit_prompt: &'static str,
+    pub(crate) budget_edit_note: &'static str,
+    pub(crate) budget_explicit_note: &'static str,
+    pub(crate) budget_follows_tier_note: &'static str,
+    /// Name of the save action, for surfaces that need a plain label rather than the button face.
+    pub(crate) save_all_label: &'static str,
+    /// Save-button face while edits are pending; `{count}` is filled in by the caller.
+    pub(crate) save_button_dirty: &'static str,
+    /// Save-button face with nothing to write, which is also the toast for pressing it anyway.
+    pub(crate) save_button_clean: &'static str,
+    pub(crate) save_all_note: &'static str,
+    /// Blocking frame shown while the settings file is being written.
+    pub(crate) saving_notice: &'static str,
+}
+
+impl ConfigMessages {
+    #[cfg(test)]
+    fn values(&self) -> [&'static str; 32] {
+        [
+            self.editing_group_title,
+            self.replace_limit_label,
+            self.replace_limit_note,
+            self.replace_limit_saved_note,
+            self.search_group_title,
+            self.cpu_limit_label,
+            self.automatic_label,
+            self.cpu_limit_note,
+            self.cpu_edit_title,
+            self.cpu_edit_prompt,
+            self.input_error_empty,
+            self.input_error_not_integer,
+            self.input_error_range,
+            self.reset_group_title,
+            self.reset_all_label,
+            self.reset_all_note,
+            self.reset_confirm,
+            self.reset_success,
+            self.footer_edit,
+            self.footer_accept,
+            self.unsaved_changes,
+            self.discard_confirm,
+            self.budget_edit_title,
+            self.budget_edit_prompt,
+            self.budget_edit_note,
+            self.budget_explicit_note,
+            self.budget_follows_tier_note,
+            self.save_all_label,
+            self.save_button_dirty,
+            self.save_button_clean,
+            self.save_all_note,
+            self.saving_notice,
+        ]
+    }
+}
+
+/// Returns the complete configuration-extension table for a supported language.
+pub(crate) const fn messages(language: Language) -> &'static ConfigMessages {
+    match language {
+        Language::En => &EN,
+        Language::ZhCn => &ZH_CN,
+        Language::ZhTw => &ZH_TW,
+        Language::Ja => &JA,
+        Language::Ko => &KO,
+        Language::Es => &ES,
+        Language::Fr => &FR,
+        Language::De => &DE,
+        Language::PtBr => &PT_BR,
+        Language::Ru => &RU,
+        Language::It => &IT,
+        Language::Tr => &TR,
+        Language::Pl => &PL,
+        Language::Nl => &NL,
+        Language::Vi => &VI,
+        Language::Id => &ID,
+        Language::Uk => &UK,
+    }
+}
+
+macro_rules! config_messages {
+    (
+        $editing_group_title:expr, $replace_limit_label:expr,
+        $replace_limit_note:expr, $replace_limit_saved_note:expr,
+        $search_group_title:expr, $cpu_limit_label:expr, $automatic_label:expr,
+        $cpu_limit_note:expr, $cpu_edit_title:expr, $cpu_edit_prompt:expr,
+        $input_error_empty:expr, $input_error_not_integer:expr, $input_error_range:expr,
+        $reset_group_title:expr, $reset_all_label:expr, $reset_all_note:expr,
+        $reset_confirm:expr, $reset_success:expr, $footer_edit:expr, $footer_accept:expr,
+        $unsaved_changes:expr, $discard_confirm:expr,
+        $budget_edit_title:expr, $budget_edit_prompt:expr, $budget_edit_note:expr,
+        $budget_explicit_note:expr, $budget_follows_tier_note:expr,
+        $save_all_label:expr, $save_button_dirty:expr, $save_button_clean:expr,
+        $save_all_note:expr, $saving_notice:expr
+    ) => {
+        ConfigMessages {
+            editing_group_title: $editing_group_title,
+            replace_limit_label: $replace_limit_label,
+            replace_limit_note: $replace_limit_note,
+            replace_limit_saved_note: $replace_limit_saved_note,
+            search_group_title: $search_group_title,
+            cpu_limit_label: $cpu_limit_label,
+            automatic_label: $automatic_label,
+            cpu_limit_note: $cpu_limit_note,
+            cpu_edit_title: $cpu_edit_title,
+            cpu_edit_prompt: $cpu_edit_prompt,
+            input_error_empty: $input_error_empty,
+            input_error_not_integer: $input_error_not_integer,
+            input_error_range: $input_error_range,
+            reset_group_title: $reset_group_title,
+            reset_all_label: $reset_all_label,
+            reset_all_note: $reset_all_note,
+            reset_confirm: $reset_confirm,
+            reset_success: $reset_success,
+            footer_edit: $footer_edit,
+            footer_accept: $footer_accept,
+            unsaved_changes: $unsaved_changes,
+            discard_confirm: $discard_confirm,
+            budget_edit_title: $budget_edit_title,
+            budget_edit_prompt: $budget_edit_prompt,
+            budget_edit_note: $budget_edit_note,
+            budget_explicit_note: $budget_explicit_note,
+            budget_follows_tier_note: $budget_follows_tier_note,
+            save_all_label: $save_all_label,
+            save_button_dirty: $save_button_dirty,
+            save_button_clean: $save_button_clean,
+            save_all_note: $save_all_note,
+            saving_notice: $saving_notice,
+        }
+    };
+}
+
+const EN: ConfigMessages = config_messages!(
+    "Editing",
+    "Replace file limit",
+    "Larger limits allow replace to use more memory; values set too high may cause an out-of-memory failure.",
+    "The new replace limit applies to the next request. Apply is not required.",
+    "Search",
+    "CPU limit",
+    "Automatic",
+    "Used by grep/glob; takes effect once every Codex session has closed and the shared control center exits. Apply is not required.",
+    "Edit CPU limit",
+    "Enter 1..={maximum}:",
+    "Value cannot be empty.",
+    "Enter a whole number.",
+    "Enter a number from 1 to {maximum}.",
+    "Reset",
+    "Reset all settings",
+    "Keeps the Apply receipt and running jobs; may evict the oldest finished jobs above the default history quota.",
+    "Reset all settings?",
+    "All settings reset.",
+    "Enter edit",
+    "Enter accept",
+    "Unsaved changes",
+    "Discard unsaved changes?\nGo back and press s to save them instead.",
+    "Edit output budget",
+    "Share for {tool} — enter 1..=100:",
+    "Arrow keys move in steps of 25%; type any value in between here.",
+    "Explicit; unchanged when the tier changes.",
+    "Follows the tier's recommended share.",
+    "Save settings",
+    "Save changes ({count})",
+    "No unsaved changes",
+    "Writes every unsaved change to settings.toml.",
+    "Saving…"
+);
+
+const ZH_CN: ConfigMessages = config_messages!(
+    "编辑",
+    "replace 文件限制",
+    "限制越高，replace 可使用的内存越多；设置过高可能导致内存不足。",
+    "新的 replace 限制会在下一次请求时生效。无需 Apply。",
+    "搜索",
+    "CPU 限制",
+    "自动",
+    "用于 grep/glob；所有 Codex 会话关闭、共享控制中心退出后生效。无需 Apply。",
+    "编辑 CPU 限制",
+    "输入 1..={maximum}：",
+    "值不能为空。",
+    "请输入整数。",
+    "请输入 1 到 {maximum} 之间的数字。",
+    "重置",
+    "重置所有设置",
+    "保留 Apply receipt 和正在运行的 jobs；恢复默认历史配额时，可能回收超额的最旧 finished jobs。",
+    "要重置所有设置吗？",
+    "已重置所有设置。",
+    "Enter 编辑",
+    "Enter 确认",
+    "有未保存的更改",
+    "要放弃未保存的更改吗？\n也可以返回配置页按 s 保存它们。",
+    "编辑输出预算",
+    "{tool} 的比例 —— 输入 1..=100：",
+    "左右键按 25% 一档调整；中间的比例在这里输入。",
+    "已显式设定；切换档位时不变。",
+    "跟随档位的推荐比例。",
+    "保存设置",
+    "保存更改（{count} 项）",
+    "没有未保存的更改",
+    "把所有未保存的更改写入 settings.toml。",
+    "正在保存…"
+);
+
+const ZH_TW: ConfigMessages = config_messages!(
+    "編輯",
+    "replace 檔案限制",
+    "限制越高，replace 可使用的記憶體越多；設定過高可能導致記憶體不足。",
+    "新的 replace 限制會在下一次請求時生效。不需要 Apply。",
+    "搜尋",
+    "CPU 限制",
+    "自動",
+    "用於 grep/glob；所有 Codex 工作階段關閉、共享控制中心結束後生效。不需要 Apply。",
+    "編輯 CPU 限制",
+    "輸入 1..={maximum}：",
+    "值不可為空。",
+    "請輸入整數。",
+    "請輸入 1 到 {maximum} 之間的數字。",
+    "重設",
+    "重設所有設定",
+    "保留 Apply receipt 和執行中的 jobs；恢復預設歷史配額時，可能回收超額的最舊 finished jobs。",
+    "要重設所有設定嗎？",
+    "已重設所有設定。",
+    "Enter 編輯",
+    "Enter 確認",
+    "有未儲存的變更",
+    "要放棄未儲存的變更嗎？\n也可以返回設定頁按 s 儲存。",
+    "編輯輸出預算",
+    "{tool} 的比例 —— 輸入 1..=100：",
+    "左右鍵按 25% 一檔調整；中間的比例在這裡輸入。",
+    "已明確設定；切換檔位時不變。",
+    "跟隨檔位的建議比例。",
+    "儲存設定",
+    "儲存變更（{count} 項）",
+    "沒有未儲存的變更",
+    "將所有未儲存的變更寫入 settings.toml。",
+    "正在儲存…"
+);
+
+const JA: ConfigMessages = config_messages!(
+    "編集",
+    "replace ファイル制限",
+    "上限を大きくすると replace のメモリ使用量が増えます。高すぎる値はメモリ不足を招くことがあります。",
+    "新しい replace 制限は次のリクエストから有効です。Apply は不要です。",
+    "検索",
+    "CPU 制限",
+    "自動",
+    "grep/glob で使用。共有コントロールセンターの再起動後に適用されます。Apply は不要です。",
+    "CPU 制限を編集",
+    "1..={maximum} を入力:",
+    "値は空にできません。",
+    "整数を入力してください。",
+    "1～{maximum} の数値を入力してください。",
+    "リセット",
+    "すべての設定をリセット",
+    "Apply receipt と実行中の jobs は保持されます。既定の履歴クォータへ戻す際、超過分の古い finished jobs が削除される場合があります。",
+    "すべての設定をリセットしますか？",
+    "すべての設定をリセットしました。",
+    "Enter 編集",
+    "Enter 確定",
+    "未保存の変更あり",
+    "未保存の変更を破棄しますか？\n戻って s を押せば保存できます。",
+    "出力予算を編集",
+    "{tool} の割合 — 1..=100 を入力:",
+    "左右キーは 25% 刻み。中間の値はここで入力します。",
+    "明示設定。段階を変えても維持。",
+    "段階の推奨割合に追随。",
+    "設定を保存",
+    "変更を保存（{count} 件）",
+    "未保存の変更はありません",
+    "未保存の変更をすべて settings.toml に書き込みます。",
+    "保存中…"
+);
+
+const KO: ConfigMessages = config_messages!(
+    "편집",
+    "replace 파일 제한",
+    "제한을 높이면 replace가 더 많은 메모리를 사용할 수 있으며, 너무 높으면 메모리 부족이 발생할 수 있습니다.",
+    "새 replace 제한은 다음 요청부터 적용됩니다. Apply는 필요하지 않습니다.",
+    "검색",
+    "CPU 제한",
+    "자동",
+    "grep/glob에 사용되며 공유 제어 센터를 다시 시작한 후 적용됩니다. Apply는 필요하지 않습니다.",
+    "CPU 제한 편집",
+    "1..={maximum} 입력:",
+    "값을 비워 둘 수 없습니다.",
+    "정수를 입력하세요.",
+    "1~{maximum} 사이의 숫자를 입력하세요.",
+    "재설정",
+    "모든 설정 재설정",
+    "Apply receipt와 실행 중인 jobs는 유지됩니다. 기본 기록 할당량으로 되돌릴 때 초과된 오래된 finished jobs가 삭제될 수 있습니다.",
+    "모든 설정을 재설정할까요?",
+    "모든 설정을 재설정했습니다.",
+    "Enter 편집",
+    "Enter 확인",
+    "저장되지 않은 변경",
+    "저장되지 않은 변경을 버릴까요?\n돌아가서 s를 누르면 저장할 수 있습니다.",
+    "출력 예산 편집",
+    "{tool} 비율 — 1..=100 입력:",
+    "좌우 키는 25% 단위로 이동합니다. 중간 값은 여기에 입력하세요.",
+    "명시 설정. 단계가 바뀌어도 유지.",
+    "단계의 권장 비율을 따름.",
+    "설정 저장",
+    "변경 사항 저장({count}개)",
+    "저장되지 않은 변경 없음",
+    "저장되지 않은 모든 변경을 settings.toml에 씁니다.",
+    "저장 중…"
+);
+
+const ES: ConfigMessages = config_messages!(
+    "Edición",
+    "Límite de archivo de replace",
+    "Los límites mayores permiten que replace use más memoria; un valor demasiado alto puede causar falta de memoria.",
+    "El nuevo límite de replace se aplica a la siguiente solicitud. No hace falta Apply.",
+    "Búsqueda",
+    "Límite de CPU",
+    "Automático",
+    "Se usa para grep/glob; se aplica tras reiniciar el centro de control compartido. No hace falta Apply.",
+    "Editar límite de CPU",
+    "Introduce 1..={maximum}:",
+    "El valor no puede estar vacío.",
+    "Introduce un número entero.",
+    "Introduce un número del 1 al {maximum}.",
+    "Restablecer",
+    "Restablecer todos los ajustes",
+    "Conserva el Apply receipt y los jobs en ejecución; al volver a la cuota de historial predeterminada puede expulsar los finished jobs más antiguos que la superen.",
+    "¿Restablecer todos los ajustes?",
+    "Todos los ajustes se restablecieron.",
+    "Enter editar",
+    "Enter aceptar",
+    "Cambios sin guardar",
+    "¿Descartar los cambios sin guardar?\nTambién puedes volver y pulsar s para guardarlos.",
+    "Editar presupuesto de salida",
+    "Proporción de {tool}: introduce 1..=100:",
+    "Las flechas avanzan de 25% en 25%; escribe aquí cualquier valor intermedio.",
+    "Explícita; no cambia con el nivel.",
+    "Sigue la proporción recomendada del nivel.",
+    "Guardar ajustes",
+    "Guardar cambios ({count})",
+    "No hay cambios sin guardar",
+    "Escribe en settings.toml todos los cambios sin guardar.",
+    "Guardando…"
+);
+
+const FR: ConfigMessages = config_messages!(
+    "Édition",
+    "Limite de fichier replace",
+    "Une limite plus élevée permet à replace d’utiliser plus de mémoire ; une valeur excessive peut provoquer un manque de mémoire.",
+    "La nouvelle limite de replace s’applique à la prochaine requête. Apply n’est pas nécessaire.",
+    "Recherche",
+    "Limite du processeur",
+    "Automatique",
+    "Utilisé par grep/glob ; s’applique après le redémarrage du centre de contrôle partagé. Apply n’est pas nécessaire.",
+    "Modifier la limite du processeur",
+    "Saisissez 1..={maximum} :",
+    "La valeur ne peut pas être vide.",
+    "Saisissez un nombre entier.",
+    "Saisissez un nombre entre 1 et {maximum}.",
+    "Réinitialiser",
+    "Réinitialiser tous les réglages",
+    "Conserve l’Apply receipt et les jobs en cours ; le retour au quota d’historique par défaut peut supprimer les finished jobs les plus anciens au-delà de ce quota.",
+    "Réinitialiser tous les réglages ?",
+    "Tous les réglages ont été réinitialisés.",
+    "Enter modifier",
+    "Enter valider",
+    "Modifications non enregistrées",
+    "Abandonner les modifications non enregistrées ?\nVous pouvez aussi revenir et appuyer sur s pour les enregistrer.",
+    "Modifier le budget de sortie",
+    "Part de {tool} — saisissez 1..=100 :",
+    "Les flèches avancent par pas de 25 % ; saisissez ici toute valeur intermédiaire.",
+    "Explicite ; inchangée si le niveau change.",
+    "Suit la part recommandée du niveau.",
+    "Enregistrer les réglages",
+    "Enregistrer les modifications ({count})",
+    "Aucune modification non enregistrée",
+    "Écrit dans settings.toml toutes les modifications non enregistrées.",
+    "Enregistrement…"
+);
+
+const DE: ConfigMessages = config_messages!(
+    "Bearbeitung",
+    "Dateilimit für replace",
+    "Höhere Limits erlauben replace mehr Speicher zu verwenden; ein zu hoher Wert kann zu Speichermangel führen.",
+    "Das neue replace-Limit gilt ab der nächsten Anfrage. Apply ist nicht erforderlich.",
+    "Suche",
+    "CPU-Limit",
+    "Automatisch",
+    "Für grep/glob verwendet; gilt nach dem Neustart der gemeinsamen Steuerzentrale. Apply ist nicht erforderlich.",
+    "CPU-Limit bearbeiten",
+    "1..={maximum} eingeben:",
+    "Der Wert darf nicht leer sein.",
+    "Geben Sie eine ganze Zahl ein.",
+    "Geben Sie eine Zahl zwischen 1 und {maximum} ein.",
+    "Zurücksetzen",
+    "Alle Einstellungen zurücksetzen",
+    "Behält den Apply receipt und laufende jobs; beim Zurücksetzen auf das Standard-Verlaufskontingent können die ältesten finished jobs darüber entfernt werden.",
+    "Alle Einstellungen zurücksetzen?",
+    "Alle Einstellungen wurden zurückgesetzt.",
+    "Enter bearbeiten",
+    "Enter übernehmen",
+    "Ungespeicherte Änderungen",
+    "Ungespeicherte Änderungen verwerfen?\nSie können auch zurückgehen und mit s speichern.",
+    "Ausgabebudget bearbeiten",
+    "Anteil für {tool} — 1..=100 eingeben:",
+    "Pfeiltasten springen in 25-%-Schritten; Zwischenwerte hier eingeben.",
+    "Explizit; bleibt bei Stufenwechsel.",
+    "Folgt dem empfohlenen Anteil der Stufe.",
+    "Einstellungen speichern",
+    "Änderungen speichern ({count})",
+    "Keine ungespeicherten Änderungen",
+    "Schreibt alle ungespeicherten Änderungen in settings.toml.",
+    "Wird gespeichert…"
+);
+
+const PT_BR: ConfigMessages = config_messages!(
+    "Edição",
+    "Limite de arquivo do replace",
+    "Limites maiores permitem que replace use mais memória; um valor alto demais pode causar falta de memória.",
+    "O novo limite de replace vale na próxima solicitação. Não é necessário usar Apply.",
+    "Pesquisa",
+    "Limite de CPU",
+    "Automático",
+    "Usado por grep/glob; entra em vigor após reiniciar a central de controle compartilhada. Não é necessário usar Apply.",
+    "Editar limite de CPU",
+    "Digite 1..={maximum}:",
+    "O valor não pode ficar vazio.",
+    "Digite um número inteiro.",
+    "Digite um número de 1 a {maximum}.",
+    "Redefinir",
+    "Redefinir todas as configurações",
+    "Mantém o Apply receipt e os jobs em execução; ao restaurar a cota de histórico padrão, pode remover os finished jobs mais antigos que a excederem.",
+    "Redefinir todas as configurações?",
+    "Todas as configurações foram redefinidas.",
+    "Enter editar",
+    "Enter aceitar",
+    "Alterações não salvas",
+    "Descartar as alterações não salvas?\nVocê também pode voltar e pressionar s para salvá-las.",
+    "Editar orçamento de saída",
+    "Fração de {tool} — digite 1..=100:",
+    "As setas avançam de 25% em 25%; digite aqui qualquer valor intermediário.",
+    "Explícita; não muda com o nível.",
+    "Segue a fração recomendada do nível.",
+    "Salvar configurações",
+    "Salvar alterações ({count})",
+    "Nenhuma alteração não salva",
+    "Grava em settings.toml todas as alterações não salvas.",
+    "Salvando…"
+);
+
+const RU: ConfigMessages = config_messages!(
+    "Редактирование",
+    "Лимит файла replace",
+    "Чем выше лимит, тем больше памяти может использовать replace; слишком большое значение может вызвать нехватку памяти.",
+    "Новый лимит replace действует со следующего запроса. Нажимать Apply не нужно.",
+    "Поиск",
+    "Лимит ЦП",
+    "Автоматически",
+    "Используется grep/glob; действует после перезапуска общего центра управления. Нажимать Apply не нужно.",
+    "Изменить лимит ЦП",
+    "Введите 1..={maximum}:",
+    "Значение не может быть пустым.",
+    "Введите целое число.",
+    "Введите число от 1 до {maximum}.",
+    "Сброс",
+    "Сбросить все настройки",
+    "Сохраняет Apply receipt и запущенные jobs; при возврате к стандартной квоте истории могут быть удалены самые старые finished jobs сверх неё.",
+    "Сбросить все настройки?",
+    "Все настройки сброшены.",
+    "Enter изменить",
+    "Enter принять",
+    "Несохранённые изменения",
+    "Отменить несохранённые изменения?\nМожно вернуться и нажать s, чтобы сохранить их.",
+    "Изменить бюджет вывода",
+    "Доля для {tool} — введите 1..=100:",
+    "Стрелки меняют долю шагом 25 %; промежуточное значение вводится здесь.",
+    "Задана явно; не меняется с уровнем.",
+    "Следует рекомендуемой доле уровня.",
+    "Сохранить настройки",
+    "Сохранить изменения ({count})",
+    "Нет несохранённых изменений",
+    "Записывает все несохранённые изменения в settings.toml.",
+    "Сохранение…"
+);
+
+const IT: ConfigMessages = config_messages!(
+    "Modifica",
+    "Limite file di replace",
+    "Limiti più alti consentono a replace di usare più memoria; un valore eccessivo può causare memoria insufficiente.",
+    "Il nuovo limite di replace vale dalla prossima richiesta. Apply non è necessario.",
+    "Ricerca",
+    "Limite CPU",
+    "Automatico",
+    "Usato da grep/glob; vale dopo il riavvio del centro di controllo condiviso. Apply non è necessario.",
+    "Modifica limite CPU",
+    "Inserisci 1..={maximum}:",
+    "Il valore non può essere vuoto.",
+    "Inserisci un numero intero.",
+    "Inserisci un numero da 1 a {maximum}.",
+    "Ripristina",
+    "Ripristina tutte le impostazioni",
+    "Mantiene l’Apply receipt e i jobs in esecuzione; ripristinando la quota di cronologia predefinita può rimuovere i finished jobs più vecchi che la superano.",
+    "Ripristinare tutte le impostazioni?",
+    "Tutte le impostazioni sono state ripristinate.",
+    "Enter modifica",
+    "Enter accetta",
+    "Modifiche non salvate",
+    "Scartare le modifiche non salvate?\nPuoi anche tornare indietro e premere s per salvarle.",
+    "Modifica budget di output",
+    "Quota per {tool} — inserisci 1..=100:",
+    "Le frecce si spostano a passi del 25%; i valori intermedi si inseriscono qui.",
+    "Esplicita; invariata al cambio livello.",
+    "Segue la quota consigliata del livello.",
+    "Salva impostazioni",
+    "Salva modifiche ({count})",
+    "Nessuna modifica non salvata",
+    "Scrive in settings.toml tutte le modifiche non salvate.",
+    "Salvataggio…"
+);
+
+const TR: ConfigMessages = config_messages!(
+    "Düzenleme",
+    "replace dosya sınırı",
+    "Daha yüksek sınırlar replace için daha fazla bellek kullanımına izin verir; aşırı yüksek bir değer bellek yetersizliğine yol açabilir.",
+    "Yeni replace sınırı bir sonraki istekte geçerli olur. Apply gerekmez.",
+    "Arama",
+    "CPU sınırı",
+    "Otomatik",
+    "grep/glob tarafından kullanılır; paylaşılan kontrol merkezi yeniden başlatıldıktan sonra uygulanır. Apply gerekmez.",
+    "CPU sınırını düzenle",
+    "1..={maximum} girin:",
+    "Değer boş bırakılamaz.",
+    "Tam sayı girin.",
+    "1 ile {maximum} arasında bir sayı girin.",
+    "Sıfırla",
+    "Tüm ayarları sıfırla",
+    "Apply receipt ve çalışan jobs korunur; varsayılan geçmiş kotasına dönerken kotayı aşan en eski finished jobs kaldırılabilir.",
+    "Tüm ayarlar sıfırlansın mı?",
+    "Tüm ayarlar sıfırlandı.",
+    "Enter düzenle",
+    "Enter kabul et",
+    "Kaydedilmemiş değişiklikler",
+    "Kaydedilmemiş değişiklikler atılsın mı?\nGeri dönüp s ile kaydedebilirsiniz.",
+    "Çıktı bütçesini düzenle",
+    "{tool} payı — 1..=100 girin:",
+    "Ok tuşları %25 adımlarla ilerler; ara değerleri buraya yazın.",
+    "Açık ayar; kademe değişince korunur.",
+    "Kademenin önerilen payını izler.",
+    "Ayarları kaydet",
+    "Değişiklikleri kaydet ({count})",
+    "Kaydedilmemiş değişiklik yok",
+    "Kaydedilmemiş tüm değişiklikleri settings.toml dosyasına yazar.",
+    "Kaydediliyor…"
+);
+
+const PL: ConfigMessages = config_messages!(
+    "Edycja",
+    "Limit pliku replace",
+    "Wyższy limit pozwala replace użyć więcej pamięci; zbyt wysoka wartość może spowodować brak pamięci.",
+    "Nowy limit replace obowiązuje od następnego żądania. Apply nie jest wymagane.",
+    "Wyszukiwanie",
+    "Limit CPU",
+    "Automatycznie",
+    "Używany przez grep/glob; obowiązuje po ponownym uruchomieniu współdzielonego centrum sterowania. Apply nie jest wymagane.",
+    "Edytuj limit CPU",
+    "Wpisz 1..={maximum}:",
+    "Wartość nie może być pusta.",
+    "Wpisz liczbę całkowitą.",
+    "Wpisz liczbę od 1 do {maximum}.",
+    "Resetuj",
+    "Zresetuj wszystkie ustawienia",
+    "Zachowuje Apply receipt i uruchomione jobs; przywrócenie domyślnego limitu historii może usunąć najstarsze finished jobs ponad ten limit.",
+    "Zresetować wszystkie ustawienia?",
+    "Zresetowano wszystkie ustawienia.",
+    "Enter edytuj",
+    "Enter akceptuj",
+    "Niezapisane zmiany",
+    "Odrzucić niezapisane zmiany?\nMożesz też wrócić i nacisnąć s, aby je zapisać.",
+    "Edytuj budżet wyjścia",
+    "Udział dla {tool} — wpisz 1..=100:",
+    "Strzałki przesuwają o 25%; wartości pośrednie wpisz tutaj.",
+    "Ustawiony wprost; nie zmienia się.",
+    "Podąża za zalecanym udziałem poziomu.",
+    "Zapisz ustawienia",
+    "Zapisz zmiany ({count})",
+    "Brak niezapisanych zmian",
+    "Zapisuje w settings.toml wszystkie niezapisane zmiany.",
+    "Zapisywanie…"
+);
+
+const NL: ConfigMessages = config_messages!(
+    "Bewerken",
+    "Bestandslimiet voor replace",
+    "Hogere limieten laten replace meer geheugen gebruiken; een te hoge waarde kan geheugentekort veroorzaken.",
+    "De nieuwe replace-limiet geldt vanaf de volgende aanvraag. Apply is niet nodig.",
+    "Zoeken",
+    "CPU-limiet",
+    "Automatisch",
+    "Gebruikt door grep/glob; geldt na herstart van het gedeelde controlecentrum. Apply is niet nodig.",
+    "CPU-limiet bewerken",
+    "Voer 1..={maximum} in:",
+    "De waarde mag niet leeg zijn.",
+    "Voer een geheel getal in.",
+    "Voer een getal van 1 tot {maximum} in.",
+    "Resetten",
+    "Alle instellingen resetten",
+    "Behoudt de Apply receipt en actieve jobs; bij herstel van het standaard geschiedenisquotum kunnen de oudste finished jobs daarboven worden verwijderd.",
+    "Alle instellingen resetten?",
+    "Alle instellingen zijn gereset.",
+    "Enter bewerken",
+    "Enter accepteren",
+    "Niet-opgeslagen wijzigingen",
+    "Niet-opgeslagen wijzigingen verwerpen?\nJe kunt ook teruggaan en op s drukken om ze op te slaan.",
+    "Uitvoerbudget bewerken",
+    "Aandeel voor {tool} — voer 1..=100 in:",
+    "Pijltoetsen gaan in stappen van 25%; tussenliggende waarden voer je hier in.",
+    "Expliciet; blijft bij niveauwissel.",
+    "Volgt het aanbevolen aandeel van het niveau.",
+    "Instellingen opslaan",
+    "Wijzigingen opslaan ({count})",
+    "Geen niet-opgeslagen wijzigingen",
+    "Schrijft alle niet-opgeslagen wijzigingen naar settings.toml.",
+    "Opslaan…"
+);
+
+const VI: ConfigMessages = config_messages!(
+    "Chỉnh sửa",
+    "Giới hạn tệp replace",
+    "Giới hạn lớn hơn cho phép replace dùng nhiều bộ nhớ hơn; giá trị quá cao có thể gây hết bộ nhớ.",
+    "Giới hạn replace mới có hiệu lực từ yêu cầu kế tiếp. Không cần Apply.",
+    "Tìm kiếm",
+    "Giới hạn CPU",
+    "Tự động",
+    "Dùng cho grep/glob; có hiệu lực sau khi khởi động lại trung tâm điều khiển dùng chung. Không cần Apply.",
+    "Chỉnh giới hạn CPU",
+    "Nhập 1..={maximum}:",
+    "Giá trị không được để trống.",
+    "Nhập số nguyên.",
+    "Nhập số từ 1 đến {maximum}.",
+    "Đặt lại",
+    "Đặt lại mọi cài đặt",
+    "Giữ Apply receipt và các jobs đang chạy; khi khôi phục hạn mức lịch sử mặc định, các finished jobs cũ nhất vượt hạn mức có thể bị xóa.",
+    "Đặt lại mọi cài đặt?",
+    "Đã đặt lại mọi cài đặt.",
+    "Enter chỉnh sửa",
+    "Enter chấp nhận",
+    "Thay đổi chưa lưu",
+    "Bỏ các thay đổi chưa lưu?\nBạn cũng có thể quay lại và nhấn s để lưu.",
+    "Chỉnh ngân sách đầu ra",
+    "Tỷ lệ cho {tool} — nhập 1..=100:",
+    "Phím mũi tên đổi theo bước 25%; giá trị ở giữa thì nhập tại đây.",
+    "Đặt thủ công; giữ nguyên khi đổi mức.",
+    "Theo tỷ lệ khuyến nghị của mức.",
+    "Lưu cài đặt",
+    "Lưu thay đổi ({count})",
+    "Không có thay đổi chưa lưu",
+    "Ghi mọi thay đổi chưa lưu vào settings.toml.",
+    "Đang lưu…"
+);
+
+const ID: ConfigMessages = config_messages!(
+    "Penyuntingan",
+    "Batas file replace",
+    "Batas yang lebih tinggi memungkinkan replace memakai lebih banyak memori; nilai yang terlalu tinggi dapat menyebabkan kehabisan memori.",
+    "Batas replace baru berlaku pada permintaan berikutnya. Apply tidak diperlukan.",
+    "Pencarian",
+    "Batas CPU",
+    "Otomatis",
+    "Digunakan oleh grep/glob; berlaku setelah pusat kontrol bersama dimulai ulang. Apply tidak diperlukan.",
+    "Edit batas CPU",
+    "Masukkan 1..={maximum}:",
+    "Nilai tidak boleh kosong.",
+    "Masukkan bilangan bulat.",
+    "Masukkan angka dari 1 hingga {maximum}.",
+    "Atur ulang",
+    "Atur ulang semua pengaturan",
+    "Mempertahankan Apply receipt dan jobs yang berjalan; saat memulihkan kuota riwayat default, finished jobs terlama di atas kuota dapat dihapus.",
+    "Atur ulang semua pengaturan?",
+    "Semua pengaturan diatur ulang.",
+    "Enter edit",
+    "Enter terima",
+    "Perubahan belum disimpan",
+    "Buang perubahan yang belum disimpan?\nAnda juga bisa kembali dan menekan s untuk menyimpannya.",
+    "Edit anggaran keluaran",
+    "Porsi untuk {tool} — masukkan 1..=100:",
+    "Tombol panah bergerak per 25%; nilai di antaranya diketik di sini.",
+    "Eksplisit; tetap saat tingkat berubah.",
+    "Mengikuti porsi anjuran tingkat.",
+    "Simpan pengaturan",
+    "Simpan perubahan ({count})",
+    "Tidak ada perubahan yang belum disimpan",
+    "Menulis semua perubahan yang belum disimpan ke settings.toml.",
+    "Menyimpan…"
+);
+
+const UK: ConfigMessages = config_messages!(
+    "Редагування",
+    "Ліміт файлу replace",
+    "Вищий ліміт дозволяє replace використовувати більше пам’яті; надто велике значення може спричинити нестачу пам’яті.",
+    "Новий ліміт replace діє з наступного запиту. Apply не потрібен.",
+    "Пошук",
+    "Ліміт ЦП",
+    "Автоматично",
+    "Використовується grep/glob; діє після перезапуску спільного центру керування. Apply не потрібен.",
+    "Редагувати ліміт ЦП",
+    "Введіть 1..={maximum}:",
+    "Значення не може бути порожнім.",
+    "Введіть ціле число.",
+    "Введіть число від 1 до {maximum}.",
+    "Скидання",
+    "Скинути всі налаштування",
+    "Зберігає Apply receipt і запущені jobs; під час повернення до типової квоти історії найстаріші finished jobs понад неї можуть бути видалені.",
+    "Скинути всі налаштування?",
+    "Усі налаштування скинуто.",
+    "Enter редагувати",
+    "Enter прийняти",
+    "Незбережені зміни",
+    "Скасувати незбережені зміни?\nМожна повернутися й натиснути s, щоб зберегти їх.",
+    "Редагувати бюджет виводу",
+    "Частка для {tool} — введіть 1..=100:",
+    "Стрілки змінюють частку кроком 25 %; проміжне значення вводиться тут.",
+    "Задано явно; не змінюється з рівнем.",
+    "Дотримується рекомендованої частки рівня.",
+    "Зберегти налаштування",
+    "Зберегти зміни ({count})",
+    "Немає незбережених змін",
+    "Записує всі незбережені зміни до settings.toml.",
+    "Збереження…"
+);
+
+#[cfg(test)]
+mod tests {
+    use super::messages;
+    use crate::control::i18n::ALL_LANGUAGES;
+
+    #[test]
+    fn every_language_has_complete_editor_strings_and_exact_placeholders() {
+        for language in ALL_LANGUAGES {
+            let messages = messages(language);
+            assert!(
+                messages
+                    .values()
+                    .iter()
+                    .all(|value| !value.trim().is_empty()),
+                "{} has an empty configuration translation",
+                language.code()
+            );
+            // Footer hints are the only place a key binding is taught. A translation that keeps
+            // the verb but drops the key leaves an action nobody can find.
+            for (hint, key) in [
+                (messages.footer_edit, "Enter "),
+                (messages.footer_accept, "Enter "),
+                (language.messages().footer_save, "s "),
+            ] {
+                assert!(
+                    hint.starts_with(key),
+                    "{} footer hint {hint:?} must name its {key:?}key first",
+                    language.code()
+                );
+            }
+            assert_eq!(messages.cpu_edit_prompt.matches("{maximum}").count(), 1);
+            assert_eq!(messages.input_error_range.matches("{maximum}").count(), 1);
+            // A prompt that lost its placeholder would name no tool at all, leaving the editor
+            // ambiguous about which of the five budgets it is about to change.
+            assert_eq!(
+                messages.budget_edit_prompt.matches("{tool}").count(),
+                1,
+                "{} budget prompt must name the tool exactly once",
+                language.code()
+            );
+            // The save button is the only face that reports how much is pending; a translation
+            // that drops the count turns it back into a button with nothing to say.
+            assert_eq!(
+                messages.save_button_dirty.matches("{count}").count(),
+                1,
+                "{} save button must report its pending count exactly once",
+                language.code()
+            );
+            // The discard prompt is where a user learns the edits can still be kept; a
+            // translation that drops the save key leaves only the destructive option explained.
+            assert!(
+                messages.discard_confirm.contains(" s"),
+                "{} discard prompt must name the save key",
+                language.code()
+            );
+            assert!(messages.cpu_limit_note.contains("grep/glob"));
+            assert!(messages.cpu_limit_note.contains("Apply"));
+            assert!(messages.reset_all_note.contains("Apply receipt"));
+            assert!(messages.reset_all_note.contains("jobs"));
+            assert!(
+                messages.reset_all_note.contains("finished"),
+                "{} reset note must disclose finished-job reclamation",
+                language.code()
+            );
+            // The editor is the only path to an off-grid share, so its note is the only place the
+            // coarse arrow-key step is taught. A translation that drops it leaves the editor
+            // looking like the sole way to change a budget at all.
+            assert!(
+                messages.budget_edit_note.contains("25"),
+                "{} budget note must teach the coarse arrow-key step",
+                language.code()
+            );
+            assert!(
+                messages.save_all_note.contains("settings.toml"),
+                "{} save note must name the file it writes",
+                language.code()
+            );
+        }
+    }
+}

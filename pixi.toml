@@ -18,4 +18,5 @@ creative-model-bridge-test = "python -m unittest discover -s plugins/creative-mo
 workflow = "actionlint .github/workflows/*.yml"
 codex-sync-build = "cargo build --manifest-path plugins/codex-sync/engine/Cargo.toml"
 codex-sync-test = "CC=/usr/bin/cc CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/cc cargo test --manifest-path plugins/codex-sync/engine/Cargo.toml"
-check = { depends-on = ["test", "validate", "workflow", "codex-sync-test"] }
+fastctx-test = "cargo test --manifest-path plugins/fastctx/engine/Cargo.toml --locked --no-default-features"
+check = { depends-on = ["test", "validate", "workflow", "codex-sync-test", "fastctx-test"] }

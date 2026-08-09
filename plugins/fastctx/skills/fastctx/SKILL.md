@@ -9,7 +9,7 @@ Use the bundled provision scripts instead of installing `fastctx` with npm, npx,
 
 ## Resolve the plugin root
 
-Resolve the plugin root as the parent of the `skills/` directory that contains this skill. Confirm that both `.codex-plugin/plugin.json` and `upstream-release.json` exist there. Stop if either file is missing.
+Resolve the plugin root as the parent of the `skills/` directory that contains this skill. Confirm that both `.codex-plugin/plugin.json` and `runtime-release.json` exist there. Stop if either file is missing.
 
 On macOS or Linux, use:
 
@@ -42,7 +42,7 @@ Supported actions are `setup`, `status`, and `unapply`.
 
 ## Set up or repair
 
-1. Explain that setup downloads the exact reviewed GitHub Release recorded in `upstream-release.json`, verifies its SHA-256 digest, enables the FastCtx Bash tools, and changes global Codex configuration plus `~/.fastctx/`. On Windows, setup first uses an existing standalone GNU Bash when available; otherwise it downloads the locked Git for Windows `tar.bz2` asset in `windows-bash-runtime.json`, verifies its size and SHA-256 digest, safely extracts it under `~/.fastctx/portable-git/`, and owns only the matching user-level `FASTCTX_BASH` value. The bzip2 archive deliberately avoids the LZMA method used by the Portable Git self-extractor because older Windows `tar.exe` builds cannot decode it reliably. Setup also writes the resolved path to this device's `mcp_servers.fastctx.env.FASTCTX_BASH` so the next Codex MCP process receives it; never add that device-specific path to the shared Codex Sync repository.
+1. Explain that setup downloads the exact reviewed GitHub Release recorded in `runtime-release.json`, verifies its SHA-256 digest, enables the FastCtx Bash tools, and changes global Codex configuration plus `~/.fastctx/`. On Windows, setup first uses an existing standalone GNU Bash when available; otherwise it downloads the locked Git for Windows `tar.bz2` asset in `windows-bash-runtime.json`, verifies its size and SHA-256 digest, safely extracts it under `~/.fastctx/portable-git/`, and owns only the matching user-level `FASTCTX_BASH` value. The bzip2 archive deliberately avoids the LZMA method used by the Portable Git self-extractor because older Windows `tar.exe` builds cannot decode it reliably. Setup also writes the resolved path to this device's `mcp_servers.fastctx.env.FASTCTX_BASH` so the next Codex MCP process receives it; never add that device-specific path to the shared Codex Sync repository.
 2. Obtain explicit confirmation unless this invocation is the already-approved Codex Sync provisioning step.
 3. Run the platform provision command with `setup --yes`.
 4. Report the FastCtx version and status result.

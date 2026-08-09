@@ -1,0 +1,130 @@
+name: Release FastCtx engine
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "fastctx-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: fastctx-x86_64-unknown-linux-gnu.tar.gz
+            binary: fastctx
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            archive: fastctx-x86_64-apple-darwin.tar.gz
+            binary: fastctx
+          - os: macos-15
+            target: aarch64-apple-darwin
+            archive: fastctx-aarch64-apple-darwin.tar.gz
+            binary: fastctx
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: fastctx-x86_64-pc-windows-msvc.zip
+            binary: fastctx.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Zig for glibc-compatible Linux builds
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        uses: mlugg/setup-zig@d1434d08867e3ee9daa34448df10607b98908d29 # v2.2.1
+        with:
+          version: 0.14.1
+      - name: Test owned engine
+        working-directory: plugins/fastctx/engine
+        run: cargo test --locked --no-default-features --target "${{ matrix.target }}"
+      - name: Build and package Unix engine
+        if: runner.os != 'Windows'
+        shell: bash
+        working-directory: plugins/fastctx/engine
+        env:
+          FASTCTX_DISTRIBUTION: codex-plugin
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^version = "\([0-9.]*\)"/\1/p' Cargo.toml | head -n 1)"
+          if [[ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]]; then
+            cargo install cargo-zigbuild --locked --version 0.23.0
+            cargo zigbuild --locked --release --target x86_64-unknown-linux-gnu.2.31
+          else
+            cargo build --locked --release --target "${{ matrix.target }}"
+          fi
+          mkdir -p "$GITHUB_WORKSPACE/dist/package"
+          cp "target/${{ matrix.target }}/release/${{ matrix.binary }}" "$GITHUB_WORKSPACE/dist/package/fastctx"
+          test "$("$GITHUB_WORKSPACE/dist/package/fastctx" --version)" = "fastctx $version"
+          cp LICENSE-APACHE NOTICE THIRD_PARTY_LICENSES.md "$GITHUB_WORKSPACE/dist/package/"
+          tar -C "$GITHUB_WORKSPACE/dist/package" -czf "$GITHUB_WORKSPACE/dist/${{ matrix.archive }}" fastctx LICENSE-APACHE NOTICE THIRD_PARTY_LICENSES.md
+          python "$GITHUB_WORKSPACE/scripts/write_fastctx_runtime_release.py" --check-archive "$GITHUB_WORKSPACE/dist/${{ matrix.archive }}" --binary fastctx --payload-dir .
+          if [[ "${{ matrix.target }}" == "x86_64-unknown-linux-gnu" ]]; then
+            readelf -W --version-info "$GITHUB_WORKSPACE/dist/package/fastctx" | python "$GITHUB_WORKSPACE/scripts/write_fastctx_runtime_release.py" --check-glibc-version-info
+          fi
+      - name: Build and package Windows engine
+        if: runner.os == 'Windows'
+        shell: pwsh
+        working-directory: plugins/fastctx/engine
+        env:
+          FASTCTX_DISTRIBUTION: codex-plugin
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cargo build --locked --release --target '${{ matrix.target }}'
+          $dist = Join-Path $env:GITHUB_WORKSPACE 'dist'
+          $package = Join-Path $dist 'package'
+          $archive = Join-Path $dist '${{ matrix.archive }}'
+          New-Item -ItemType Directory -Force -Path $package | Out-Null
+          Copy-Item -LiteralPath 'target/${{ matrix.target }}/release/${{ matrix.binary }}' -Destination (Join-Path $package 'fastctx.exe')
+          $version = (Select-String -LiteralPath Cargo.toml -Pattern '^version = "([0-9.]+)"').Matches[0].Groups[1].Value
+          if ((& (Join-Path $package 'fastctx.exe') --version) -ne "fastctx $version") { throw 'binary version does not match Cargo.toml' }
+          Copy-Item LICENSE-APACHE,NOTICE,THIRD_PARTY_LICENSES.md -Destination $package
+          [System.IO.Compression.ZipFile]::CreateFromDirectory($package, $archive)
+          python "$env:GITHUB_WORKSPACE/scripts/write_fastctx_runtime_release.py" --check-archive $archive --binary fastctx.exe --payload-dir .
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ matrix.target }}
+          path: dist/${{ matrix.archive }}
+          if-no-files-found: error
+  release:
+    if: startsWith(github.ref, 'refs/tags/fastctx-v')
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Generate final runtime metadata from release assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#fastctx-v}"
+          cargo_version="$(sed -n 's/^version = "\([0-9.]*\)"/\1/p' plugins/fastctx/engine/Cargo.toml | head -n 1)"
+          test "$version" = "$cargo_version"
+          python scripts/write_fastctx_runtime_release.py --version "$version" --tag "$GITHUB_REF_NAME" --cargo-manifest plugins/fastctx/engine/Cargo.toml --assets-dir dist --output runtime-release.json
+          python scripts/write_fastctx_runtime_release.py --check runtime-release.json --cargo-manifest plugins/fastctx/engine/Cargo.toml
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/fastctx-* --repo "$GITHUB_REPOSITORY" --verify-tag --title "FastCtx ${GITHUB_REF_NAME#fastctx-v}" --generate-notes
+      - name: Publish generated metadata for review
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: runtime-release-metadata
+          path: runtime-release.json

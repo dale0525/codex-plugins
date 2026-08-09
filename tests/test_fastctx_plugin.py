@@ -24,6 +24,61 @@ class FastCtxPluginTests(unittest.TestCase):
         self.assertNotRegex(script, re.compile(r"\b(?:pixi|conda|m2-bash)\b", re.IGNORECASE))
         self.assertNotIn(".7z.exe", script)
 
+    def test_owned_runtime_metadata_is_explicitly_transitional_and_digest_pinned(self) -> None:
+        metadata = json.loads((PLUGIN / "runtime-release.json").read_text(encoding="utf-8"))
+        self.assertEqual(metadata["schema_version"], 2)
+        self.assertEqual(metadata["distribution"], "transitional-upstream")
+        self.assertTrue(metadata["transitional"])
+        self.assertIn("do not edit hashes manually", metadata["transition_note"])
+        self.assertEqual(set(metadata["assets"]), {
+            "aarch64-apple-darwin",
+            "x86_64-apple-darwin",
+            "x86_64-pc-windows-msvc",
+            "x86_64-unknown-linux-gnu",
+        })
+        for asset in metadata["assets"].values():
+            self.assertRegex(asset["sha256"], r"^[0-9a-f]{64}$")
+            self.assertGreater(asset["size"], 0)
+            self.assertTrue(asset["url"].endswith("/" + asset["name"]))
+
+    def test_owned_engine_and_provisioners_share_the_compact_contract(self) -> None:
+        agents = (PLUGIN / "engine/src/control/agents.rs").read_text(encoding="utf-8")
+        shell = (PLUGIN / "scripts/provision.sh").read_text(encoding="utf-8")
+        powershell = (PLUGIN / "scripts/provision.ps1").read_text(encoding="utf-8")
+        cargo = (PLUGIN / "engine/Cargo.toml").read_text(encoding="utf-8")
+        self.assertIn('version = "0.2.5"', cargo)
+        self.assertIn('repository = "https://github.com/dale0525/codex-plugins"', cargo)
+        self.assertIn('CODEX_PLUGIN_DISTRIBUTION: &str = "codex-plugin"',
+                      (PLUGIN / "engine/src/update/check.rs").read_text(encoding="utf-8"))
+        self.assertIn("AGENTS_SECTION.to_string()", agents)
+        self.assertIn("runtime-release.json", shell)
+        self.assertIn("runtime-release.json", powershell)
+        self.assertIn("System.IO.Compression.ZipFile]::OpenRead", powershell)
+        self.assertIn("unsafe path", powershell)
+
+    def test_owned_release_workflow_packages_licenses_and_uses_least_privilege(self) -> None:
+        workflow = (ROOT / ".github/workflows/release-fastctx.yml").read_text(encoding="utf-8")
+        self.assertIn("LICENSE-APACHE NOTICE THIRD_PARTY_LICENSES.md", workflow)
+        self.assertIn("fastctx LICENSE-APACHE NOTICE THIRD_PARTY_LICENSES.md", workflow)
+        self.assertIn("--check-archive", workflow)
+        self.assertIn("--binary fastctx.exe --payload-dir .", workflow)
+        self.assertIn("cargo build --locked --release", workflow)
+        self.assertIn("cargo test --locked --no-default-features", workflow)
+        self.assertIn("cargo zigbuild --locked --release --target x86_64-unknown-linux-gnu.2.31", workflow)
+        self.assertIn("readelf -W --version-info", workflow)
+        self.assertIn("--check-glibc-version-info", workflow)
+        self.assertIn("ZipFile]::CreateFromDirectory($package, $archive)", workflow)
+        self.assertNotIn("Compress-Archive", workflow)
+        self.assertNotIn("Join-Path $package '*'", workflow)
+        self.assertIn("permissions:\n  contents: read", workflow)
+        self.assertIn("persist-credentials: false", workflow)
+        self.assertIn("release version does not match Cargo.toml", (ROOT / "scripts/write_fastctx_runtime_release.py").read_text(encoding="utf-8"))
+
+    def test_readme_does_not_claim_fastctx_daily_sync(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("FastCtx is not a periodic sync source", readme)
+        self.assertNotIn("Release metadata and supported-platform\narchive digests are synchronized daily", readme)
+
     def test_windows_provisioner_persists_device_local_bash_in_mcp_environment(self) -> None:
         script = (PLUGIN / "scripts/provision.ps1").read_text(encoding="utf-8")
         helper = (PLUGIN / "scripts/fastctx-mcp-env.ps1").read_text(encoding="utf-8")

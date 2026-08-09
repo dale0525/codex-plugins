@@ -22,16 +22,3 @@ plugin_manifest = "plugins/prompt-master/.codex-plugin/plugin.json"
 license_source = "LICENSE"
 license_destination = "plugins/prompt-master/third-party/prompt-master-LICENSE"
 remove_skill_frontmatter_fields = ["version"]
-
-[[github_releases]]
-id = "fastctx-release"
-repository = "yc-duan/fastctx"
-metadata_destination = "plugins/fastctx/upstream-release.json"
-plugin_manifest = "plugins/fastctx/.codex-plugin/plugin.json"
-checksum_asset = "SHA256SUMS"
-required_assets = [
-  "fastctx-aarch64-apple-darwin.tar.gz",
-  "fastctx-x86_64-apple-darwin.tar.gz",
-  "fastctx-x86_64-pc-windows-msvc.zip",
-  "fastctx-x86_64-unknown-linux-gnu.tar.gz",
-]

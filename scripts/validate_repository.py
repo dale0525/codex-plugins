@@ -588,6 +588,55 @@ def _validate_fastctx_windows_runtime(validation: Validation) -> None:
         validation.error("FastCtx Windows Bash runtime: invalid asset digest")
 
 
+def _validate_fastctx_runtime_release(validation: Validation) -> None:
+    path = ROOT / "plugins/fastctx/runtime-release.json"
+    metadata = _read_json(path, validation)
+    if metadata is None:
+        return
+    if metadata.get("schema_version") != 2:
+        validation.error("FastCtx runtime release: schema_version must be 2")
+        return
+    assets = metadata.get("assets")
+    expected = {
+        "aarch64-apple-darwin": "fastctx-aarch64-apple-darwin.tar.gz",
+        "x86_64-apple-darwin": "fastctx-x86_64-apple-darwin.tar.gz",
+        "x86_64-pc-windows-msvc": "fastctx-x86_64-pc-windows-msvc.zip",
+        "x86_64-unknown-linux-gnu": "fastctx-x86_64-unknown-linux-gnu.tar.gz",
+    }
+    if not isinstance(assets, dict) or set(assets) != set(expected):
+        validation.error("FastCtx runtime release: exactly four platform assets are required")
+        return
+    final = metadata.get("distribution") == "codex-plugin" and metadata.get("transitional") is False
+    transition = metadata.get("distribution") == "transitional-upstream" and metadata.get("transitional") is True
+    if not (final or transition):
+        validation.error("FastCtx runtime release: invalid distribution state")
+    repository = metadata.get("repository")
+    if repository != ("dale0525/codex-plugins" if final else "yc-duan/fastctx"):
+        validation.error("FastCtx runtime release: repository does not match distribution state")
+    version = metadata.get("version")
+    tag = metadata.get("tag")
+    if not isinstance(version, str) or not SEMVER_PATTERN.fullmatch(version):
+        validation.error("FastCtx runtime release: invalid version")
+    if not isinstance(tag, str) or not tag:
+        validation.error("FastCtx runtime release: invalid tag")
+    if final and tag != f"fastctx-v{version}":
+        validation.error("FastCtx runtime release: final tag must match version")
+    if transition and not isinstance(metadata.get("transition_note"), str):
+        validation.error("FastCtx runtime release: transition note is required")
+    for target, name in expected.items():
+        asset = assets[target]
+        if not isinstance(asset, dict) or asset.get("name") != name:
+            validation.error(f"FastCtx runtime release: invalid asset {target}")
+            continue
+        if not isinstance(asset.get("size"), int) or asset["size"] <= 0:
+            validation.error(f"FastCtx runtime release: invalid asset size for {target}")
+        digest = asset.get("sha256")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            validation.error(f"FastCtx runtime release: invalid asset digest for {target}")
+        if not isinstance(asset.get("url"), str) or not asset["url"].endswith(f"/{name}"):
+            validation.error(f"FastCtx runtime release: invalid asset URL for {target}")
+
+
 def _validate_workflows(validation: Validation) -> None:
     workflow_directory = ROOT / ".github/workflows"
     workflows = sorted((*workflow_directory.glob("*.yml"), *workflow_directory.glob("*.yaml")))
@@ -623,6 +672,7 @@ def main() -> int:
     _validate_marketplace(validation)
     _validate_sync_metadata(validation)
     _validate_fastctx_windows_runtime(validation)
+    _validate_fastctx_runtime_release(validation)
     _validate_workflows(validation)
     for warning in validation.warnings:
         print(f"warning: {warning}")

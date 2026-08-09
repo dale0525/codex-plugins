@@ -3,7 +3,7 @@
 set -eu
 
 plugin_root=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
-metadata="$plugin_root/upstream-release.json"
+metadata="$plugin_root/runtime-release.json"
 action="${1:-status}"
 codex_home="${CODEX_HOME:-${HOME}/.codex}"
 fastctx_dir="${HOME}/.fastctx"

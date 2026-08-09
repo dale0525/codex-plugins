@@ -1,5 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "distribution": "transitional-upstream",
+  "transitional": true,
+  "transition_note": "This cryptographically verified upstream v0.2.4 release remains only until the repository-owned fastctx-v0.2.5 release publishes all four assets. Generate and commit the final codex-plugin metadata from release evidence; do not edit hashes manually.",
   "repository": "yc-duan/fastctx",
   "version": "0.2.4",
   "tag": "v0.2.4",

@@ -1,15 +1,15 @@
 {
   "name": "fastctx",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Provision FastCtx's native MCP runtime without a global npm installation.",
   "author": {
-    "name": "yc-duan",
-    "email": "dy2958830371@gmail.com",
-    "url": "https://github.com/yc-duan"
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
   },
-  "homepage": "https://github.com/yc-duan/fastctx",
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/fastctx",
   "repository": "https://github.com/dale0525/codex-plugins",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "keywords": [
     "fastctx",
     "mcp",
@@ -21,7 +21,7 @@
     "displayName": "FastCtx",
     "shortDescription": "Fast repository and Bash tools without global npm.",
     "longDescription": "Downloads a reviewed native FastCtx release, enables its repository and Bash MCP tools, verifies the Codex integration, and supports status, repair, and removal workflows.",
-    "developerName": "yc-duan",
+    "developerName": "Logic Tan",
     "category": "Developer Tools",
     "capabilities": [
       "Local file reading and search",

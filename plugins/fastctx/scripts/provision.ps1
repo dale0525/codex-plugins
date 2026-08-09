@@ -4,7 +4,7 @@ Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'fastctx-mcp-env.ps1')
 
 $pluginRoot = Split-Path -Parent $PSScriptRoot
-$metadataPath = Join-Path $pluginRoot 'upstream-release.json'
+$metadataPath = Join-Path $pluginRoot 'runtime-release.json'
 $bashMetadataPath = Join-Path $pluginRoot 'windows-bash-runtime.json'
 $action = if ($args.Count -gt 0) { $args[0] } else { 'status' }
 $metadata = Get-Content -LiteralPath $metadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -273,6 +273,18 @@ function Get-DownloadedBinary {
         $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
         if ($actual -ne $asset.sha256) {
             throw "FastCtx archive checksum verification failed for $($asset.name)"
+        }
+        Add-Type -AssemblyName System.IO.Compression.FileSystem
+        $zip = [System.IO.Compression.ZipFile]::OpenRead($archive)
+        try {
+            foreach ($entry in $zip.Entries) {
+                $normalized = $entry.FullName.Replace('\\', '/')
+                if ($normalized -match '^/' -or $normalized -match '^[A-Za-z]:' -or $normalized -match '(^|/)\.\.(/|$)') {
+                    throw "FastCtx archive contains an unsafe path: $($entry.FullName)"
+                }
+            }
+        } finally {
+            $zip.Dispose()
         }
         $extractDirectory = Join-Path $temporaryDirectory 'extract'
         Expand-Archive -LiteralPath $archive -DestinationPath $extractDirectory

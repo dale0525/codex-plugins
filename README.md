@@ -124,12 +124,12 @@ versioned snapshots instead of exposing GitHub credentials to Git subprocesses.
 
 ### FastCtx
 
-Packages the native [yc-duan/fastctx](https://github.com/yc-duan/fastctx)
-runtime for reviewed, npm-free provisioning. FastCtx supplies structured local
+Packages a repository-owned derivative of [yc-duan/fastctx](https://github.com/yc-duan/fastctx)
+for reviewed, npm-free provisioning. FastCtx supplies structured local
 file reading, search, discovery, mechanical replacement, Bash execution, and
 persistent background jobs through MCP. Release metadata and supported-platform
-archive digests are synchronized daily behind the pull-request supply-chain
-review gate.
+archive digests are generated from the repository-owned four-platform release;
+the checked metadata remains explicitly transitional until that release exists.
 
 FastCtx and Codex Sync have explicit ownership boundaries:
 
@@ -212,7 +212,7 @@ instructions, retry, or switch providers.
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
 17:23 UTC (01:23 China Standard Time) and can also be started manually. It:
 
-1. Reads external Git-tree and GitHub Release sources from `sync-sources.toml`.
+1. Reads external Git-tree and GitHub Release sources from `sync-sources.toml` (FastCtx is not a periodic sync source).
 2. Copies configured skill/plugin directories and verifies every required
    GitHub Release asset against both `SHA256SUMS` and the GitHub asset digest.
 3. Applies declared compatibility normalization, records immutable commits,
