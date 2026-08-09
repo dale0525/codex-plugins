@@ -22,3 +22,14 @@ plugin_manifest = "plugins/prompt-master/.codex-plugin/plugin.json"
 license_source = "LICENSE"
 license_destination = "plugins/prompt-master/third-party/prompt-master-LICENSE"
 remove_skill_frontmatter_fields = ["version"]
+
+[[github_releases]]
+id = "codebase-memory-mcp"
+repository = "DeusData/codebase-memory-mcp"
+metadata_destination = "plugins/codebase-memory-mcp/runtime-release.json"
+plugin_manifest = "plugins/codebase-memory-mcp/.codex-plugin/plugin.json"
+required_assets = [
+  "codebase-memory-mcp-darwin-arm64.tar.gz",
+  "codebase-memory-mcp-windows-amd64.zip",
+]
+checksum_asset = "checksums.txt"

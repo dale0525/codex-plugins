@@ -50,6 +50,12 @@ codex plugin add web-novel-craft@dale0525-codex-plugins
 codex plugin add creative-model-bridge@dale0525-codex-plugins
 ```
 
+## Install Codebase Memory MCP
+
+```bash
+codex plugin add codebase-memory-mcp@dale0525-codex-plugins
+```
+
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
@@ -207,6 +213,20 @@ without network access, and returns generated text verbatim with file hashes,
 usage, and request metadata. It does not auto-select models, inject hidden
 instructions, retry, or switch providers.
 
+### Codebase Memory MCP
+
+Packages [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp)
+as a lazy, checksum-verified native MCP runtime for Apple Silicon macOS and
+x64 Windows. The plugin does not run the upstream installer or modify Codex
+configuration, global instructions, hooks, or agent profiles. On first MCP
+startup it downloads the stable release selected by the daily synchronization
+workflow, verifies the archive, and stores that exact version in a device-local
+runtime directory.
+
+Existing devices update only after an explicit `codex-sync pull` (or a manual
+marketplace upgrade and plugin reinstall), followed by a new Codex task. Old
+runtime directories remain inert; startup never falls back to an older version.
+
 ## External content synchronization
 
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
@@ -234,6 +254,7 @@ set and checksum asset. Every destination must remain inside this repository.
 ```text
 .agents/plugins/marketplace.json
 plugins/apple-design/
+plugins/codebase-memory-mcp/
 plugins/codex-sync/
 plugins/creative-model-bridge/
 plugins/fastctx/

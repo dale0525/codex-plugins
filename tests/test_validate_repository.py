@@ -128,6 +128,57 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 validation.errors,
             )
 
+    def test_codebase_memory_runtime_requires_exact_platform_assets(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cbm-runtime-validator-test-") as temporary:
+            root = Path(temporary)
+            metadata = root / "plugins/codebase-memory-mcp/runtime-release.json"
+            metadata.parent.mkdir(parents=True)
+            tag = "v0.9.0"
+            prefix = (
+                "https://github.com/DeusData/codebase-memory-mcp/releases/download/"
+                f"{tag}/"
+            )
+            payload = {
+                "schema_version": 1,
+                "repository": "DeusData/codebase-memory-mcp",
+                "version": "0.9.0",
+                "tag": tag,
+                "tag_object_sha": "a" * 40,
+                "commit_sha": "b" * 40,
+                "assets": {
+                    "codebase-memory-mcp-darwin-arm64": {
+                        "name": "codebase-memory-mcp-darwin-arm64.tar.gz",
+                        "url": f"{prefix}codebase-memory-mcp-darwin-arm64.tar.gz",
+                        "size": 1,
+                        "sha256": "c" * 64,
+                    },
+                    "codebase-memory-mcp-windows-amd64": {
+                        "name": "codebase-memory-mcp-windows-amd64.zip",
+                        "url": f"{prefix}codebase-memory-mcp-windows-amd64.zip",
+                        "size": 1,
+                        "sha256": "d" * 64,
+                    },
+                },
+                "checksum_asset": {
+                    "name": "checksums.txt",
+                    "url": f"{prefix}checksums.txt",
+                    "size": 1,
+                    "sha256": "e" * 64,
+                },
+            }
+            metadata.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_codebase_memory_runtime_release(validation)
+            self.assertEqual(validation.errors, [])
+
+            del payload["assets"]["codebase-memory-mcp-windows-amd64"]
+            metadata.write_text(json.dumps(payload) + "\n", encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_codebase_memory_runtime_release(validation)
+            self.assertTrue(any("exactly the macOS" in error for error in validation.errors))
+
     def test_mcp_companion_validates_path_launcher_cwd_and_env_vars(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mcp-validator-test-") as temporary:
             root = Path(temporary)
@@ -148,6 +199,35 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                                 "startup_timeout_sec": 45,
                                 "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"],
                             }
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin,
+                    {"mcpServers": "./.mcp.json"},
+                    validation,
+                )
+            self.assertEqual(validation.errors, [])
+
+    def test_mcp_companion_accepts_canonical_direct_server_map(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="mcp-validator-test-") as temporary:
+            root = Path(temporary)
+            plugin = root / "plugins/example"
+            launcher = plugin / "bin/launch"
+            launcher.parent.mkdir(parents=True)
+            launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+            launcher.chmod(0o755)
+            (plugin / ".mcp.json").write_text(
+                json.dumps(
+                    {
+                        "example": {
+                            "command": "./bin/launch",
+                            "cwd": ".",
+                            "args": [],
                         }
                     }
                 ),
@@ -288,7 +368,7 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
     def test_git_alias_command_is_exact_and_direct_pixi_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory(prefix="git-alias-validator-test-") as temporary:
             root = Path(temporary)
-            plugin = root / "plugins/example"
+            plugin = root / "plugins/creative-model-bridge"
             plugin.mkdir(parents=True)
             scripts = plugin / "scripts"
             scripts.mkdir()
@@ -313,6 +393,46 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
             with patch.object(validate_repository, "ROOT", root):
                 validate_repository._validate_mcp_servers(plugin, {"mcpServers": "./.mcp.json"}, validation)
             self.assertTrue(any("direct Pixi command" in error for error in validation.errors))
+
+    def test_codebase_memory_git_alias_must_inherit_task_cwd(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="git-alias-validator-test-") as temporary:
+            root = Path(temporary)
+            plugin = root / "plugins/codebase-memory-mcp"
+            scripts = plugin / "scripts"
+            scripts.mkdir(parents=True)
+            launcher = scripts / "launch.sh"
+            launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+            launcher.chmod(0o755)
+            companion = plugin / ".mcp.json"
+            payload = {
+                "codebase-memory-mcp": {
+                    "command": "git",
+                    "args": [
+                        "-c",
+                        "alias.codebase-memory-mcp=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) codex_home=$(cygpath -u \"$codex_home\") ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/codebase-memory-mcp\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed codebase-memory-mcp plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed codebase-memory-mcp launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
+                        "codebase-memory-mcp",
+                    ],
+                    "env_vars": ["CODEX_HOME", "HOME", "USERPROFILE"],
+                }
+            }
+            companion.write_text(json.dumps(payload), encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin, {"mcpServers": "./.mcp.json"}, validation
+                )
+            self.assertEqual(validation.errors, [])
+
+            payload["codebase-memory-mcp"]["cwd"] = "."
+            companion.write_text(json.dumps(payload), encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin, {"mcpServers": "./.mcp.json"}, validation
+                )
+            self.assertTrue(
+                any("must inherit the task working directory" in error for error in validation.errors)
+            )
 
 
 class WorkflowActionPinValidationTests(unittest.TestCase):

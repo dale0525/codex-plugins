@@ -234,10 +234,10 @@ def _validate_mcp_servers(plugin_path: Path, manifest: dict[str, Any], validatio
         payload = _read_json(companion, validation)
         if payload is None:
             return
-        if set(payload) != {"mcpServers"}:
-            validation.error(f"{companion.relative_to(ROOT)}: companion must contain only mcpServers")
-            return
-        value = payload.get("mcpServers")
+        if set(payload) == {"mcpServers"}:
+            value = payload.get("mcpServers")
+        else:
+            value = payload
     if not isinstance(value, dict):
         validation.error(f"{plugin_path.relative_to(ROOT)}: mcpServers must be an object or companion path")
         return
@@ -368,9 +368,12 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
                     "CREATIVE_MODEL_BRIDGE_OFFLINE",
                 }
             )
+        elif plugin_path.name == "codebase-memory-mcp":
+            allowed_env.update({"HOME", "USERPROFILE"})
         if any(item not in allowed_env for item in env_vars):
             validation.error(f"{context}: env_vars contains a non-allowlisted variable")
 
+    has_explicit_cwd = "cwd" in server
     cwd = server.get("cwd", ".")
     if not isinstance(cwd, str) or Path(cwd).is_absolute():
         validation.error(f"{context}: cwd must be a relative path")
@@ -395,18 +398,44 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
         if command == "pixi":
             validation.error(f"{context}: direct Pixi command is not permitted for target runtime")
         elif command == "git":
-            expected_args = [
-                "-c",
-                'alias.creative-model-bridge=!sh "${GIT_PREFIX}scripts/bootstrap.sh"',
-                "creative-model-bridge",
-            ]
-            if cwd != ".":
+            git_launchers = {
+                "creative-model-bridge": (
+                    [
+                        "-c",
+                        'alias.creative-model-bridge=!sh "${GIT_PREFIX}scripts/bootstrap.sh"',
+                        "creative-model-bridge",
+                    ],
+                    "scripts/bootstrap.sh",
+                ),
+                "codebase-memory-mcp": (
+                    [
+                        "-c",
+                        "alias.codebase-memory-mcp=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) codex_home=$(cygpath -u \"$codex_home\") ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/codebase-memory-mcp\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed codebase-memory-mcp plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed codebase-memory-mcp launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
+                        "codebase-memory-mcp",
+                    ],
+                    "scripts/launch.sh",
+                ),
+            }
+            launcher_contract = git_launchers.get(plugin_path.name)
+            if plugin_path.name == "codebase-memory-mcp" and has_explicit_cwd:
+                validation.error(
+                    f"{context}: codebase-memory-mcp must inherit the task working directory"
+                )
+            elif plugin_path.name != "codebase-memory-mcp" and cwd != ".":
                 validation.error(f"{context}: Git alias command must run from plugin root (cwd '.')")
-            if args != expected_args:
-                validation.error(f"{context}: Git alias command must use the exact bootstrap arguments")
-            bootstrap = plugin_path / "scripts/bootstrap.sh"
-            if not bootstrap.is_file() or not os.access(bootstrap, os.X_OK):
-                validation.error(f"{context}: scripts/bootstrap.sh must exist and be executable")
+            if launcher_contract is None:
+                validation.error(f"{context}: Git alias command is not allowed for this plugin")
+            else:
+                expected_args, relative_launcher = launcher_contract
+                if args != expected_args:
+                    validation.error(
+                        f"{context}: Git alias command must use the exact launcher arguments"
+                    )
+                launcher = plugin_path / relative_launcher
+                if not launcher.is_file() or not os.access(launcher, os.X_OK):
+                    validation.error(
+                        f"{context}: {relative_launcher} must exist and be executable"
+                    )
         elif "/" in command or "\\" in command or command.startswith("."):
             target = (cwd_path / command).resolve()
             if not _inside(plugin_path.resolve(), target):
@@ -637,6 +666,64 @@ def _validate_fastctx_runtime_release(validation: Validation) -> None:
             validation.error(f"FastCtx runtime release: invalid asset URL for {target}")
 
 
+def _validate_codebase_memory_runtime_release(validation: Validation) -> None:
+    path = ROOT / "plugins/codebase-memory-mcp/runtime-release.json"
+    metadata = _read_json(path, validation)
+    if metadata is None:
+        return
+    context = "Codebase Memory runtime release"
+    if metadata.get("schema_version") != 1:
+        validation.error(f"{context}: schema_version must be 1")
+    if metadata.get("repository") != "DeusData/codebase-memory-mcp":
+        validation.error(f"{context}: unexpected repository")
+    version = metadata.get("version")
+    tag = metadata.get("tag")
+    if not isinstance(version, str) or not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        validation.error(f"{context}: invalid version")
+    if tag != f"v{version}":
+        validation.error(f"{context}: tag must match version")
+    for field in ("tag_object_sha", "commit_sha"):
+        value = metadata.get(field)
+        if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{40}", value):
+            validation.error(f"{context}: invalid {field}")
+
+    expected = {
+        "codebase-memory-mcp-darwin-arm64": "codebase-memory-mcp-darwin-arm64.tar.gz",
+        "codebase-memory-mcp-windows-amd64": "codebase-memory-mcp-windows-amd64.zip",
+    }
+    assets = metadata.get("assets")
+    if not isinstance(assets, dict) or set(assets) != set(expected):
+        validation.error(f"{context}: exactly the macOS arm64 and Windows amd64 assets are required")
+        return
+    expected_prefix = (
+        "https://github.com/DeusData/codebase-memory-mcp/releases/download/"
+        f"{tag}/"
+    )
+    for target, name in expected.items():
+        asset = assets[target]
+        if not isinstance(asset, dict) or asset.get("name") != name:
+            validation.error(f"{context}: invalid asset {target}")
+            continue
+        if asset.get("url") != f"{expected_prefix}{name}":
+            validation.error(f"{context}: invalid asset URL for {target}")
+        if not isinstance(asset.get("size"), int) or asset["size"] <= 0:
+            validation.error(f"{context}: invalid asset size for {target}")
+        digest = asset.get("sha256")
+        if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+            validation.error(f"{context}: invalid asset digest for {target}")
+    checksum_asset = metadata.get("checksum_asset")
+    if not isinstance(checksum_asset, dict) or checksum_asset.get("name") != "checksums.txt":
+        validation.error(f"{context}: checksum asset must be checksums.txt")
+    else:
+        if checksum_asset.get("url") != f"{expected_prefix}checksums.txt":
+            validation.error(f"{context}: invalid checksum asset URL")
+        checksum_digest = checksum_asset.get("sha256")
+        if not isinstance(checksum_digest, str) or not re.fullmatch(
+            r"[0-9a-f]{64}", checksum_digest
+        ):
+            validation.error(f"{context}: invalid checksum asset digest")
+
+
 def _validate_workflows(validation: Validation) -> None:
     workflow_directory = ROOT / ".github/workflows"
     workflows = sorted((*workflow_directory.glob("*.yml"), *workflow_directory.glob("*.yaml")))
@@ -673,6 +760,7 @@ def main() -> int:
     _validate_sync_metadata(validation)
     _validate_fastctx_windows_runtime(validation)
     _validate_fastctx_runtime_release(validation)
+    _validate_codebase_memory_runtime_release(validation)
     _validate_workflows(validation)
     for warning in validation.warnings:
         print(f"warning: {warning}")

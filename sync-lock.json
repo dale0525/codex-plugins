@@ -14,6 +14,71 @@
       "ref": "main",
       "commit": "d15eabbe5d2122eedc060bae8a771381e9873d1b",
       "destination": "plugins/prompt-master/skills/prompt-master"
+    },
+    "codebase-memory-mcp": {
+      "kind": "github-release",
+      "repository": "DeusData/codebase-memory-mcp",
+      "version": "0.9.0",
+      "tag": "v0.9.0",
+      "release_id": 350873451,
+      "published_at": "2026-07-08T11:16:08Z",
+      "tag_object_sha": "b637e3330c96cfe452da623db068c241aaa3ec01",
+      "commit": "b637e3330c96cfe452da623db068c241aaa3ec01",
+      "metadata_destination": "plugins/codebase-memory-mcp/runtime-release.json",
+      "assets": {
+        "codebase-memory-mcp-darwin-arm64": {
+          "name": "codebase-memory-mcp-darwin-arm64.tar.gz",
+          "url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.9.0/codebase-memory-mcp-darwin-arm64.tar.gz",
+          "size": 38237947,
+          "sha256": "faa02f0404230c451a9812230394481948f80183801fa5bf67044b41c2f25ed4"
+        },
+        "codebase-memory-mcp-windows-amd64": {
+          "name": "codebase-memory-mcp-windows-amd64.zip",
+          "url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.9.0/codebase-memory-mcp-windows-amd64.zip",
+          "size": 37387929,
+          "sha256": "92f96896f952e539f0d6cb34d7892a25064b677ccbf808b8f8310ad897e86f2c"
+        }
+      },
+      "checksum_asset": {
+        "name": "checksums.txt",
+        "url": "https://github.com/DeusData/codebase-memory-mcp/releases/download/v0.9.0/checksums.txt",
+        "size": 1740,
+        "sha256": "b7294616f22050124c8f2cf029cc9943e0b7d6e426fb9a0b95b1de9815c76e57"
+      },
+      "ignored_assets": [
+        "checksums.txt.bundle",
+        "codebase-memory-mcp-darwin-amd64.tar.gz",
+        "codebase-memory-mcp-darwin-amd64.tar.gz.bundle",
+        "codebase-memory-mcp-darwin-arm64.tar.gz.bundle",
+        "codebase-memory-mcp-linux-amd64-portable.tar.gz",
+        "codebase-memory-mcp-linux-amd64-portable.tar.gz.bundle",
+        "codebase-memory-mcp-linux-amd64.tar.gz",
+        "codebase-memory-mcp-linux-amd64.tar.gz.bundle",
+        "codebase-memory-mcp-linux-arm64-portable.tar.gz",
+        "codebase-memory-mcp-linux-arm64-portable.tar.gz.bundle",
+        "codebase-memory-mcp-linux-arm64.tar.gz",
+        "codebase-memory-mcp-linux-arm64.tar.gz.bundle",
+        "codebase-memory-mcp-ui-darwin-amd64.tar.gz",
+        "codebase-memory-mcp-ui-darwin-amd64.tar.gz.bundle",
+        "codebase-memory-mcp-ui-darwin-arm64.tar.gz",
+        "codebase-memory-mcp-ui-darwin-arm64.tar.gz.bundle",
+        "codebase-memory-mcp-ui-linux-amd64-portable.tar.gz",
+        "codebase-memory-mcp-ui-linux-amd64-portable.tar.gz.bundle",
+        "codebase-memory-mcp-ui-linux-amd64.tar.gz",
+        "codebase-memory-mcp-ui-linux-amd64.tar.gz.bundle",
+        "codebase-memory-mcp-ui-linux-arm64-portable.tar.gz",
+        "codebase-memory-mcp-ui-linux-arm64-portable.tar.gz.bundle",
+        "codebase-memory-mcp-ui-linux-arm64.tar.gz",
+        "codebase-memory-mcp-ui-linux-arm64.tar.gz.bundle",
+        "codebase-memory-mcp-ui-windows-amd64.zip",
+        "codebase-memory-mcp-ui-windows-amd64.zip.bundle",
+        "codebase-memory-mcp-ui-windows-arm64.zip",
+        "codebase-memory-mcp-ui-windows-arm64.zip.bundle",
+        "codebase-memory-mcp-windows-amd64.zip.bundle",
+        "codebase-memory-mcp-windows-arm64.zip",
+        "codebase-memory-mcp-windows-arm64.zip.bundle",
+        "sbom.json"
+      ]
     }
   }
 }

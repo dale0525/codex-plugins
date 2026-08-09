@@ -212,6 +212,39 @@ class ExternalContentSyncTests(unittest.TestCase):
             self.assertEqual(metadata["assets"]["test-target"]["sha256"], asset_digest)
             self.assertFalse(synchronize(self.config, self.lock))
 
+    def test_github_release_sync_ignores_newer_prerelease(self) -> None:
+        _, _, github_json, download = self._release_fixture()
+        stable = github_json("https://api.github.com/releases?per_page=100")[0]
+        prerelease = dict(stable)
+        prerelease.update(
+            {
+                "id": 8,
+                "tag_name": "v0.2.4-rc.1",
+                "prerelease": True,
+                "published_at": "2026-07-26T20:47:52Z",
+            }
+        )
+
+        def github_json_with_prerelease(url: str):
+            if "/releases?" in url:
+                return [prerelease, stable]
+            return github_json(url)
+
+        with (
+            patch(
+                "scripts.sync_external_content._github_json",
+                side_effect=github_json_with_prerelease,
+            ),
+            patch("scripts.sync_external_content._download", side_effect=download),
+        ):
+            self.assertTrue(synchronize(self.config, self.lock))
+        metadata = json.loads(
+            (self.root / "plugins/fastctx/upstream-release.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(metadata["version"], "0.2.3")
+
     def test_github_release_rejects_mutated_locked_tag_without_writes(self) -> None:
         manifest, _, github_json, download = self._release_fixture()
         with (
