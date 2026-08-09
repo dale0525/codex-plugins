@@ -145,7 +145,18 @@ fn background_status_tracks_only_known_jobs_and_consumes_terminal_entries_explic
 fn foreground_run_preserves_order_normalizes_output_and_marks_long_line_loss() {
     let _serial = shell_contract_guard();
     let temp = tempfile::tempdir().unwrap();
-    let mut session = shell_session(temp.path(), None);
+    let disabled_apply_patch = temp.path().join("disable-apply-patch.sh");
+    std::fs::write(
+        &disabled_apply_patch,
+        "apply_patch() { printf 'bash: apply_patch: command not found\\n' >&2; return 127; }\n",
+    )
+    .unwrap();
+    let mut command = shell_command(temp.path(), None);
+    // This developer environment places a working host `apply_patch` on the login-shell PATH.
+    // The contract exercises the fallback guidance for the ordinary no-program case; BASH_ENV
+    // makes that prerequisite deterministic while the later function definition still overrides it.
+    command.env("BASH_ENV", &disabled_apply_patch);
+    let mut session = McpSession::start(command);
     let response = session.call(
         "run",
         serde_json::json!({

@@ -24,12 +24,15 @@ class FastCtxPluginTests(unittest.TestCase):
         self.assertNotRegex(script, re.compile(r"\b(?:pixi|conda|m2-bash)\b", re.IGNORECASE))
         self.assertNotIn(".7z.exe", script)
 
-    def test_owned_runtime_metadata_is_explicitly_transitional_and_digest_pinned(self) -> None:
+    def test_owned_runtime_metadata_is_codex_plugin_and_digest_pinned(self) -> None:
         metadata = json.loads((PLUGIN / "runtime-release.json").read_text(encoding="utf-8"))
         self.assertEqual(metadata["schema_version"], 2)
-        self.assertEqual(metadata["distribution"], "transitional-upstream")
-        self.assertTrue(metadata["transitional"])
-        self.assertIn("do not edit hashes manually", metadata["transition_note"])
+        self.assertEqual(metadata["distribution"], "codex-plugin")
+        self.assertFalse(metadata["transitional"])
+        self.assertEqual(metadata["repository"], "dale0525/codex-plugins")
+        self.assertEqual(metadata["version"], "0.2.5")
+        self.assertEqual(metadata["tag"], "fastctx-v0.2.5")
+        self.assertNotIn("transition_note", metadata)
         self.assertEqual(set(metadata["assets"]), {
             "aarch64-apple-darwin",
             "x86_64-apple-darwin",
@@ -40,6 +43,10 @@ class FastCtxPluginTests(unittest.TestCase):
             self.assertRegex(asset["sha256"], r"^[0-9a-f]{64}$")
             self.assertGreater(asset["size"], 0)
             self.assertTrue(asset["url"].endswith("/" + asset["name"]))
+            self.assertIn(
+                "/dale0525/codex-plugins/releases/download/fastctx-v0.2.5/",
+                asset["url"],
+            )
 
     def test_owned_engine_and_provisioners_share_the_compact_contract(self) -> None:
         agents = (PLUGIN / "engine/src/control/agents.rs").read_text(encoding="utf-8")
