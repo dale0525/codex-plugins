@@ -412,7 +412,7 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                         "alias.codebase-memory-mcp=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) codex_home=$(cygpath -u \"$codex_home\") ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/codebase-memory-mcp\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed codebase-memory-mcp plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed codebase-memory-mcp launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
                         "codebase-memory-mcp",
                     ],
-                    "env_vars": ["CODEX_HOME", "HOME", "USERPROFILE"],
+                    "env_vars": ["CODEX_HOME", "HOME", "USERPROFILE", "LOCALAPPDATA"],
                 }
             }
             companion.write_text(json.dumps(payload), encoding="utf-8")
@@ -423,6 +423,16 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 )
             self.assertEqual(validation.errors, [])
 
+            payload["codebase-memory-mcp"]["env_vars"].remove("LOCALAPPDATA")
+            companion.write_text(json.dumps(payload), encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_mcp_servers(
+                    plugin, {"mcpServers": "./.mcp.json"}, validation
+                )
+            self.assertTrue(any("must include LOCALAPPDATA" in error for error in validation.errors))
+
+            payload["codebase-memory-mcp"]["env_vars"].append("LOCALAPPDATA")
             payload["codebase-memory-mcp"]["cwd"] = "."
             companion.write_text(json.dumps(payload), encoding="utf-8")
             validation = validate_repository.Validation()

@@ -310,6 +310,14 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, f"cwd:{nested_workspace.resolve()}\n")
 
+    def test_mcp_manifest_forwards_windows_cache_location(self) -> None:
+        companion = json.loads((self.plugin / ".mcp.json").read_text(encoding="utf-8"))
+        server = companion["codebase-memory-mcp"]
+        self.assertEqual(
+            server["env_vars"],
+            ["CODEX_HOME", "HOME", "USERPROFILE", "LOCALAPPDATA"],
+        )
+
     def test_mcp_git_alias_falls_back_to_windows_userprofile(self) -> None:
         self._write_metadata()
         companion = json.loads((self.plugin / ".mcp.json").read_text(encoding="utf-8"))

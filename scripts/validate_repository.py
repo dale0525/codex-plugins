@@ -369,7 +369,9 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
                 }
             )
         elif plugin_path.name == "codebase-memory-mcp":
-            allowed_env.update({"HOME", "USERPROFILE"})
+            allowed_env.update({"HOME", "USERPROFILE", "LOCALAPPDATA"})
+            if "LOCALAPPDATA" not in env_vars:
+                validation.error(f"{context}: env_vars must include LOCALAPPDATA for Windows")
         if any(item not in allowed_env for item in env_vars):
             validation.error(f"{context}: env_vars contains a non-allowlisted variable")
 

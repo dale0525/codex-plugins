@@ -1,6 +1,6 @@
 {
   "name": "codebase-memory-mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Verified, local launcher for Codebase Memory MCP.",
   "author": {
     "name": "Logic Tan",
