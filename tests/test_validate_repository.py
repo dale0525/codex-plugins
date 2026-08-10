@@ -128,33 +128,33 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 validation.errors,
             )
 
-    def test_codebase_memory_runtime_requires_exact_platform_assets(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="cbm-runtime-validator-test-") as temporary:
+    def test_gortex_runtime_requires_exact_platform_assets(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="gortex-runtime-validator-test-") as temporary:
             root = Path(temporary)
-            metadata = root / "plugins/codebase-memory-mcp/runtime-release.json"
+            metadata = root / "plugins/gortex/runtime-release.json"
             metadata.parent.mkdir(parents=True)
             tag = "v0.9.0"
             prefix = (
-                "https://github.com/DeusData/codebase-memory-mcp/releases/download/"
+                "https://github.com/zzet/gortex/releases/download/"
                 f"{tag}/"
             )
             payload = {
                 "schema_version": 1,
-                "repository": "DeusData/codebase-memory-mcp",
+                "repository": "zzet/gortex",
                 "version": "0.9.0",
                 "tag": tag,
                 "tag_object_sha": "a" * 40,
                 "commit_sha": "b" * 40,
                 "assets": {
-                    "codebase-memory-mcp-darwin-arm64": {
-                        "name": "codebase-memory-mcp-darwin-arm64.tar.gz",
-                        "url": f"{prefix}codebase-memory-mcp-darwin-arm64.tar.gz",
+                    "gortex_darwin_arm64": {
+                        "name": "gortex_darwin_arm64.tar.gz",
+                        "url": f"{prefix}gortex_darwin_arm64.tar.gz",
                         "size": 1,
                         "sha256": "c" * 64,
                     },
-                    "codebase-memory-mcp-windows-amd64": {
-                        "name": "codebase-memory-mcp-windows-amd64.zip",
-                        "url": f"{prefix}codebase-memory-mcp-windows-amd64.zip",
+                    "gortex_windows_amd64": {
+                        "name": "gortex_windows_amd64.zip",
+                        "url": f"{prefix}gortex_windows_amd64.zip",
                         "size": 1,
                         "sha256": "d" * 64,
                     },
@@ -169,14 +169,14 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
             metadata.write_text(json.dumps(payload) + "\n", encoding="utf-8")
             validation = validate_repository.Validation()
             with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_codebase_memory_runtime_release(validation)
+                validate_repository._validate_gortex_runtime_release(validation)
             self.assertEqual(validation.errors, [])
 
-            del payload["assets"]["codebase-memory-mcp-windows-amd64"]
+            del payload["assets"]["gortex_windows_amd64"]
             metadata.write_text(json.dumps(payload) + "\n", encoding="utf-8")
             validation = validate_repository.Validation()
             with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_codebase_memory_runtime_release(validation)
+                validate_repository._validate_gortex_runtime_release(validation)
             self.assertTrue(any("exactly the macOS" in error for error in validation.errors))
 
     def test_mcp_companion_validates_path_launcher_cwd_and_env_vars(self) -> None:
@@ -394,10 +394,10 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 validate_repository._validate_mcp_servers(plugin, {"mcpServers": "./.mcp.json"}, validation)
             self.assertTrue(any("direct Pixi command" in error for error in validation.errors))
 
-    def test_codebase_memory_git_alias_must_inherit_task_cwd(self) -> None:
+    def test_gortex_git_alias_must_inherit_task_cwd(self) -> None:
         with tempfile.TemporaryDirectory(prefix="git-alias-validator-test-") as temporary:
             root = Path(temporary)
-            plugin = root / "plugins/codebase-memory-mcp"
+            plugin = root / "plugins/gortex"
             scripts = plugin / "scripts"
             scripts.mkdir(parents=True)
             launcher = scripts / "launch.sh"
@@ -405,12 +405,12 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
             launcher.chmod(0o755)
             companion = plugin / ".mcp.json"
             payload = {
-                "codebase-memory-mcp": {
+                "gortex": {
                     "command": "git",
                     "args": [
                         "-c",
-                        "alias.codebase-memory-mcp=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) codex_home=$(cygpath -u \"$codex_home\") ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/codebase-memory-mcp\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed codebase-memory-mcp plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed codebase-memory-mcp launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
-                        "codebase-memory-mcp",
+                        "alias.gortex=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) codex_home=$(cygpath -u \"$codex_home\") ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/gortex\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed gortex plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed gortex launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
+                        "gortex",
                     ],
                     "env_vars": ["CODEX_HOME", "HOME", "USERPROFILE", "LOCALAPPDATA"],
                 }
@@ -423,7 +423,7 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 )
             self.assertEqual(validation.errors, [])
 
-            payload["codebase-memory-mcp"]["env_vars"].remove("LOCALAPPDATA")
+            payload["gortex"]["env_vars"].remove("LOCALAPPDATA")
             companion.write_text(json.dumps(payload), encoding="utf-8")
             validation = validate_repository.Validation()
             with patch.object(validate_repository, "ROOT", root):
@@ -432,8 +432,8 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 )
             self.assertTrue(any("must include LOCALAPPDATA" in error for error in validation.errors))
 
-            payload["codebase-memory-mcp"]["env_vars"].append("LOCALAPPDATA")
-            payload["codebase-memory-mcp"]["cwd"] = "."
+            payload["gortex"]["env_vars"].append("LOCALAPPDATA")
+            payload["gortex"]["cwd"] = "."
             companion.write_text(json.dumps(payload), encoding="utf-8")
             validation = validate_repository.Validation()
             with patch.object(validate_repository, "ROOT", root):

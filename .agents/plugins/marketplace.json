@@ -89,10 +89,10 @@
       "category": "Writing"
     },
     {
-      "name": "codebase-memory-mcp",
+      "name": "gortex",
       "source": {
         "source": "local",
-        "path": "./plugins/codebase-memory-mcp"
+        "path": "./plugins/gortex"
       },
       "policy": {
         "installation": "AVAILABLE",

@@ -368,7 +368,7 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
                     "CREATIVE_MODEL_BRIDGE_OFFLINE",
                 }
             )
-        elif plugin_path.name == "codebase-memory-mcp":
+        elif plugin_path.name == "gortex":
             allowed_env.update({"HOME", "USERPROFILE", "LOCALAPPDATA"})
             if "LOCALAPPDATA" not in env_vars:
                 validation.error(f"{context}: env_vars must include LOCALAPPDATA for Windows")
@@ -409,21 +409,21 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
                     ],
                     "scripts/bootstrap.sh",
                 ),
-                "codebase-memory-mcp": (
+                "gortex": (
                     [
                         "-c",
-                        "alias.codebase-memory-mcp=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) codex_home=$(cygpath -u \"$codex_home\") ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/codebase-memory-mcp\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed codebase-memory-mcp plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed codebase-memory-mcp launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
-                        "codebase-memory-mcp",
+                        "alias.gortex=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) codex_home=$(cygpath -u \"$codex_home\") ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/gortex\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed gortex plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed gortex launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
+                        "gortex",
                     ],
                     "scripts/launch.sh",
                 ),
             }
             launcher_contract = git_launchers.get(plugin_path.name)
-            if plugin_path.name == "codebase-memory-mcp" and has_explicit_cwd:
+            if plugin_path.name == "gortex" and has_explicit_cwd:
                 validation.error(
-                    f"{context}: codebase-memory-mcp must inherit the task working directory"
+                    f"{context}: gortex must inherit the task working directory"
                 )
-            elif plugin_path.name != "codebase-memory-mcp" and cwd != ".":
+            elif plugin_path.name != "gortex" and cwd != ".":
                 validation.error(f"{context}: Git alias command must run from plugin root (cwd '.')")
             if launcher_contract is None:
                 validation.error(f"{context}: Git alias command is not allowed for this plugin")
@@ -668,15 +668,15 @@ def _validate_fastctx_runtime_release(validation: Validation) -> None:
             validation.error(f"FastCtx runtime release: invalid asset URL for {target}")
 
 
-def _validate_codebase_memory_runtime_release(validation: Validation) -> None:
-    path = ROOT / "plugins/codebase-memory-mcp/runtime-release.json"
+def _validate_gortex_runtime_release(validation: Validation) -> None:
+    path = ROOT / "plugins/gortex/runtime-release.json"
     metadata = _read_json(path, validation)
     if metadata is None:
         return
-    context = "Codebase Memory runtime release"
+    context = "Gortex runtime release"
     if metadata.get("schema_version") != 1:
         validation.error(f"{context}: schema_version must be 1")
-    if metadata.get("repository") != "DeusData/codebase-memory-mcp":
+    if metadata.get("repository") != "zzet/gortex":
         validation.error(f"{context}: unexpected repository")
     version = metadata.get("version")
     tag = metadata.get("tag")
@@ -690,15 +690,15 @@ def _validate_codebase_memory_runtime_release(validation: Validation) -> None:
             validation.error(f"{context}: invalid {field}")
 
     expected = {
-        "codebase-memory-mcp-darwin-arm64": "codebase-memory-mcp-darwin-arm64.tar.gz",
-        "codebase-memory-mcp-windows-amd64": "codebase-memory-mcp-windows-amd64.zip",
+        "gortex_darwin_arm64": "gortex_darwin_arm64.tar.gz",
+        "gortex_windows_amd64": "gortex_windows_amd64.zip",
     }
     assets = metadata.get("assets")
     if not isinstance(assets, dict) or set(assets) != set(expected):
         validation.error(f"{context}: exactly the macOS arm64 and Windows amd64 assets are required")
         return
     expected_prefix = (
-        "https://github.com/DeusData/codebase-memory-mcp/releases/download/"
+        "https://github.com/zzet/gortex/releases/download/"
         f"{tag}/"
     )
     for target, name in expected.items():
@@ -762,7 +762,7 @@ def main() -> int:
     _validate_sync_metadata(validation)
     _validate_fastctx_windows_runtime(validation)
     _validate_fastctx_runtime_release(validation)
-    _validate_codebase_memory_runtime_release(validation)
+    _validate_gortex_runtime_release(validation)
     _validate_workflows(validation)
     for warning in validation.warnings:
         print(f"warning: {warning}")

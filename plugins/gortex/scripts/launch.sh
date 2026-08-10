@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Download and launch only the pinned Codebase Memory MCP release.
+# Download and launch only the pinned Gortex release.
 set -eu
 
 plugin_root=$(CDPATH='' cd -- "$(dirname -- "$0")/.." && pwd)
@@ -43,7 +43,7 @@ sha256_file() {
   elif command -v shasum >/dev/null 2>&1; then
     shasum -a 256 "$1" | awk '{print $1}'
   else
-    log "codebase-memory-mcp requires sha256sum or shasum for archive verification"
+    log "gortex requires sha256sum or shasum for archive verification"
     return 1
   fi
 }
@@ -51,9 +51,9 @@ sha256_file() {
 valid_version() {
   candidate=$1
   [ -x "$candidate" ] || return 1
-  actual=$("$candidate" --version 2>/dev/null || true)
+  actual=$("$candidate" version --short 2>/dev/null || true)
   case "$actual" in
-    *"$version"*) return 0 ;;
+    "$version"|"v$version"|"$version"+*|"v$version"+*) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -61,14 +61,7 @@ valid_version() {
 exec_runtime() {
   runtime_binary=$1
   shift
-  update_check_shims="$plugin_root/scripts/no-update-check"
-  [ -d "$update_check_shims" ] || {
-    log "Missing upstream update-check isolation directory: $update_check_shims"
-    exit 1
-  }
-  PATH="$update_check_shims:$PATH"
-  export PATH
-  exec "$runtime_binary" "$@"
+  exec "$runtime_binary" mcp "$@"
 }
 
 safe_archive_paths() {
@@ -76,7 +69,7 @@ safe_archive_paths() {
     tar.gz) tar -tzf "$archive" ;;
     zip)
       if ! command -v unzip >/dev/null 2>&1; then
-        log "codebase-memory-mcp requires unzip to inspect the Windows archive"
+        log "gortex requires unzip to inspect the Windows archive"
         return 1
       fi
       unzip -Z1 "$archive"
@@ -96,24 +89,24 @@ extract_archive() {
 
 case "$(uname -s)-$(uname -m)" in
   Darwin-arm64)
-    asset_key="codebase-memory-mcp-darwin-arm64"
-    cache_root="${HOME}/.local/share/codebase-memory-mcp"
-    binary_name="codebase-memory-mcp"
+    asset_key="gortex_darwin_arm64"
+    cache_root="${HOME}/.local/share/gortex"
+    binary_name="gortex"
     archive_kind="tar.gz"
     ;;
   MINGW*-x86_64|MSYS*-x86_64)
-    asset_key="codebase-memory-mcp-windows-amd64"
+    asset_key="gortex_windows_amd64"
     if [ -z "${LOCALAPPDATA:-}" ] || ! command -v cygpath >/dev/null 2>&1; then
-      log "codebase-memory-mcp requires LOCALAPPDATA and cygpath on Windows"
+      log "gortex requires LOCALAPPDATA and cygpath on Windows"
       exit 1
     fi
     local_app_data=$(cygpath -u "$LOCALAPPDATA")
-    cache_root="$local_app_data/codebase-memory-mcp"
-    binary_name="codebase-memory-mcp.exe"
+    cache_root="$local_app_data/gortex"
+    binary_name="gortex.exe"
     archive_kind="zip"
     ;;
   *)
-    log "Unsupported codebase-memory-mcp platform: $(uname -s)-$(uname -m) (supported: Darwin arm64, MINGW/MSYS x86_64)"
+    log "Unsupported gortex platform: $(uname -s)-$(uname -m) (supported: Darwin arm64, MINGW/MSYS x86_64)"
     exit 1
     ;;
 esac
@@ -135,7 +128,7 @@ if valid_version "$binary"; then
   exec_runtime "$binary" "$@"
 fi
 if [ -e "$version_dir" ]; then
-  log "Cached codebase-memory-mcp $version failed version verification; refusing to use or replace it"
+  log "Cached gortex $version failed version verification; refusing to use or replace it"
   exit 1
 fi
 
@@ -144,11 +137,11 @@ lock_dir="$cache_root/versions/.${version}.lock"
 waited=0
 while ! mkdir "$lock_dir" 2>/dev/null; do
   if [ ! -d "$lock_dir" ]; then
-    log "Cannot acquire codebase-memory-mcp installation lock: $lock_dir"
+    log "Cannot acquire gortex installation lock: $lock_dir"
     exit 1
   fi
   if [ "$waited" -ge 120 ]; then
-    log "Timed out waiting for codebase-memory-mcp $version installation lock"
+    log "Timed out waiting for gortex $version installation lock"
     exit 1
   fi
   sleep 1
@@ -174,7 +167,7 @@ if valid_version "$binary"; then
   exec_runtime "$binary" "$@"
 fi
 if [ -e "$version_dir" ]; then
-  log "Cached codebase-memory-mcp $version failed version verification; refusing to use or replace it"
+  log "Cached gortex $version failed version verification; refusing to use or replace it"
   exit 1
 fi
 
@@ -183,7 +176,7 @@ archive="$temporary_dir/$asset_name"
 extract_dir="$temporary_dir/extract"
 staged_dir="$temporary_dir/$version"
 
-log "Downloading verified codebase-memory-mcp $version for $asset_key"
+log "Downloading verified gortex $version for $asset_key"
 curl --fail --location --silent --show-error --header 'Cache-Control: no-cache' "$asset_url" --output "$archive"
 actual_size=$(wc -c < "$archive" | tr -d '[:space:]')
 if [ "$actual_size" != "$expected_size" ]; then
@@ -210,7 +203,7 @@ fi
 cp "$downloaded_binary" "$staged_dir/$binary_name"
 chmod 0755 "$staged_dir/$binary_name"
 if ! valid_version "$staged_dir/$binary_name"; then
-  log "Downloaded codebase-memory-mcp $version failed version verification"
+  log "Downloaded gortex $version failed version verification"
   exit 1
 fi
 

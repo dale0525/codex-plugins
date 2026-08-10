@@ -1,0 +1,39 @@
+{
+  "name": "gortex",
+  "version": "0.1.1",
+  "description": "Verified, local launcher for the Gortex code knowledge graph.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/gortex",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "Apache-2.0",
+  "keywords": [
+    "gortex",
+    "mcp",
+    "code-intelligence",
+    "knowledge-graph"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Gortex",
+    "shortDescription": "Shared local code graph and structural search.",
+    "longDescription": "Downloads and verifies a pinned Gortex runtime, then connects Codex to its singleton local daemon.",
+    "developerName": "Logic Tan",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Structural code search",
+      "Call-chain analysis",
+      "Impact analysis",
+      "Architecture exploration"
+    ],
+    "defaultPrompt": [
+      "Find the implementation and callers of this symbol.",
+      "Show the impact of changing this component.",
+      "Explain the architecture of this repository."
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+Gortex
+Copyright 2024-2026 Andrey Kumanyaev <me@zzet.org>
+
+This product is licensed under the Apache License, Version 2.0 (see
+LICENSE.md). It includes software developed by third parties.
+
+------------------------------------------------------------------------
+
+Bundled (vendored) dependencies:
+
+* internal/thirdparty/renameio/
+  Atomic file replacement helpers.
+  Copyright 2018 Google Inc.
+  Licensed under the Apache License, Version 2.0.
+  License: internal/thirdparty/renameio/LICENSE
+
+* internal/thirdparty/go-pointer/
+  A from-scratch, sharded reimplementation of github.com/mattn/go-pointer
+  written for this project. Module path reuses the upstream identifier so
+  it can drop in via a `replace` directive. Authored under this project's
+  license (Apache 2.0).
+
+------------------------------------------------------------------------
+
+External Go-module dependencies are fetched at build time via `go build`
+and not vendored in this repository. Their licenses are available in the
+module cache (`go env GOMODCACHE`) and listed in THIRD_PARTY_NOTICES.md.
+Regenerate that file with:
+
+    go-licenses report ./... > THIRD_PARTY_NOTICES.md

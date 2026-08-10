@@ -16,11 +16,11 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_SOURCE = ROOT / "plugins/codebase-memory-mcp"
+PLUGIN_SOURCE = ROOT / "plugins/gortex"
 VERSION = "1.2.3"
 
 
-class CodebaseMemoryLauncherTests(unittest.TestCase):
+class GortexLauncherTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.root = Path(self.temporary.name)
@@ -31,19 +31,19 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
         self.curl_log = self.root / "curl.log"
         self.home = self.root / "home"
         self.windows_cache_root = self.root / "windows-local-app-data"
-        self.runtime = self.root / "codebase-memory-mcp"
+        self.runtime = self.root / "gortex"
         self.runtime.write_text(
             "#!/bin/sh\n"
-            "if [ \"${1:-}\" = --version ]; then\n"
-            f"  printf '%s\\n' 'codebase-memory-mcp {VERSION}'\n"
+            "if [ \"${1:-}\" = version ] && [ \"${2:-}\" = --short ]; then\n"
+            f"  printf '%s\\n' 'v{VERSION}+fixture'\n"
             "  exit 0\n"
             "fi\n"
-            "if [ \"${1:-}\" = probe ]; then\n"
-            "  printf 'probe:%s\\n' \"${2:-}\"\n"
-            "  exit 0\n"
-            "fi\n"
-            "if [ \"${1:-}\" = probe-cwd ]; then\n"
-            "  printf 'cwd:%s\\n' \"$PWD\"\n"
+            "if [ \"${1:-}\" = mcp ]; then\n"
+            "  case \"${2:-}\" in\n"
+            "    probe) printf 'probe:%s\\n' \"${3:-}\" ;;\n"
+            "    probe-cwd) printf 'cwd:%s\\n' \"$PWD\" ;;\n"
+            "    *) printf 'mcp:%s\\n' \"${2:-}\" ;;\n"
+            "  esac\n"
             "  exit 0\n"
             "fi\n"
             "printf 'unexpected:%s\\n' \"${1:-}\"\n",
@@ -105,7 +105,7 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
 
     def _make_tar(self, path: Path, unsafe: bool = False) -> None:
         with tarfile.open(path, "w:gz") as archive:
-            archive.add(self.runtime, arcname="package/codebase-memory-mcp")
+            archive.add(self.runtime, arcname="package/gortex")
             if unsafe:
                 member = tarfile.TarInfo("../outside")
                 member.size = 1
@@ -113,7 +113,7 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
 
     def _make_zip(self, path: Path, unsafe: bool = False) -> None:
         with zipfile.ZipFile(path, "w") as archive:
-            archive.write(self.runtime, arcname="package/codebase-memory-mcp.exe")
+            archive.write(self.runtime, arcname="package/gortex.exe")
             if unsafe:
                 archive.writestr("../outside", b"x")
 
@@ -137,14 +137,14 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
         metadata = {
             "version": VERSION,
             "assets": {
-                "codebase-memory-mcp-darwin-arm64": self._asset(
-                    "codebase-memory-mcp-darwin-arm64.tar.gz",
+                "gortex_darwin_arm64": self._asset(
+                    "gortex_darwin_arm64.tar.gz",
                     darwin_archive or self.valid_tar,
                     darwin_size,
                     darwin_sha,
                 ),
-                "codebase-memory-mcp-windows-amd64": self._asset(
-                    "codebase-memory-mcp-windows-amd64.zip", windows_archive or self.valid_zip
+                "gortex_windows_amd64": self._asset(
+                    "gortex_windows_amd64.zip", windows_archive or self.valid_zip
                 ),
             },
         }
@@ -184,9 +184,9 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
 
     def _version_dir(self, windows: bool = False) -> Path:
         cache_root = (
-            self.windows_cache_root / "codebase-memory-mcp"
+            self.windows_cache_root / "gortex"
             if windows
-            else self.home / ".local/share/codebase-memory-mcp"
+            else self.home / ".local/share/gortex"
         )
         return cache_root / "versions" / VERSION
 
@@ -198,7 +198,7 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
         first = self._run("Darwin", "arm64", self.valid_tar, "probe", "first")
         self.assertEqual(first.returncode, 0, first.stderr)
         self.assertEqual(first.stdout, "probe:first\n")
-        binary = self._version_dir() / "codebase-memory-mcp"
+        binary = self._version_dir() / "gortex"
         self.assertTrue(binary.is_file())
         self.assertTrue(os.access(binary, os.X_OK))
 
@@ -212,8 +212,8 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
         result = self._run("MINGW64_NT-10.0", "x86_64", self.valid_zip, "probe", "windows")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, "probe:windows\n")
-        self.assertTrue((self._version_dir(windows=True) / "codebase-memory-mcp.exe").is_file())
-        self.assertEqual(self._curl_calls(), ["https://fixtures.invalid/codebase-memory-mcp-windows-amd64.zip"])
+        self.assertTrue((self._version_dir(windows=True) / "gortex.exe").is_file())
+        self.assertEqual(self._curl_calls(), ["https://fixtures.invalid/gortex_windows_amd64.zip"])
 
     def test_concurrent_first_launches_publish_only_a_complete_version(self) -> None:
         self._write_metadata()
@@ -235,7 +235,7 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
         self.assertEqual(first_stdout, "probe:concurrent\n")
         self.assertEqual(second_stdout, "probe:concurrent\n")
         self.assertEqual(len(self._curl_calls()), 1)
-        self.assertTrue((self._version_dir() / "codebase-memory-mcp").is_file())
+        self.assertTrue((self._version_dir() / "gortex").is_file())
 
     def test_size_and_sha256_failures_do_not_publish_a_version(self) -> None:
         self._write_metadata(darwin_size=self.valid_tar.stat().st_size + 1)
@@ -272,16 +272,16 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
             with self.subTest(system=system, machine=machine):
                 result = self._run(system, machine, self.valid_tar, "probe", "unsupported")
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn(f"Unsupported codebase-memory-mcp platform: {system}-{machine}", result.stderr)
+                self.assertIn(f"Unsupported gortex platform: {system}-{machine}", result.stderr)
         self.assertEqual(self._curl_calls(), [])
 
     def test_mcp_git_alias_preserves_the_calling_repository_cwd(self) -> None:
         self._write_metadata()
         companion = json.loads((self.plugin / ".mcp.json").read_text(encoding="utf-8"))
-        server = companion["codebase-memory-mcp"]
+        server = companion["gortex"]
         installed_plugin = (
             self.home
-            / ".codex/plugins/cache/dale0525-codex-plugins/codebase-memory-mcp/0.1.1"
+            / ".codex/plugins/cache/dale0525-codex-plugins/gortex/0.1.1"
         )
         shutil.copytree(self.plugin, installed_plugin)
         project = self.root / "different-project"
@@ -312,7 +312,7 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
 
     def test_mcp_manifest_forwards_windows_cache_location(self) -> None:
         companion = json.loads((self.plugin / ".mcp.json").read_text(encoding="utf-8"))
-        server = companion["codebase-memory-mcp"]
+        server = companion["gortex"]
         self.assertEqual(
             server["env_vars"],
             ["CODEX_HOME", "HOME", "USERPROFILE", "LOCALAPPDATA"],
@@ -321,10 +321,10 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
     def test_mcp_git_alias_falls_back_to_windows_userprofile(self) -> None:
         self._write_metadata()
         companion = json.loads((self.plugin / ".mcp.json").read_text(encoding="utf-8"))
-        server = companion["codebase-memory-mcp"]
+        server = companion["gortex"]
         installed_plugin = (
             self.root
-            / "windows-profile/.codex/plugins/cache/dale0525-codex-plugins/codebase-memory-mcp/0.1.1"
+            / "windows-profile/.codex/plugins/cache/dale0525-codex-plugins/gortex/0.1.1"
         )
         shutil.copytree(self.plugin, installed_plugin)
         project = self.root / "windows-project"
@@ -347,18 +347,11 @@ class CodebaseMemoryLauncherTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, f"cwd:{project.resolve()}\n")
 
-    def test_runtime_path_shims_block_upstream_curl(self) -> None:
-        shim = self.plugin / "scripts/no-update-check/curl"
-        result = subprocess.run(
-            ["/bin/sh", str(shim), "https://api.github.com/repos/example/releases/latest"],
-            text=True,
-            capture_output=True,
-            check=False,
-        )
-        self.assertEqual(result.returncode, 22)
-        self.assertEqual(result.stdout, "")
-        self.assertEqual(result.stderr, "")
-        self.assertIn("exit /b 22", (self.plugin / "scripts/no-update-check/curl.cmd").read_text())
+    def test_launcher_always_executes_the_mcp_subcommand(self) -> None:
+        self._write_metadata()
+        result = self._run("Darwin", "arm64", self.valid_tar, "probe", "mcp")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, "probe:mcp\n")
 
 
 if __name__ == "__main__":
