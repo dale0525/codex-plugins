@@ -103,3 +103,20 @@ pixi lock --check
 
 All runtime code is in `scripts/creative_model_bridge.py` and uses only the
 Python standard library.
+
+## Local reinstall
+
+Codex snapshots local marketplace plugins into its cache. Do not let the
+project-local `.pixi` environment enter that snapshot: it contains symlinks
+that a filesystem copy may not preserve. After updating the manifest
+cachebuster, reinstall from the repository root with:
+
+```bash
+python3 scripts/reinstall_local_plugin.py \
+  plugins/creative-model-bridge \
+  creative-model-bridge@dale0525-codex-plugins
+```
+
+The helper temporarily moves `.pixi` outside the plugin directory while Codex
+copies the plugin, then restores it even if installation fails. The installed
+cache therefore creates its own environment from `pixi.lock` on first use.
