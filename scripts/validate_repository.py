@@ -23,6 +23,12 @@ PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 WORKFLOW_ACTION_REF_PATTERN = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 CREATIVE_SKILL_REQUIRED_MARKERS = (
     "`gemini-3-pro`",
+    "`experimental_bearer_token`",
+    "Do not read `auth.json`",
+    "Prefer Node",
+    '`wire_api = "responses"`',
+    "`stream: true`",
+    "`response.completed`",
     "`POST /chat/completions`",
     "`POST /responses`",
     "Gemini `generateContent`",
@@ -31,11 +37,6 @@ CREATIVE_SKILL_REQUIRED_MARKERS = (
     "Disable automatic redirects",
     "retry an ambiguous request",
     "Return the generated output",
-)
-CREATIVE_PROTOCOL_ORDER = (
-    "`POST /chat/completions`",
-    "`POST /responses`",
-    "provider-native format",
 )
 
 
@@ -212,14 +213,6 @@ def _validate_creative_skill(
             validation.error(
                 f"{skill.relative_to(ROOT)} must contain the skill contract marker {marker!r}"
             )
-    protocol_positions = [skill_text.find(marker) for marker in CREATIVE_PROTOCOL_ORDER]
-    if all(position >= 0 for position in protocol_positions) and protocol_positions != sorted(
-        protocol_positions
-    ):
-        validation.error(
-            f"{skill.relative_to(ROOT)} must keep Chat Completions, Responses, and "
-            "provider-native formats in fallback order"
-        )
 
 
 def _inside(root: Path, candidate: Path) -> bool:

@@ -1,7 +1,7 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.3.0+codex.20260811153112",
-  "description": "Guide creative writing requests through external models using the active Codex provider.",
+  "version": "0.3.0+codex.20260811162942",
+  "description": "Guide creative writing through external models using the active provider base URL and API key.",
   "author": {
     "name": "Logic Tan",
     "email": "logictan89@gmail.com",
@@ -12,7 +12,7 @@
   "license": "MIT",
   "keywords": [
     "creative-writing",
-    "chat-completions",
+    "responses-api",
     "model-provider",
     "protocol-fallback"
   ],
@@ -20,7 +20,7 @@
   "interface": {
     "displayName": "Creative Model Bridge",
     "shortDescription": "Use external creative models through the active Codex provider.",
-    "longDescription": "Guides Codex to preserve supplied writing material, reuse the active provider's endpoint and credentials, prefer OpenAI-compatible Chat Completions, fall back safely when protocols are incompatible, and return generated text verbatim.",
+    "longDescription": "Guides Codex to preserve supplied writing material, reuse the active provider's base URL and API key, honor its configured wire API, fall back safely when protocols are incompatible, and return generated text verbatim.",
     "developerName": "Logic Tan",
     "category": "Writing",
     "capabilities": [

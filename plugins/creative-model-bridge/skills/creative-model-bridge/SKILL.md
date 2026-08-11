@@ -1,6 +1,6 @@
 ---
 name: creative-model-bridge
-description: Route fiction, scripts, poetry, story development, rewrites, revision, and every other creative writing task through an external LLM using the current Codex model provider's existing endpoint, authentication, and headers. Use when creative work must preserve supplied material and return the model's output verbatim; prefer OpenAI-compatible Chat Completions, then safe protocol fallbacks.
+description: Route fiction, scripts, poetry, story development, rewrites, revision, and every other creative writing task through an external LLM using the current Codex model provider's existing base URL and provider API key. Use when creative work must preserve supplied material and return the model's output verbatim; honor an explicit wire API before safe protocol fallbacks.
 ---
 
 # Creative Model Bridge
@@ -32,15 +32,22 @@ for a bundled runtime, script, MCP server, or Pixi environment.
 
 ## Reuse the current provider
 
-Reuse the current Codex model provider's effective `base_url`, authentication,
+Reuse the current Codex model provider's effective `base_url`, provider API key,
 and headers. Prefer provider information already exposed by the runtime. If it
 is not directly available, resolve the active user-level configuration and
 profile without changing them.
 
-Honor the configured authentication mechanism, including `env_key`,
-command-backed authentication, an existing bearer token, `requires_openai_auth`,
-`http_headers`, and `env_http_headers`. Prefer an existing provider-aware client
-when login or keyring credentials cannot be safely extracted.
+Resolve credentials only from the selected provider. Use its command-backed
+`auth`, `env_key`, or `experimental_bearer_token`, plus `http_headers` and
+`env_http_headers`. Treat a configured provider bearer token as an API key and
+send it as `Authorization: Bearer <key>` unless the provider headers explicitly
+define another scheme. Do not use a key belonging to another provider.
+
+Do not read `auth.json`, extract a Codex or ChatGPT login token, or synthesize a
+`ChatGPT-Account-Id` header. `requires_openai_auth` describes Codex runtime
+authentication; it is not a provider API-key source for this skill. If the
+selected provider has no API-key source, stop at that boundary instead of using
+the Codex login session.
 
 Keep every credential in process memory. Never print it, return it, place its
 literal value in a tool call or command argument, write it to a file, create a
@@ -58,30 +65,41 @@ request.
 
 ## Choose an available caller
 
-Use a safe system-provided mechanism that is already available: a provider-aware
-client or tool, direct HTTP with `curl`, Python's standard library or an installed
-SDK, Node `fetch`, or an installed provider CLI. Prefer request bodies on stdin
-or in process memory. Do not install dependencies, create a persistent helper,
-or start a daemon.
+Use a safe system-provided mechanism that is already available. Prefer Node
+`fetch` for direct HTTP because it keeps the key in process memory and has broad
+compatibility with OpenAI-compatible gateways. Next prefer a provider-aware
+client or tool, an installed SDK or provider CLI, or `curl` with both body and
+credential supplied through stdin. Avoid Python `urllib` when Node is available;
+some compatible gateways reject its transport fingerprint with a misleading
+403. Do not put a credential in a command argument, install dependencies, create
+a persistent helper, or start a daemon.
 
-The API format order below is fixed even when the concrete caller changes.
+Choose the wire format before sending anything. A failed or possibly accepted
+generation must not be repeated merely to change transport.
 
 ## Try protocols safely
 
-1. Try an OpenAI-compatible `POST /chat/completions` request first. Prefer a
-   non-streaming JSON response for portability. Send `model`, ordered `messages`,
-   and the protocol's output-token field. If only streaming is supported, parse
-   SSE and keep final content separate from reasoning fields.
-2. Try `POST /responses` only after a clear endpoint or request-schema
-   incompatibility that occurred before generation, such as 404, 405, 415, or an
-   explicit unsupported-field response. Translate the same system instruction,
-   prompt, model, and output limit to Responses fields without changing their
-   meaning.
-3. If Responses is also clearly incompatible, try a provider-native format only
-   when the provider is confidently identified and the call remains inside the
-   same configured origin and authentication boundary. Eligible formats include
-   Anthropic Messages and Gemini `generateContent`; an existing provider CLI or
-   SDK may perform this adaptation.
+1. Honor an explicit provider wire format first. For `wire_api = "responses"`,
+   call `POST /responses`; do not probe Chat Completions first. Send `model`,
+   `instructions`, and `input` as an ordered message array whose text parts use
+   `input_text`. Start with the Codex-compatible transport, `stream: true`, and
+   omit optional token-limit fields unless this provider is known to support
+   them. Parse SSE events, concatenate only `response.output_text.delta`, and
+   accept the result only after `response.completed`. Treat `response.failed`,
+   `response.incomplete`, an error event, or a stream ending without completion
+   as failure with no retry.
+2. For a provider that explicitly declares Chat Completions, call
+   `POST /chat/completions` first with ordered `messages`. Prefer non-streaming
+   JSON unless that provider is known to require SSE.
+3. When `wire_api` is absent or unknown, try OpenAI-compatible Chat Completions
+   first, then Responses. Switch only after a clear endpoint or request-schema
+   incompatibility before generation, such as 404, 405, 415, or an explicit
+   unsupported-field response.
+4. If both OpenAI formats are clearly incompatible, try a provider-native format
+   only when the provider is confidently identified and the call remains inside
+   the same configured origin and authentication boundary. Eligible formats
+   include Anthropic Messages and Gemini `generateContent`; an existing provider
+   CLI or SDK may perform this adaptation.
 
 Do not change formats after 401 or 403 authentication failures, 429 rate limits,
 policy denials, transport timeouts, partial output, malformed or interrupted

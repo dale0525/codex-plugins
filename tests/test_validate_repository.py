@@ -44,26 +44,6 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
             root = Path(temporary)
             copied_plugin = root / "plugins/creative-model-bridge"
             shutil.copytree(plugin, copied_plugin)
-            copied_skill = copied_plugin / "skills/creative-model-bridge/SKILL.md"
-            reversed_protocols = (
-                original.replace("`POST /chat/completions`", "`POST /temporary`")
-                .replace("`POST /responses`", "`POST /chat/completions`")
-                .replace("`POST /temporary`", "`POST /responses`")
-            )
-            copied_skill.write_text(reversed_protocols, encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_creative_skill(
-                    copied_plugin, manifest, validation
-                )
-            self.assertTrue(
-                any("fallback order" in error for error in validation.errors)
-            )
-
-        with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
-            root = Path(temporary)
-            copied_plugin = root / "plugins/creative-model-bridge"
-            shutil.copytree(plugin, copied_plugin)
             runtime = copied_plugin / "scripts/creative_model_bridge.py"
             runtime.parent.mkdir()
             runtime.write_text("# forbidden runtime\n", encoding="utf-8")

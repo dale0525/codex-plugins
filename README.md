@@ -208,9 +208,9 @@ than claiming unsupported transcript coverage.
 ### Creative Model Bridge
 
 Provides an instruction-only creative-writing skill with no bundled runtime.
-It reuses the active Codex provider, prefers OpenAI-compatible Chat Completions,
-falls back safely to Responses or a recognized same-provider native protocol,
-and returns the external model's visible text verbatim.
+It reuses the active Codex provider's base URL and API key, honors an explicit
+wire API, falls back safely among compatible same-provider protocols, and
+returns the external model's visible text verbatim.
 
 ### Gortex
 
