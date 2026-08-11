@@ -1,7 +1,7 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.2.1+codex.20260810131357",
-  "description": "Route creative writing requests through a bundled, auditable one-shot Python bridge.",
+  "version": "0.3.0+codex.20260811153112",
+  "description": "Guide creative writing requests through external models using the active Codex provider.",
   "author": {
     "name": "Logic Tan",
     "email": "logictan89@gmail.com",
@@ -14,13 +14,13 @@
     "creative-writing",
     "chat-completions",
     "model-provider",
-    "one-shot-cli"
+    "protocol-fallback"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Creative Model Bridge",
-    "shortDescription": "Use configured creative models through a transparent bundled CLI.",
-    "longDescription": "Builds deterministic prompts from the requested task and supplied materials, sends one streaming OpenAI-compatible Chat Completions request, and returns reasoning and generated output verbatim as one JSON result.",
+    "shortDescription": "Use external creative models through the active Codex provider.",
+    "longDescription": "Guides Codex to preserve supplied writing material, reuse the active provider's endpoint and credentials, prefer OpenAI-compatible Chat Completions, fall back safely when protocols are incompatible, and return generated text verbatim.",
     "developerName": "Logic Tan",
     "category": "Writing",
     "capabilities": [

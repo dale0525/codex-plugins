@@ -11,12 +11,12 @@ from scripts import validate_repository
 
 
 class RepositorySyncMetadataValidationTests(unittest.TestCase):
-    def test_creative_model_bridge_one_shot_script_contract_is_checked(self) -> None:
+    def test_creative_model_bridge_instruction_only_contract_is_checked(self) -> None:
         plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
         manifest = json.loads((plugin / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
         validation = validate_repository.Validation()
         with patch.object(validate_repository, "ROOT", plugin.parents[1]):
-            validate_repository._validate_creative_script(plugin, manifest, validation)
+            validate_repository._validate_creative_skill(plugin, manifest, validation)
         self.assertEqual(validation.errors, [])
 
         skill = plugin / "skills/creative-model-bridge/SKILL.md"
@@ -32,13 +32,62 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 copied_skill.write_text(original.replace(marker, ""), encoding="utf-8")
                 validation = validate_repository.Validation()
                 with patch.object(validate_repository, "ROOT", root):
-                    validate_repository._validate_creative_script(
+                    validate_repository._validate_creative_skill(
                         copied_plugin, manifest, validation
                     )
                 self.assertTrue(
                     any(marker in error for error in validation.errors),
                     (marker, validation.errors),
                 )
+
+        with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
+            root = Path(temporary)
+            copied_plugin = root / "plugins/creative-model-bridge"
+            shutil.copytree(plugin, copied_plugin)
+            copied_skill = copied_plugin / "skills/creative-model-bridge/SKILL.md"
+            reversed_protocols = (
+                original.replace("`POST /chat/completions`", "`POST /temporary`")
+                .replace("`POST /responses`", "`POST /chat/completions`")
+                .replace("`POST /temporary`", "`POST /responses`")
+            )
+            copied_skill.write_text(reversed_protocols, encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_creative_skill(
+                    copied_plugin, manifest, validation
+                )
+            self.assertTrue(
+                any("fallback order" in error for error in validation.errors)
+            )
+
+        with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
+            root = Path(temporary)
+            copied_plugin = root / "plugins/creative-model-bridge"
+            shutil.copytree(plugin, copied_plugin)
+            runtime = copied_plugin / "scripts/creative_model_bridge.py"
+            runtime.parent.mkdir()
+            runtime.write_text("# forbidden runtime\n", encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_creative_skill(
+                    copied_plugin, manifest, validation
+                )
+            self.assertTrue(any("scripts must be removed" in error for error in validation.errors))
+
+        with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
+            root = Path(temporary)
+            copied_plugin = root / "plugins/creative-model-bridge"
+            shutil.copytree(plugin, copied_plugin)
+            helper = copied_plugin / "helper.py"
+            helper.write_text("# forbidden helper\n", encoding="utf-8")
+            validation = validate_repository.Validation()
+            with patch.object(validate_repository, "ROOT", root):
+                validate_repository._validate_creative_skill(
+                    copied_plugin, manifest, validation
+                )
+            self.assertTrue(
+                any("is not allowed" in error for error in validation.errors)
+            )
 
     def test_release_lock_requires_v2_and_checksum_digest(self) -> None:
         with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
@@ -197,7 +246,7 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                                 "cwd": ".",
                                 "args": [],
                                 "startup_timeout_sec": 45,
-                                "env_vars": ["CODEX_HOME", "CREATIVE_MODEL_API_KEY"],
+                                "env_vars": ["CODEX_HOME"],
                             }
                         }
                     }
@@ -365,33 +414,23 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 )
             self.assertEqual(validation.errors, [])
 
-    def test_git_alias_command_is_exact_and_direct_pixi_is_rejected(self) -> None:
+    def test_direct_pixi_command_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory(prefix="git-alias-validator-test-") as temporary:
             root = Path(temporary)
-            plugin = root / "plugins/creative-model-bridge"
+            plugin = root / "plugins/example"
             plugin.mkdir(parents=True)
-            scripts = plugin / "scripts"
-            scripts.mkdir()
-            bootstrap = scripts / "bootstrap.sh"
-            bootstrap.write_text("#!/bin/sh\n", encoding="utf-8")
-            bootstrap.chmod(0o755)
-            companion = plugin / ".mcp.json"
-            companion.write_text(json.dumps({"mcpServers": {"example": {
-                "command": "git",
-                "args": ["-c", 'alias.creative-model-bridge=!sh "${GIT_PREFIX}scripts/bootstrap.sh"', "creative-model-bridge"],
-                "cwd": ".", "env_vars": ["CODEX_HOME"],
-            }}}), encoding="utf-8")
+            payload = {
+                "mcpServers": {
+                    "example": {
+                        "command": "pixi",
+                        "args": [],
+                        "env_vars": ["CODEX_HOME"],
+                    }
+                }
+            }
             validation = validate_repository.Validation()
             with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_mcp_servers(plugin, {"mcpServers": "./.mcp.json"}, validation)
-            self.assertEqual(validation.errors, [])
-
-            payload = json.loads(companion.read_text(encoding="utf-8"))
-            payload["mcpServers"]["example"]["command"] = "pixi"
-            companion.write_text(json.dumps(payload), encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_mcp_servers(plugin, {"mcpServers": "./.mcp.json"}, validation)
+                validate_repository._validate_mcp_servers(plugin, payload, validation)
             self.assertTrue(any("direct Pixi command" in error for error in validation.errors))
 
     def test_gortex_git_alias_must_inherit_task_cwd(self) -> None:

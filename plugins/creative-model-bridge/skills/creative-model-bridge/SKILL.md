@@ -1,72 +1,101 @@
 ---
 name: creative-model-bridge
-description: Use the bundled Creative Model Bridge one-shot Python script for fiction, scripts, poetry, story development, revision, and every other creative writing task while preserving supplied material and returning generated output verbatim.
+description: Route fiction, scripts, poetry, story development, rewrites, revision, and every other creative writing task through an external LLM using the current Codex model provider's existing endpoint, authentication, and headers. Use when creative work must preserve supplied material and return the model's output verbatim; prefer OpenAI-compatible Chat Completions, then safe protocol fallbacks.
 ---
 
 # Creative Model Bridge
 
-Use this skill for every creative writing task: drafts, scenes, scripts, poetry,
-story development, critique-assisted revision, rewrites, and format changes.
-The bridge is unconditional for these tasks; do not silently replace it with a
-local draft or another provider client.
+Use this skill for every creative writing task. Send the work to an external
+model; do not silently draft or revise the requested creative text locally when
+the external call fails. Treat this package as instructions only: do not look
+for a bundled runtime, script, MCP server, or Pixi environment.
 
-## Invocation
+## Prepare the request
 
-Locate the plugin root containing this skill and run the bundled script through
-Pixi. Keep the request JSON on stdin, never in argv, shell history, temporary
-files, or stderr:
+1. Preserve the user's language, point of view, tense, format, named constraints,
+   and supplied material.
+2. Use the user's model string exactly when one is named. Otherwise use
+   `gemini-3-pro`.
+3. Build one stateless prompt in this order: task, constraints, output
+   specification, inline material, then file material. Read required files with
+   available tools and wrap each one in explicit begin/end markers.
+4. Use this system instruction unless the user explicitly requests no system
+   instruction:
 
-```text
-pixi run --manifest-path <plugin-root>/pixi.toml run
-```
+   ```text
+   你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。
+   ```
 
-The command is a one-shot process: provide the complete UTF-8 JSON request and
-close stdin (EOF) in the same invocation. Prefer a non-interactive pipe or
-heredoc; do not type JSON into a live PTY and leave it open, because the script
-uses `stdin.read()` and will correctly wait for EOF before making the network
-request. For example:
+5. Request up to 60,000 output tokens where the selected protocol and model
+   support it. Adapt only the protocol-specific field name; do not silently
+   discard source material to satisfy a client default.
 
-```bash
-pixi run --manifest-path <plugin-root>/pixi.toml run <<'JSON'
-{"task":"Revise the supplied scene.","context_text":["..."]}
-JSON
-```
+## Reuse the current provider
 
-The script reads one JSON object and emits one JSON object. Successful output
-always has `reasoning` and `output`; return `output` verbatim. If the process
-exits non-zero, surface its safe `error` rather than retrying or drafting a
-replacement. Do not send more than one request per process.
+Reuse the current Codex model provider's effective `base_url`, authentication,
+and headers. Prefer provider information already exposed by the runtime. If it
+is not directly available, resolve the active user-level configuration and
+profile without changing them.
 
-If a process produces no output, first verify that stdin reached EOF. A process
-waiting before any provider request is usually an input/EOF problem; a process
-that has reached the provider is bounded by the bridge's HTTP timeout. Do not
-retry until the first process has exited.
+Honor the configured authentication mechanism, including `env_key`,
+command-backed authentication, an existing bearer token, `requires_openai_auth`,
+`http_headers`, and `env_http_headers`. Prefer an existing provider-aware client
+when login or keyring credentials cannot be safely extracted.
 
-## Request rules
+Keep every credential in process memory. Never print it, return it, place its
+literal value in a tool call or command argument, write it to a file, create a
+new `.env`, or include it in diagnostics. Reference an existing environment
+variable by name where possible. Never ask the user to paste a key into chat.
 
-Preserve the user's material, language, point of view, tense, format, and named
-constraints. Use ordered `context_text` entries for inline material and ordered
-absolute `context_files` paths for source files. The bridge places task,
-constraints, output specification, inline context, and file context in that
-order, with explicit begin/end markers around every file.
-
-If the user names a model, pass that model string exactly. Otherwise allow the
-built-in `gemini-3-pro` default. Any supplied `max_tokens` or
-`max_output_tokens` value is ignored; the bridge always sends 60,000. Use
-`system_mode: "none"` only when the user explicitly
-wants no system instruction; the default `minimal` mode uses only the documented
-minimal Chinese writing instruction. Keep every revision stateless by supplying
-all required material again.
-
-Do not add a preface, critique, translation, summary, or formatting wrapper to
-the returned output unless the user explicitly requests one. Do not edit global
-`AGENTS.md`, Codex configuration, or provider credentials as part of a writing
+Send credentials only to the exact origin of the configured provider. Do not
+infer a model vendor from the model name and forward the credential to another
+host. Disable automatic redirects for credential-bearing requests; reject a
+redirect unless the caller can prove that the resolved target has the same
+scheme, host, and effective port as the configured provider. Never forward an
+authorization or provider header across origins. Do not edit `AGENTS.md`, Codex
+configuration, credential storage, or the marketplace as part of a writing
 request.
 
-## Operational boundary
+## Choose an available caller
 
-The script makes exactly one `POST /chat/completions` request with `stream: true`
-and parses SSE frames. Reasoning deltas and output deltas are kept separate;
-usage is retained when present. It does not list models, preview payloads,
-maintain a conversation, retry, switch providers/models, download binaries, or
-run an MCP server.
+Use a safe system-provided mechanism that is already available: a provider-aware
+client or tool, direct HTTP with `curl`, Python's standard library or an installed
+SDK, Node `fetch`, or an installed provider CLI. Prefer request bodies on stdin
+or in process memory. Do not install dependencies, create a persistent helper,
+or start a daemon.
+
+The API format order below is fixed even when the concrete caller changes.
+
+## Try protocols safely
+
+1. Try an OpenAI-compatible `POST /chat/completions` request first. Prefer a
+   non-streaming JSON response for portability. Send `model`, ordered `messages`,
+   and the protocol's output-token field. If only streaming is supported, parse
+   SSE and keep final content separate from reasoning fields.
+2. Try `POST /responses` only after a clear endpoint or request-schema
+   incompatibility that occurred before generation, such as 404, 405, 415, or an
+   explicit unsupported-field response. Translate the same system instruction,
+   prompt, model, and output limit to Responses fields without changing their
+   meaning.
+3. If Responses is also clearly incompatible, try a provider-native format only
+   when the provider is confidently identified and the call remains inside the
+   same configured origin and authentication boundary. Eligible formats include
+   Anthropic Messages and Gemini `generateContent`; an existing provider CLI or
+   SDK may perform this adaptation.
+
+Do not change formats after 401 or 403 authentication failures, 429 rate limits,
+policy denials, transport timeouts, partial output, malformed or interrupted
+streams, or a 5xx response that may have followed request acceptance. Do not
+retry an ambiguous request. These stops prevent duplicate generations and
+charges.
+
+If no safe caller can access the current provider credential, or every eligible
+format fails, report the exact safe failure boundary. Do not expose response
+bodies that may contain secrets, and do not draft a replacement locally.
+
+## Return the result
+
+Extract only the model's final visible content. Do not expose raw reasoning,
+reasoning deltas, internal metadata, or credentials. Return the generated output
+verbatim without a preface, critique, translation, summary, or formatting wrapper
+unless the user explicitly requests one.

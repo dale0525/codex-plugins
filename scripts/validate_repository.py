@@ -22,13 +22,20 @@ LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 WORKFLOW_ACTION_REF_PATTERN = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
 CREATIVE_SKILL_REQUIRED_MARKERS = (
-    "pixi run --manifest-path",
-    "`reasoning`",
-    "`output`",
-    "`context_files`",
-    "`stream: true`",
-    "Do not send more than one request per process",
-    "run an MCP server",
+    "`gemini-3-pro`",
+    "`POST /chat/completions`",
+    "`POST /responses`",
+    "Gemini `generateContent`",
+    "Keep every credential in process memory",
+    "Send credentials only to the exact origin",
+    "Disable automatic redirects",
+    "retry an ambiguous request",
+    "Return the generated output",
+)
+CREATIVE_PROTOCOL_ORDER = (
+    "`POST /chat/completions`",
+    "`POST /responses`",
+    "provider-native format",
 )
 
 
@@ -160,23 +167,37 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
                 _validate_skill(skill_directory, validation)
     _validate_mcp_servers(plugin_path, manifest, validation)
     if plugin_path.name == "creative-model-bridge":
-        _validate_creative_script(plugin_path, manifest, validation)
+        _validate_creative_skill(plugin_path, manifest, validation)
     validation.plugin_count += 1
 
 
-def _validate_creative_script(
+def _validate_creative_skill(
     plugin_path: Path, manifest: dict[str, Any], validation: Validation
 ) -> None:
-    """Validate the one-shot Python shape for Creative Model Bridge."""
+    """Keep Creative Model Bridge instruction-only and security explicit."""
+    allowed_files = {
+        Path(".codex-plugin/plugin.json"),
+        Path("README.md"),
+        Path("skills/creative-model-bridge/SKILL.md"),
+    }
+    for path in plugin_path.rglob("*"):
+        relative = path.relative_to(plugin_path)
+        if path.is_symlink() or (path.is_file() and relative not in allowed_files):
+            validation.error(
+                f"{path.relative_to(ROOT)} is not allowed in the instruction-only plugin"
+            )
     manifest_path = plugin_path / ".codex-plugin/plugin.json"
     if "mcpServers" in manifest or "mcp_servers" in manifest:
         validation.error(f"{manifest_path.relative_to(ROOT)}: MCP companions are not allowed")
     for relative in (
         ".codex-sync/provision.json",
+        ".mcp.json",
         "mcp",
-        "scripts/bootstrap.sh",
-        "scripts/provision.ps1",
-        "scripts/build.py",
+        "scripts",
+        "tests",
+        "docs",
+        "pixi.toml",
+        "pixi.lock",
     ):
         if (plugin_path / relative).exists():
             validation.error(f"{plugin_path.joinpath(relative).relative_to(ROOT)} must be removed")
@@ -186,27 +207,19 @@ def _validate_creative_script(
     except OSError:
         validation.error(f"{skill.relative_to(ROOT)} must be readable")
         skill_text = ""
-    skill_lower = skill_text.lower()
-    for forbidden in ("global mcp server", "mcp tools", "provisioned global"):
-        if forbidden in skill_lower:
-            validation.error(f"{skill.relative_to(ROOT)} must not reference {forbidden}")
     for marker in CREATIVE_SKILL_REQUIRED_MARKERS:
         if marker not in skill_text:
             validation.error(
-                f"{skill.relative_to(ROOT)} must contain the script contract marker {marker!r}"
+                f"{skill.relative_to(ROOT)} must contain the skill contract marker {marker!r}"
             )
-    for relative in ("scripts/creative_model_bridge.py", "pixi.toml", "pixi.lock"):
-        target = plugin_path / relative
-        if not target.is_file():
-            validation.error(f"{plugin_path.relative_to(ROOT)}: missing {relative}")
-    script = plugin_path / "scripts/creative_model_bridge.py"
-    if script.is_file():
-        script_text = script.read_text(encoding="utf-8")
-        for marker in ('"/chat/completions"', '"stream": True', '"reasoning_content"', '"output"'):
-            if marker not in script_text:
-                validation.error(
-                    f"{script.relative_to(ROOT)} must contain the runtime marker {marker!r}"
-                )
+    protocol_positions = [skill_text.find(marker) for marker in CREATIVE_PROTOCOL_ORDER]
+    if all(position >= 0 for position in protocol_positions) and protocol_positions != sorted(
+        protocol_positions
+    ):
+        validation.error(
+            f"{skill.relative_to(ROOT)} must keep Chat Completions, Responses, and "
+            "provider-native formats in fallback order"
+        )
 
 
 def _inside(root: Path, candidate: Path) -> bool:
@@ -357,18 +370,8 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
     elif len(env_vars) != len(set(env_vars)):
         validation.error(f"{context}: env_vars must not contain duplicates")
     else:
-        allowed_env = {"CODEX_HOME", "CREATIVE_MODEL_API_KEY"}
-        if plugin_path.name == "creative-model-bridge":
-            allowed_env.update(
-                {
-                    "SSL_CERT_FILE",
-                    "CREATIVE_MODEL_BRIDGE_SSL_CERT_FILE",
-                    "CREATIVE_MODEL_BRIDGE_BIN",
-                    "CREATIVE_MODEL_BRIDGE_VERSION",
-                    "CREATIVE_MODEL_BRIDGE_OFFLINE",
-                }
-            )
-        elif plugin_path.name == "gortex":
+        allowed_env = {"CODEX_HOME"}
+        if plugin_path.name == "gortex":
             allowed_env.update({"HOME", "USERPROFILE", "LOCALAPPDATA"})
             if "LOCALAPPDATA" not in env_vars:
                 validation.error(f"{context}: env_vars must include LOCALAPPDATA for Windows")
@@ -401,14 +404,6 @@ def _validate_mcp_server_entry(plugin_path: Path, context: str, server: dict[str
             validation.error(f"{context}: direct Pixi command is not permitted for target runtime")
         elif command == "git":
             git_launchers = {
-                "creative-model-bridge": (
-                    [
-                        "-c",
-                        'alias.creative-model-bridge=!sh "${GIT_PREFIX}scripts/bootstrap.sh"',
-                        "creative-model-bridge",
-                    ],
-                    "scripts/bootstrap.sh",
-                ),
                 "gortex": (
                     [
                         "-c",

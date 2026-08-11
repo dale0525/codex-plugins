@@ -207,11 +207,10 @@ than claiming unsupported transcript coverage.
 
 ### Creative Model Bridge
 
-Provides a provider-neutral Responses API MCP bridge for creative writing. It
-lists models from the configured provider, previews the exact outbound prompt
-without network access, and returns generated text verbatim with file hashes,
-usage, and request metadata. It does not auto-select models, inject hidden
-instructions, retry, or switch providers.
+Provides an instruction-only creative-writing skill with no bundled runtime.
+It reuses the active Codex provider, prefers OpenAI-compatible Chat Completions,
+falls back safely to Responses or a recognized same-provider native protocol,
+and returns the external model's visible text verbatim.
 
 ### Gortex
 
