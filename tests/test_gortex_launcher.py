@@ -347,6 +347,46 @@ class GortexLauncherTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, f"cwd:{project.resolve()}\n")
 
+    def test_mcp_windows_launch_succeeds_without_cygpath_in_path(self) -> None:
+        self._write_metadata()
+        (self.fake_bin / "cygpath").unlink()
+        installed_plugin = (
+            self.root
+            / "C:/Users/test/.codex/plugins/cache/dale0525-codex-plugins/gortex/fixture"
+        )
+        shutil.copytree(self.plugin, installed_plugin)
+        subprocess.run(
+            ["git", "init", "--quiet"],
+            cwd=self.root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        companion = json.loads((self.plugin / ".mcp.json").read_text(encoding="utf-8"))
+        server = companion["gortex"]
+        environment = self._environment("MINGW64_NT-10.0", "x86_64", self.valid_zip)
+        environment["CODEX_HOME"] = r"C:\Users\test\.codex"
+        environment["LOCALAPPDATA"] = r"C:\Users\test\AppData\Local"
+
+        result = subprocess.run(
+            [server["command"], *server["args"], "probe-cwd"],
+            cwd=self.root,
+            env=environment,
+            text=True,
+            capture_output=True,
+            timeout=10,
+            check=False,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, f"cwd:{self.root.resolve()}\n")
+        self.assertTrue(
+            (
+                self.root
+                / f"C:/Users/test/AppData/Local/gortex/versions/{VERSION}/gortex.exe"
+            ).is_file()
+        )
+
     def test_launcher_always_executes_the_mcp_subcommand(self) -> None:
         self._write_metadata()
         result = self._run("Darwin", "arm64", self.valid_tar, "probe", "mcp")

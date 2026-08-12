@@ -48,6 +48,23 @@ sha256_file() {
   fi
 }
 
+windows_path_to_posix() {
+  windows_path=$1
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -u "$windows_path"
+    return
+  fi
+
+  # Git's sh accepts drive-letter paths once Windows separators are normalized.
+  # Convert them without assuming cygpath is present in the MCP process PATH.
+  while case "$windows_path" in *\\*) true ;; *) false ;; esac; do
+    path_prefix=${windows_path%%\\*}
+    path_suffix=${windows_path#*\\}
+    windows_path=$path_prefix/$path_suffix
+  done
+  printf '%s\n' "$windows_path"
+}
+
 valid_version() {
   candidate=$1
   [ -x "$candidate" ] || return 1
@@ -96,11 +113,11 @@ case "$(uname -s)-$(uname -m)" in
     ;;
   MINGW*-x86_64|MSYS*-x86_64)
     asset_key="gortex_windows_amd64"
-    if [ -z "${LOCALAPPDATA:-}" ] || ! command -v cygpath >/dev/null 2>&1; then
-      log "gortex requires LOCALAPPDATA and cygpath on Windows"
+    if [ -z "${LOCALAPPDATA:-}" ]; then
+      log "gortex requires LOCALAPPDATA on Windows"
       exit 1
     fi
-    local_app_data=$(cygpath -u "$LOCALAPPDATA")
+    local_app_data=$(windows_path_to_posix "$LOCALAPPDATA")
     cache_root="$local_app_data/gortex"
     binary_name="gortex.exe"
     archive_kind="zip"
