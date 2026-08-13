@@ -18,32 +18,32 @@
     "gortex": {
       "kind": "github-release",
       "repository": "zzet/gortex",
-      "version": "0.63.2",
-      "tag": "v0.63.2",
-      "release_id": 367417039,
-      "published_at": "2026-08-09T07:54:05Z",
-      "tag_object_sha": "6a2905e12dfb737f6d37d5508a73bb7537a2d860",
-      "commit": "6a2905e12dfb737f6d37d5508a73bb7537a2d860",
+      "version": "0.63.3",
+      "tag": "v0.63.3",
+      "release_id": 369486699,
+      "published_at": "2026-08-12T19:45:12Z",
+      "tag_object_sha": "d4801638a64f54526e39536f54f18b8bb9dd379b",
+      "commit": "d4801638a64f54526e39536f54f18b8bb9dd379b",
       "metadata_destination": "plugins/gortex/runtime-release.json",
       "assets": {
         "gortex_darwin_arm64": {
           "name": "gortex_darwin_arm64.tar.gz",
-          "url": "https://github.com/zzet/gortex/releases/download/v0.63.2/gortex_darwin_arm64.tar.gz",
-          "size": 51445285,
-          "sha256": "188f2c8495d13e77281cefe8ad7d3628d59b00bfd202eedad7785236990e64b5"
+          "url": "https://github.com/zzet/gortex/releases/download/v0.63.3/gortex_darwin_arm64.tar.gz",
+          "size": 51452232,
+          "sha256": "4abd9c1d0259b99eec3f55ae1b3f77e1e51d35661ab29b493049f1ac36ca244d"
         },
         "gortex_windows_amd64": {
           "name": "gortex_windows_amd64.zip",
-          "url": "https://github.com/zzet/gortex/releases/download/v0.63.2/gortex_windows_amd64.zip",
-          "size": 54372381,
-          "sha256": "511855e4367d6e3357621768f2d9fd10e45b367808f734cae1a1bb5d987edea8"
+          "url": "https://github.com/zzet/gortex/releases/download/v0.63.3/gortex_windows_amd64.zip",
+          "size": 54391980,
+          "sha256": "008e2247b182438b150d1cf1ba189e88a35cabca2f0fe3ecbaa0eea665a6becc"
         }
       },
       "checksum_asset": {
         "name": "checksums.txt",
-        "url": "https://github.com/zzet/gortex/releases/download/v0.63.2/checksums.txt",
+        "url": "https://github.com/zzet/gortex/releases/download/v0.63.3/checksums.txt",
         "size": 995,
-        "sha256": "d4eadc05781cb088d2cb9e8dcc90d0af5fdb09b0f8b247e675670f384ea4ae53"
+        "sha256": "883fa6941cbfe30a901c7c0013473a3089b26d0423948da869b0c8b571fb5d36"
       },
       "ignored_assets": [
         "checksums.txt.pem",
