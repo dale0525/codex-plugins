@@ -22,14 +22,3 @@ plugin_manifest = "plugins/prompt-master/.codex-plugin/plugin.json"
 license_source = "LICENSE"
 license_destination = "plugins/prompt-master/third-party/prompt-master-LICENSE"
 remove_skill_frontmatter_fields = ["version"]
-
-[[github_releases]]
-id = "gortex"
-repository = "zzet/gortex"
-metadata_destination = "plugins/gortex/runtime-release.json"
-plugin_manifest = "plugins/gortex/.codex-plugin/plugin.json"
-required_assets = [
-  "gortex_darwin_arm64.tar.gz",
-  "gortex_windows_amd64.zip",
-]
-checksum_asset = "checksums.txt"

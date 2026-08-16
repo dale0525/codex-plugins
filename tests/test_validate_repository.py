@@ -157,57 +157,6 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 validation.errors,
             )
 
-    def test_gortex_runtime_requires_exact_platform_assets(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="gortex-runtime-validator-test-") as temporary:
-            root = Path(temporary)
-            metadata = root / "plugins/gortex/runtime-release.json"
-            metadata.parent.mkdir(parents=True)
-            tag = "v0.9.0"
-            prefix = (
-                "https://github.com/zzet/gortex/releases/download/"
-                f"{tag}/"
-            )
-            payload = {
-                "schema_version": 1,
-                "repository": "zzet/gortex",
-                "version": "0.9.0",
-                "tag": tag,
-                "tag_object_sha": "a" * 40,
-                "commit_sha": "b" * 40,
-                "assets": {
-                    "gortex_darwin_arm64": {
-                        "name": "gortex_darwin_arm64.tar.gz",
-                        "url": f"{prefix}gortex_darwin_arm64.tar.gz",
-                        "size": 1,
-                        "sha256": "c" * 64,
-                    },
-                    "gortex_windows_amd64": {
-                        "name": "gortex_windows_amd64.zip",
-                        "url": f"{prefix}gortex_windows_amd64.zip",
-                        "size": 1,
-                        "sha256": "d" * 64,
-                    },
-                },
-                "checksum_asset": {
-                    "name": "checksums.txt",
-                    "url": f"{prefix}checksums.txt",
-                    "size": 1,
-                    "sha256": "e" * 64,
-                },
-            }
-            metadata.write_text(json.dumps(payload) + "\n", encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_gortex_runtime_release(validation)
-            self.assertEqual(validation.errors, [])
-
-            del payload["assets"]["gortex_windows_amd64"]
-            metadata.write_text(json.dumps(payload) + "\n", encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_gortex_runtime_release(validation)
-            self.assertTrue(any("exactly the macOS" in error for error in validation.errors))
-
     def test_mcp_companion_validates_path_launcher_cwd_and_env_vars(self) -> None:
         with tempfile.TemporaryDirectory(prefix="mcp-validator-test-") as temporary:
             root = Path(temporary)
@@ -412,56 +361,6 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
             with patch.object(validate_repository, "ROOT", root):
                 validate_repository._validate_mcp_servers(plugin, payload, validation)
             self.assertTrue(any("direct Pixi command" in error for error in validation.errors))
-
-    def test_gortex_git_alias_must_inherit_task_cwd(self) -> None:
-        with tempfile.TemporaryDirectory(prefix="git-alias-validator-test-") as temporary:
-            root = Path(temporary)
-            plugin = root / "plugins/gortex"
-            scripts = plugin / "scripts"
-            scripts.mkdir(parents=True)
-            launcher = scripts / "launch.sh"
-            launcher.write_text("#!/bin/sh\n", encoding="utf-8")
-            launcher.chmod(0o755)
-            companion = plugin / ".mcp.json"
-            payload = {
-                "gortex": {
-                    "command": "git",
-                    "args": [
-                        "-c",
-                        "alias.gortex=!sh -c 'task_cwd=$PWD; [ -z \"${GIT_PREFIX:-}\" ] || task_cwd=$PWD/$GIT_PREFIX; if [ -n \"${CODEX_HOME:-}\" ]; then codex_home=$CODEX_HOME; elif [ -n \"${HOME:-}\" ]; then codex_home=$HOME/.codex; elif [ -n \"${USERPROFILE:-}\" ]; then codex_home=$USERPROFILE/.codex; else echo \"CODEX_HOME, HOME, or USERPROFILE is required\" >&2; exit 1; fi; case \"$(uname -s)\" in MINGW*|MSYS*) if command -v cygpath >/dev/null 2>&1; then codex_home=$(cygpath -u \"$codex_home\"); else while case \"$codex_home\" in *\\\\*) true ;; *) false ;; esac; do path_prefix=${codex_home%%\\\\*}; path_suffix=${codex_home#*\\\\}; codex_home=$path_prefix/$path_suffix; done; fi ;; esac; base=\"$codex_home/plugins/cache/dale0525-codex-plugins/gortex\"; launcher=; for candidate in \"$base\"/*/scripts/launch.sh; do [ -f \"$candidate\" ] || continue; if [ -n \"$launcher\" ]; then echo \"Multiple installed gortex plugin versions found under $base\" >&2; exit 1; fi; launcher=$candidate; done; [ -n \"$launcher\" ] || { echo \"Installed gortex launcher not found under $base\" >&2; exit 1; }; cd \"$task_cwd\"; exec sh \"$launcher\" \"$@\"' -",
-                        "gortex",
-                    ],
-                    "env_vars": ["CODEX_HOME", "HOME", "USERPROFILE", "LOCALAPPDATA"],
-                }
-            }
-            companion.write_text(json.dumps(payload), encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_mcp_servers(
-                    plugin, {"mcpServers": "./.mcp.json"}, validation
-                )
-            self.assertEqual(validation.errors, [])
-
-            payload["gortex"]["env_vars"].remove("LOCALAPPDATA")
-            companion.write_text(json.dumps(payload), encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_mcp_servers(
-                    plugin, {"mcpServers": "./.mcp.json"}, validation
-                )
-            self.assertTrue(any("must include LOCALAPPDATA" in error for error in validation.errors))
-
-            payload["gortex"]["env_vars"].append("LOCALAPPDATA")
-            payload["gortex"]["cwd"] = "."
-            companion.write_text(json.dumps(payload), encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_mcp_servers(
-                    plugin, {"mcpServers": "./.mcp.json"}, validation
-                )
-            self.assertTrue(
-                any("must inherit the task working directory" in error for error in validation.errors)
-            )
 
 
 class WorkflowActionPinValidationTests(unittest.TestCase):

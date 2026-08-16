@@ -50,12 +50,6 @@ codex plugin add web-novel-craft@dale0525-codex-plugins
 codex plugin add creative-model-bridge@dale0525-codex-plugins
 ```
 
-## Install Gortex
-
-```bash
-codex plugin add gortex@dale0525-codex-plugins
-```
-
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
@@ -212,21 +206,6 @@ It reuses the active Codex provider's base URL and API key, honors an explicit
 wire API, falls back safely among compatible same-provider protocols, and
 returns the external model's visible text verbatim.
 
-### Gortex
-
-Packages [zzet/gortex](https://github.com/zzet/gortex) as a lazy,
-checksum-verified native MCP runtime for Apple Silicon macOS and x64 Windows.
-The plugin does not run the upstream installer or modify Codex configuration,
-global instructions, hooks, or agent profiles. On first MCP startup it downloads
-the stable release selected by the daily synchronization workflow, verifies the
-archive, and stores that exact version in a device-local runtime directory.
-`gortex mcp` starts or reuses one detached daemon; task connections are lightweight
-stdio relays and share the daemon's graph and index state.
-
-Existing devices update only after an explicit `codex-sync pull` (or a manual
-marketplace upgrade and plugin reinstall), followed by a new Codex task. Old
-runtime directories remain inert; startup never falls back to an older version.
-
 ## External content synchronization
 
 The `Sync external skills and plugins` GitHub Actions workflow runs daily at
@@ -254,7 +233,6 @@ set and checksum asset. Every destination must remain inside this repository.
 ```text
 .agents/plugins/marketplace.json
 plugins/apple-design/
-plugins/gortex/
 plugins/codex-sync/
 plugins/creative-model-bridge/
 plugins/fastctx/
