@@ -9,6 +9,7 @@ pyyaml = ">=6.0,<7"
 actionlint = ">=1.7,<2"
 shellcheck = ">=0.10,<1"
 rust = ">=1.85,<2"
+go = ">=1.26,<1.27"
 
 [tasks]
 sync = "python scripts/sync_external_content.py"
