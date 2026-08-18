@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.6.1 release binary otherwise.
+bootstrap downloads and verifies the 0.6.2 release binary otherwise.
 
 ## Commands
 
