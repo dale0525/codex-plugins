@@ -69,6 +69,19 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
                 any("is not allowed" in error for error in validation.errors)
             )
 
+    def test_creative_model_bridge_is_chat_completions_sse_only(self) -> None:
+        plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
+        skill_text = (plugin / "skills/creative-model-bridge/SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        for forbidden in (
+            "`POST /responses`",
+            "`response.completed`",
+            "Gemini `generateContent`",
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, skill_text)
+
     def test_release_lock_requires_v2_and_checksum_digest(self) -> None:
         with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
             root = Path(temporary)

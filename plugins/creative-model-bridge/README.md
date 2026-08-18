@@ -7,12 +7,15 @@ MCP server, Pixi environment, daemon, or bundled provider client.
 For creative writing, the skill tells Codex to:
 
 - preserve the requested language, format, constraints, and supplied material;
-- use the user's exact model name or default to `gemini-3-pro`;
+- use `curl` or `curl.exe`, with no extra dependency or bundled client;
 - reuse the active Codex provider's base URL, provider API key, and headers;
-- honor an explicit `wire_api`; use Codex-compatible streaming Responses when
-  configured, otherwise try Chat Completions before safe fallbacks;
-- stop instead of blindly retrying ambiguous, authenticated, limited, or
-  partially completed requests; and
+- call only the OpenAI-compatible streaming `POST /chat/completions` endpoint;
+- try `gemini-3-pro`, `gemini-3-flash`, `deepseek-flash`, `deepseek-pro`,
+  `gpt-5.6-terra`, `gpt-5.6-sol`, and `gpt-5.6-luna` in that fallback order;
+- accept only `choices[].delta.content` as visible text, ignoring thinking and
+  reasoning fields; and
+- stop instead of retrying an ambiguous, authenticated, limited, timed-out, or
+  partially completed request; and
 - return only the model's final visible text verbatim.
 
 Credentials stay within the active provider boundary. The skill never reads the

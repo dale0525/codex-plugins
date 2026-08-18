@@ -1,6 +1,6 @@
 ---
 name: creative-model-bridge
-description: Route fiction, scripts, poetry, story development, rewrites, revision, and every other creative writing task through an external LLM using the current Codex model provider's existing base URL and provider API key. Use when creative work must preserve supplied material and return the model's output verbatim; honor an explicit wire API before safe protocol fallbacks.
+description: Route fiction, scripts, poetry, story development, rewrites, revision, and every other creative writing task through the active provider's OpenAI-compatible Chat Completions streaming API. Use the fixed model fallback order and return only final visible text.
 ---
 
 # Creative Model Bridge
@@ -14,21 +14,19 @@ for a bundled runtime, script, MCP server, or Pixi environment.
 
 1. Preserve the user's language, point of view, tense, format, named constraints,
    and supplied material.
-2. Use the user's model string exactly when one is named. Otherwise use
-   `gemini-3-pro`.
-3. Build one stateless prompt in this order: task, constraints, output
+2. Build one stateless prompt in this order: task, constraints, output
    specification, inline material, then file material. Read required files with
    available tools and wrap each one in explicit begin/end markers.
-4. Use this system instruction unless the user explicitly requests no system
+3. Use this system instruction unless the user explicitly requests no system
    instruction:
 
    ```text
    你是创意文字写作者。严格依据用户提供的任务与材料创作；只输出成稿，不解释过程。
    ```
 
-5. Request up to 60,000 output tokens where the selected protocol and model
-   support it. Adapt only the protocol-specific field name; do not silently
-   discard source material to satisfy a client default.
+4. Request up to 60,000 output tokens only when the current compatible provider
+   documents the relevant Chat Completions field. Do not silently discard source
+   material to satisfy a client default.
 
 ## Reuse the current provider
 
@@ -63,57 +61,79 @@ authorization or provider header across origins. Do not edit `AGENTS.md`, Codex
 configuration, credential storage, or the marketplace as part of a writing
 request.
 
-## Choose an available caller
+## Call Chat Completions with curl
 
-Use a safe system-provided mechanism that is already available. Prefer Node
-`fetch` for direct HTTP because it keeps the key in process memory and has broad
-compatibility with OpenAI-compatible gateways. Next prefer a provider-aware
-client or tool, an installed SDK or provider CLI, or `curl` with both body and
-credential supplied through stdin. Avoid Python `urllib` when Node is available;
-some compatible gateways reject its transport fingerprint with a misleading
-403. Do not put a credential in a command argument, install dependencies, create
-a persistent helper, or start a daemon.
+Use only the OpenAI-compatible Chat Completions streaming API. Ignore
+`wire_api` and do not call Responses, Anthropic Messages, Gemini native APIs,
+SDKs, provider CLIs, or a locally installed runtime.
 
-Choose the wire format before sending anything. A failed or possibly accepted
-generation must not be repeated merely to change transport.
+Use the system `curl` command on macOS/Linux and `curl.exe` on Windows. It is
+available without adding a package dependency. Send one `POST /chat/completions`
+request with this JSON shape:
 
-## Try protocols safely
+```json
+{
+  "model": "<candidate>",
+  "messages": [
+    {"role": "system", "content": "<system instruction>"},
+    {"role": "user", "content": "<prepared prompt>"}
+  ],
+  "stream": true
+}
+```
 
-1. Honor an explicit provider wire format first. For `wire_api = "responses"`,
-   call `POST /responses`; do not probe Chat Completions first. Send `model`,
-   `instructions`, and `input` as an ordered message array whose text parts use
-   `input_text`. Start with the Codex-compatible transport, `stream: true`, and
-   omit optional token-limit fields unless this provider is known to support
-   them. Parse SSE events, concatenate only `response.output_text.delta`, and
-   accept the result only after `response.completed`. Treat `response.failed`,
-   `response.incomplete`, an error event, or a stream ending without completion
-   as failure with no retry.
-2. For a provider that explicitly declares Chat Completions, call
-   `POST /chat/completions` first with ordered `messages`. Prefer non-streaming
-   JSON unless that provider is known to require SSE.
-3. When `wire_api` is absent or unknown, try OpenAI-compatible Chat Completions
-   first, then Responses. Switch only after a clear endpoint or request-schema
-   incompatibility before generation, such as 404, 405, 415, or an explicit
-   unsupported-field response.
-4. If both OpenAI formats are clearly incompatible, try a provider-native format
-   only when the provider is confidently identified and the call remains inside
-   the same configured origin and authentication boundary. Eligible formats
-   include Anthropic Messages and Gemini `generateContent`; an existing provider
-   CLI or SDK may perform this adaptation.
+Pass the JSON body and credential/header to `curl` through the current shell's
+anonymous pipe or file descriptor, not a command argument or persistent file.
+Set `Content-Type: application/json`, disable redirects, keep SSE buffering
+disabled, and send the request only to `<base_url>/chat/completions`. Do not
+install a dependency, create a helper, or start a daemon.
 
-Do not change formats after 401 or 403 authentication failures, 429 rate limits,
-policy denials, transport timeouts, partial output, malformed or interrupted
-streams, or a 5xx response that may have followed request acceptance. Do not
-retry an ambiguous request. These stops prevent duplicate generations and
-charges.
+## Select and fall back between models
 
-If no safe caller can access the current provider credential, or every eligible
-format fails, report the exact safe failure boundary. Do not expose response
-bodies that may contain secrets, and do not draft a replacement locally.
+The supported candidates, in exact fallback order, are:
 
-## Return the result
+1. `gemini-3-pro`
+2. `gemini-3-flash`
+3. `deepseek-flash`
+4. `deepseek-pro`
+5. `gpt-5.6-terra`
+6. `gpt-5.6-sol`
+7. `gpt-5.6-luna`
 
-Extract only the model's final visible content. Do not expose raw reasoning,
-reasoning deltas, internal metadata, or credentials. Return the generated output
-verbatim without a preface, critique, translation, summary, or formatting wrapper
-unless the user explicitly requests one.
+Always begin with `gemini-3-pro` and advance through this list one candidate at
+a time. This order is fixed; do not skip, reorder, or call a model outside it.
+If the user explicitly requests a model outside this list, report that it is
+unsupported instead of silently substituting another model.
+
+Try the next candidate only when the previous request is conclusively rejected
+before any SSE output, such as a structured invalid-model or unsupported-model
+response or a model-specific 400/404/422 response. Keep the same provider
+origin, credentials, headers, prompt, and API shape for every candidate. A
+local caller, configuration, or credential failure is not model-specific; stop
+instead of cycling through the list.
+
+Do not fall back after 401 or 403 authentication failures, 429 rate limits,
+policy denials, timeouts, connection failures after sending the request, 5xx
+responses, partial output, malformed or interrupted streams, or any SSE delta.
+Those outcomes may represent an accepted generation and a retry could duplicate
+content or charges. Report the exact safe failure boundary if no eligible
+candidate remains.
+
+## Extract the final visible text
+
+Parse the Server-Sent Events line by line. For each JSON `data:` event, append
+only a string value from `choices[].delta.content`, in event order. Skip null,
+missing, or empty content values and ignore every other delta field, including
+`reasoning_content`, `reasoning`, `thinking`, role, tool calls, usage, and
+metadata. The models currently tested do not all emit the same thinking fields,
+but their final visible text is consistently carried by `choices[].delta.content`.
+
+Accept a completed generation only after a non-null `finish_reason` and the
+terminal `data: [DONE]` event. Do not treat a usage-only chunk as text. If the
+stream ends early or has no final completion marker, do not return partial text
+or retry it with another model.
+
+Return the concatenated visible text verbatim without a preface, critique,
+translation, summary, or formatting wrapper unless the user explicitly requests
+one. Never expose raw reasoning, reasoning deltas, internal metadata, or
+credentials.
