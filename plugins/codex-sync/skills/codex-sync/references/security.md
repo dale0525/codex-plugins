@@ -21,10 +21,13 @@ from the actual local listing. Remote pushes are ordinary non-force
 fast-forward pushes; remote races fail instead of overwriting someone else's
 commit.
 
-Never synchronize auth/session/history, SQLite state, project trust, caches, or
-plugin provision artifacts. Existing declared configuration leaves (including
-hook settings) remain within the normal config policy; Codex Sync never adds
-lifecycle hooks. Personal, OpenAI, and `openai-*` names are protected at
+Never synchronize auth/session/history, SQLite state, project trust, caches,
+automation memory/run state, or plugin provision artifacts. Only validated
+`automations/<id>/automation.toml` declarations are portable; symlinks and
+extra files in the repository automation tree are rejected. Existing declared
+configuration leaves (including hook settings) remain within the normal config
+policy; Codex Sync never adds lifecycle hooks. Personal, OpenAI, and
+`openai-*` names are protected at
 capture, planning, mutation, and state boundaries. Non-Git marketplaces are
 outside the sync domain. A desired name colliding with a protected or
 non-portable local marketplace fails preflight before any device mutation.

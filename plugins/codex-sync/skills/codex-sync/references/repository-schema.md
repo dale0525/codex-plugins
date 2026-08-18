@@ -7,9 +7,34 @@ schema_version = 3
 ```
 
 Managed files are fixed to `AGENTS.md`, `agents/*.toml`,
-`config/common.toml`, `devices/<device>.toml`, `marketplaces.toml`, and
-`plugins.toml`. Do not add path mappings, `providers.toml`, or external AGENTS
-sections.
+`config/common.toml`, `devices/<device>.toml`, `automations/<id>/automation.toml`,
+`marketplaces.toml`, and `plugins.toml`. Do not add path mappings,
+`providers.toml`, or external AGENTS sections.
+
+`automations/<id>/automation.toml` is the declaration-only part of a scheduled
+automation. IDs use 1-128 ASCII letters, numbers, `.`, `-`, or `_`; leading or
+trailing dots, case-insensitive duplicates, and Windows reserved names are
+rejected for cross-device portability. The engine validates the Codex desktop
+fields (`version`, `id`, `kind`, `name`, `prompt`, `status`, `rrule`,
+model/reasoning, execution
+environment, target/cwds, and timestamps). It also accepts the optional
+`approval_policy` (`untrusted`, `on-request`, `never`, or `on-failure`) and
+`sandbox_mode` (`read-only`, `workspace-write`, or `danger-full-access`) as
+explicit sync metadata. Current Codex desktop automation files do not emit
+these two fields and the current desktop runner derives the effective run
+permissions from the selected/saved configuration and installation
+requirements; therefore syncing these metadata fields does not by itself
+override a read-only outer policy. Verify the effective mode in the automation
+settings UI on each device.
+
+When a desktop rewrite omits `approval_policy` or `sandbox_mode`, push preserves
+the corresponding value already present in the repository. An explicit local
+value still replaces the repository value.
+
+Only `automation.toml` is synchronized. `$CODEX_HOME/automations/*/memory.md`,
+`.run-jitter-salt`, run history, logs, SQLite state, and other lifecycle files
+remain local and are never copied or deleted by pull/push. Removing a remote
+definition removes only the local `automation.toml`; local memory is retained.
 
 Common configuration is overlaid by the current device file. Existing local
 keys outside the set previously managed by Codex Sync are preserved on pull.

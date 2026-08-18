@@ -1,6 +1,7 @@
 mod app;
 #[cfg(test)]
 mod app_tests;
+mod automations;
 mod codex;
 mod config;
 mod migration;

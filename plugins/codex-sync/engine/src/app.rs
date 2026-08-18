@@ -4,6 +4,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+use crate::automations;
 use crate::codex;
 use crate::config::{self, ManagedValues};
 use crate::migration;
@@ -178,6 +179,10 @@ pub fn pull(dry_run: bool) -> Result<()> {
         Ok(plugins) => plugins,
         Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
     };
+    let automations = match automations::read_repository(&paths.cache) {
+        Ok(automations) => automations,
+        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
+    };
     let current = match config::read_current(&paths.codex_home) {
         Ok(current) => current,
         Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
@@ -220,6 +225,9 @@ pub fn pull(dry_run: bool) -> Result<()> {
         {
             println!("- remove agent profile {name}.toml");
         }
+        for action in automations::dry_run_actions(&paths.codex_home, &automations)? {
+            println!("- {action}");
+        }
         let report = codex::reconcile(&markets, &plugins, true)?;
         for action in report.actions {
             println!("- {action}");
@@ -243,7 +251,7 @@ pub fn pull(dry_run: bool) -> Result<()> {
             return Err(error.context("create pre-pull backup"));
         }
     };
-    let result = apply_core(&paths, &state, &desired);
+    let result = apply_core(&paths, &state, &desired, &automations);
     if let Err(error) = result {
         if let Err(restore_error) = restore_core_backup(&paths, &backup) {
             state.converged = false;
@@ -503,6 +511,7 @@ fn validate_v3_repository(root: &Path) -> Result<()> {
     })?;
     let _ = read_markets(root)?;
     let _ = read_plugins(root)?;
+    let _ = automations::read_repository(root)?;
     Ok(())
 }
 
@@ -694,6 +703,7 @@ fn capture_current(paths: &Paths, state: &LocalState) -> Result<CaptureResult> {
             bytes,
         )?;
     }
+    automations::capture_to_repository(&paths.cache, &paths.codex_home)?;
     let previous_markets = read_markets(&paths.cache)?;
     let inventory = codex::capture_inventory(&previous_markets)?;
     codex::write_markets(&paths.cache.join("marketplaces.toml"), &inventory.markets)?;
@@ -739,6 +749,7 @@ pub(crate) fn create_core_backup(paths: &Paths) -> Result<PathBuf> {
             &paths.backup.join("agents").join(format!("{name}.toml")),
         )?;
     }
+    automations::create_backup(&paths.codex_home, &paths.cache, &paths.backup)?;
     Ok(paths.backup.clone())
 }
 
@@ -820,6 +831,7 @@ pub(crate) fn restore_core_backup(paths: &Paths, backup: &Path) -> Result<()> {
             return Err(error).with_context(|| format!("inspect {}", agents_backup.display()))
         }
     }
+    automations::restore_backup(&paths.codex_home, backup)?;
     Ok(())
 }
 
@@ -881,7 +893,12 @@ fn restore_file(source: &Path, destination: &Path) -> Result<()> {
     }
 }
 
-fn apply_core(paths: &Paths, state: &LocalState, desired: &ManagedValues) -> Result<()> {
+fn apply_core(
+    paths: &Paths,
+    state: &LocalState,
+    desired: &ManagedValues,
+    desired_automations: &automations::Definitions,
+) -> Result<()> {
     let current = config::read_current(&paths.codex_home)?;
     let rendered = config::render_config(&current, &state.managed_paths, desired)?;
     atomic_write(&paths.codex_home.join("config.toml"), rendered.as_bytes())?;
@@ -890,6 +907,7 @@ fn apply_core(paths: &Paths, state: &LocalState, desired: &ManagedValues) -> Res
         &fs::read(paths.cache.join("AGENTS.md"))?,
     )?;
     profiles::mirror_profiles(&paths.cache, &paths.codex_home, &state.managed_profiles)?;
+    automations::apply(&paths.cache, &paths.codex_home, desired_automations)?;
     Ok(())
 }
 

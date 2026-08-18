@@ -59,6 +59,170 @@ fn setup_pull_and_push_use_git_and_fixed_author() {
 }
 
 #[test]
+fn automations_sync_definitions_and_preserve_runtime_memory() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("automation-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::create_dir_all(edit.join("automations/codex-2")).unwrap();
+    fs::write(
+        edit.join("automations/codex-2/automation.toml"),
+        r#"version = 1
+id = "codex-2"
+kind = "cron"
+name = "Weekly cleanup"
+prompt = "Clean old sessions"
+status = "ACTIVE"
+rrule = "FREQ=WEEKLY;BYDAY=MO;BYHOUR=7;BYMINUTE=0;BYSECOND=0"
+model = "gpt-5.6-sol"
+reasoning_effort = "medium"
+execution_environment = "local"
+target = { type = "projectless" }
+cwds = ["~"]
+created_at = 1
+updated_at = 2
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+"#,
+    )
+    .unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "add automation"]);
+    run_git(&edit, &["push", "origin", "main"]);
+
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull", "--dry-run"])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains(
+            "add automation codex-2/automation.toml",
+        ));
+    assert!(!codex_home
+        .join("automations/codex-2/automation.toml")
+        .exists());
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    let local_definition = codex_home.join("automations/codex-2/automation.toml");
+    let local_text = fs::read_to_string(&local_definition).unwrap();
+    assert!(local_text.contains("sandbox_mode = \"danger-full-access\""));
+    // Simulate the desktop app rewriting its native schema, which currently
+    // omits the two optional sync metadata fields.
+    fs::write(
+        &local_definition,
+        local_text
+            .replace("approval_policy = \"never\"\n", "")
+            .replace("sandbox_mode = \"danger-full-access\"\n", ""),
+    )
+    .unwrap();
+    fs::write(
+        codex_home.join("automations/codex-2/memory.md"),
+        "runtime memory\n",
+    )
+    .unwrap();
+    fs::write(
+        codex_home.join("automations/.run-jitter-salt"),
+        "runtime salt\n",
+    )
+    .unwrap();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push"])
+        .assert()
+        .success();
+    let check = temp.path().join("automation-check");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), check.to_str().unwrap()],
+    );
+    assert!(check.join("automations/codex-2/automation.toml").exists());
+    let captured = fs::read_to_string(check.join("automations/codex-2/automation.toml")).unwrap();
+    assert!(captured.contains("approval_policy = \"never\""));
+    assert!(captured.contains("sandbox_mode = \"danger-full-access\""));
+    assert!(!check.join("automations/codex-2/memory.md").exists());
+    assert!(!check.join("automations/.run-jitter-salt").exists());
+
+    run_git(&edit, &["pull", "--rebase", "origin", "main"]);
+    fs::remove_file(edit.join("automations/codex-2/automation.toml")).unwrap();
+    run_git(&edit, &["add", "-A"]);
+    run_git(&edit, &["commit", "-m", "remove automation"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    assert!(!local_definition.exists());
+    assert!(codex_home.join("automations/codex-2/memory.md").exists());
+}
+
+#[test]
+fn automation_policy_validation_rejects_unknown_values() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("automation-invalid");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::create_dir_all(edit.join("automations/bad")).unwrap();
+    fs::write(
+        edit.join("automations/bad/automation.toml"),
+        r#"version = 1
+id = "bad"
+kind = "cron"
+name = "Bad"
+prompt = "Bad"
+status = "ACTIVE"
+rrule = "FREQ=DAILY"
+execution_environment = "local"
+target = { type = "projectless" }
+cwds = ["~"]
+created_at = 1
+updated_at = 2
+sandbox_mode = "not-a-mode"
+"#,
+    )
+    .unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "invalid automation"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains(
+            "unsupported automation sandbox_mode",
+        ));
+}
+
+#[test]
 fn device_overlay_capture_keeps_shadowed_common_baseline() {
     let (temp, remote, codex_home, sync_home) = fixture();
     let edit = temp.path().join("overlay-edit");

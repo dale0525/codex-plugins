@@ -34,6 +34,27 @@ fn core_backup_round_trip_restores_files_and_absent_markers() {
     fs::create_dir_all(cache.join("agents")).unwrap();
     fs::write(cache.join("AGENTS.md"), "remote\n").unwrap();
     fs::write(cache.join("agents/default.toml"), "name = \"default\"\n").unwrap();
+    let automation = r#"version = 1
+id = "job"
+kind = "cron"
+name = "Job"
+prompt = "Do work"
+status = "ACTIVE"
+rrule = "FREQ=DAILY"
+execution_environment = "local"
+target = { type = "projectless" }
+cwds = ["~"]
+created_at = 1
+updated_at = 2
+"#;
+    fs::create_dir_all(codex_home.join("automations/job")).unwrap();
+    fs::write(
+        codex_home.join("automations/job/automation.toml"),
+        automation,
+    )
+    .unwrap();
+    fs::create_dir_all(cache.join("automations/job")).unwrap();
+    fs::write(cache.join("automations/job/automation.toml"), automation).unwrap();
     let paths = Paths {
         data_home: data_home.clone(),
         state_file: data_home.join("state.toml"),
@@ -45,6 +66,11 @@ fn core_backup_round_trip_restores_files_and_absent_markers() {
     let backup = create_core_backup(&paths).unwrap();
     fs::write(codex_home.join("config.toml"), "model = \"after\"\n").unwrap();
     fs::write(codex_home.join("AGENTS.md"), "after\n").unwrap();
+    fs::write(
+        codex_home.join("automations/job/automation.toml"),
+        automation.replace("name = \"Job\"", "name = \"After\""),
+    )
+    .unwrap();
     restore_core_backup(&paths, &backup).unwrap();
     assert_eq!(
         fs::read_to_string(codex_home.join("config.toml")).unwrap(),
@@ -53,6 +79,10 @@ fn core_backup_round_trip_restores_files_and_absent_markers() {
     assert_eq!(
         fs::read_to_string(codex_home.join("AGENTS.md")).unwrap(),
         "before\n"
+    );
+    assert_eq!(
+        fs::read_to_string(codex_home.join("automations/job/automation.toml")).unwrap(),
+        automation
     );
 }
 
