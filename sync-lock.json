@@ -5,7 +5,7 @@
       "kind": "git-tree",
       "repository": "https://github.com/emilkowalski/skills.git",
       "ref": "main",
-      "commit": "e879241fab3cdb22e8d95587cdbf40b57a88d7da",
+      "commit": "d23d7f88a2e21c9e4b1418c7abe420f5c1052ba7",
       "destination": "plugins/apple-design/skills"
     },
     "prompt-master": {
