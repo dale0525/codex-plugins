@@ -82,6 +82,19 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, skill_text)
 
+    def test_creative_model_bridge_falls_back_after_every_unsuccessful_attempt(self) -> None:
+        plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
+        skill_text = (plugin / "skills/creative-model-bridge/SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Treat every other outcome as an unsuccessful attempt", skill_text)
+        self.assertIn("continue with the next candidate", skill_text)
+        self.assertIn("contain no usable `choices[].delta.content` text", skill_text)
+        self.assertIn("normal text-completion `finish_reason`", skill_text)
+        self.assertIn("non-whitespace text", skill_text)
+        self.assertIn("protocol error remains a failure", skill_text)
+        self.assertNotIn("Do not fall back after 401 or 403", skill_text)
+
     def test_release_lock_requires_v2_and_checksum_digest(self) -> None:
         with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
             root = Path(temporary)

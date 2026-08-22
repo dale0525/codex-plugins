@@ -39,10 +39,15 @@ CREATIVE_SKILL_REQUIRED_MARKERS = (
     "`reasoning_content`",
     "Keep every credential in process memory",
     "Send credentials only to the exact origin",
-    "Try the next candidate only",
-    "Do not fall back after 401 or 403",
+    "Treat every other outcome as an unsuccessful attempt",
+    "continue with the next candidate",
+    "HTTP response is 2xx",
+    "normal text-completion `finish_reason`",
+    "non-whitespace text",
+    "protocol error remains a failure",
+    "Do not fallback after an explicit user cancellation",
     "Disable automatic redirects",
-    "do not return partial text",
+    "Discard all visible text",
     "Return the concatenated visible text",
 )
 

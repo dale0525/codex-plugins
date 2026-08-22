@@ -14,8 +14,11 @@ For creative writing, the skill tells Codex to:
   `gpt-5.6-terra`, `gpt-5.6-sol`, and `gpt-5.6-luna` in that fallback order;
 - accept only `choices[].delta.content` as visible text, ignoring thinking and
   reasoning fields; and
-- stop instead of retrying an ambiguous, authenticated, limited, timed-out, or
-  partially completed request; and
+- continue to the next configured model after every unsuccessful attempt,
+  including empty, interrupted, rejected, authenticated, limited, timed-out, or
+  partially completed responses; and
+- require a successful 2xx transport, normal completion reason, `[DONE]`, and
+  non-whitespace visible text; and
 - return only the model's final visible text verbatim.
 
 Credentials stay within the active provider boundary. The skill never reads the

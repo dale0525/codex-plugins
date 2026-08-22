@@ -101,23 +101,41 @@ The supported candidates, in exact fallback order, are:
 7. `gpt-5.6-luna`
 
 Always begin with `gemini-3-pro` and advance through this list one candidate at
-a time. This order is fixed; do not skip, reorder, or call a model outside it.
-If the user explicitly requests a model outside this list, report that it is
-unsupported instead of silently substituting another model.
+a time. This order is fixed; do not skip, reorder, retry a candidate, or call a
+model outside it. If the user explicitly requests a model outside this list,
+report that it is unsupported instead of silently substituting another model.
 
-Try the next candidate only when the previous request is conclusively rejected
-before any SSE output, such as a structured invalid-model or unsupported-model
-response or a model-specific 400/404/422 response. Keep the same provider
-origin, credentials, headers, prompt, and API shape for every candidate. A
-local caller, configuration, or credential failure is not model-specific; stop
-instead of cycling through the list.
+Treat an attempt as successful only when all of these conditions hold:
 
-Do not fall back after 401 or 403 authentication failures, 429 rate limits,
-policy denials, timeouts, connection failures after sending the request, 5xx
-responses, partial output, malformed or interrupted streams, or any SSE delta.
-Those outcomes may represent an accepted generation and a retry could duplicate
-content or charges. Report the exact safe failure boundary if no eligible
-candidate remains.
+- the HTTP response is 2xx and `curl` exits successfully;
+- no error, refusal, safety, policy, or blocked signal appears anywhere in the
+  response or stream;
+- the stream has a normal text-completion `finish_reason` (normally `stop`, or
+  an explicitly documented provider-equivalent; reject `length`,
+  `content_filter`, `tool_calls`, `function_call`, safety/refusal values, and
+  unknown values);
+- the terminal `data: [DONE]` event arrives; and
+- the concatenated `choices[].delta.content` is non-whitespace text that meets
+  the user's explicit output format and is not merely an error, refusal, or
+  status message.
+
+Treat every other outcome as an unsuccessful attempt and try the next
+candidate in the exact order until the list is exhausted. This includes
+model-specific rejections, local configuration or credential failures, 401/403,
+429, policy denials, non-2xx responses, nonzero `curl` exits, timeouts,
+connection failures, 5xx responses, malformed or interrupted streams, partial
+output, unsupported or non-normal finish reasons, explicit error/refusal/safety
+signals, whitespace-only text, and streams that reach `finish_reason` and
+`data: [DONE]` but contain no usable `choices[].delta.content` text. A transport
+or protocol error remains a failure even if buffered text and `[DONE]` are also
+present.
+
+For every fallback, keep the same provider origin, credentials, headers, prompt,
+and API shape. Discard all visible text from an unsuccessful attempt; never
+return it as a partial result. After every candidate is unsuccessful, report the
+failure boundary without exposing credentials, raw reasoning, or internal
+metadata. Do not fallback after an explicit user cancellation or interrupt;
+that is a user stop, not a model failure.
 
 ## Extract the final visible text
 
@@ -128,10 +146,13 @@ missing, or empty content values and ignore every other delta field, including
 metadata. The models currently tested do not all emit the same thinking fields,
 but their final visible text is consistently carried by `choices[].delta.content`.
 
-Accept a completed generation only after a non-null `finish_reason` and the
-terminal `data: [DONE]` event. Do not treat a usage-only chunk as text. If the
-stream ends early or has no final completion marker, do not return partial text
-or retry it with another model.
+Accept a completed generation only when the success conditions above are all
+met. In particular, require non-whitespace visible text and a normal completion
+reason; do not accept `length`, `content_filter`, `tool_calls`, `function_call`,
+unknown finish reasons, refusal/error payloads, or a stream whose transport
+failed. Do not treat a usage-only chunk as text. Treat an early end, missing
+completion marker, malformed stream, or empty visible text as an unsuccessful
+attempt and continue with the next candidate.
 
 Return the concatenated visible text verbatim without a preface, critique,
 translation, summary, or formatting wrapper unless the user explicitly requests

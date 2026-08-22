@@ -1,6 +1,6 @@
 {
   "name": "creative-model-bridge",
-  "version": "0.4.0+codex.20260818",
+  "version": "0.4.2+codex.20260822",
   "description": "Guide creative writing through OpenAI-compatible streaming Chat Completions with model fallback.",
   "author": {
     "name": "Logic Tan",
