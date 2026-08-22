@@ -32,8 +32,18 @@ for a bundled runtime, script, MCP server, or Pixi environment.
 
 Reuse the current Codex model provider's effective `base_url`, provider API key,
 and headers. Prefer provider information already exposed by the runtime. If it
-is not directly available, resolve the active user-level configuration and
-profile without changing them.
+is not directly available, use Codex's own cross-platform effective-configuration
+resolver (for example, the app-server `config/read` endpoint) to resolve the
+active user-level configuration and profile without changing them.
+
+Do not parse `config.toml` with the system `python3`, Ruby, PowerShell,
+`plutil`, `awk`, or another OS utility, and do not assume any of them provides a
+portable TOML parser. TOML is not a universally OS-native format, and macOS
+system Python may be older than 3.11. Do not install a parser or create a
+helper. Configuration resolution is a single preflight before selecting the
+first model. If Codex's effective-config resolver is unavailable or fails, stop
+at that configuration boundary with a local diagnostic; this is not a model
+attempt and must not be repeated as fallback across candidates.
 
 Resolve credentials only from the selected provider. Use its command-backed
 `auth`, `env_key`, or `experimental_bearer_token`, plus `http_headers` and
@@ -119,9 +129,9 @@ Treat an attempt as successful only when all of these conditions hold:
   the user's explicit output format and is not merely an error, refusal, or
   status message.
 
-Treat every other outcome as an unsuccessful attempt and try the next
-candidate in the exact order until the list is exhausted. This includes
-model-specific rejections, local configuration or credential failures, 401/403,
+Treat every other model-attempt outcome as an unsuccessful attempt and try the
+next candidate in the exact order until the list is exhausted. This includes
+model-specific rejections, 401/403,
 429, policy denials, non-2xx responses, nonzero `curl` exits, timeouts,
 connection failures, 5xx responses, malformed or interrupted streams, partial
 output, unsupported or non-normal finish reasons, explicit error/refusal/safety

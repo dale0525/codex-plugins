@@ -87,9 +87,14 @@ class RepositorySyncMetadataValidationTests(unittest.TestCase):
         skill_text = (plugin / "skills/creative-model-bridge/SKILL.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Treat every other outcome as an unsuccessful attempt", skill_text)
+        self.assertIn(
+            "Treat every other model-attempt outcome as an unsuccessful attempt", skill_text
+        )
         self.assertIn("continue with the next candidate", skill_text)
         self.assertIn("contain no usable `choices[].delta.content` text", skill_text)
+        self.assertIn("Do not parse `config.toml` with the system `python3`", skill_text)
+        self.assertIn("single preflight", skill_text)
+        self.assertIn("this is not a model", skill_text)
         self.assertIn("normal text-completion `finish_reason`", skill_text)
         self.assertIn("non-whitespace text", skill_text)
         self.assertIn("protocol error remains a failure", skill_text)

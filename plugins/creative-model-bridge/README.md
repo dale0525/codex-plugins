@@ -17,6 +17,8 @@ For creative writing, the skill tells Codex to:
 - continue to the next configured model after every unsuccessful attempt,
   including empty, interrupted, rejected, authenticated, limited, timed-out, or
   partially completed responses; and
+- resolve the effective provider configuration through Codex's own
+  cross-platform resolver before model selection; and
 - require a successful 2xx transport, normal completion reason, `[DONE]`, and
   non-whitespace visible text; and
 - return only the model's final visible text verbatim.
