@@ -1,6 +1,6 @@
 {
   "name": "provider-chat-completions",
-  "version": "0.1.1+codex.20260823154152",
+  "version": "0.1.2+codex.20260823154323",
   "description": "Call the active Codex provider's OpenAI-compatible Chat Completions API with a caller-supplied model and messages.",
   "author": {
     "name": "Logic Tan",
