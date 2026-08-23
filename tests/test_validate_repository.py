@@ -11,94 +11,31 @@ from scripts import validate_repository
 
 
 class RepositorySyncMetadataValidationTests(unittest.TestCase):
-    def test_creative_model_bridge_instruction_only_contract_is_checked(self) -> None:
-        plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
+    def test_provider_chat_completions_contract_is_checked(self) -> None:
+        plugin = Path(__file__).resolve().parents[1] / "plugins/provider-chat-completions"
         manifest = json.loads((plugin / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
         validation = validate_repository.Validation()
         with patch.object(validate_repository, "ROOT", plugin.parents[1]):
-            validate_repository._validate_creative_skill(plugin, manifest, validation)
+            validate_repository._validate_provider_chat_completions(plugin, manifest, validation)
         self.assertEqual(validation.errors, [])
 
-        skill = plugin / "skills/creative-model-bridge/SKILL.md"
+        skill = plugin / "skills/provider-chat-completions/SKILL.md"
         original = skill.read_text(encoding="utf-8")
-        for marker in validate_repository.CREATIVE_SKILL_REQUIRED_MARKERS:
+        for marker in validate_repository.PROVIDER_CHAT_SKILL_REQUIRED_MARKERS:
             with self.subTest(marker=marker), tempfile.TemporaryDirectory(
                 prefix="repository-validator-test-"
             ) as temporary:
                 root = Path(temporary)
-                copied_plugin = root / "plugins/creative-model-bridge"
+                copied_plugin = root / "plugins/provider-chat-completions"
                 shutil.copytree(plugin, copied_plugin)
-                copied_skill = copied_plugin / "skills/creative-model-bridge/SKILL.md"
+                copied_skill = copied_plugin / "skills/provider-chat-completions/SKILL.md"
                 copied_skill.write_text(original.replace(marker, ""), encoding="utf-8")
                 validation = validate_repository.Validation()
                 with patch.object(validate_repository, "ROOT", root):
-                    validate_repository._validate_creative_skill(
+                    validate_repository._validate_provider_chat_completions(
                         copied_plugin, manifest, validation
                     )
-                self.assertTrue(
-                    any(marker in error for error in validation.errors),
-                    (marker, validation.errors),
-                )
-
-        with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
-            root = Path(temporary)
-            copied_plugin = root / "plugins/creative-model-bridge"
-            shutil.copytree(plugin, copied_plugin)
-            runtime = copied_plugin / "scripts/creative_model_bridge.py"
-            runtime.parent.mkdir()
-            runtime.write_text("# forbidden runtime\n", encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_creative_skill(
-                    copied_plugin, manifest, validation
-                )
-            self.assertTrue(any("scripts must be removed" in error for error in validation.errors))
-
-        with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:
-            root = Path(temporary)
-            copied_plugin = root / "plugins/creative-model-bridge"
-            shutil.copytree(plugin, copied_plugin)
-            helper = copied_plugin / "helper.py"
-            helper.write_text("# forbidden helper\n", encoding="utf-8")
-            validation = validate_repository.Validation()
-            with patch.object(validate_repository, "ROOT", root):
-                validate_repository._validate_creative_skill(
-                    copied_plugin, manifest, validation
-                )
-            self.assertTrue(
-                any("is not allowed" in error for error in validation.errors)
-            )
-
-    def test_creative_model_bridge_is_chat_completions_sse_only(self) -> None:
-        plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
-        skill_text = (plugin / "skills/creative-model-bridge/SKILL.md").read_text(
-            encoding="utf-8"
-        )
-        for forbidden in (
-            "`POST /responses`",
-            "`response.completed`",
-            "Gemini `generateContent`",
-        ):
-            with self.subTest(forbidden=forbidden):
-                self.assertNotIn(forbidden, skill_text)
-
-    def test_creative_model_bridge_falls_back_after_every_unsuccessful_attempt(self) -> None:
-        plugin = Path(__file__).resolve().parents[1] / "plugins/creative-model-bridge"
-        skill_text = (plugin / "skills/creative-model-bridge/SKILL.md").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn(
-            "Treat every other model-attempt outcome as an unsuccessful attempt", skill_text
-        )
-        self.assertIn("continue with the next candidate", skill_text)
-        self.assertIn("contain no usable `choices[].delta.content` text", skill_text)
-        self.assertIn("Do not parse `config.toml` with the system `python3`", skill_text)
-        self.assertIn("single preflight", skill_text)
-        self.assertIn("this is not a model", skill_text)
-        self.assertIn("normal text-completion `finish_reason`", skill_text)
-        self.assertIn("non-whitespace text", skill_text)
-        self.assertIn("protocol error remains a failure", skill_text)
-        self.assertNotIn("Do not fall back after 401 or 403", skill_text)
+                self.assertTrue(any(marker in error for error in validation.errors))
 
     def test_release_lock_requires_v2_and_checksum_digest(self) -> None:
         with tempfile.TemporaryDirectory(prefix="repository-validator-test-") as temporary:

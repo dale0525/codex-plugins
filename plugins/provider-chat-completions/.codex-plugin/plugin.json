@@ -1,0 +1,36 @@
+{
+  "name": "provider-chat-completions",
+  "version": "0.1.0+codex.20260823144331",
+  "description": "Call the active Codex provider's OpenAI-compatible Chat Completions API with a caller-supplied model and messages.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/provider-chat-completions",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "openai-compatible",
+    "chat-completions",
+    "provider",
+    "model-api"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Provider Chat Completions",
+    "shortDescription": "Call the active provider with a chosen model and messages.",
+    "longDescription": "Makes one safe OpenAI-compatible Chat Completions call using the effective Codex provider configuration and its existing credential. The caller supplies the model and messages; this plugin does not add prompts, choose models, or perform fallback generation.",
+    "developerName": "Logic Tan",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Network",
+      "Execute"
+    ],
+    "defaultPrompt": [
+      "Call the active provider's Chat Completions API with this model and messages.",
+      "Return the normalized Chat Completions result without changing the request."
+    ]
+  }
+}

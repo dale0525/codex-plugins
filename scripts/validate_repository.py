@@ -21,38 +21,13 @@ SKILL_NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LOCAL_LINK_PATTERN = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 PIXI_SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 WORKFLOW_ACTION_REF_PATTERN = re.compile(r"^[^@\s]+@[0-9a-f]{40}$")
-CREATIVE_SKILL_REQUIRED_MARKERS = (
-    "`gemini-3-pro`",
-    "`gemini-3-flash`",
-    "`deepseek-flash`",
-    "`deepseek-pro`",
-    "`gpt-5.6-terra`",
-    "`gpt-5.6-sol`",
-    "`gpt-5.6-luna`",
-    "`experimental_bearer_token`",
-    "Do not read `auth.json`",
-    "`curl`",
-    '"stream": true',
-    "`POST /chat/completions`",
-    "`choices[].delta.content`",
-    "`data: [DONE]`",
-    "`reasoning_content`",
-    "Keep every credential in process memory",
-    "Send credentials only to the exact origin",
-    "Codex's own cross-platform effective-configuration",
-    "Do not parse `config.toml` with the system `python3`",
-    "single preflight",
-    "this is not a model",
-    "Treat every other model-attempt outcome as an unsuccessful attempt",
-    "continue with the next candidate",
-    "HTTP response is 2xx",
-    "normal text-completion `finish_reason`",
-    "non-whitespace text",
-    "protocol error remains a failure",
-    "Do not fallback after an explicit user cancellation",
-    "Disable automatic redirects",
-    "Discard all visible text",
-    "Return the concatenated visible text",
+PROVIDER_CHAT_SKILL_REQUIRED_MARKERS = (
+    "caller-supplied messages",
+    "`<plugin-root>/scripts/run.sh`",
+    "effective Codex provider",
+    "one non-streaming `POST /chat/completions` call",
+    "do not add a system prompt",
+    "Do not pass a credential",
 )
 
 
@@ -183,52 +158,45 @@ def _validate_plugin(plugin_path: Path, expected_name: str, validation: Validati
             for skill_directory in skill_directories:
                 _validate_skill(skill_directory, validation)
     _validate_mcp_servers(plugin_path, manifest, validation)
-    if plugin_path.name == "creative-model-bridge":
-        _validate_creative_skill(plugin_path, manifest, validation)
+    if plugin_path.name == "provider-chat-completions":
+        _validate_provider_chat_completions(plugin_path, manifest, validation)
     validation.plugin_count += 1
 
 
-def _validate_creative_skill(
+def _validate_provider_chat_completions(
     plugin_path: Path, manifest: dict[str, Any], validation: Validation
 ) -> None:
-    """Keep Creative Model Bridge instruction-only and security explicit."""
-    allowed_files = {
+    """Validate the executable provider utility and its narrow skill contract."""
+    expected_files = {
         Path(".codex-plugin/plugin.json"),
         Path("README.md"),
-        Path("skills/creative-model-bridge/SKILL.md"),
+        Path("skills/provider-chat-completions/SKILL.md"),
+        Path("scripts/provider_chat_completions.py"),
+        Path("scripts/run.sh"),
+        Path("scripts/run.ps1"),
+        Path("tests/test_provider_chat_completions.py"),
     }
     for path in plugin_path.rglob("*"):
         relative = path.relative_to(plugin_path)
-        if path.is_symlink() or (path.is_file() and relative not in allowed_files):
-            validation.error(
-                f"{path.relative_to(ROOT)} is not allowed in the instruction-only plugin"
-            )
-    manifest_path = plugin_path / ".codex-plugin/plugin.json"
-    if "mcpServers" in manifest or "mcp_servers" in manifest:
-        validation.error(f"{manifest_path.relative_to(ROOT)}: MCP companions are not allowed")
-    for relative in (
-        ".codex-sync/provision.json",
-        ".mcp.json",
-        "mcp",
-        "scripts",
-        "tests",
-        "docs",
-        "pixi.toml",
-        "pixi.lock",
-    ):
-        if (plugin_path / relative).exists():
-            validation.error(f"{plugin_path.joinpath(relative).relative_to(ROOT)} must be removed")
-    skill = plugin_path / "skills/creative-model-bridge/SKILL.md"
-    try:
+        if path.is_symlink():
+            validation.error(f"{path.relative_to(ROOT)} must not be a symlink")
+        elif path.is_file() and relative not in expected_files and "__pycache__" not in relative.parts:
+            validation.error(f"{path.relative_to(ROOT)} is not part of the provider utility")
+    for relative in expected_files:
+        path = plugin_path / relative
+        if not path.is_file():
+            validation.error(f"{path.relative_to(ROOT)} is required")
+    launcher = plugin_path / "scripts/run.sh"
+    if launcher.is_file() and not os.access(launcher, os.X_OK):
+        validation.error(f"{launcher.relative_to(ROOT)} must be executable")
+    skill = plugin_path / "skills/provider-chat-completions/SKILL.md"
+    if skill.is_file():
         skill_text = skill.read_text(encoding="utf-8")
-    except OSError:
-        validation.error(f"{skill.relative_to(ROOT)} must be readable")
-        skill_text = ""
-    for marker in CREATIVE_SKILL_REQUIRED_MARKERS:
-        if marker not in skill_text:
-            validation.error(
-                f"{skill.relative_to(ROOT)} must contain the skill contract marker {marker!r}"
-            )
+        for marker in PROVIDER_CHAT_SKILL_REQUIRED_MARKERS:
+            if marker not in skill_text:
+                validation.error(
+                    f"{skill.relative_to(ROOT)} must contain the provider contract marker {marker!r}"
+                )
 
 
 def _inside(root: Path, candidate: Path) -> bool:

@@ -44,10 +44,10 @@ codex plugin add prompt-master@dale0525-codex-plugins
 codex plugin add web-novel-craft@dale0525-codex-plugins
 ```
 
-## Install Creative Model Bridge
+## Install Provider Chat Completions
 
 ```bash
-codex plugin add creative-model-bridge@dale0525-codex-plugins
+codex plugin add provider-chat-completions@dale0525-codex-plugins
 ```
 
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
@@ -202,12 +202,13 @@ counterexamples, and executable procedures without distributing raw captions.
 One source retains an explicitly excluded, uncharacterized media-tail gap rather
 than claiming unsupported transcript coverage.
 
-### Creative Model Bridge
+### Provider Chat Completions
 
-Provides an instruction-only creative-writing skill with no bundled runtime.
-It reuses the active Codex provider's base URL and API key, honors an explicit
-wire API, falls back safely among compatible same-provider protocols, and
-returns the external model's visible text verbatim.
+Provides a one-shot utility for calling the effective Codex provider's
+OpenAI-compatible `POST /chat/completions` endpoint with a caller-supplied model
+and messages. It resolves the provider credential inside the runtime, makes one
+non-streaming request, and returns a normalized result without adding prompts,
+choosing models, or performing fallback generation.
 
 ## External content synchronization
 
@@ -237,7 +238,7 @@ set and checksum asset. Every destination must remain inside this repository.
 .agents/plugins/marketplace.json
 plugins/apple-design/
 plugins/codex-sync/
-plugins/creative-model-bridge/
+plugins/provider-chat-completions/
 plugins/fastctx/
 plugins/film-craft-orchestrator/
 plugins/prompt-master/

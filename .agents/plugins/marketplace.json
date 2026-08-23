@@ -77,16 +77,16 @@
       "category": "Productivity"
     },
     {
-      "name": "creative-model-bridge",
+      "name": "provider-chat-completions",
       "source": {
         "source": "local",
-        "path": "./plugins/creative-model-bridge"
+        "path": "./plugins/provider-chat-completions"
       },
       "policy": {
         "installation": "AVAILABLE",
         "authentication": "ON_INSTALL"
       },
-      "category": "Writing"
+      "category": "Developer Tools"
     }
   ]
 }
