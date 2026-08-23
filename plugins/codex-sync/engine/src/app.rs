@@ -2,7 +2,6 @@ use anyhow::{Context, Result};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 use crate::automations;
 use crate::codex;
@@ -359,7 +358,7 @@ pub fn push(dry_run: bool, message: Option<&str>) -> Result<()> {
         .filter(|value| !value.trim().is_empty())
         .map(str::to_owned)
         .unwrap_or_else(|| format!("Sync Codex configuration from {}", state.device));
-    let output = Command::new("git")
+    let output = storage::git_command()?
         .current_dir(&paths.cache)
         .args([
             "-c",

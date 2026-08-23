@@ -59,6 +59,69 @@ fn setup_pull_and_push_use_git_and_fixed_author() {
 }
 
 #[test]
+fn git_override_is_used_and_invalid_override_is_explicit() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let codex_bin = temp.path().join("codex-cli");
+    let wrapper = temp.path().join("git-override");
+    let real_git = Command::new("sh")
+        .args(["-c", "command -v git"])
+        .output()
+        .unwrap();
+    assert!(real_git.status.success());
+    let real_git = String::from_utf8(real_git.stdout)
+        .unwrap()
+        .trim()
+        .to_owned();
+    fs::write(
+        &wrapper,
+        "#!/bin/sh\nset -eu\nprintf '%s\\n' \"$1\" >> \"$CODEX_SYNC_GIT_LOG\"\nexec \"$CODEX_SYNC_REAL_GIT\" \"$@\"\n",
+    )
+    .unwrap();
+    let mut permissions = fs::metadata(&wrapper).unwrap().permissions();
+    permissions.set_mode(0o755);
+    fs::set_permissions(&wrapper, permissions).unwrap();
+    let log = temp.path().join("git-override.log");
+
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("CODEX_SYNC_GIT_BIN", &wrapper)
+        .env("CODEX_SYNC_REAL_GIT", &real_git)
+        .env("CODEX_SYNC_GIT_LOG", &log)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    assert!(fs::read_to_string(&log)
+        .unwrap()
+        .lines()
+        .any(|line| line == "clone"));
+
+    let (missing_temp, missing_remote, missing_codex_home, missing_sync_home) = fixture();
+    let missing_codex_bin = missing_temp.path().join("codex-cli");
+    command(&missing_codex_home, &missing_sync_home, &missing_codex_bin)
+        .env(
+            "CODEX_SYNC_GIT_BIN",
+            missing_temp.path().join("missing-git"),
+        )
+        .args([
+            "setup",
+            "--repository",
+            missing_remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains(
+            "CODEX_SYNC_GIT_BIN does not point to a file",
+        ));
+}
+
+#[test]
 fn automations_sync_definitions_and_preserve_runtime_memory() {
     let (temp, remote, codex_home, sync_home) = fixture();
     let edit = temp.path().join("automation-edit");

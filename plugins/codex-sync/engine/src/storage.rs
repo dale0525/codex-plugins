@@ -204,7 +204,7 @@ fn copy_tree_contents(source: &Path, destination: &Path) -> Result<()> {
 }
 
 pub fn run_git(args: &[&str], cwd: Option<&Path>) -> Result<Output> {
-    let mut command = Command::new("git");
+    let mut command = git_command()?;
     command.args(args);
     if let Some(cwd) = cwd {
         command.current_dir(cwd);
@@ -229,7 +229,7 @@ pub fn git_text(args: &[&str], cwd: Option<&Path>) -> Result<String> {
 }
 
 pub fn git_try(args: &[&str], cwd: Option<&Path>) -> Result<Output> {
-    let mut command = Command::new("git");
+    let mut command = git_command()?;
     command.args(args);
     if let Some(cwd) = cwd {
         command.current_dir(cwd);
@@ -237,6 +237,28 @@ pub fn git_try(args: &[&str], cwd: Option<&Path>) -> Result<Output> {
     command
         .output()
         .with_context(|| format!("run git {}", args.join(" ")))
+}
+
+/// Creates a Git command using the bootstrap-resolved executable when present.
+///
+/// Windows bootstrap sets `CODEX_SYNC_GIT_BIN` to either a discovered Git for
+/// Windows installation or the verified private portable runtime. Keeping this
+/// resolution here ensures every engine Git invocation, including commits, uses
+/// the same executable instead of relying on a mutable process PATH.
+pub fn git_command() -> Result<Command> {
+    match std::env::var_os("CODEX_SYNC_GIT_BIN") {
+        None => Ok(Command::new("git")),
+        Some(value) => {
+            let path = PathBuf::from(value);
+            if !path.is_file() {
+                anyhow::bail!(
+                    "CODEX_SYNC_GIT_BIN does not point to a file: {}",
+                    path.display()
+                );
+            }
+            Ok(Command::new(path))
+        }
+    }
 }
 
 #[cfg(test)]
