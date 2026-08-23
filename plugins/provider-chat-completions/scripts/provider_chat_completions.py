@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import http.client
 import math
+import ntpath
 import os
 import re
 import socket
@@ -27,6 +28,8 @@ MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 DEFAULT_TIMEOUT_SECONDS = 120.0
 CONFIG_TIMEOUT_SECONDS = 30.0
 CONFIG_STARTUP_GRACE_SECONDS = 0.5
+CONFIG_REAP_TIMEOUT_SECONDS = 5.0
+MAX_DIAGNOSTIC_PATH_CHARS = 2048
 HEADER_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
 FORBIDDEN_REQUEST_HEADERS = {
     "connection",
@@ -48,12 +51,14 @@ class BridgeError(Exception):
         code: str,
         retryable: bool = False,
         http_status: Optional[int] = None,
+        diagnostic: Optional[Mapping[str, Any]] = None,
     ) -> None:
         super().__init__(code)
         self.stage = stage
         self.code = code
         self.retryable = retryable
         self.http_status = http_status
+        self.diagnostic = dict(diagnostic) if diagnostic else None
 
 
 def failure_result(error: BridgeError) -> Dict[str, Any]:
@@ -65,6 +70,8 @@ def failure_result(error: BridgeError) -> Dict[str, Any]:
     }
     if error.http_status is not None:
         result["http_status"] = error.http_status
+    if error.diagnostic:
+        result["diagnostic"] = error.diagnostic
     return result
 
 
@@ -111,8 +118,127 @@ def _encode_json_body(value: Any) -> bytes:
         raise BridgeError("request", "request_body_invalid") from exc
 
 
-def read_effective_config(cwd: str, codex_bin: str = "codex") -> Mapping[str, Any]:
+def resolve_codex_binary(
+    environment: Optional[Mapping[str, str]] = None,
+    platform: Optional[str] = None,
+) -> str:
+    """Choose a directly launchable app-server helper for the current platform."""
+    env = os.environ if environment is None else environment
+    effective_platform = os.name if platform is None else platform
+    configured = env.get("PROVIDER_CHAT_CODEX_BIN")
+    if isinstance(configured, str) and configured.strip():
+        path_module = ntpath if effective_platform == "nt" else os.path
+        if not path_module.isabs(configured):
+            raise BridgeError("config", "codex_bin_not_absolute")
+        return configured
+
+    if effective_platform == "nt":
+        # The Windows App Execution Alias named ``codex`` can resolve to a
+        # packaged desktop app that a child process is not allowed to launch.
+        # Prefer the helper provisioned for plugin app-server calls instead.
+        code_home = env.get("CODEX_HOME")
+        if not isinstance(code_home, str) or not code_home:
+            user_profile = env.get("USERPROFILE")
+            if isinstance(user_profile, str) and user_profile:
+                code_home = ntpath.join(user_profile, ".codex")
+            else:
+                code_home = os.path.expanduser("~/.codex")
+        helper = ntpath.join(code_home, "plugins", ".plugin-appserver", "codex.exe")
+        if not ntpath.isabs(helper):
+            raise BridgeError("config", "codex_helper_path_invalid")
+        return helper
+    return "codex"
+
+
+_DIAGNOSTIC_REDACTIONS = (
+    (
+        re.compile(r"(?i)(authorization\s*[:=]\s*(?:bearer\s+)?)[^\s,;]+"),
+        r"\1[REDACTED]",
+    ),
+    (re.compile(r"(?i)(\bbearer\s+)[^\s,;]+"), r"\1[REDACTED]"),
+    (
+        re.compile(r"(?i)(\b(?:api[_ -]?key|token|secret|password)\s*[:=]\s*)[^\s,;]+"),
+        r"\1[REDACTED]",
+    ),
+    (re.compile(r"(?i)\b(?:sk|rk)-[A-Za-z0-9_-]{8,}\b"), "[REDACTED]"),
+)
+
+
+def _safe_diagnostic_path(value: str) -> str:
+    text = "".join(
+        character if character in "\t\r\n" or ord(character) >= 0x20 else "�"
+        for character in value
+    )
+    for pattern, replacement in _DIAGNOSTIC_REDACTIONS:
+        text = pattern.sub(replacement, text)
+    text = text.strip()
+    if len(text) > MAX_DIAGNOSTIC_PATH_CHARS:
+        text = text[:MAX_DIAGNOSTIC_PATH_CHARS] + "…"
+    return text or "<unknown>"
+
+
+def _stderr_metadata(value: Any) -> Optional[Dict[str, Any]]:
+    if isinstance(value, bytes):
+        size = len(value)
+    elif isinstance(value, str):
+        size = len(value.encode("utf-8", errors="replace"))
+    else:
+        return None
+    return {"present": size > 0, "bytes": size}
+
+
+def _launch_diagnostic(
+    codex_bin: str,
+    process: Optional[Any] = None,
+    error: Optional[BaseException] = None,
+    stderr: Any = None,
+) -> Dict[str, Any]:
+    diagnostic: Dict[str, Any] = {"executable": _safe_diagnostic_path(str(codex_bin))}
+    winerror = getattr(error, "winerror", None)
+    if isinstance(winerror, int):
+        diagnostic["winerror"] = winerror
+    errno = getattr(error, "errno", None)
+    if isinstance(errno, int):
+        diagnostic["errno"] = errno
+    returncode = getattr(process, "returncode", None)
+    if isinstance(returncode, int):
+        diagnostic["returncode"] = returncode
+    stderr_metadata = _stderr_metadata(stderr)
+    if stderr_metadata is not None:
+        diagnostic["stderr"] = stderr_metadata
+    return diagnostic
+
+
+def _stop_config_process(process: Any) -> Any:
+    try:
+        if getattr(process, "stdin", None) is not None:
+            process.stdin.close()
+            process.stdin = None
+    except (OSError, ValueError):
+        pass
+    try:
+        process.kill()
+    except (AttributeError, OSError, ProcessLookupError):
+        pass
+    try:
+        _, stderr = process.communicate(timeout=CONFIG_REAP_TIMEOUT_SECONDS)
+        return stderr
+    except subprocess.TimeoutExpired:
+        for stream_name in ("stdout", "stderr"):
+            stream = getattr(process, stream_name, None)
+            try:
+                if stream is not None:
+                    stream.close()
+            except OSError:
+                pass
+        return None
+    except (AttributeError, OSError, ValueError):
+        return None
+
+
+def read_effective_config(cwd: str, codex_bin: Optional[str] = None) -> Mapping[str, Any]:
     """Resolve the effective config without reading config.toml directly."""
+    codex_bin = resolve_codex_binary() if codex_bin is None else codex_bin
     requests = [
         {
             "id": 1,
@@ -120,7 +246,7 @@ def read_effective_config(cwd: str, codex_bin: str = "codex") -> Mapping[str, An
             "params": {
                 "clientInfo": {
                     "name": "provider-chat-completions",
-                    "version": "0.1.0",
+                    "version": "0.1.3",
                 }
             },
         },
@@ -132,13 +258,35 @@ def read_effective_config(cwd: str, codex_bin: str = "codex") -> Mapping[str, An
         },
     ]
     payload = "\n".join(json.dumps(item, ensure_ascii=True) for item in requests) + "\n"
+    process: Optional[Any] = None
+    stderr_bytes: Any = None
     try:
         process = subprocess.Popen(
             [codex_bin, "app-server", "--stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
         )
+    except FileNotFoundError as exc:
+        raise BridgeError(
+            "config",
+            "codex_unavailable",
+            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
+        ) from exc
+    except PermissionError as exc:
+        raise BridgeError(
+            "config",
+            "codex_launch_denied",
+            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
+        ) from exc
+    except (OSError, ValueError) as exc:
+        raise BridgeError(
+            "config",
+            "config_read_failed",
+            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
+        ) from exc
+
+    try:
         assert process.stdin is not None
         process.stdin.write(payload.encode("utf-8"))
         process.stdin.flush()
@@ -149,28 +297,40 @@ def read_effective_config(cwd: str, codex_bin: str = "codex") -> Mapping[str, An
         # detached first. Keep communicate() for concurrent stdout draining:
         # config/read can exceed a pipe buffer and deadlock a plain wait().
         process.stdin = None
-        stdout_bytes, _ = process.communicate(timeout=CONFIG_TIMEOUT_SECONDS)
-    except FileNotFoundError as exc:
-        raise BridgeError("config", "codex_unavailable") from exc
+        stdout_bytes, stderr_bytes = process.communicate(timeout=CONFIG_TIMEOUT_SECONDS)
     except subprocess.TimeoutExpired as exc:
-        process.kill()
-        process.communicate()
-        raise BridgeError("config", "config_read_timeout", retryable=True) from exc
+        stderr_bytes = _stop_config_process(process)
+        raise BridgeError(
+            "config",
+            "config_read_timeout",
+            retryable=True,
+            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
+        ) from exc
     except (OSError, ValueError) as exc:
-        raise BridgeError("config", "config_read_failed") from exc
+        stderr_bytes = _stop_config_process(process)
+        raise BridgeError(
+            "config",
+            "config_read_failed",
+            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
+        ) from exc
 
     if process.returncode != 0:
-        raise BridgeError("config", "config_read_failed")
+        raise BridgeError(
+            "config",
+            "config_read_failed",
+            diagnostic=_launch_diagnostic(codex_bin, process, stderr=stderr_bytes),
+        )
 
     stdout = stdout_bytes.decode("utf-8", errors="replace")
+    diagnostic = _launch_diagnostic(codex_bin, process, stderr=stderr_bytes)
     response = next((item for item in _json_lines(stdout) if item.get("id") == 2), None)
     if response is None:
-        raise BridgeError("config", "config_read_no_response")
+        raise BridgeError("config", "config_read_no_response", diagnostic=diagnostic)
     if response.get("error") is not None:
-        raise BridgeError("config", "config_read_error")
+        raise BridgeError("config", "config_read_error", diagnostic=diagnostic)
     result = response.get("result")
     if not isinstance(result, dict) or not isinstance(result.get("config"), dict):
-        raise BridgeError("config", "config_read_invalid_result")
+        raise BridgeError("config", "config_read_invalid_result", diagnostic=diagnostic)
     return result["config"]
 
 
@@ -453,7 +613,7 @@ def process_request(
     # provider configuration. This keeps malformed input local and cheap.
     _encode_json_body(build_request(request))
     cwd = os.getcwd()
-    config = (config_resolver or (lambda path: read_effective_config(path, os.environ.get("PROVIDER_CHAT_CODEX_BIN", "codex"))))(cwd)
+    config = (config_resolver or read_effective_config)(cwd)
     provider = resolve_provider(config)
     return post_chat_completion(provider, request, timeout)
 

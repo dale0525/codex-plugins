@@ -28,6 +28,17 @@ one JSON object to stdout and exits non-zero on failure. Credentials and
 provider response bodies never appear in stdout or diagnostics. The launchers
 require Python 3.8 or newer and return `python_unavailable` when it is absent.
 
+When reading the effective Codex provider on Windows, the utility first uses
+`PROVIDER_CHAT_CODEX_BIN` when it is set. Otherwise it checks the directly
+launchable helper at
+`%CODEX_HOME%\plugins\.plugin-appserver\codex.exe`, or
+`%USERPROFILE%\.codex\plugins\.plugin-appserver\codex.exe` when `CODEX_HOME`
+is not set. It never falls back to a PATH-resolved `codex` on Windows, avoiding
+the App Execution Alias and working-directory executable search. If the helper
+is absent, the result is `codex_unavailable`. Set the variable to an absolute
+helper path when the desktop installation uses a different location; relative
+overrides are rejected as `codex_bin_not_absolute` on every platform.
+
 ## Request
 
 ```json
@@ -54,6 +65,14 @@ is currently rejected so the result stays deterministic and portable.
 Success returns `ok`, `model`, `content`, `finish_reason`, and optional `usage`.
 Failure returns only a safe `stage`, `code`, optional HTTP status, and whether a
 retry could be meaningful. The utility never retries automatically.
+
+Configuration-launch failures may also include a bounded, redacted `diagnostic`
+object with the executable path, Win32/OS error number, process exit code, and
+stderr presence/byte-count metadata. Raw stderr text is never returned. The
+diagnostic never includes credentials, authorization headers, tokens, or the
+provider response body. A denied Windows launch is reported as
+`stage=config`, `code=codex_launch_denied`, `retryable=false`; no provider
+request is attempted in that case.
 
 The provider is resolved through Codex's `config/read` app-server method. Only
 the effective provider's `base_url`, `env_key`,
