@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.6.2 release binary otherwise.
+bootstrap downloads and verifies the 0.6.3 release binary otherwise.
 
 ## Commands
 
@@ -60,6 +60,10 @@ mismatches detach plugins before replacing a marketplace. Personal, `openai`,
 written atomically with one rolling backup. A plugin/marketplace failure leaves
 already-applied operations in place, keeps the previous commit, marks state not
 converged, and makes the next pull reconcile from the actual local listing.
+When Codex's plugin listing omits a stale non-protected plugin that is still
+declared under `[plugins]` in `config.toml`, pull also treats that declaration as
+local state, removes the declaration atomically, and verifies it is gone. Known
+non-Git marketplace declarations and protected resources remain untouched.
 
 Capture and publish the current device:
 

@@ -228,13 +228,13 @@ pub fn pull(dry_run: bool) -> Result<()> {
         for action in automations::dry_run_actions(&paths.codex_home, &automations)? {
             println!("- {action}");
         }
-        let report = codex::reconcile(&markets, &plugins, true)?;
+        let report = codex::reconcile(&markets, &plugins, &paths.codex_home, true)?;
         for action in report.actions {
             println!("- {action}");
         }
         return Ok(());
     }
-    let preflight = codex::reconcile(&markets, &plugins, true);
+    let preflight = codex::reconcile(&markets, &plugins, &paths.codex_home, true);
     if let Err(error) = preflight {
         return fail_pull(
             &paths,
@@ -264,7 +264,7 @@ pub fn pull(dry_run: bool) -> Result<()> {
         save_state(&paths, &state)?;
         return Err(error);
     }
-    if let Err(error) = codex::reconcile(&markets, &plugins, false) {
+    if let Err(error) = codex::reconcile(&markets, &plugins, &paths.codex_home, false) {
         state.converged = false;
         save_state(&paths, &state)?;
         return Err(error.context(

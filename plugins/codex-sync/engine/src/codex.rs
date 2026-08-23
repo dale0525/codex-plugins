@@ -7,6 +7,7 @@ use anyhow::{Context, Result};
 use serde::Deserialize;
 use serde_json::Value as JsonValue;
 
+use crate::config::{self, ManagedValues};
 use crate::model::{portable_name, Marketplace};
 use crate::storage::{atomic_write, git_text, git_try};
 
@@ -301,6 +302,7 @@ fn raw_plugin_is_protected(plugin: &InstalledPlugin) -> bool {
 pub fn reconcile(
     desired_markets: &[Marketplace],
     desired_plugins: &BTreeSet<String>,
+    codex_home: &Path,
     dry_run: bool,
 ) -> Result<ConvergenceReport> {
     let desired_by_name = desired_markets_by_name(desired_markets)?;
@@ -316,7 +318,20 @@ pub fn reconcile(
             );
         }
     }
-    let local_plugins = local_plugins(&installed, &portable_markets)?;
+    // Codex can omit a stale declaration from `plugin list`; include the
+    // non-protected config entries so remote deletion still has an owner.
+    let config_text = config::read_current(codex_home)?;
+    let installed_plugins = local_plugins(&installed, &portable_markets)?;
+    let config_plugins = config_plugins(&config_text, &nonportable_names)?;
+    let mut local_plugins = installed_plugins
+        .iter()
+        .map(|(id, (_, market))| (id.clone(), market.clone()))
+        .collect::<BTreeMap<_, _>>();
+    for (id, market) in &config_plugins {
+        local_plugins
+            .entry(id.clone())
+            .or_insert_with(|| market.clone());
+    }
     let mut report = ConvergenceReport::default();
     let desired_names = desired_by_name.keys().cloned().collect::<BTreeSet<_>>();
     let mut affected_markets = BTreeSet::new();
@@ -335,23 +350,38 @@ pub fn reconcile(
 
     // Detach plugins from source-mismatched and removed marketplaces first.
     let mut removed_plugins = BTreeSet::new();
-    for (id, (_, market)) in &local_plugins {
+    let mut removed_config_plugins = BTreeSet::new();
+    for (id, market) in &local_plugins {
         if affected_markets.contains(market) {
             report.actions.push(format!("remove plugin {id}"));
             removed_plugins.insert(id.clone());
+            if config_plugins.contains_key(id) {
+                removed_config_plugins.insert(id.clone());
+            }
             if !dry_run {
-                remove_plugin(id)?;
+                if installed_plugins.contains_key(id) {
+                    remove_plugin(id)?;
+                }
             }
         }
     }
-    // Then remove installed plugins outside the remote desired set.
-    for (id, (_, _market)) in &local_plugins {
+    // Then remove installed or configured plugins outside the remote desired set.
+    for id in local_plugins.keys() {
         if !desired_plugins.contains(id) && !removed_plugins.contains(id) {
             report.actions.push(format!("remove plugin {id}"));
+            removed_plugins.insert(id.clone());
+            if config_plugins.contains_key(id) {
+                removed_config_plugins.insert(id.clone());
+            }
             if !dry_run {
-                remove_plugin(id)?;
+                if installed_plugins.contains_key(id) {
+                    remove_plugin(id)?;
+                }
             }
         }
+    }
+    if !dry_run && !removed_config_plugins.is_empty() {
+        remove_plugin_config(codex_home, &removed_config_plugins, &nonportable_names)?;
     }
     for name in &affected_markets {
         if portable_markets.contains_key(name) {
@@ -386,7 +416,7 @@ pub fn reconcile(
         }
     }
     if !dry_run {
-        verify_converged(&desired_by_name, &desired_plugins)?;
+        verify_converged(&desired_by_name, &desired_plugins, codex_home)?;
     }
     Ok(report)
 }
@@ -500,12 +530,61 @@ fn local_plugins(
     Ok(result)
 }
 
+fn config_plugins(
+    config_text: &str,
+    nonportable_names: &BTreeSet<String>,
+) -> Result<BTreeMap<String, String>> {
+    if config_text.trim().is_empty() {
+        return Ok(BTreeMap::new());
+    }
+    let value = config_text
+        .parse::<toml::Value>()
+        .context("parse Codex config.toml plugin entries")?;
+    let Some(plugins) = value.get("plugins").and_then(toml::Value::as_table) else {
+        return Ok(BTreeMap::new());
+    };
+    let mut result = BTreeMap::new();
+    for id in plugins.keys() {
+        let Ok(market) = plugin_marketplace(id) else {
+            continue;
+        };
+        if is_protected_market(market) || nonportable_names.contains(market) {
+            continue;
+        }
+        result.insert(id.clone(), market.to_owned());
+    }
+    Ok(result)
+}
+
+fn remove_plugin_config(
+    codex_home: &Path,
+    plugin_ids: &BTreeSet<String>,
+    nonportable_names: &BTreeSet<String>,
+) -> Result<()> {
+    let config_text = config::read_current(codex_home)?;
+    let current_plugins = config_plugins(&config_text, nonportable_names)?;
+    let paths = plugin_ids
+        .iter()
+        .filter(|id| current_plugins.contains_key(*id))
+        .map(|id| vec!["plugins".to_owned(), id.clone()])
+        .collect::<Vec<_>>();
+    if paths.is_empty() {
+        return Ok(());
+    }
+    let rendered = config::render_config(&config_text, &paths, &ManagedValues::new())?;
+    if rendered != config_text {
+        atomic_write(&codex_home.join("config.toml"), rendered.as_bytes())?;
+    }
+    Ok(())
+}
+
 fn verify_converged(
     desired_markets: &BTreeMap<String, Marketplace>,
     desired_plugins: &BTreeSet<String>,
+    codex_home: &Path,
 ) -> Result<()> {
     let configured = configured_markets()?;
-    let (portable, _) = local_market_sets(&configured)?;
+    let (portable, nonportable) = local_market_sets(&configured)?;
     if portable.len() != desired_markets.len()
         || portable.iter().any(|(name, market)| {
             desired_markets
@@ -516,8 +595,14 @@ fn verify_converged(
         anyhow::bail!("marketplace set did not converge");
     }
     let installed = installed_plugins()?;
-    let local = local_plugins(&installed, &portable)?;
-    let actual = local.keys().cloned().collect::<BTreeSet<_>>();
+    let installed_local = local_plugins(&installed, &portable)?;
+    let config_text = config::read_current(codex_home)?;
+    let configured_local = config_plugins(&config_text, &nonportable)?;
+    let actual = installed_local
+        .keys()
+        .chain(configured_local.keys())
+        .cloned()
+        .collect::<BTreeSet<_>>();
     if actual != *desired_plugins {
         anyhow::bail!("plugin set did not converge");
     }
@@ -984,5 +1069,23 @@ mod tests {
         assert!(install_plugin("browser@openai").is_err());
         assert!(remove_plugin("browser@openai-bundled").is_err());
         assert!(install_plugin("browser@personal").is_err());
+    }
+
+    #[test]
+    fn config_plugins_preserve_protected_and_known_nonportable_entries() {
+        let config = r#"
+[plugins."stale@git-market"]
+enabled = true
+[plugins."local@local-market"]
+enabled = true
+[plugins."browser@openai-bundled"]
+enabled = true
+"#;
+        let nonportable = BTreeSet::from(["local-market".to_owned()]);
+        let plugins = config_plugins(config, &nonportable).unwrap();
+        assert_eq!(
+            plugins,
+            BTreeMap::from([("stale@git-market".to_owned(), "git-market".to_owned())])
+        );
     }
 }

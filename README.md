@@ -61,6 +61,9 @@ through the private repository for zero-setup use on every device.
 Codex Sync 0.4.3 records apply and rollback operations with durable write-ahead
 logs, runtime receipts, compensation plans, and recovery-required gates so
 configuration and plugin provisioning converge transactionally across failures.
+Codex Sync 0.6.3 also repairs stale non-protected plugin declarations left in
+`config.toml` when the Codex plugin listing omits them, so a remote deletion can
+converge without manual cleanup on every device.
 Codex Sync 0.4.2 prevents transient session reasoning settings from becoming
 cross-device defaults: normal capture restores portable
 `model_reasoning_effort = "medium"` and removes device-level overrides. A

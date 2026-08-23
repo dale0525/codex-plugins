@@ -435,6 +435,66 @@ fn source_mismatch_replaces_market_and_remote_deletion_removes_it() {
         .contains("managed_markets"));
 }
 
+#[test]
+fn pull_removes_config_only_plugin_omitted_by_codex_listing() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let markets = temp.path().join("markets.json");
+    let plugins = temp.path().join("plugins.json");
+    fs::write(
+        &markets,
+        r#"{"marketplaces":[{"name":"market","marketplaceSource":{"sourceType":"git","source":"https://example.test/market.git","ref":"main","sparse":[]}},{"name":"local-market","marketplaceSource":{"sourceType":"local","source":"/tmp/local-market"}}]}"#,
+    )
+    .unwrap();
+    fs::write(&plugins, plugin_json(&[])).unwrap();
+    fs::write(
+        codex_home.join("config.toml"),
+        "custom_local = \"keep\"\n\n[plugins.\"stale@market\"]\nenabled = true\n\n[plugins.\"local@local-market\"]\nenabled = true\n\n[plugins.\"browser@openai-bundled\"]\nenabled = true\n",
+    )
+    .unwrap();
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins)
+        .args(["pull", "--dry-run"])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("remove plugin stale@market"));
+    assert!(fs::read_to_string(codex_home.join("config.toml"))
+        .unwrap()
+        .contains("stale@market"));
+
+    let log = temp.path().join("actions.log");
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins)
+        .env("FAKE_CODEX_LOG", &log)
+        .args(["pull"])
+        .assert()
+        .success();
+    let config = fs::read_to_string(codex_home.join("config.toml")).unwrap();
+    assert!(!config.contains("stale@market"));
+    assert!(config.contains("custom_local = \"keep\""));
+    assert!(config.contains("local@local-market"));
+    assert!(config.contains("browser@openai-bundled"));
+    assert!(fs::read_to_string(log)
+        .unwrap()
+        .contains("plugin marketplace remove market"));
+    assert!(fs::read_to_string(sync_home.join("state.toml"))
+        .unwrap()
+        .contains("converged = true"));
+}
+
 fn seed_v2(remote: &Path, temp: &Path) -> PathBuf {
     let edit = temp.join("v2-edit");
     run_git(
