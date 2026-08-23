@@ -5,6 +5,7 @@ import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
@@ -44,6 +45,33 @@ class _Handler(BaseHTTPRequestHandler):
 
     def log_message(self, *_args):
         return
+
+
+class _FakeStdin:
+    def __init__(self):
+        self.closed = False
+
+    def write(self, _data):
+        return None
+
+    def flush(self):
+        return None
+
+    def close(self):
+        self.closed = True
+
+
+class _FakeConfigProcess:
+    def __init__(self):
+        self.stdin = _FakeStdin()
+        self.returncode = 0
+
+    def communicate(self, timeout):
+        if self.stdin is not None:
+            raise ValueError("closed stdin was not detached")
+        if timeout != bridge.CONFIG_TIMEOUT_SECONDS:
+            raise AssertionError("unexpected config timeout")
+        return b'{"id":2,"result":{"config":{"model_provider":"test"}}}\n', b""
 
 
 class BridgeTests(unittest.TestCase):
@@ -86,6 +114,15 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(request["messages"][0]["content"], "hello")
         self.assertEqual(request["stream"], False)
         self.assertEqual(request["temperature"], 0.2)
+
+    def test_config_reader_detaches_closed_stdin_before_communicating(self):
+        process = _FakeConfigProcess()
+        with patch.object(bridge.subprocess, "Popen", return_value=process), patch.object(
+            bridge.time, "sleep"
+        ):
+            config = bridge.read_effective_config("/tmp", "codex")
+        self.assertEqual(config, {"model_provider": "test"})
+        self.assertTrue(process.stdin is None)
 
     def test_protected_and_streaming_parameters_are_rejected(self):
         with self.assertRaises(bridge.BridgeError) as protected:

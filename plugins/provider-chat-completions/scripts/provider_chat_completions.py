@@ -145,6 +145,10 @@ def read_effective_config(cwd: str, codex_bin: str = "codex") -> Mapping[str, An
         # app-server needs a short turn to publish the response before EOF.
         time.sleep(CONFIG_STARTUP_GRACE_SECONDS)
         process.stdin.close()
+        # Python 3.9's communicate() flushes a closed stdin handle unless it is
+        # detached first. Keep communicate() for concurrent stdout draining:
+        # config/read can exceed a pipe buffer and deadlock a plain wait().
+        process.stdin = None
         stdout_bytes, _ = process.communicate(timeout=CONFIG_TIMEOUT_SECONDS)
     except FileNotFoundError as exc:
         raise BridgeError("config", "codex_unavailable") from exc
