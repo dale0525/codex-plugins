@@ -1,6 +1,10 @@
 import json
 import os
+import platform
+import shutil
+import subprocess
 import sys
+import tempfile
 import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -9,6 +13,7 @@ from unittest.mock import patch
 
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
+RUN_PS1 = SCRIPT_DIR / "run.ps1"
 sys.path.insert(0, str(SCRIPT_DIR))
 import provider_chat_completions as bridge  # noqa: E402
 
@@ -142,6 +147,54 @@ class BridgeTests(unittest.TestCase):
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=2)
+
+    def test_windows_launcher_detaches_preflight_stdin(self):
+        launcher = RUN_PS1.read_text(encoding="utf-8")
+        self.assertIn("function Test-Python38", launcher)
+        self.assertIn("$info.RedirectStandardInput = $true", launcher)
+        self.assertIn("$process.StandardInput.Close()", launcher)
+        self.assertIn("& $python.Source -3 $scriptPath @args", launcher)
+        self.assertIn("& $python.Source $scriptPath @args", launcher)
+        self.assertNotIn("& $python.Source -3 -c", launcher)
+        self.assertNotIn("& $python.Source -c", launcher)
+
+        if platform.system() != "Windows":
+            return
+        powershell = shutil.which("pwsh") or shutil.which("powershell")
+        if powershell is None:
+            self.skipTest("PowerShell is not installed")
+
+        with tempfile.TemporaryDirectory() as directory:
+            launcher = Path(directory) / "run.ps1"
+            core = Path(directory) / "provider_chat_completions.py"
+            launcher.write_text(RUN_PS1.read_text(encoding="utf-8"), encoding="utf-8")
+            core.write_text(
+                "import sys\n"
+                "sys.stdout.write(sys.stdin.read())\n",
+                encoding="utf-8",
+            )
+            payload = (
+                '{"model":"chosen-model","messages":[{"role":"user",'
+                '"content":"stdin must survive preflight"}],"sentinel":"unchanged"}\n'
+            )
+            completed = subprocess.run(
+                [
+                    powershell,
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(launcher),
+                ],
+                input=payload.encode("utf-8"),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+                timeout=30,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr.decode("utf-8", errors="replace"))
+        self.assertEqual(completed.stdout.decode("utf-8"), payload)
 
     def test_request_keeps_messages_and_owns_stream(self):
         request = bridge.build_request(
