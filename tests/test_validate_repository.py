@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -11,6 +12,18 @@ from scripts import validate_repository
 
 
 class RepositorySyncMetadataValidationTests(unittest.TestCase):
+    def test_provider_chat_completions_launcher_is_tracked_executable(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        launcher = "plugins/provider-chat-completions/scripts/run.sh"
+        result = subprocess.run(
+            ["git", "ls-files", "--stage", launcher],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        self.assertTrue(result.stdout.startswith("100755 "), result.stdout)
+
     def test_provider_chat_completions_contract_is_checked(self) -> None:
         plugin = Path(__file__).resolve().parents[1] / "plugins/provider-chat-completions"
         manifest = json.loads((plugin / ".codex-plugin/plugin.json").read_text(encoding="utf-8"))
