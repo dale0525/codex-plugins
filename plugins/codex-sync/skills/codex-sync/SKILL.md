@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.6.4 release binary otherwise. On Windows,
+bootstrap downloads and verifies the 0.6.5 release binary otherwise. On Windows,
 it resolves Git independently of the system `PATH`: it uses a reviewed
 `CODEX_SYNC_GIT_BIN` override, a usable installed Git, or FastCtx's portable
 Git when available, otherwise downloads a locked, SHA-256-verified portable Git

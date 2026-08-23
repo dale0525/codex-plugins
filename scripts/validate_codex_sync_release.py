@@ -45,6 +45,15 @@ def main() -> int:
         if marker not in path.read_text(encoding="utf-8"):
             print(f"{label} does not default to release {expected}", file=sys.stderr)
             return 1
+    windows_bootstrap = PLUGIN / "scripts/bootstrap.ps1"
+    try:
+        windows_bootstrap.read_bytes().decode("ascii")
+    except UnicodeDecodeError as error:
+        print(
+            f"Windows bootstrap must remain ASCII-safe for PowerShell compatibility: {error}",
+            file=sys.stderr,
+        )
+        return 1
     print(f"Codex Sync release versions match {expected}")
     return 0
 

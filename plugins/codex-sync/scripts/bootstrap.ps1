@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$version = if ($env:CODEX_SYNC_VERSION) { $env:CODEX_SYNC_VERSION } else { '0.6.4' }
+$version = if ($env:CODEX_SYNC_VERSION) { $env:CODEX_SYNC_VERSION } else { '0.6.5' }
 $codexHomePath = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $env:USERPROFILE '.codex' }
 $installDirectory = if ($env:CODEX_SYNC_BIN_HOME) {
     $env:CODEX_SYNC_BIN_HOME
@@ -226,7 +226,7 @@ function Initialize-GitEnvironment {
     $git = Resolve-UsableGit -ManagedGit $managedGit
     if (-not $git) {
         if ($env:CODEX_SYNC_OFFLINE -eq '1') {
-            throw 'Git is unavailable and offline mode forbids downloading Codex Sync’s verified portable Git runtime'
+            throw "Git is unavailable and offline mode forbids downloading Codex Sync's verified portable Git runtime"
         }
         $git = Install-ManagedGit -Metadata $metadata -ManagedRoot $managedRoot -ManagedGit $managedGit
     }
