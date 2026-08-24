@@ -22,9 +22,18 @@ policy.
    or `%USERPROFILE%\.codex\plugins\.plugin-appserver\codex.exe`. It does not
    fall back to PATH or the Windows App Execution Alias named `codex`. An
    explicit override must be an absolute path on every platform.
-4. Treat the returned JSON as the transport result. On `ok: false`, report the
-   safe failure boundary to the caller; do not retry, switch providers, or draft
-   a replacement unless the caller's own policy explicitly says to do so.
+   For any response that may exceed the tool display limit, create a private
+   temporary path and pass `--output-file <absolute-path>` to the launcher. The
+   launcher atomically writes the complete normalized result to that file and
+   prints only a bounded manifest (`result_file`, byte count, and status) to
+   stdout. Read the saved file with local file tools; never print or `cat` its
+   full contents into the tool output. Keep the file until review and
+   validation are complete.
+4. Without capture mode, treat the returned JSON as the transport result. With
+   capture mode, treat the bounded manifest as a handle and read `result_file`
+   to obtain the complete transport result. On `ok: false`, report the safe
+   failure boundary to the caller; do not retry, switch providers, or draft a
+   replacement unless the caller's own policy explicitly says to do so.
 
 If a Windows helper launch is denied, the utility returns
 `{"ok":false,"stage":"config","code":"codex_launch_denied","retryable":false}`
@@ -35,5 +44,6 @@ provider response bodies in diagnostics.
 
 The runtime makes one non-streaming `POST /chat/completions` call. It does not
 assemble prompts, validate creative quality, expose reasoning fields, follow
-redirects, or persist credentials. Do not pass a credential in the request or
-ask the user to paste one.
+redirects, or persist credentials. Capture mode persists only the normalized
+result requested by the caller, using owner-only file permissions; it never
+writes authorization headers or provider diagnostics to that file. Do not pass a credential in the request or ask the user to paste one.

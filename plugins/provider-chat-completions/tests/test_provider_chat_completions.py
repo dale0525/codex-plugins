@@ -1,12 +1,15 @@
+import io
 import json
 import os
 import platform
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
 import threading
 import unittest
+from types import SimpleNamespace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from unittest.mock import patch
@@ -208,6 +211,60 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(request["messages"][0]["content"], "hello")
         self.assertEqual(request["stream"], False)
         self.assertEqual(request["temperature"], 0.2)
+
+    def test_capture_arguments_require_an_absolute_output_path(self):
+        with self.assertRaises(bridge.BridgeError) as relative:
+            bridge.parse_cli_arguments(["--output-file", "result.json"])
+        self.assertEqual(relative.exception.code, "output_file_invalid")
+
+        with self.assertRaises(bridge.BridgeError) as unknown:
+            bridge.parse_cli_arguments(["--unexpected"])
+        self.assertEqual(unknown.exception.code, "arguments_invalid")
+
+    def test_capture_writes_complete_result_and_bounded_manifest(self):
+        content = ("paragraph with a complete response\n" * 5000).rstrip()
+        result = {
+            "ok": True,
+            "model": "chosen-model",
+            "content": content,
+            "finish_reason": "stop",
+            "usage": {"prompt_tokens": 1, "completion_tokens": 5000},
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "result.json"
+            byte_count = bridge.write_result_file(str(path), result)
+            saved = path.read_bytes()
+            self.assertEqual(saved, bridge._result_bytes(result))
+            self.assertEqual(byte_count, len(saved))
+            self.assertEqual(json.loads(saved.decode("utf-8")), result)
+            self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o600)
+
+            manifest = bridge.capture_manifest(result, str(path), byte_count)
+            self.assertEqual(manifest["result_file"], str(path))
+            self.assertEqual(manifest["bytes"], byte_count)
+            self.assertEqual(manifest["content_chars"], len(content))
+            self.assertNotIn(content, json.dumps(manifest))
+
+    def test_main_capture_mode_emits_manifest_only(self):
+        result = {
+            "ok": True,
+            "model": "chosen-model",
+            "content": "complete response that must stay on disk",
+            "finish_reason": "stop",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "result.json"
+            stdout = io.BytesIO()
+            with patch.object(bridge, "process_request", return_value=result), patch.object(
+                bridge.sys, "stdin", SimpleNamespace(buffer=io.BytesIO(b"{}"))
+            ), patch.object(bridge.sys, "stdout", SimpleNamespace(buffer=stdout)):
+                return_code = bridge.main(["--output-file", str(path)])
+
+            self.assertEqual(return_code, 0)
+            manifest = json.loads(stdout.getvalue().decode("utf-8"))
+            self.assertEqual(manifest["result_file"], str(path))
+            self.assertNotIn(result["content"], stdout.getvalue().decode("utf-8"))
+            self.assertEqual(json.loads(path.read_text(encoding="utf-8")), result)
 
     def test_config_reader_detaches_closed_stdin_before_communicating(self):
         process = _FakeConfigProcess()

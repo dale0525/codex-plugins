@@ -13,6 +13,7 @@ import socket
 import ssl
 import subprocess
 import sys
+import tempfile
 import time
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence
 from urllib.error import HTTPError, URLError
@@ -116,6 +117,106 @@ def _encode_json_body(value: Any) -> bytes:
         return text.encode("utf-8")
     except (TypeError, ValueError, OverflowError, UnicodeEncodeError) as exc:
         raise BridgeError("request", "request_body_invalid") from exc
+
+
+def _result_bytes(result: Mapping[str, Any]) -> bytes:
+    try:
+        output = (
+            json.dumps(
+                result,
+                ensure_ascii=True,
+                allow_nan=False,
+                separators=(",", ":"),
+            )
+            + "\n"
+        )
+        return output.encode("utf-8")
+    except (TypeError, ValueError, UnicodeEncodeError):
+        fallback = json.dumps(
+            failure_result(BridgeError("protocol", "result_not_serializable")),
+            ensure_ascii=True,
+            separators=(",", ":"),
+        ) + "\n"
+        return fallback.encode("utf-8")
+
+
+def _validated_output_file(value: Any) -> str:
+    basename = os.path.basename(value) if isinstance(value, str) else ""
+    if (
+        not isinstance(value, str)
+        or not value
+        or not os.path.isabs(value)
+        or "\x00" in value
+        or basename in {"", ".", ".."}
+    ):
+        raise BridgeError("request", "output_file_invalid")
+    return value
+
+
+def parse_cli_arguments(arguments: Sequence[str]) -> Optional[str]:
+    """Parse optional output capture arguments without changing stdin semantics."""
+    if not arguments:
+        return None
+    if len(arguments) == 2 and arguments[0] == "--output-file":
+        return _validated_output_file(arguments[1])
+    raise BridgeError("request", "arguments_invalid")
+
+
+def write_result_file(path: str, result: Mapping[str, Any]) -> int:
+    """Atomically persist a complete normalized result with owner-only permissions."""
+    path = _validated_output_file(path)
+    encoded = _result_bytes(result)
+    parent = os.path.dirname(path) or os.curdir
+    if not os.path.isdir(parent):
+        raise BridgeError("output", "result_file_unavailable")
+    descriptor: Optional[int] = None
+    temporary_path: Optional[str] = None
+    try:
+        descriptor, temporary_path = tempfile.mkstemp(
+            prefix=f".{os.path.basename(path)}.",
+            suffix=".tmp",
+            dir=parent,
+        )
+        os.chmod(temporary_path, 0o600)
+        with os.fdopen(descriptor, "wb") as stream:
+            descriptor = None
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_path, path)
+        temporary_path = None
+        return len(encoded)
+    except (OSError, ValueError) as exc:
+        raise BridgeError("output", "result_file_write_failed") from exc
+    finally:
+        if descriptor is not None:
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+        if temporary_path is not None:
+            try:
+                os.unlink(temporary_path)
+            except OSError:
+                pass
+
+
+def capture_manifest(result: Mapping[str, Any], path: str, byte_count: int) -> Dict[str, Any]:
+    """Return bounded metadata for a result that was written to a local file."""
+    manifest: Dict[str, Any] = {
+        "ok": bool(result.get("ok")),
+        "result_file": path,
+        "bytes": byte_count,
+    }
+    if result.get("ok"):
+        manifest["model"] = result.get("model") or ""
+        manifest["finish_reason"] = result.get("finish_reason")
+        content = result.get("content")
+        if isinstance(content, str):
+            manifest["content_chars"] = len(content)
+        elif content is not None:
+            manifest["content_items"] = len(content) if isinstance(content, list) else 0
+    return manifest
 
 
 def resolve_codex_binary(
@@ -618,8 +719,10 @@ def process_request(
     return post_chat_completion(provider, request, timeout)
 
 
-def main() -> int:
+def main(arguments: Optional[Sequence[str]] = None) -> int:
+    output_file: Optional[str] = None
     try:
+        output_file = parse_cli_arguments(sys.argv[1:] if arguments is None else arguments)
         request = json.loads(sys.stdin.buffer.read().decode("utf-8"))
         if not isinstance(request, dict):
             raise BridgeError("request", "request_not_object")
@@ -630,20 +733,16 @@ def main() -> int:
         result = failure_result(BridgeError("request", "invalid_json"))
     except Exception:
         result = failure_result(BridgeError("runtime", "unexpected_error"))
-    try:
-        output = json.dumps(
-            result,
-            ensure_ascii=True,
-            allow_nan=False,
-            separators=(",", ":"),
-        ) + "\n"
-    except (TypeError, ValueError, UnicodeEncodeError):
-        output = json.dumps(
-            failure_result(BridgeError("protocol", "result_not_serializable")),
-            ensure_ascii=True,
-            separators=(",", ":"),
-        ) + "\n"
-    sys.stdout.buffer.write(output.encode("utf-8"))
+    if output_file is not None:
+        try:
+            byte_count = write_result_file(output_file, result)
+            output = _result_bytes(capture_manifest(result, output_file, byte_count))
+        except BridgeError as exc:
+            result = failure_result(exc)
+            output = _result_bytes(result)
+    else:
+        output = _result_bytes(result)
+    sys.stdout.buffer.write(output)
     return 0 if result.get("ok") else 1
 
 
