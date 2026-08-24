@@ -245,6 +245,32 @@ class BridgeTests(unittest.TestCase):
             self.assertEqual(manifest["content_chars"], len(content))
             self.assertNotIn(content, json.dumps(manifest))
 
+    def test_capture_manifest_does_not_echo_provider_controlled_fields(self):
+        result = {
+            "ok": True,
+            "model": "m" * 100000,
+            "content": "short",
+            "finish_reason": "r" * 100000,
+        }
+        manifest = bridge.capture_manifest(result, "/tmp/result.json", 123)
+        serialized = json.dumps(manifest)
+        self.assertLess(len(serialized), 512)
+        self.assertNotIn(result["model"], serialized)
+        self.assertNotIn(result["finish_reason"], serialized)
+
+    def test_windows_capture_restricts_acl_before_writing(self):
+        with patch.object(bridge.os, "name", "nt"), patch.object(
+            bridge.os, "environ", {"USERNAME": "logic"}
+        ), patch.object(bridge.subprocess, "run") as run:
+            bridge._restrict_output_permissions(r"C:\Temp\result.json")
+        run.assert_called_once_with(
+            ["icacls", r"C:\Temp\result.json", "/inheritance:r", "/grant:r", "logic:F"],
+            check=True,
+            stdout=bridge.subprocess.DEVNULL,
+            stderr=bridge.subprocess.DEVNULL,
+            timeout=bridge.OUTPUT_PERMISSION_TIMEOUT_SECONDS,
+        )
+
     def test_main_capture_mode_emits_manifest_only(self):
         result = {
             "ok": True,

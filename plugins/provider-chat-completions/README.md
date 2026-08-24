@@ -36,8 +36,10 @@ JSON
 
 Capture mode writes the complete normalized result atomically with owner-only
 permissions and prints only a small manifest containing `result_file`, status,
-and size metadata. Read the file locally and do not print its full contents to
-the tool output. Keep it until the caller has finished validating the result.
+and size metadata. On Windows it removes inherited ACLs with `icacls` and fails
+closed if that restriction cannot be applied. Read the file locally and do not
+print its full contents to the tool output. Keep it until the caller has
+finished validating the result.
 
 On Windows, use `scripts/run.ps1` with the same JSON input and the same
 `--output-file <absolute-path>` option. Without capture mode, the process writes

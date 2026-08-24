@@ -30,6 +30,8 @@ DEFAULT_TIMEOUT_SECONDS = 120.0
 CONFIG_TIMEOUT_SECONDS = 30.0
 CONFIG_STARTUP_GRACE_SECONDS = 0.5
 CONFIG_REAP_TIMEOUT_SECONDS = 5.0
+OUTPUT_PERMISSION_TIMEOUT_SECONDS = 10.0
+MAX_OUTPUT_FILE_PATH_CHARS = 4096
 MAX_DIAGNOSTIC_PATH_CHARS = 2048
 HEADER_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
 FORBIDDEN_REQUEST_HEADERS = {
@@ -147,6 +149,7 @@ def _validated_output_file(value: Any) -> str:
         or not value
         or not os.path.isabs(value)
         or "\x00" in value
+        or len(value) > MAX_OUTPUT_FILE_PATH_CHARS
         or basename in {"", ".", ".."}
     ):
         raise BridgeError("request", "output_file_invalid")
@@ -160,6 +163,38 @@ def parse_cli_arguments(arguments: Sequence[str]) -> Optional[str]:
     if len(arguments) == 2 and arguments[0] == "--output-file":
         return _validated_output_file(arguments[1])
     raise BridgeError("request", "arguments_invalid")
+
+
+def _restrict_output_permissions(path: str) -> None:
+    if os.name != "nt":
+        try:
+            os.chmod(path, 0o600)
+        except OSError as exc:
+            raise BridgeError("output", "result_file_permissions_failed") from exc
+        return
+
+    username = os.environ.get("USERNAME")
+    if not isinstance(username, str) or not username:
+        try:
+            username = os.getlogin()
+        except OSError as exc:
+            raise BridgeError("output", "result_file_permissions_failed") from exc
+    try:
+        subprocess.run(
+            [
+                "icacls",
+                path,
+                "/inheritance:r",
+                "/grant:r",
+                f"{username}:F",
+            ],
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=OUTPUT_PERMISSION_TIMEOUT_SECONDS,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise BridgeError("output", "result_file_permissions_failed") from exc
 
 
 def write_result_file(path: str, result: Mapping[str, Any]) -> int:
@@ -177,7 +212,7 @@ def write_result_file(path: str, result: Mapping[str, Any]) -> int:
             suffix=".tmp",
             dir=parent,
         )
-        os.chmod(temporary_path, 0o600)
+        _restrict_output_permissions(temporary_path)
         with os.fdopen(descriptor, "wb") as stream:
             descriptor = None
             stream.write(encoded)
@@ -209,8 +244,6 @@ def capture_manifest(result: Mapping[str, Any], path: str, byte_count: int) -> D
         "bytes": byte_count,
     }
     if result.get("ok"):
-        manifest["model"] = result.get("model") or ""
-        manifest["finish_reason"] = result.get("finish_reason")
         content = result.get("content")
         if isinstance(content, str):
             manifest["content_chars"] = len(content)
