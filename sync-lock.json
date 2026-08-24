@@ -12,7 +12,7 @@
       "kind": "git-tree",
       "repository": "https://github.com/nidhinjs/prompt-master.git",
       "ref": "main",
-      "commit": "d15eabbe5d2122eedc060bae8a771381e9873d1b",
+      "commit": "2bd92518e26bf659e21e3d9ab90573fcf3ddeccb",
       "destination": "plugins/prompt-master/skills/prompt-master"
     }
   }
