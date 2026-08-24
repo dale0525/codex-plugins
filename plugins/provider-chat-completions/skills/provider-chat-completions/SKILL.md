@@ -45,5 +45,7 @@ provider response bodies in diagnostics.
 The runtime makes one non-streaming `POST /chat/completions` call. It does not
 assemble prompts, validate creative quality, expose reasoning fields, follow
 redirects, or persist credentials. Capture mode persists only the normalized
-result requested by the caller, using owner-only file permissions; it never
-writes authorization headers or provider diagnostics to that file. Do not pass a credential in the request or ask the user to paste one.
+result requested by the caller, using owner-only file permissions (including
+removing inherited Windows ACLs); it fails closed if that restriction cannot be
+applied. It never writes authorization headers or provider diagnostics to that
+file. Do not pass a credential in the request or ask the user to paste one.
