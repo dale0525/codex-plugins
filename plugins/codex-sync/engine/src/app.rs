@@ -3,7 +3,6 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::automations;
 use crate::codex;
 use crate::config::{self, ManagedValues};
 use crate::migration;
@@ -178,10 +177,6 @@ pub fn pull(dry_run: bool) -> Result<()> {
         Ok(plugins) => plugins,
         Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
     };
-    let automations = match automations::read_repository(&paths.cache) {
-        Ok(automations) => automations,
-        Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
-    };
     let current = match config::read_current(&paths.codex_home) {
         Ok(current) => current,
         Err(error) => return fail_pull(&paths, &mut state, dry_run, error),
@@ -224,9 +219,6 @@ pub fn pull(dry_run: bool) -> Result<()> {
         {
             println!("- remove agent profile {name}.toml");
         }
-        for action in automations::dry_run_actions(&paths.codex_home, &automations)? {
-            println!("- {action}");
-        }
         let report = codex::reconcile(&markets, &plugins, &paths.codex_home, true)?;
         for action in report.actions {
             println!("- {action}");
@@ -250,7 +242,7 @@ pub fn pull(dry_run: bool) -> Result<()> {
             return Err(error.context("create pre-pull backup"));
         }
     };
-    let result = apply_core(&paths, &state, &desired, &automations);
+    let result = apply_core(&paths, &state, &desired);
     if let Err(error) = result {
         if let Err(restore_error) = restore_core_backup(&paths, &backup) {
             state.converged = false;
@@ -510,7 +502,6 @@ fn validate_v3_repository(root: &Path) -> Result<()> {
     })?;
     let _ = read_markets(root)?;
     let _ = read_plugins(root)?;
-    let _ = automations::read_repository(root)?;
     Ok(())
 }
 
@@ -648,6 +639,13 @@ struct CaptureResult {
 
 fn capture_current(paths: &Paths, state: &LocalState) -> Result<CaptureResult> {
     let current = config::read_current(&paths.codex_home)?;
+    let current_value = if current.trim().is_empty() {
+        toml::Value::Table(toml::map::Map::new())
+    } else {
+        current
+            .parse::<toml::Value>()
+            .context("parse current Codex config.toml")?
+    };
     let common_path = paths.cache.join("config/common.toml");
     let device_path = paths
         .cache
@@ -660,17 +658,28 @@ fn capture_current(paths: &Paths, state: &LocalState) -> Result<CaptureResult> {
     let mut declared = BTreeSet::new();
     declared.extend(common_paths.iter().cloned());
     declared.extend(device_paths.iter().cloned());
+    // These are non-secret capability settings required by Codex's actor
+    // authorization and code-mode tool exposure paths. Auto-declare only these
+    // exact paths; all other new local keys remain unmanaged and are reported.
+    let auto_capture_paths = config::auto_capture_paths(&current_value);
+    declared.extend(auto_capture_paths.iter().cloned());
     for warning in config::unmanaged_paths(&current, &declared)? {
         println!(
             "unmanaged local key: {} (not captured)",
             config::display_path(&warning)
         );
     }
-    let common_capture_paths = common_paths
+    let mut common_capture_paths = common_paths
         .iter()
         .filter(|path| !device_paths.contains(path))
         .cloned()
-        .collect::<Vec<_>>();
+        .collect::<BTreeSet<_>>();
+    for path in auto_capture_paths {
+        if !device_paths.contains(&path) {
+            common_capture_paths.insert(path);
+        }
+    }
+    let common_capture_paths = common_capture_paths.into_iter().collect::<Vec<_>>();
     let common_kept = config::capture_declared(&current, &common_path, &common_capture_paths)?;
     let device_kept = config::capture_declared(&current, &device_path, &device_paths)?;
     let agents_path = paths.codex_home.join("AGENTS.md");
@@ -702,7 +711,10 @@ fn capture_current(paths: &Paths, state: &LocalState) -> Result<CaptureResult> {
             bytes,
         )?;
     }
-    automations::capture_to_repository(&paths.cache, &paths.codex_home)?;
+    // Automations are device-local. Remove declarations captured by older
+    // Codex Sync releases from the repository without reading or mutating the
+    // local automation store.
+    remove_if_exists(&paths.cache.join("automations"))?;
     let previous_markets = read_markets(&paths.cache)?;
     let inventory = codex::capture_inventory(&previous_markets)?;
     codex::write_markets(&paths.cache.join("marketplaces.toml"), &inventory.markets)?;
@@ -748,7 +760,6 @@ pub(crate) fn create_core_backup(paths: &Paths) -> Result<PathBuf> {
             &paths.backup.join("agents").join(format!("{name}.toml")),
         )?;
     }
-    automations::create_backup(&paths.codex_home, &paths.cache, &paths.backup)?;
     Ok(paths.backup.clone())
 }
 
@@ -830,7 +841,6 @@ pub(crate) fn restore_core_backup(paths: &Paths, backup: &Path) -> Result<()> {
             return Err(error).with_context(|| format!("inspect {}", agents_backup.display()))
         }
     }
-    automations::restore_backup(&paths.codex_home, backup)?;
     Ok(())
 }
 
@@ -892,12 +902,7 @@ fn restore_file(source: &Path, destination: &Path) -> Result<()> {
     }
 }
 
-fn apply_core(
-    paths: &Paths,
-    state: &LocalState,
-    desired: &ManagedValues,
-    desired_automations: &automations::Definitions,
-) -> Result<()> {
+fn apply_core(paths: &Paths, state: &LocalState, desired: &ManagedValues) -> Result<()> {
     let current = config::read_current(&paths.codex_home)?;
     let rendered = config::render_config(&current, &state.managed_paths, desired)?;
     atomic_write(&paths.codex_home.join("config.toml"), rendered.as_bytes())?;
@@ -906,7 +911,6 @@ fn apply_core(
         &fs::read(paths.cache.join("AGENTS.md"))?,
     )?;
     profiles::mirror_profiles(&paths.cache, &paths.codex_home, &state.managed_profiles)?;
-    automations::apply(&paths.cache, &paths.codex_home, desired_automations)?;
     Ok(())
 }
 

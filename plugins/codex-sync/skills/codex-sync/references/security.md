@@ -22,11 +22,14 @@ fast-forward pushes; remote races fail instead of overwriting someone else's
 commit.
 
 Never synchronize auth/session/history, SQLite state, project trust, caches,
-automation memory/run state, or plugin provision artifacts. Only validated
-`automations/<id>/automation.toml` declarations are portable; symlinks and
-extra files in the repository automation tree are rejected. Existing declared
-configuration leaves (including hook settings) remain within the normal config
-policy; Codex Sync never adds lifecycle hooks. Personal, OpenAI, and
+automations, or plugin provision artifacts. Pull never reads or mutates the
+local automation store; push removes legacy repository automation declarations
+without inspecting local automations. Existing declared configuration leaves
+(including hook settings) remain within the normal config policy. The only new
+configuration paths auto-declared during capture are the
+non-secret `model_providers.*.http_headers.x-openai-actor-authorization` marker
+and `features.code_mode.direct_only_tool_namespaces` list; Codex Sync never adds
+lifecycle hooks. Personal, OpenAI, and
 `openai-*` names are protected at
 capture, planning, mutation, and state boundaries. Non-Git marketplaces are
 outside the sync domain. A desired name colliding with a protected or

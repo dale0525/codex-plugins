@@ -7,6 +7,7 @@ use std::process::Command;
 
 mod support;
 
+use predicates::prelude::PredicateBooleanExt;
 use support::*;
 
 #[test]
@@ -56,6 +57,56 @@ fn setup_pull_and_push_use_git_and_fixed_author() {
         String::from_utf8_lossy(&log.stdout).trim(),
         "Logic Tan <logictan89@gmail.com>"
     );
+}
+
+#[test]
+fn push_auto_captures_actor_authorization_header() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["pull"])
+        .assert()
+        .success();
+    fs::OpenOptions::new()
+        .append(true)
+        .open(codex_home.join("config.toml"))
+        .unwrap()
+        .write_all(
+            b"\n[model_providers.cpa.http_headers]\n\"x-openai-actor-authorization\" = \"custom\"\n\n[features.code_mode]\ndirect_only_tool_namespaces = [\"image_gen\"]\n",
+        )
+        .unwrap();
+    command(&codex_home, &sync_home, &codex_bin)
+        .args(["push"])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("Pushed "))
+        .stdout(predicates::str::contains(
+            "unmanaged local key: model_providers.cpa.http_headers.x-openai-actor-authorization",
+        )
+        .not())
+        .stdout(predicates::str::contains(
+            "unmanaged local key: features.code_mode.direct_only_tool_namespaces",
+        )
+        .not());
+    let check = temp.path().join("actor-header-check");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), check.to_str().unwrap()],
+    );
+    let common = fs::read_to_string(check.join("config/common.toml")).unwrap();
+    assert!(common.contains("[model_providers.cpa.http_headers]"));
+    assert!(common.contains("x-openai-actor-authorization = \"custom\""));
+    assert!(common.contains("direct_only_tool_namespaces = [\"image_gen\"]"));
 }
 
 #[test]
@@ -122,7 +173,7 @@ fn git_override_is_used_and_invalid_override_is_explicit() {
 }
 
 #[test]
-fn automations_sync_definitions_and_preserve_runtime_memory() {
+fn automations_are_device_local_and_legacy_repository_definitions_are_removed_on_push() {
     let (temp, remote, codex_home, sync_home) = fixture();
     let edit = temp.path().join("automation-edit");
     run_git(
@@ -132,23 +183,7 @@ fn automations_sync_definitions_and_preserve_runtime_memory() {
     fs::create_dir_all(edit.join("automations/codex-2")).unwrap();
     fs::write(
         edit.join("automations/codex-2/automation.toml"),
-        r#"version = 1
-id = "codex-2"
-kind = "cron"
-name = "Weekly cleanup"
-prompt = "Clean old sessions"
-status = "ACTIVE"
-rrule = "FREQ=WEEKLY;BYDAY=MO;BYHOUR=7;BYMINUTE=0;BYSECOND=0"
-model = "gpt-5.6-sol"
-reasoning_effort = "medium"
-execution_environment = "local"
-target = { type = "projectless" }
-cwds = ["~"]
-created_at = 1
-updated_at = 2
-approval_policy = "never"
-sandbox_mode = "danger-full-access"
-"#,
+        "legacy repository automation\n",
     )
     .unwrap();
     run_git(&edit, &["config", "user.name", "Seed"]);
@@ -156,6 +191,12 @@ sandbox_mode = "danger-full-access"
     run_git(&edit, &["add", "."]);
     run_git(&edit, &["commit", "-m", "add automation"]);
     run_git(&edit, &["push", "origin", "main"]);
+
+    let local_definition = codex_home.join("automations/local-job/automation.toml");
+    let local_memory = codex_home.join("automations/local-job/memory.md");
+    fs::create_dir_all(local_definition.parent().unwrap()).unwrap();
+    fs::write(&local_definition, "local automation\n").unwrap();
+    fs::write(&local_memory, "local runtime memory\n").unwrap();
 
     let codex_bin = temp.path().join("codex-cli");
     command(&codex_home, &sync_home, &codex_bin)
@@ -172,9 +213,7 @@ sandbox_mode = "danger-full-access"
         .args(["pull", "--dry-run"])
         .assert()
         .success()
-        .stdout(predicates::str::contains(
-            "add automation codex-2/automation.toml",
-        ));
+        .stdout(predicates::str::contains("automation").not());
     assert!(!codex_home
         .join("automations/codex-2/automation.toml")
         .exists());
@@ -182,28 +221,18 @@ sandbox_mode = "danger-full-access"
         .args(["pull"])
         .assert()
         .success();
-    let local_definition = codex_home.join("automations/codex-2/automation.toml");
-    let local_text = fs::read_to_string(&local_definition).unwrap();
-    assert!(local_text.contains("sandbox_mode = \"danger-full-access\""));
-    // Simulate the desktop app rewriting its native schema, which currently
-    // omits the two optional sync metadata fields.
-    fs::write(
-        &local_definition,
-        local_text
-            .replace("approval_policy = \"never\"\n", "")
-            .replace("sandbox_mode = \"danger-full-access\"\n", ""),
-    )
-    .unwrap();
-    fs::write(
-        codex_home.join("automations/codex-2/memory.md"),
-        "runtime memory\n",
-    )
-    .unwrap();
-    fs::write(
-        codex_home.join("automations/.run-jitter-salt"),
-        "runtime salt\n",
-    )
-    .unwrap();
+    assert_eq!(
+        fs::read_to_string(&local_definition).unwrap(),
+        "local automation\n"
+    );
+    assert_eq!(
+        fs::read_to_string(&local_memory).unwrap(),
+        "local runtime memory\n"
+    );
+    assert!(!codex_home
+        .join("automations/codex-2/automation.toml")
+        .exists());
+
     command(&codex_home, &sync_home, &codex_bin)
         .args(["push"])
         .assert()
@@ -213,76 +242,15 @@ sandbox_mode = "danger-full-access"
         temp.path(),
         &["clone", remote.to_str().unwrap(), check.to_str().unwrap()],
     );
-    assert!(check.join("automations/codex-2/automation.toml").exists());
-    let captured = fs::read_to_string(check.join("automations/codex-2/automation.toml")).unwrap();
-    assert!(captured.contains("approval_policy = \"never\""));
-    assert!(captured.contains("sandbox_mode = \"danger-full-access\""));
-    assert!(!check.join("automations/codex-2/memory.md").exists());
-    assert!(!check.join("automations/.run-jitter-salt").exists());
-
-    run_git(&edit, &["pull", "--rebase", "origin", "main"]);
-    fs::remove_file(edit.join("automations/codex-2/automation.toml")).unwrap();
-    run_git(&edit, &["add", "-A"]);
-    run_git(&edit, &["commit", "-m", "remove automation"]);
-    run_git(&edit, &["push", "origin", "main"]);
-    command(&codex_home, &sync_home, &codex_bin)
-        .args(["pull"])
-        .assert()
-        .success();
-    assert!(!local_definition.exists());
-    assert!(codex_home.join("automations/codex-2/memory.md").exists());
-}
-
-#[test]
-fn automation_policy_validation_rejects_unknown_values() {
-    let (temp, remote, codex_home, sync_home) = fixture();
-    let edit = temp.path().join("automation-invalid");
-    run_git(
-        temp.path(),
-        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    assert!(!check.join("automations").exists());
+    assert_eq!(
+        fs::read_to_string(&local_definition).unwrap(),
+        "local automation\n"
     );
-    fs::create_dir_all(edit.join("automations/bad")).unwrap();
-    fs::write(
-        edit.join("automations/bad/automation.toml"),
-        r#"version = 1
-id = "bad"
-kind = "cron"
-name = "Bad"
-prompt = "Bad"
-status = "ACTIVE"
-rrule = "FREQ=DAILY"
-execution_environment = "local"
-target = { type = "projectless" }
-cwds = ["~"]
-created_at = 1
-updated_at = 2
-sandbox_mode = "not-a-mode"
-"#,
-    )
-    .unwrap();
-    run_git(&edit, &["config", "user.name", "Seed"]);
-    run_git(&edit, &["config", "user.email", "seed@example.test"]);
-    run_git(&edit, &["add", "."]);
-    run_git(&edit, &["commit", "-m", "invalid automation"]);
-    run_git(&edit, &["push", "origin", "main"]);
-    let codex_bin = temp.path().join("codex-cli");
-    command(&codex_home, &sync_home, &codex_bin)
-        .args([
-            "setup",
-            "--repository",
-            remote.to_str().unwrap(),
-            "--device",
-            "test",
-        ])
-        .assert()
-        .success();
-    command(&codex_home, &sync_home, &codex_bin)
-        .args(["pull"])
-        .assert()
-        .failure()
-        .stderr(predicates::str::contains(
-            "unsupported automation sandbox_mode",
-        ));
+    assert_eq!(
+        fs::read_to_string(&local_memory).unwrap(),
+        "local runtime memory\n"
+    );
 }
 
 #[test]

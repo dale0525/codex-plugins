@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.6.5 release binary otherwise. On Windows,
+bootstrap downloads and verifies the 0.6.6 release binary otherwise. On Windows,
 it resolves Git independently of the system `PATH`: it uses a reviewed
 `CODEX_SYNC_GIT_BIN` override, a usable installed Git, or FastCtx's portable
 Git when available, otherwise downloads a locked, SHA-256-verified portable Git
@@ -55,10 +55,9 @@ Pull and apply the remote branch directly:
 Pull first builds a strict non-protected convergence plan, then overlays
 `config/common.toml` with `devices/<device>.toml` (device values win), replaces
 `AGENTS.md`, mirrors only agent profiles referenced by backtick names in that
-file (removing profiles that are no longer referenced), mirrors declaration-only
-`automations/<id>/automation.toml` files, and registers or refreshes desired Git
-marketplaces before running an unconditional `plugin add` for every desired
-plugin. A final marketplace/plugin listing must exactly match the
+file (removing profiles that are no longer referenced), and registers or
+refreshes desired Git marketplaces before running an unconditional `plugin add`
+for every desired plugin. A final marketplace/plugin listing must exactly match the
 remote non-protected Git sets and report each desired plugin as `installed =
 true` and `enabled = true`. Source identity is `(url, ref, sparse)`; source
 mismatches detach plugins before replacing a marketplace. Personal, `openai`,
@@ -80,12 +79,14 @@ Capture and publish the current device:
 ```
 
 Push updates only leaves already declared in `config/common.toml` and the
-current device file; newly discovered local keys are reported and not captured.
+current device file, plus the narrowly allowlisted
+`model_providers.*.http_headers.x-openai-actor-authorization` capability header
+and `features.code_mode.direct_only_tool_namespaces` capability list.
+Other newly discovered local keys are reported and not captured.
 It captures the complete current `AGENTS.md`, only local agent TOML profiles
 referenced by backtick names in that file, and reports profiles that are no
-longer needed. It captures local automation declarations while excluding
-automation memory/runtime files. It also captures every installed
-non-protected plugin (including disabled entries), and only
+longer needed. It does not read or capture local automations. It also captures
+every installed non-protected plugin (including disabled entries), and only
 marketplaces referenced by at least one such installed plugin. Personal,
 OpenAI and `openai-*` resources, available-but-uninstalled plugins, non-Git
 local marketplaces, and orphan marketplaces are excluded. A local marketplace
@@ -114,8 +115,7 @@ schema_version = 3
 ```
 
 The only managed paths are `AGENTS.md`, `agents/*.toml`,
-`config/common.toml`, `devices/<device>.toml`, `automations/<id>/automation.toml`,
-`marketplaces.toml`, and
+`config/common.toml`, `devices/<device>.toml`, `marketplaces.toml`, and
 `plugins.toml`. There is no `providers.toml`, custom path declaration, or
 external AGENTS section. `plugins.toml` is a string array:
 
@@ -141,12 +141,9 @@ configuration. Only `model_providers.*.experimental_bearer_token` may contain
 a literal bearer token; other probable secrets and URLs with embedded
 credentials are rejected. `model_reasoning_effort` is synchronized verbatim.
 
-Do not synchronize auth/session/history, SQLite state, caches, automation
-memory/run state, or plugin provision artifacts. Codex Sync is explicit and does
-not add lifecycle timers or hooks. Optional automation `approval_policy` and
-`sandbox_mode` metadata are preserved when present, but the current Codex desktop
-runner derives effective permissions from selected/saved configuration and
-installation requirements; these fields are not a guaranteed per-automation
-override. If the desktop app rewrites a declaration without these fields, push
-retains values already present in the repository. Verify the effective mode in
-the automation settings UI on each device.
+Do not synchronize auth/session/history, SQLite state, caches, automations, or
+plugin provision artifacts. Automations are entirely device-local: pull ignores
+legacy repository automation declarations, and the next push removes a legacy
+`automations/` directory from the repository without reading or mutating the
+local automation store. Codex Sync is explicit and does not add lifecycle timers
+or hooks.

@@ -18,7 +18,7 @@ fn backup_test_paths(root: &Path) -> Paths {
 }
 
 #[test]
-fn core_backup_round_trip_restores_files_and_absent_markers() {
+fn core_backup_round_trip_restores_managed_files_and_ignores_automations() {
     let temporary = tempfile::tempdir().unwrap();
     let codex_home = temporary.path().join("codex");
     let data_home = temporary.path().join("sync");
@@ -53,8 +53,6 @@ updated_at = 2
         automation,
     )
     .unwrap();
-    fs::create_dir_all(cache.join("automations/job")).unwrap();
-    fs::write(cache.join("automations/job/automation.toml"), automation).unwrap();
     let paths = Paths {
         data_home: data_home.clone(),
         state_file: data_home.join("state.toml"),
@@ -66,9 +64,10 @@ updated_at = 2
     let backup = create_core_backup(&paths).unwrap();
     fs::write(codex_home.join("config.toml"), "model = \"after\"\n").unwrap();
     fs::write(codex_home.join("AGENTS.md"), "after\n").unwrap();
+    let changed_automation = automation.replace("name = \"Job\"", "name = \"After\"");
     fs::write(
         codex_home.join("automations/job/automation.toml"),
-        automation.replace("name = \"Job\"", "name = \"After\""),
+        &changed_automation,
     )
     .unwrap();
     restore_core_backup(&paths, &backup).unwrap();
@@ -82,7 +81,7 @@ updated_at = 2
     );
     assert_eq!(
         fs::read_to_string(codex_home.join("automations/job/automation.toml")).unwrap(),
-        automation
+        changed_automation
     );
 }
 

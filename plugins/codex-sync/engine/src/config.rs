@@ -9,6 +9,10 @@ use crate::storage::atomic_write;
 
 pub type ManagedValues = BTreeMap<Vec<String>, toml::Value>;
 
+const ACTOR_AUTHORIZATION_HEADER: &str = "x-openai-actor-authorization";
+const CODE_MODE_DIRECT_ONLY_PATH: [&str; 3] =
+    ["features", "code_mode", "direct_only_tool_namespaces"];
+
 const SECRET_PARTS: &[&str] = &[
     "access_token",
     "api_key",
@@ -282,6 +286,38 @@ pub fn value_at<'a>(value: &'a toml::Value, path: &[String]) -> Option<&'a toml:
     Some(current)
 }
 
+/// Return the narrowly allowlisted capability paths that may be declared
+/// automatically during capture. All other newly discovered local keys remain
+/// unmanaged and are reported without being synchronized.
+pub fn auto_capture_paths(value: &toml::Value) -> Vec<Vec<String>> {
+    leaf_paths(value)
+        .into_iter()
+        .filter(|path| {
+            let actor_header = path.len() == 4
+                && path[0] == "model_providers"
+                && path[2] == "http_headers"
+                && path[3].eq_ignore_ascii_case(ACTOR_AUTHORIZATION_HEADER)
+                && value_at(value, path)
+                    .and_then(toml::Value::as_str)
+                    .is_some_and(|header| !header.trim().is_empty());
+            let direct_only_namespaces = path
+                .iter()
+                .map(String::as_str)
+                .eq(CODE_MODE_DIRECT_ONLY_PATH)
+                && value_at(value, path)
+                    .and_then(toml::Value::as_array)
+                    .is_some_and(|namespaces| {
+                        namespaces.iter().all(|namespace| {
+                            namespace
+                                .as_str()
+                                .is_some_and(|name| !name.trim().is_empty())
+                        })
+                    });
+            actor_header || direct_only_namespaces
+        })
+        .collect()
+}
+
 pub fn capture_declared(
     current: &str,
     target: &Path,
@@ -392,5 +428,46 @@ mod tests {
             toml::Value::String("token".into()),
         );
         assert!(validate_values(&values).is_err());
+    }
+
+    #[test]
+    fn auto_capture_only_allows_nonempty_actor_authorization_header() {
+        let value: toml::Value = toml::from_str(
+            r#"
+            [model_providers.cpa.http_headers]
+            "x-openai-actor-authorization" = "custom"
+            "authorization" = "do-not-capture"
+            "x-empty" = ""
+            "#,
+        )
+        .unwrap();
+        assert_eq!(
+            auto_capture_paths(&value),
+            vec![vec![
+                "model_providers".to_owned(),
+                "cpa".to_owned(),
+                "http_headers".to_owned(),
+                "x-openai-actor-authorization".to_owned(),
+            ]]
+        );
+    }
+
+    #[test]
+    fn auto_capture_allows_direct_only_namespace_list() {
+        let value: toml::Value = toml::from_str(
+            r#"
+            [features.code_mode]
+            direct_only_tool_namespaces = ["image_gen"]
+            "#,
+        )
+        .unwrap();
+        assert_eq!(
+            auto_capture_paths(&value),
+            vec![vec![
+                "features".to_owned(),
+                "code_mode".to_owned(),
+                "direct_only_tool_namespaces".to_owned(),
+            ]]
+        );
     }
 }
