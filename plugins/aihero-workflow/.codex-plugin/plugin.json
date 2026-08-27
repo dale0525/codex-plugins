@@ -1,0 +1,42 @@
+{
+  "name": "aihero-workflow",
+  "version": "0.1.0",
+  "description": "Codex-safe, Chinese-first workflow skills adapted from AIHero's engineering skills.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/mattpocock/skills",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "agent-docs",
+    "spec",
+    "tdd",
+    "domain-modeling",
+    "research"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AIHero Workflow (Codex)",
+    "shortDescription": "Chinese-first planning, research, implementation, and agent-document workflows.",
+    "longDescription": "Codex-adapted workflow skills for ambiguity handling, repository terminology, local specs, evidence-backed research, test-first implementation, and agent-facing documentation. External issue publishing, automatic commits, and architecture reports remain explicitly gated.",
+    "developerName": "Logic Tan",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Planning and decision capture",
+      "Primary-source research",
+      "Domain terminology maintenance",
+      "Test-first implementation",
+      "Agent-facing document review"
+    ],
+    "defaultPrompt": [
+      "Clarify this repository change and capture the decisions.",
+      "Research this external question with primary sources.",
+      "Implement this frozen plan test-first without committing.",
+      "Review this agent-facing document for no-op and duplicated instructions."
+    ]
+  }
+}

@@ -17,6 +17,18 @@
       "category": "Design"
     },
     {
+      "name": "aihero-workflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/aihero-workflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    },
+    {
       "name": "codex-sync",
       "source": {
         "source": "local",
