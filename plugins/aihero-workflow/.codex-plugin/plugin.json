@@ -1,6 +1,6 @@
 {
   "name": "aihero-workflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Codex-safe, Chinese-first workflow skills adapted from AIHero's engineering skills.",
   "author": {
     "name": "Logic Tan",
@@ -30,13 +30,15 @@
       "Primary-source research",
       "Domain terminology maintenance",
       "Test-first implementation",
-      "Agent-facing document review"
+      "Agent-facing document review",
+      "Plain-language explanation recovery"
     ],
     "defaultPrompt": [
       "Clarify this repository change and capture the decisions.",
       "Research this external question with primary sources.",
       "Implement this frozen plan test-first without committing.",
-      "Review this agent-facing document for no-op and duplicated instructions."
+      "Review this agent-facing document for no-op and duplicated instructions.",
+      "Re-explain that in plain Chinese."
     ]
   }
 }
