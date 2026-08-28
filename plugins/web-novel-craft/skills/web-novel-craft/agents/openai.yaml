@@ -3,4 +3,4 @@ interface:
   short_description: "Ideate, write, critique, and revise web novels"
   default_prompt: "Use $web-novel-craft to develop, write, critique, and revise this web novel as a capable novelist and editor."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

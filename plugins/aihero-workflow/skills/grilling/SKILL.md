@@ -1,6 +1,6 @@
 ---
 name: grilling
-description: Run a bounded, multi-question decision interview without silently deciding for the user.
+description: Run a bounded, multi-question decision interview without silently deciding for the user. Use only when explicitly invoked as the internal primitive of grill-with-docs or when the user explicitly requests a decision interview; do not trigger for ordinary implementation planning.
 ---
 
 # Grilling primitive

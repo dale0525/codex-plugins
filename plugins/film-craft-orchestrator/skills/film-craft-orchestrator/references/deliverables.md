@@ -66,7 +66,6 @@ slate,continuity_risk,safety_note,fallback,status
 
 进入 writer 前必须再交 `adaptation_handoff.csv`，逐个 `screen_unit` 给 source refs、scene id、预计秒数、进入/退出状态、目标、障碍、转折、屏幕设备、虚构材料和未决事实。总预计时长应在目标 ±10%。
 
-视频证据包字段见 `video-evidence.md`，最小交付包括：来源 URL/标题/频道、访问日期、字幕/ASR 状态、少量带时间码的 claims、证据等级、练习和未核验项。
 
 ## 验收清单
 
@@ -87,9 +86,8 @@ slate,continuity_risk,safety_note,fallback,status
 
 ### 证据
 
-- [ ] 事实、video claim、interpretation、experiment 分栏。
+- [ ] 事实、source claim、interpretation、experiment 分栏。
 - [ ] 高风险陈述有来源和时间码；不确定性旗标保留。
-- [ ] 只有满足严格程序字段的视频标 `deep_distilled`；章节和元数据不计蒸馏量。
 - [ ] 视频只用短引文/摘要，不提供整段转录或整部剧本。
 - [ ] 缩略图只标 `thumbnail_only`，不推断剪辑、音频或因果。
 

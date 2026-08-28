@@ -1,7 +1,10 @@
 # Codex Sync security boundary
 
-Codex Sync invokes the system `git` and Codex CLI. It does not use a GitHub API,
-GitHub App, keyring, ZIP snapshot, or token store. Git credentials are inherited
+Codex Sync invokes a reviewed Git executable and the Codex CLI. The executable
+may be an explicit override, an installed system Git, FastCtx's reviewed
+portable Git, or the plugin's checksum-verified managed download on Windows.
+It does not use a GitHub API, GitHub App, keyring, ZIP snapshot, or token store.
+Git credentials are inherited
 by the child process and are never read, printed, or persisted by the engine.
 
 Push rejects probable secret keys and URLs with embedded credentials. The sole

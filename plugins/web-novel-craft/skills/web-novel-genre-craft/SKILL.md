@@ -1,13 +1,13 @@
 ---
 name: web-novel-genre-craft
-description: 为网络小说设计或诊断玄幻仙侠、都市商战、规则怪谈/无限恐怖、群像战争、科幻世界、同人、女性复仇、年代重生、romance、悬疑、喜剧、长篇结尾和历史研究时使用；把类型期待转成可追踪状态、规则、选择和回收，不把模板或平台经验当普遍公式。
+description: 仅在已确定为网络/连载小说且类型承诺已命名时，设计或诊断玄幻仙侠、都市商战、规则怪谈/无限恐怖、群像战争、科幻世界、同人、女性复仇、年代重生、romance、悬疑、喜剧或长篇结尾的类型特有机制。历史资料仅用于把史实转成网络小说场景中的障碍、程序、社会压力或人物选择；纯事实研究、普通历史小说、影视/游戏设定研究不触发。
 ---
 
 # Web Novel Genre Craft
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `references/genre-craft.md`，再按任务加载 `xianxia-progression.md`、`urban-business.md`、`infinite-horror.md`、`ensemble-war-factions.md`、`science-fiction-worldbuilding.md`、`fanfiction-source-craft.md`、`female-revenge-era-rebirth.md`、`romance.md`、`mystery.md`、`comedy-dialogue.md`、`long-form-endings.md` 或 `historical-research.md`。
+共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/genre-craft.md`，再按任务加载 `../web-novel-craft/references/xianxia-progression.md`、`../web-novel-craft/references/urban-business.md`、`../web-novel-craft/references/infinite-horror.md`、`../web-novel-craft/references/ensemble-war-factions.md`、`../web-novel-craft/references/science-fiction-worldbuilding.md`、`../web-novel-craft/references/fanfiction-source-craft.md`、`../web-novel-craft/references/female-revenge-era-rebirth.md`、`../web-novel-craft/references/romance.md`、`../web-novel-craft/references/mystery.md`、`../web-novel-craft/references/comedy-dialogue.md`、`../web-novel-craft/references/long-form-endings.md` 或 `../web-novel-craft/references/historical-research.md`。
 
 ## 路由边界
 

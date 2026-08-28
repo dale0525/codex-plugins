@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: Resolve repository terminology conflicts and maintain a glossary without turning it into a spec.
+description: Resolve an ambiguous or conflicting repository term when its meaning could change scope, behavior, architecture, or acceptance, and maintain a glossary without turning it into a spec. Do not trigger for stable, unambiguous new names.
 ---
 
 # Domain modeling

@@ -25,7 +25,7 @@
   "interface": {
     "displayName": "Web Novel Craft",
     "shortDescription": "Ideate, write, critique, and revise compelling web novels.",
-    "longDescription": "Nine coordinated skills make Codex a capable web novelist and editor: developing premises, characters, worlds, causal long-form structure, progression, Chinese mainstream genre craft, scene prose, direct chapter writing, critique, revision, evaluation, and timestamped video evidence research.",
+    "longDescription": "Nine coordinated skills make Codex a capable web novelist and editor: developing premises, characters, worlds, causal long-form structure, progression, Chinese mainstream genre craft, scene prose, direct chapter writing, critique, revision, evaluation, and explicitly invoked evidence research for web-novel craft.",
     "developerName": "Logic Tan",
     "category": "Writing",
     "capabilities": [

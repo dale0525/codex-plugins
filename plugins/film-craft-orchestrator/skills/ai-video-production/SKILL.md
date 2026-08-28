@@ -1,6 +1,6 @@
 ---
 name: ai-video-production
-description: 将已冻结的故事、导演意图和视觉圣经转换为 AI 视频 clip 计划、provider-neutral prompt IR、模型适配提示、参考资产传输、生成日志和可剪素材时使用。也用于模型路由、首帧/尾帧、口型策略与生成迭代；不把整段剧本直接粘给模型，也不擅自修改上游人物选择。
+description: 将已冻结的故事、导演意图、视觉圣经和参考资产转换为 AI 视频 clip 计划、provider-neutral prompt IR、模型适配提示、生成日志和可剪素材时使用。模型路由仅指针对已批准 clip 的能力、参考资产与交付约束；首帧/尾帧、生成前口型策略和生成迭代也属此阶段。一般模型介绍、价格/能力比较、购买建议、新闻或教程研究不触发；不把整段剧本直接粘给模型，也不擅自修改上游人物选择。
 ---
 
 # AI Video Production
@@ -9,12 +9,12 @@ description: 将已冻结的故事、导演意图和视觉圣经转换为 AI 视
 
 共享根是 `../film-craft-orchestrator/`。依次读取：
 
-- `references/ai-video-workflow.md`
-- `references/ai-video-model-routing.md`
-- `references/ai-video-deliverables.md`
-- `references/distilled-ai-video-procedures.json`
+- `../film-craft-orchestrator/references/ai-video-workflow.md`
+- `../film-craft-orchestrator/references/ai-video-model-routing.md`
+- `../film-craft-orchestrator/references/ai-video-deliverables.md`
+- `../film-craft-orchestrator/references/distilled-ai-video-procedures.json`
 
-需要连续性或失败修复时再读取对应分技能及 `references/ai-video-continuity.md`、`references/ai-video-failure-repair.md`。模型事实必须同时核对 `references/model-adapters.json` 与 `references/ai-video-official-evidence.json`。
+需要连续性或失败修复时再读取对应分技能及 `../film-craft-orchestrator/references/ai-video-continuity.md`、`../film-craft-orchestrator/references/ai-video-failure-repair.md`。模型事实必须同时核对 `../film-craft-orchestrator/references/model-adapters.json` 与 `../film-craft-orchestrator/references/ai-video-official-evidence.json`。
 
 ## Scene-to-clip
 
@@ -55,10 +55,10 @@ subject/state → start/action/end → environment/space
 在共享根运行：
 
 ```bash
-python scripts/compile_ai_video_package.py <package-directory> \
-  --adapters references/model-adapters.json
-python scripts/validate_ai_video_package.py <package-directory> \
-  --adapters references/model-adapters.json
+python ../film-craft-orchestrator/scripts/compile_ai_video_package.py <package-directory> \
+  --adapters ../film-craft-orchestrator/references/model-adapters.json
+python ../film-craft-orchestrator/scripts/validate_ai_video_package.py <package-directory> \
+  --adapters ../film-craft-orchestrator/references/model-adapters.json
 ```
 
 编译器默认拒绝覆盖已有派生文件。只有明确废弃旧骨架并保留真实生成/QC 记录时才使用 `--replace-derived`。

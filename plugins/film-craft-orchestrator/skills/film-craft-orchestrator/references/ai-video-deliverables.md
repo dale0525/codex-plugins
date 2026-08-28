@@ -34,7 +34,7 @@ final_film_qc.yaml
 generation_probe_plan.yaml
 ```
 
-模板位于 `assets/templates/`。单一事实只允许一个 canonical 文件；其他文件用稳定 ID/版本引用，不复制成另一套真源。人工真源止于 brief、adaptation matrix、story map、director intent、visual bible、reference manifest 和 semantic reviews；其余文件由编译器生成骨架，再追加真实 generation/QC 结果。
+模板位于 `assets/templates/`。单一事实只允许一个 canonical 文件；其他文件用稳定 ID/版本引用，不复制成另一套真源。人工真源止于 brief、adaptation matrix、story map、director intent、visual bible、reference manifest 和 semantic reviews；其余文件由编译器生成骨架，再追加真实 generation/QC 结果。编译完成后，`editing-sound` 仅可在同一派生文件中增量填写编辑/声音字段，并记录 owner、status、source artifact version；上游重新编译时旧的编辑/声音增量按版本失效，不得另建平行文件或静默覆盖。
 
 创建包时运行 `init_ai_video_package.py <output>`；小说、真实事件、旧剧本或其他有源材料改用 `init_ai_video_package.py <output> --with-adaptation`。默认只初始化上游输入，阶段冻结并独立审查后运行 `compile_ai_video_package.py` 生成下游。`--full-templates` 只用于旧式手填流程兼容。CSV 中含逗号、引号或换行的字段必须正确引用。
 

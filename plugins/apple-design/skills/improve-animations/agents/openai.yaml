@@ -1,0 +1,6 @@
+interface:
+  display_name: "Improve Animations"
+  short_description: "Audit motion and write plans only when explicitly requested."
+  default_prompt: "Use $improve-animations only when explicitly invoked for a read-only audit or plan."
+policy:
+  allow_implicit_invocation: false

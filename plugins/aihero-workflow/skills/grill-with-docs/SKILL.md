@@ -1,6 +1,6 @@
 ---
 name: grill-with-docs
-description: Automatically clarify a repository change and persist only durable terminology and decisions.
+description: Clarify a repository change that spans multiple files or modules when unresolved goals, terminology, boundaries, or acceptance could change scope, behavior, architecture, or acceptance; persist only durable terminology and decisions. Skip small, already-specified changes and no-repository ideas.
 ---
 
 # Grill with docs

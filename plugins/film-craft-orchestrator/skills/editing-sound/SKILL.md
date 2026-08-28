@@ -1,13 +1,13 @@
 ---
 name: editing-sound
-description: 设计或审查叙事剪辑、节奏、反应镜头、蒙太奇、对白编辑、口型、画外音、ambience、Foley、SFX、音乐、混音和终片声音交付时使用。负责把已生成 clips 变成可理解的时间线与声音结构；不借剪辑改写未经批准的来源事实或人物选择。
+description: 设计或审查已生成 clips 的叙事剪辑、节奏、反应镜头、蒙太奇、对白编辑、ADR/独立 lip-sync、画外音、ambience、Foley、SFX、音乐、混音和声音母版技术交付时使用。负责时间线、声音层次与音画同步的技术验收；最终项目的语义与视觉放行由 continuity-qc 负责，不借剪辑改写未经批准的来源事实或人物选择。
 ---
 
 # Editing and Sound
 
 ## 共享知识
 
-共享根是 `../film-craft-orchestrator/`。先读 `references/editing-sound.md`；表演剪辑、反应选择和 coverage 缺口加读 `references/distilled-directing-editing-procedures.json`、`references/distilled-structure-sound-procedures.json` 与 `references/distilled-targeted-foundation-procedures.json`。
+共享根是 `../film-craft-orchestrator/`。先读 `../film-craft-orchestrator/references/editing-sound.md`；表演剪辑、反应选择和 coverage 缺口加读 `../film-craft-orchestrator/references/distilled-directing-editing-procedures.json`、`../film-craft-orchestrator/references/distilled-structure-sound-procedures.json` 与 `../film-craft-orchestrator/references/distilled-targeted-foundation-procedures.json`。
 
 ## 剪辑设计
 
@@ -30,6 +30,6 @@ description: 设计或审查叙事剪辑、节奏、反应镜头、蒙太奇、�
 
 ## 输出与验收
 
-输出 `edit_plan.yaml` 与 `sound_cue_sheet.csv` 时，逐 clip 使用稳定 ID，给出 source in/out、timeline in/out、trim/handles、transition、信息载体和音画同步点。最终检查：节奏、空间可读性、动作/视线连接、对白清晰度、响度/峰值、音乐遮蔽、声音连续性和交付格式。
+编译器生成派生文件的骨架后，只能在原位增量填写/修订 `edit_plan.yaml` 与 `sound_cue_sheet.csv` 的编辑与声音字段，不得另建第二套真源；每次变更记录 owner、status、source artifact version，并在上游重新编译时按版本失效重建。逐 clip 使用稳定 ID，给出 source in/out、timeline in/out、trim/handles、transition、信息载体和音画同步点。最终检查：节奏、空间可读性、动作/视线连接、对白清晰度、响度/峰值、音乐遮蔽、声音连续性和交付格式。
 
 如果 coverage 不足，明确指出缺失的叙事功能与最小补镜，不用泛泛的“多拍几个角度”。

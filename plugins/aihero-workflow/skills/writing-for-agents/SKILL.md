@@ -1,6 +1,6 @@
 ---
 name: writing-for-agents
-description: Review agent-facing documents for predictable behavior, low context load, and complete stopping rules.
+description: Review documents primarily written for agents to execute or consume for predictable behavior, low context load, and complete stopping rules. Do not trigger for ordinary product README editing unless the user asks for an agent-facing review.
 ---
 
 # Writing for agents

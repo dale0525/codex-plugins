@@ -1,6 +1,0 @@
-interface:
-  display_name: "Video Evidence Research"
-  short_description: "从字幕、画面与官方资料蒸馏可验证程序"
-  default_prompt: "Use $video-evidence-research to extract timestamped, visually bounded procedures from these film-learning videos."
-policy:
-  allow_implicit_invocation: true

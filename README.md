@@ -100,7 +100,7 @@ local-only plugin sources are reported and skipped because their code cannot be
 restored on another device. Normal capture also canonicalizes
 `model_reasoning_effort` to `medium` instead of copying the live session value.
 
-Apple Design packages seven MIT-licensed design-engineering skills from
+Apple Design packages twelve MIT-licensed design-engineering skills from
 [emilkowalski/skills](https://github.com/emilkowalski/skills). The upstream
 license is preserved in the plugin's `third-party/` directory.
 
@@ -177,10 +177,10 @@ The 0.2.0 apply transaction takes ownership of the synchronized profile filename
 
 ### Film Craft Orchestrator
 
-Provides one end-to-end orchestration skill and eight focused skills for source
+Provides one end-to-end orchestration skill and seven focused skills for source
 adaptation, screenwriting, directing, cinematography, AI-video production,
-continuity and quality control, editing and sound, and timestamped video-evidence
-research. Shared templates, evidence corpora, compilers, and deterministic
+continuity and quality control, and editing and sound. Shared templates,
+compilers, and deterministic
 validators remain in one canonical skill root so the focused skills do not drift.
 
 ### Prompt Master
@@ -194,7 +194,8 @@ agents, image and video generators, and other AI tools.
 Provides one writer/editor orchestration skill and eight focused skills for web-novel
 development, long-form structure, characters and viewpoint, progression and
 LitRPG systems, Chinese mainstream genres, scene prose, direct writing,
-evidence-based critique, revision, evaluation, and video-evidence research. It
+evidence-based critique, revision, evaluation, and explicitly invoked
+web-novel craft evidence research. It
 deliberately excludes scheduling, backlog, team, publishing, provider, and
 engineering-oriented production management. Its shared corpus deeply distills 67
 YouTube and Bilibili sources into timestamped claims, boundaries,
@@ -218,11 +219,14 @@ The `Sync external skills and plugins` GitHub Actions workflow runs daily at
 1. Reads external Git-tree and GitHub Release sources from `sync-sources.toml` (FastCtx is not a periodic sync source).
 2. Copies configured skill/plugin directories and verifies every required
    GitHub Release asset against both `SHA256SUMS` and the GitHub asset digest.
-3. Applies declared compatibility normalization, records immutable commits,
+3. Applies declared compatibility normalization—including repository-owned
+   invocation policies and stable text adaptations—records immutable commits,
    release tags, asset digests, and destinations in `sync-lock.json`, and
    increments an affected plugin's patch version when packaged content changes.
 4. Runs the repository tests and validators with pixi.
-5. Commits validated changes and pushes them to the repository's default branch.
+5. Commits validated changes, rebases against the latest default branch, reruns
+   the full check on that exact tree, and pushes only after it passes. A rebase
+   conflict, remote race, or failed recheck stops without a force push.
 
 Skills can change agent behavior, so maintainers should review the automated
 commits and upstream repository history. Repository settings must allow GitHub

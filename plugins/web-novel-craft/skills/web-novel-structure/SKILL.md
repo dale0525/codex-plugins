@@ -1,15 +1,15 @@
 ---
 name: web-novel-structure
-description: 设计或诊断网络小说主线、大纲、卷/篇章/章节、承诺—进展—回收、因果衔接、伏笔、信息顺序、快慢节奏和章末钩子时使用；负责事件与期待结构，不代替人物声音、力量规则或文字润色。
+description: 在网络/连载小说中设计或诊断主线、大纲、卷/篇章/章节、承诺—进展—回收、因果衔接、伏笔、信息顺序、快慢节奏和章末钩子时使用；负责通用事件与期待结构，不代替类型专属机制、人物声音、力量规则或文字润色。
 ---
 
 # Web Novel Structure
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `references/structure.md`；长篇续写需要轻量事实时读 `references/story-bible.md`。
+共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/structure.md`；长篇续写需要轻量事实时读 `../web-novel-craft/references/story-bible.md`。
 
-若问题集中在 romance、悬疑、喜剧、历史或中段—高潮—结尾的类型机制，转 `$web-novel-genre-craft` 并按需读取 `references/genre-craft.md` 和对应专项资料。
+若问题集中在 romance、悬疑、喜剧、历史或中段—高潮—结尾的类型机制，转 `$web-novel-genre-craft` 并按需读取 `../web-novel-craft/references/genre-craft.md` 和对应专项资料。
 
 ## 工作流
 
@@ -34,3 +34,10 @@ description: 设计或诊断网络小说主线、大纲、卷/篇章/章节、�
 ## 交付
 
 交付主线句、嵌套大纲、承诺台账、逐章因果链、状态变化表、信息前置表、节奏理由和线程关闭条件。
+
+## 完成门
+
+- 输入明确范围（主线、卷、篇章或章节）和目标读者；缺失时只作显式假设。
+- 每个交付单位都有入口/出口状态、至少一个选择或结果，以及可追踪的承诺进展。
+- 因果链、信息前置和章末钩子均能在表格或大纲中定位。
+- 完成这些检查后停止继续扩写；局部句段执行转 prose-craft，类型专属回收转 genre-craft。

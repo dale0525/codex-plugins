@@ -1,15 +1,15 @@
 ---
 name: web-novel-characters
-description: 设计或诊断网络小说主角、反派、配角、人物动机、主动性、能力边界、缺陷、关系、人物弧、叙事视角与角色声音时使用；把人物变化落实为压力下的选择与代价，不用履历、口头禅或标签冒充人物。
+description: 在网络/连载小说中设计或诊断主角、反派、配角、人物动机、主动性、能力边界、缺陷、关系、人物弧、叙事视角与角色声音时使用；把人物变化落实为压力下的选择与代价。以 romance 类型承诺为核心的关系机制交给 genre-craft，不用履历、口头禅或标签冒充人物。
 ---
 
 # Web Novel Characters
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `references/characters.md`；需要续写记忆时读 `references/story-bible.md`。
+共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/characters.md`；需要续写记忆时读 `../web-novel-craft/references/story-bible.md`。
 
-人物动机、视角与声音留在本技能；以 romance 类型承诺为核心的关系 beat、slow burn 与 HEA/HFN 验收转 `$web-novel-genre-craft` 并读 `references/romance.md`。
+人物动机、视角与声音留在本技能；以 romance 类型承诺为核心的关系 beat、slow burn 与 HEA/HFN 验收转 `$web-novel-genre-craft` 并读 `../web-novel-craft/references/romance.md`。
 
 ## 工作流
 
@@ -33,3 +33,10 @@ description: 设计或诊断网络小说主角、反派、配角、人物动机�
 ## 交付
 
 交付人物卡、关系张力、知识边界、POV 规则、关键选择弧、声音样本及各吸引力轴的诊断。不要仿写在世作者的独特声音。
+
+## 完成门
+
+- 每个主要角色都有当下目标、策略、能力边界、盲区和至少一次压力下的选择/代价。
+- POV、知识权限和声音规则能解释一个具体场景中的信息限制。
+- 关系变化必须改变后续选择，而非只增加履历或口头禅。
+- 检查通过后停止扩写；类型契约或局部句段问题转对应分技能。

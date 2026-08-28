@@ -46,6 +46,8 @@ class SourceSpec:
     license_destination: str | None
     remove_frontmatter_fields: tuple[str, ...]
     skill_description_suffixes: tuple[tuple[str, str], ...]
+    skill_implicit_invocation: tuple[tuple[str, bool], ...]
+    skill_text_replacements: tuple[tuple[str, str, str], ...]
 
 
 @dataclass(frozen=True)
@@ -125,6 +127,27 @@ def load_config(config_path: Path, repository_root: Path = REPOSITORY_ROOT) -> l
             for name, suffix in suffixes.items()
         ):
             raise SyncError(f"{context}.skill_description_suffixes must map names to text")
+        implicit_invocation = raw.get("skill_implicit_invocation", {})
+        if not isinstance(implicit_invocation, dict) or not all(
+            isinstance(name, str) and isinstance(value, bool)
+            for name, value in implicit_invocation.items()
+        ):
+            raise SyncError(
+                f"{context}.skill_implicit_invocation must map names to booleans"
+            )
+        text_replacements = raw.get("skill_text_replacements", [])
+        if not isinstance(text_replacements, list) or not all(
+            isinstance(item, dict)
+            and isinstance(item.get("skill"), str)
+            and item.get("skill", "").strip()
+            and isinstance(item.get("find"), str)
+            and item.get("find", "")
+            and isinstance(item.get("replace"), str)
+            for item in text_replacements
+        ):
+            raise SyncError(
+                f"{context}.skill_text_replacements must contain skill/find/replace strings"
+            )
 
         repository = _required_string(raw, "repository", context)
         parsed_repository = urlsplit(repository)
@@ -156,6 +179,15 @@ def load_config(config_path: Path, repository_root: Path = REPOSITORY_ROOT) -> l
             license_destination=license_destination,
             remove_frontmatter_fields=tuple(fields),
             skill_description_suffixes=tuple(sorted(suffixes.items())),
+            skill_implicit_invocation=tuple(sorted(implicit_invocation.items())),
+            skill_text_replacements=tuple(
+                (
+                    item["skill"],
+                    item["find"],
+                    item["replace"],
+                )
+                for item in text_replacements
+            ),
         )
         destination = _safe_repository_path(repository_root, spec.destination)
         for existing in destinations:
@@ -297,7 +329,83 @@ def _normalize_skill_frontmatter(
     skill_path.write_text("".join(normalized), encoding="utf-8")
 
 
-def _stage_source(spec: SourceSpec, temporary_root: Path) -> StagedSource:
+def _normalize_skill_invocation_policy(
+    skill_path: Path,
+    policies: tuple[tuple[str, bool], ...],
+) -> None:
+    """Apply repository-owned invocation policy to synchronized skills."""
+
+    allow_implicit = dict(policies).get(skill_path.parent.name)
+    if allow_implicit is None:
+        return
+    policy_path = skill_path.parent / "agents/openai.yaml"
+    value = "true" if allow_implicit else "false"
+    if policy_path.is_file():
+        text = policy_path.read_text(encoding="utf-8")
+        updated, replacements = re.subn(
+            r"(?m)^(\s*allow_implicit_invocation\s*:\s*).*$",
+            rf"\g<1>{value}",
+            text,
+            count=1,
+        )
+        if replacements == 0:
+            if re.search(r"(?m)^policy:\s*$", updated):
+                updated = re.sub(
+                    r"(?m)^policy:\s*$",
+                    f"policy:\n  allow_implicit_invocation: {value}",
+                    updated,
+                    count=1,
+                )
+            else:
+                updated = updated.rstrip("\n") + (
+                    f"\npolicy:\n  allow_implicit_invocation: {value}\n"
+                )
+        elif not updated.endswith("\n"):
+            updated += "\n"
+        policy_path.write_text(updated, encoding="utf-8")
+        return
+
+    skill_name = skill_path.parent.name
+    display_name = skill_name.replace("-", " ").title()
+    policy_path.parent.mkdir(parents=True, exist_ok=True)
+    policy_path.write_text(
+        "interface:\n"
+        f'  display_name: "{display_name}"\n'
+        f'  short_description: "Use ${skill_name} according to its declared invocation policy."\n'
+        f'  default_prompt: "Use ${skill_name} for this task."\n'
+        "policy:\n"
+        f"  allow_implicit_invocation: {value}\n",
+        encoding="utf-8",
+    )
+
+
+def _normalize_skill_text(
+    skill_path: Path,
+    replacements: tuple[tuple[str, str, str], ...],
+) -> None:
+    applicable = [
+        (find, replace)
+        for skill_name, find, replace in replacements
+        if skill_name == skill_path.parent.name
+    ]
+    if not applicable:
+        return
+    text = skill_path.read_text(encoding="utf-8")
+    for find, replace in applicable:
+        if find in text:
+            text = text.replace(find, replace, 1)
+        elif replace not in text:
+            raise SyncError(
+                f"skill text replacement did not match upstream content: {skill_path}"
+            )
+    skill_path.write_text(text, encoding="utf-8")
+
+
+def _stage_source(
+    spec: SourceSpec,
+    temporary_root: Path,
+    repository_root: Path,
+) -> StagedSource:
     clone_path = temporary_root / f"clone-{spec.source_id}"
     _run(
         [
@@ -322,11 +430,32 @@ def _stage_source(spec: SourceSpec, temporary_root: Path) -> StagedSource:
 
     staged_content = temporary_root / f"content-{spec.source_id}"
     shutil.copytree(source_path, staged_content, ignore=shutil.ignore_patterns(".git"))
+    destination = _safe_repository_path(repository_root, spec.destination)
     for skill_path in staged_content.rglob("SKILL.md"):
+        # Invocation policy files are repository-owned compatibility metadata.
+        # Preserve a tracked local interface when upstream does not provide one;
+        # otherwise a full-tree replacement would reset it on every sync.
+        staged_policy = skill_path.parent / "agents/openai.yaml"
+        if not staged_policy.exists():
+            relative_skill_dir = skill_path.parent.relative_to(staged_content)
+            local_policy = destination / relative_skill_dir / "agents/openai.yaml"
+            if local_policy.is_symlink():
+                raise SyncError(f"destination contains a symlink: {local_policy}")
+            if local_policy.is_file():
+                staged_policy.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(local_policy, staged_policy)
         _normalize_skill_frontmatter(
             skill_path,
             spec.remove_frontmatter_fields,
             spec.skill_description_suffixes,
+        )
+        _normalize_skill_invocation_policy(
+            skill_path,
+            spec.skill_implicit_invocation,
+        )
+        _normalize_skill_text(
+            skill_path,
+            spec.skill_text_replacements,
         )
 
     license_content = None
@@ -659,7 +788,9 @@ def synchronize(config_path: Path = DEFAULT_CONFIG, lock_path: Path = DEFAULT_LO
 
     with tempfile.TemporaryDirectory(prefix="codex-plugin-sync-") as temporary:
         temporary_root = Path(temporary)
-        staged_sources = [_stage_source(spec, temporary_root) for spec in specs]
+        staged_sources = [
+            _stage_source(spec, temporary_root, repository_root) for spec in specs
+        ]
         staged_releases = [
             _stage_github_release(
                 spec,

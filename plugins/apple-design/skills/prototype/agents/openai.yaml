@@ -1,0 +1,6 @@
+interface:
+  display_name: "Prototype"
+  short_description: "Build UI variants only when explicitly requested."
+  default_prompt: "Use $prototype only when explicitly invoked."
+policy:
+  allow_implicit_invocation: false

@@ -1,13 +1,13 @@
 ---
 name: web-novel-development
-description: 为网络小说选择题材与目标读者，建立读者契约、故事前提、系列发动机、类型承诺和核心设定时使用，也用于诊断“只有设定没有故事”、盲目跟风、作者自嗨或爽点未落到主角的问题；不负责详细章节大纲或成稿修订。
+description: 仅在网络/连载小说的题材定位或目标读者尚未冻结时，选择题材、建立读者契约、故事前提与系列发动机；也用于诊断“只有设定没有故事”、盲目跟风、作者自嗨或爽点未落到主角的问题。类型已确定后的专属机制交给 genre-craft，不负责详细章节大纲或成稿修订。
 ---
 
 # Web Novel Development
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `references/development.md`；跨阶段创作再读 `references/writer-workflow.md` 和 `references/web-novel-routing.md`。
+共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/development.md`；跨阶段创作再读 `../web-novel-craft/references/writer-workflow.md` 和 `../web-novel-craft/references/web-novel-routing.md`。
 
 ## 工作流
 
@@ -30,3 +30,10 @@ description: 为网络小说选择题材与目标读者，建立读者契约、�
 ## 交付边界
 
 不虚构实时平台规律；需要平台定位时明确它只是外部条件，不让平台数字代替故事判断。没有用户授权，不替用户决定题材、身份表达、核心关系或结局。
+
+## 完成门
+
+- 输入至少包含目标媒介（网络/连载）、目标读者和作者想表达的核心兴趣；缺失时明确假设。
+- 交付必须包含可检验前提、读者契约和可重复但不重置的系列发动机。
+- 至少给出三个不同章节实例，并指出一个会让发动机失效的风险。
+- 这些条件满足后停止扩展设定；若类型已冻结或用户只要章节/成稿，转对应分技能。

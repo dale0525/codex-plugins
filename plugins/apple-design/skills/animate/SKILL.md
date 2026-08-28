@@ -1,6 +1,6 @@
 ---
 name: animate
-description: Build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits. Writes the implementation. Use when asked to animate something, add motion, make a component feel alive, or build a transition. For critiquing existing motion use review-animations; for auditing a whole codebase use improve-animations.
+description: Build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and duration, how it interrupts, how it exits. Writes the implementation. Use when asked to implement web animation, add a web transition, or add motion to a web component. Do not use for React Native or Expo (use animate-expo), animation audits, animation reviews, or naming effects.
 ---
 
 # Building Animations
@@ -70,7 +70,7 @@ Walk down; stop at the first that fits.
 
 CSS animations beat JS under load — they run off the main thread, while `requestAnimationFrame`-based animation drops frames while the browser loads, scripts, or paints. Use CSS for predetermined motion, JS for dynamic and interruptible motion.
 
-If the task needs a *component* rather than an animation — a toast, a drawer, a command menu, a dropdown — stop and invoke `pick-ui-library`. Hand-rolling those is how you end up with a `<div>` dropdown and no focus management.
+If the task needs a *component* rather than an animation — a toast, a drawer, a command menu, a dropdown — use an existing accessible primitive or ask the user to explicitly invoke `pick-ui-library`. Do not automatically invoke an explicit-only skill.
 
 ### 4. Pick the properties
 

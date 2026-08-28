@@ -3,4 +3,4 @@ interface:
   short_description: "Distill traceable craft knowledge from writing videos"
   default_prompt: "Use $web-novel-evidence-research to distill this writing video into traceable procedures."
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

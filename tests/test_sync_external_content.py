@@ -46,6 +46,17 @@ class ExternalContentSyncTests(unittest.TestCase):
         stale_skill = self.root / "plugins/apple-design/skills/stale/SKILL.md"
         stale_skill.parent.mkdir(parents=True)
         stale_skill.write_text("stale\n", encoding="utf-8")
+        local_policy = self.root / "plugins/apple-design/skills/example-skill/agents/openai.yaml"
+        local_policy.parent.mkdir(parents=True)
+        local_policy.write_text(
+            "interface:\n"
+            "  display_name: \"Repository Example\"\n"
+            "  short_description: \"Repository-owned policy\"\n"
+            "  default_prompt: \"Use $example-skill only when explicitly invoked.\"\n"
+            "policy:\n"
+            "  allow_implicit_invocation: false\n",
+            encoding="utf-8",
+        )
         self.config = self.root / "sync-sources.toml"
         self.lock = self.root / "sync-lock.json"
         self.config.write_text(
@@ -60,7 +71,9 @@ class ExternalContentSyncTests(unittest.TestCase):
             "license_source = \"LICENSE\"\n"
             "license_destination = \"plugins/apple-design/third-party/upstream-LICENSE\"\n"
             "remove_skill_frontmatter_fields = [\"disable-model-invocation\"]\n"
-            "skill_description_suffixes = { example-skill = \"Use only when explicitly requested.\" }\n",
+            "skill_description_suffixes = { example-skill = \"Use only when explicitly requested.\" }\n"
+            "skill_implicit_invocation = { example-skill = false }\n"
+            "skill_text_replacements = [{ skill = \"example-skill\", find = \"# Example\", replace = \"# Normalized Example\" }]\n",
             encoding="utf-8",
         )
 
@@ -158,6 +171,11 @@ class ExternalContentSyncTests(unittest.TestCase):
             "Use only when explicitly requested.",
             skill.read_text(encoding="utf-8"),
         )
+        self.assertIn("# Normalized Example", skill.read_text(encoding="utf-8"))
+        policy = skill.parent / "agents/openai.yaml"
+        policy_text = policy.read_text(encoding="utf-8")
+        self.assertIn("Repository-owned policy", policy_text)
+        self.assertIn("allow_implicit_invocation: false", policy_text)
         self.assertFalse((skill.parent.parent / "stale").exists())
         self.assertEqual(self._version(), "1.2.4")
         self.assertEqual(

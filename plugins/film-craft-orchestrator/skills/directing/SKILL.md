@@ -1,13 +1,13 @@
 ---
 name: directing
-description: 需要导演阐述、场面调度、演员行为、注意力控制、信息隐藏与揭示、多人空间、动作节拍或 coverage 设计时使用。把抽象情绪结果翻译为可执行的表演、blocking、镜头与声音触发；不负责重写上游故事，也不以镜头术语掩盖缺失的戏剧判断。
+description: 需要为电影、剧集、短片或叙事 AI 视频设计导演阐述、场面调度、演员行为、注意力控制、信息隐藏与揭示、多人空间、动作节拍或 coverage 时使用。决定拍什么信息、如何表演和 blocking/coverage 如何承载它；不决定焦段、景深、灯光或最终构图，不负责重写上游故事，也不以镜头术语掩盖缺失的戏剧判断。
 ---
 
 # Directing
 
 ## 共享知识
 
-共享根是 `../film-craft-orchestrator/`。先读 `references/director.md`；多人、动作与视觉叙事任务加读 `references/distilled-foundation-procedures.json`、`references/distilled-targeted-foundation-procedures.json` 和 `references/distilled-directing-editing-procedures.json`。
+共享根是 `../film-craft-orchestrator/`。先读 `../film-craft-orchestrator/references/director.md`；多人、动作与视觉叙事任务加读 `../film-craft-orchestrator/references/distilled-foundation-procedures.json`、`../film-craft-orchestrator/references/distilled-targeted-foundation-procedures.json` 和 `../film-craft-orchestrator/references/distilled-directing-editing-procedures.json`。
 
 ## 导演转换
 
@@ -37,5 +37,5 @@ description: 需要导演阐述、场面调度、演员行为、注意力控制�
 独立审查通过后，在共享根运行：
 
 ```bash
-python scripts/validate_director_stage.py <package-directory>
+python ../film-craft-orchestrator/scripts/validate_director_stage.py <package-directory>
 ```

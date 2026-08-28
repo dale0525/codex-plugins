@@ -48,15 +48,31 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit synchronized changes to the default branch
+      - name: Commit synchronized changes
         if: steps.changes.outputs.changed == 'true'
-        env:
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         shell: bash
         run: |
           git config user.name "Logic Tan"
           git config user.email "logictan89@gmail.com"
           git add --all
           git commit -m "Sync external skills and plugins"
+
+      - name: Rebase and revalidate against the default branch
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
+        run: |
           git pull --rebase origin "$DEFAULT_BRANCH"
+
+          # The rebase can introduce changes made while synchronization ran.
+          # Validate the exact tree that will be pushed, not the pre-rebase tree.
+          pixi run check
+
+      - name: Push synchronized changes to the default branch
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        shell: bash
+        run: |
           git push origin "HEAD:refs/heads/$DEFAULT_BRANCH"

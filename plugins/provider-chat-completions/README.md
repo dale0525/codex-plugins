@@ -84,12 +84,14 @@ not change the request body or cause another provider call.
 
 ## Result
 
-Without capture mode, success returns `ok`, `model`, `content`, `finish_reason`,
-and optional `usage`. Capture mode returns a bounded manifest with `ok`,
-`result_file`, `bytes`, and small status metadata; the complete normalized
-result (including `content` and `usage`) is in `result_file`.
-Failure returns only a safe `stage`, `code`, optional HTTP status, and whether a
-retry could be meaningful. The utility never retries automatically.
+Without capture mode, success returns `ok`, `model`, `content`, and
+`finish_reason`, with optional `usage` and `tool_calls` when the provider
+returns them. Capture mode returns a bounded manifest with `ok`, `result_file`,
+`bytes`, and small status metadata; the complete normalized result (including
+`content`, `usage`, and `tool_calls` when present) is in `result_file`.
+Failure always returns `ok: false`, `stage`, `code`, and `retryable`, with
+optional `http_status` and a bounded, redacted `diagnostic` for configuration
+launch failures. The utility never retries automatically.
 
 Configuration-launch failures may also include a bounded, redacted `diagnostic`
 object with the executable path, Win32/OS error number, process exit code, and

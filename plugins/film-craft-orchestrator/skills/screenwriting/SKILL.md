@@ -1,13 +1,13 @@
 ---
 name: screenwriting
-description: 创作或重写电影、剧集、短片、广告叙事的概念、人物弧、结构、场景、对白和标准剧本时使用，也用于诊断不可拍说明、松散场景、虚假转折和台词问题。只负责故事与剧本层；有源材料先接收已审查的改编矩阵，不擅自改写来源事实或导演/摄影方案。
+description: 仅当目标明确是电影、剧集、叙事短片、叙事广告或可拍 screenplay 时，创作或重写概念、人物弧、结构、场景、对白和标准剧本；也用于诊断不可拍说明、松散场景、虚假转折和台词问题。小说正文、网文场景、一般创意写作、营销文案、聊天对白和非视听戏剧文本不触发，除非用户要求改编为银幕剧本。只负责故事与剧本层；有源材料先接收已审查的改编矩阵，不擅自改写来源事实或导演/摄影方案。
 ---
 
 # Screenwriting
 
 ## 共享知识
 
-共享根是 `../film-craft-orchestrator/`。先读 `references/writer.md`；按问题加载 `references/distilled-scene-procedures.json`、`references/distilled-structure-sound-procedures.json`、`references/distilled-theme-performance-camera-procedures.json`、`references/distilled-sorkin-procedures.json` 和 `references/distilled-targeted-foundation-procedures.json`。
+共享根是 `../film-craft-orchestrator/`。先读 `../film-craft-orchestrator/references/writer.md`；按问题加载 `../film-craft-orchestrator/references/distilled-scene-procedures.json`、`../film-craft-orchestrator/references/distilled-structure-sound-procedures.json`、`../film-craft-orchestrator/references/distilled-theme-performance-camera-procedures.json`、`../film-craft-orchestrator/references/distilled-sorkin-procedures.json` 和 `../film-craft-orchestrator/references/distilled-targeted-foundation-procedures.json`。
 
 ## 从故事到剧本
 
@@ -45,5 +45,5 @@ description: 创作或重写电影、剧集、短片、广告叙事的概念、�
 根据请求交付 logline、人物弧、beat map、scene cards、分集大纲或标准剧本。若进入 AI 视频流水线，输出 `story_and_scene_map.yaml`，保持 scene/beat/delivery requirement ID 稳定，并在共享根运行：
 
 ```bash
-python scripts/validate_story_stage.py <package-directory>
+python ../film-craft-orchestrator/scripts/validate_story_stage.py <package-directory>
 ```

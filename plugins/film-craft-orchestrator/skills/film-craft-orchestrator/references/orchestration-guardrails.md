@@ -1,6 +1,6 @@
 ---
 name: film-craft-orchestrator
-description: 面向 AI 生成电影、剧集、短片、广告叙事和小说影视改编的端到端影视创作与生成监督 skill。用户需要故事概念、人物弧、场景、对白、剧本、导演阐述、视觉圣经、场面调度、镜头/clip 规划、摄影与灯光语言、模型路由、参考资产、提示词包、跨镜连续性、生成失败修复、对白口型、剪辑声音或最终成片质检时使用；也用于从 YouTube 影视/AI 视频教学中提取带时间码和画面边界的可验证程序。默认把改编顾问→编剧→导演→视觉监督→AI 视频监督→剪辑/声音串成可回溯流水线，不把单一理论、厂商宣传、候选视频或未附加的参考图当成事实。
+description: 面向 AI 生成电影、剧集、短片、广告叙事和小说影视改编的端到端影视创作与生成监督 skill。用户需要故事概念、人物弧、场景、对白、剧本、导演阐述、视觉圣经、场面调度、镜头/clip 规划、摄影与灯光语言、模型路由、参考资产、提示词包、跨镜连续性、生成失败修复、对白口型、剪辑声音或最终成片质检时使用。默认把改编顾问→编剧→导演→视觉监督→AI 视频监督→剪辑/声音串成可回溯流水线，不把单一理论、厂商宣传或未附加的参考图当成事实。
 ---
 
 # Film Craft Orchestrator
@@ -21,7 +21,7 @@ description: 面向 AI 生成电影、剧集、短片、广告叙事和小说影
 4. 构图、视角、等效焦段、景深、运动、光线、色彩、world look：`cinematography.md`；景深、焦点与跨镜光色连续性加读 `distilled-targeted-foundation-procedures.json`。
 5. AI 生产包、参考资产、clip 拆分、prompt、模型、连续性、失败修复：依次读取 `ai-video-workflow.md`、`ai-video-model-routing.md`、`ai-video-continuity.md`、`ai-video-failure-repair.md`、`ai-video-deliverables.md` 和 `distilled-ai-video-procedures.json`。
 6. 剪辑、口型、对白、Foley、ambience、SFX、音乐或最终混音：`editing-sound.md`；表演剪辑、反应选择和 coverage 缺口加读 `distilled-targeted-foundation-procedures.json`。
-7. 视频研究/拉片/蒸馏：先读 `video-evidence.md`，再读取相应知识库和证据包；剧本页—成片对读加读 `distilled-script-screen-procedures.json`。
+7. 需要外部影视事实时，使用通用研究流程并记录一手来源；本插件不再提供视频证据研究技能。
 
 只问单阶段时，不暗改上游。端到端请求固定走：
 
@@ -289,19 +289,9 @@ python scripts/validate_ai_video_package.py <package-directory> \
 
 不得为迁就一次错误输出而静默篡改后续故事真相。
 
-## 视频证据纪律
+## 外部资料纪律
 
-按 `video-evidence.md` 建证据包。状态严格分开：
-
-- `official_verified`：官方页面已完整读取，能力、版本和限制可定位。
-- `deep_distilled`：完整读取视频/ASR并形成完整程序。
-- `claim_evidence_only`：有时间码主张但没有完整程序。
-- `chapter_hypothesis_only`：只有章节线索。
-- `candidate`：只有元数据。
-- `access_failed`：正常访问失败；不得绕过。
-- `complete_for_sampled_claims`：抽样静帧只核验列出的可见主张，不代表动态/音频已验证。
-
-证据分栏：`fact / video_claim / interpretation / experiment`。画面型主张需要帧/clip；自动字幕、ASR、OCR 和缩略图只作有置信度边界的证据。不得分发完整字幕、完整剧本或可替代原视频的连续镜头。
+外部视频、网页或厂商资料只作为用户明确提供的研究输入，不自动启动下载、ASR 或抽帧流程。需要当前模型事实时，使用通用研究技能并记录一手来源；不要把候选视频、厂商演示或未查看资料当成已验证证据。画面型主张需要明确的帧/clip 来源；字幕、ASR、OCR 和缩略图不能单独证明构图、blocking、剪辑点、表演或光线。不得分发完整字幕、完整剧本或可替代原视频的连续镜头。
 
 ## 参考导航
 

@@ -1,13 +1,13 @@
 ---
 name: web-novel-prose-craft
-description: 创作、诊断或修订中文网络小说的具体场景与文体时使用，覆盖叙述距离、自由间接引语、show/tell 配比、动作与打斗、五感与身体反应、情绪递进、对白声音、句群流动、长短句和移动端段落节奏；把抽象效果翻译为可执行句段，不模仿在世作者独特文风。
+description: 仅在中文网络/连载小说的具体场景或局部文体执行已经明确的场景意图时，创作、诊断或修订叙述距离、动作、感官、情绪、对白、句群和移动端段落节奏；把抽象效果翻译为可执行句段。全稿或跨场景诊断转 revision，不模仿在世作者独特文风。
 ---
 
 # Web Novel Prose Craft
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。场景总流程先读 `references/scene-prose-craft.md`；再按问题加载 `narrative-distance.md`、`action-sensory-emotion.md`、`dialogue-voice-rhythm.md` 或 `ai-prose-diagnostics.md`。
+共享根是 `../web-novel-craft/`。场景总流程先读 `../web-novel-craft/references/scene-prose-craft.md`；再按问题加载 `../web-novel-craft/references/narrative-distance.md`、`../web-novel-craft/references/action-sensory-emotion.md`、`../web-novel-craft/references/dialogue-voice-rhythm.md` 或 `../web-novel-craft/references/ai-prose-diagnostics.md`。
 
 ## 路由边界
 

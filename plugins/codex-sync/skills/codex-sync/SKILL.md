@@ -1,6 +1,6 @@
 ---
 name: codex-sync
-description: Bind Codex Sync to a Git repository and pull or push global Codex configuration, agent profiles, Git marketplaces, and plugins.
+description: Synchronize global Codex configuration, agent profiles, Git marketplaces, and plugins only when the user explicitly names Codex Sync or explicitly requests its setup, status, pull, or push workflow. Do not trigger for ordinary local configuration edits or generic Git operations.
 ---
 
 # Codex Sync

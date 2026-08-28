@@ -1,6 +1,6 @@
 ---
 name: web-novel-craft
-description: 面向中文或英文网络小说、连载小说、LitRPG、升级流和长篇系列的顶尖 AI 作家兼编辑技能。跨越立项、构思、人物、世界、结构、章节/场景写作、批评、修改和评价时使用；直接完成创作判断与文本工作，不建立排期、存稿、团队、发布或工程化项目管理系统。
+description: 仅当同一请求同时跨越至少两个分技能负责的创作决定，或用户明确要求端到端统筹网络/连载小说时使用。单一领域请求直接使用对应分技能；非网络、非连载的普通小说、剧本和文案不使用。本技能可处理中文或英文网络小说、LitRPG、升级流和长篇系列，不建立排期、存稿、团队、发布或工程化项目管理系统。
 ---
 
 # Web Novel Craft
@@ -20,11 +20,11 @@ description: 面向中文或英文网络小说、连载小说、LitRPG、升级�
 | 题材、读者体验、核心前提、故事发动机 | `$web-novel-development` |
 | 主线、大纲、卷/篇章/章节、因果、承诺、节奏、章末钩子 | `$web-novel-structure` |
 | 人物、关系、弧光、视角、知识边界与声音 | `$web-novel-characters` |
-| 玄幻仙侠、都市、规则怪谈、群像战争、科幻、同人、女频复仇、年代重生、romance、悬疑、喜剧、历史与结尾 | `$web-novel-genre-craft` |
+| 玄幻仙侠、都市、规则怪谈、群像战争、科幻、同人、女频复仇、年代重生、romance、悬疑、喜剧、类型化历史与结尾 | `$web-novel-genre-craft` |
 | 力量、技能、身份、关系、谜题成长与 LitRPG 规则 | `$web-novel-progression` |
 | 场景、叙述距离、动作、感官、情绪、对白与句群节奏 | `$web-novel-prose-craft` |
 | 完整阅读、诊断、提意见、结构/章节/文字修改与评价 | `$web-novel-revision` |
-| YouTube/Bilibili 视频字幕、证据与方法蒸馏 | `$web-novel-evidence-research` |
+| 明确要求从写作视频/访谈蒸馏网络小说方法并保留时间码证据 | `$web-novel-evidence-research` |
 
 ## 作家工作流
 

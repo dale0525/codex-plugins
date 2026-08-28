@@ -1,13 +1,13 @@
 ---
 name: continuity-qc
-description: 审查或修复 AI 视频和叙事镜头的角色身份、年龄服装、道具、地点、屏幕方向、光色、动作、时间状态、口型、可剪性与终片质量时使用。也用于生成失败分类、证据帧对比和放行判断；不通过重抽掩盖上游结构错误，也不把无输出的计划记录标成成功。
+description: 审查或修复已生成的 AI 视频和叙事镜头的角色身份、年龄服装、道具、地点、屏幕方向、光色、动作、时间状态、口型、可剪性与终片质量时使用。对真实输出提供时间码/帧证据、失败分类和唯一的最终语义与视觉放行判断；不负责生成前模型路由、声音混音母版或重写上游结构，也不通过重抽掩盖上游错误，不把无输出的计划记录标成成功。
 ---
 
 # Continuity and Quality Control
 
 ## 共享知识
 
-共享根是 `../film-craft-orchestrator/`。先读 `references/ai-video-continuity.md`；生成失败加读 `references/ai-video-failure-repair.md`，最终交付加读 `references/ai-video-deliverables.md`。
+共享根是 `../film-craft-orchestrator/`。先读 `../film-craft-orchestrator/references/ai-video-continuity.md`；生成失败加读 `../film-craft-orchestrator/references/ai-video-failure-repair.md`，最终交付加读 `../film-craft-orchestrator/references/ai-video-deliverables.md`。
 
 ## 连续性状态机
 
@@ -46,10 +46,10 @@ Clip QC 先判叙事目的与状态，再判连续性、可剪性和表面质量
 在共享根按需要运行：
 
 ```bash
-python scripts/validate_continuity_state.py <continuity-state.json>
-python scripts/continuity_lint.py <continuity-state.json>
-python scripts/validate_ai_video_package.py <package-directory> \
-  --adapters references/model-adapters.json
+python ../film-craft-orchestrator/scripts/validate_continuity_state.py <continuity-state.json>
+python ../film-craft-orchestrator/scripts/continuity_lint.py <continuity-state.json>
+python ../film-craft-orchestrator/scripts/validate_ai_video_package.py <package-directory> \
+  --adapters ../film-craft-orchestrator/references/model-adapters.json
 ```
 
 确定性验证只证明结构一致；最终放行仍需要对真实图像、声音和剪辑的语义审查。

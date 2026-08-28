@@ -1,0 +1,6 @@
+interface:
+  display_name: "Improve Codebase Architecture"
+  short_description: "Produce an architecture report only when explicitly requested."
+  default_prompt: "Use $improve-codebase-architecture only when explicitly invoked for a read-only architecture review."
+policy:
+  allow_implicit_invocation: false

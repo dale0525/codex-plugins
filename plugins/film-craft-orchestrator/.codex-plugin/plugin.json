@@ -1,7 +1,7 @@
 {
   "name": "film-craft-orchestrator",
   "version": "1.0.0",
-  "description": "End-to-end film craft and AI-video production skills for adaptation, writing, directing, cinematography, continuity, editing, sound, and evidence research.",
+  "description": "End-to-end film craft and AI-video production skills for adaptation, writing, directing, cinematography, continuity, editing, and sound.",
   "author": {
     "name": "Logic Tan",
     "email": "logictan89@gmail.com",
@@ -22,7 +22,7 @@
   "interface": {
     "displayName": "Film Craft Orchestrator",
     "shortDescription": "Create and supervise narrative AI video end to end.",
-    "longDescription": "Nine coordinated skills for source adaptation, screenwriting, directing, cinematography, AI-video generation, continuity and quality control, editing and sound, and evidence-based learning from film videos.",
+    "longDescription": "Seven focused skills plus an orchestrator for source adaptation, screenwriting, directing, cinematography, AI-video generation, continuity and quality control, and editing and sound.",
     "developerName": "Logic Tan",
     "category": "Media",
     "capabilities": [
@@ -30,8 +30,7 @@
       "Screenwriting and dialogue",
       "Directing and cinematography",
       "AI-video production packages",
-      "Continuity, editing, sound, and quality control",
-      "Timestamped video evidence distillation"
+      "Continuity, editing, sound, and quality control"
     ],
     "defaultPrompt": [
       "Turn this source into a complete AI-video production package.",

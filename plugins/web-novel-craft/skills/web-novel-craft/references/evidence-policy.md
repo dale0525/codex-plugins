@@ -16,7 +16,7 @@ A title, description, search snippet, channel reputation, or partial transcript 
 1. Obtain creator/platform captions with language and provenance.
 2. If unavailable or incomplete, download authorized audio and run local ASR.
 3. Record media URL/ID, title, channel, publication date, duration, acquisition time, caption kind, language, tool/version, model, media hash, and transcript coverage.
-4. Preserve raw transcripts only in a non-distributed research workspace. Do not package full subtitles in the plugin.
+4. Preserve raw transcripts only in a non-distributed research workspace explicitly chosen by the user or created as a clearly named temporary directory. Never write raw transcripts into the plugin tree. Record whether a run reuses, overwrites, archives, or cleans its output; never delete user-provided inputs without explicit authorization. Do not package full subtitles in the plugin.
 
 Use `scripts/transcribe_media.py` for local media when appropriate. Human-check names, invented terms, numbers, negation, and any phrase used as a direct quote.
 
@@ -78,10 +78,10 @@ Transcript evidence supports speech only. Do not infer diagrams, gestures, scree
 
 ## Corpus validation
 
-Run from the shared skill root:
+Run from the repository root with its declared Pixi environment (or an equivalent Python 3.11+ environment):
 
 ```bash
-python scripts/validate_corpus.py
+pixi run python plugins/web-novel-craft/skills/web-novel-craft/scripts/validate_corpus.py
 ```
 
 The corpus passes only when every source frozen in the base, extension, and priority-234 manifests has matching ASR/transcript evidence and a `deep_distilled` knowledge entry with timestamped claims, boundaries, and at least one complete procedure.

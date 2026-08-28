@@ -1,7 +1,6 @@
 ---
 name: wait-what
 description: Re-explain the previous answer in plain Chinese when the user did not follow it.
-disable-model-invocation: true
 ---
 
 # Wait, what?

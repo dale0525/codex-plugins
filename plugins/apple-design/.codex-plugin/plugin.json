@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "Apple Design",
     "shortDescription": "Design and review fluid, polished web interfaces.",
-    "longDescription": "Seven design-engineering skills covering Apple-inspired interface principles, animation vocabulary, motion audits, animation reviews, opportunity finding, and UI library selection.",
+    "longDescription": "Twelve design-engineering skills covering Apple-inspired interface principles, Swift, Sonner, animation implementation, Expo motion, animation vocabulary, motion audits, animation reviews, opportunity finding, prototyping, and UI library selection.",
     "developerName": "Emil Kowalski",
     "category": "Design",
     "capabilities": [

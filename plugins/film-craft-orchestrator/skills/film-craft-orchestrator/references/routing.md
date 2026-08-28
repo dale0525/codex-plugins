@@ -15,11 +15,10 @@
 | 小说/事件/旧剧本的保留、压缩、视角转译 | adaptation | `adaptation.md` |
 | 概念、logline、人物、结构、场景、对白、剧本 | writer | `writer.md` |
 | 观众体验、blocking、表演、coverage、声音/剪辑意图 | director | `director.md` |
-| 构图、等效视角、景深、机位、运动、光向、色彩、world look | visual supervisor | `cinematography.md` |
-| visual bible、参考资产、clip plan、prompt pack、模型路由 | AI video supervisor | `ai-video-workflow.md` + `ai-video-model-routing.md` |
-| 身份/道具/空间漂移、失败诊断、重生成或补救 | AI video supervisor | `ai-video-continuity.md` + `ai-video-failure-repair.md` |
-| 对白口型、剪辑、Foley、ambience、SFX、音乐、母版QC | editor/sound | `editing-sound.md` |
-| 视频拉片、字幕/ASR/画面证据、技法蒸馏 | evidence analyst | `video-evidence.md` + 对应角色 reference |
+| 构图、等效视角、景深、机位、运动、光向、色彩、world look、visual bible、参考资产 | visual supervisor | `cinematography.md` |
+| clip plan、prompt pack、模型路由、生成日志 | AI video supervisor | `ai-video-workflow.md` + `ai-video-model-routing.md` |
+| 身份/道具/空间漂移、失败诊断、重生成或补救、最终语义与视觉放行 | continuity/QC | `ai-video-continuity.md` + `ai-video-failure-repair.md` |
+| 对白口型、剪辑、Foley、ambience、SFX、音乐、声音母版技术 QC | editor/sound | `editing-sound.md` |
 
 “做一部 AI 电影”不是单一交付物。默认生成完整生产包；若用户只要某一阶段，明确输入、非目标和下一阶段，不暗改上游。
 
@@ -34,15 +33,15 @@ writer: story map → scene cards → screenplay
         ↓
 director: intent → attention → blocking → coverage
         ↓
-visual supervisor: visual bible → reference masters
+visual supervisor: visual bible → reference masters → clip-level camera/lighting fields
         ↓
 AI video supervisor: clip plan → prompt IR → adapter pack
         ↓
 generation: logs → continuity/QC → repair loop
         ↓
-editor/sound: timeline → dialogue/lip-sync → sound stems
+editor/sound: timeline → dialogue/lip-sync → sound stems → technical sound-master QC
         ↓
-final film QC
+continuity/QC: final semantic and visual release decision
 ```
 
 后续阶段只消费 frozen 输入。发现问题必须回到拥有该决定的节点，不让 prompt adapter 偷改剧本，也不为错误输出篡改 continuity truth。
@@ -54,7 +53,7 @@ final film QC
 ```yaml
 id: project-x.clip-plan
 version: 1.0.0
-owner_role: adaptation|writer|director|visual_supervisor|ai_video_supervisor|editor_sound|evidence
+owner_role: adaptation|writer|director|visual_supervisor|ai_video_supervisor|editor_sound|continuity_qc
 source_inputs: [project-x.director-intent@1.0.0]
 assumptions: []
 constraints: {}

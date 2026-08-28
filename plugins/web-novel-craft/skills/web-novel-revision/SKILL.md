@@ -1,15 +1,15 @@
 ---
 name: web-novel-revision
-description: 诊断或修订网络小说大纲、篇章、章节、稿件和已发布积稿时使用，覆盖读者契约、承诺债、因果、人物选择、视角、成长、信息跳级、节奏、连续性与文字清晰度；先修高层问题，不在未获同意时改变作者核心意图。
+description: 仅在网络/连载小说的跨场景或全稿诊断、修订、优先级排序、连续性回归或已发布积稿评估时使用，覆盖读者契约、承诺债、因果、人物选择、视角、成长、信息跳级、节奏、连续性与文字清晰度；局部场景和句段执行转 prose-craft，先修高层问题，不在未获同意时改变作者核心意图。
 ---
 
 # Web Novel Revision
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `references/revision.md` 和 `references/writing-evaluation.md`；按问题加载其他主题 reference，不一次读完整证据库。
+共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/revision.md` 和 `../web-novel-craft/references/writing-evaluation.md`；按问题加载其他主题 reference，不一次读完整证据库。
 
-类型专项缺陷转 `$web-novel-genre-craft`；叙述距离、动作、感官、情绪、对白和句群执行转 `$web-novel-prose-craft`。AI 文本出现抽象化、同声对白、重复解释或平均化时按需读取 `references/ai-prose-diagnostics.md`。
+类型专项缺陷转 `$web-novel-genre-craft`；叙述距离、动作、感官、情绪、对白和句群执行转 `$web-novel-prose-craft`。AI 文本出现抽象化、同声对白、重复解释或平均化时按需读取 `../web-novel-craft/references/ai-prose-diagnostics.md`。
 
 ## 工作流
 

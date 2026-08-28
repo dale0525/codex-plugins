@@ -1,7 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: Manually generate a read-only architecture report using deep-module and seam analysis.
-disable-model-invocation: true
+description: Generate a read-only architecture report using deep-module and seam analysis only when the user explicitly asks for an architecture review or refactoring candidates; do not trigger for ordinary code review or implementation.
 ---
 
 # Improve codebase architecture
