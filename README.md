@@ -50,13 +50,21 @@ codex plugin add web-novel-craft@dale0525-codex-plugins
 codex plugin add provider-chat-completions@dale0525-codex-plugins
 ```
 
+## Install Provider Imagegen
+
+```bash
+codex plugin add provider-imagegen@dale0525-codex-plugins
+```
+
 Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
-providers, marketplaces, or plugins. It uses no lifecycle hooks. The bundled
-GitHub App uses Device Flow. A complete provider definition, including an
-explicitly configured plaintext `experimental_bearer_token`, can be synchronized
-through the private repository for zero-setup use on every device.
+providers, marketplaces, or plugins. After a successful pull applies provider
+settings and converges plugins, Codex Sync bootstraps owner-only credential
+caches only for `provider-chat-completions` and `provider-imagegen`. A complete
+provider definition, including an explicitly configured plaintext
+`experimental_bearer_token`, can be synchronized through the private repository
+for zero-setup use on every device.
 
 Codex Sync 0.4.3 records apply and rollback operations with durable write-ahead
 logs, runtime receipts, compensation plans, and recovery-required gates so
@@ -117,13 +125,12 @@ planning and review, design-engineering guidance, and UI library selection.
 
 ### Codex Sync
 
-Bootstraps new devices from a private GitHub repository through GitHub App
-device authorization. It synchronizes global instructions and shared native
-agent profiles, including `default`, `creative_text`, and `image`, without
-lifecycle hooks. Configuration is applied with managed ownership, atomic writes,
-drift detection, scoped secret policy, pre-apply backups, and rollback. Private
-marketplaces are downloaded at immutable commit SHAs and registered as local
-versioned snapshots instead of exposing GitHub credentials to Git subprocesses.
+Bootstraps new devices from a private Git repository. It synchronizes global
+instructions and shared native agent profiles, including `default`,
+`creative_text`, and `image`. Configuration is applied with managed ownership,
+atomic writes, drift detection, scoped secret policy, and pre-apply backups.
+After plugin convergence it writes only the two allowlisted provider credential
+caches; those cache artifacts stay local and owner-only.
 
 ### FastCtx
 
@@ -205,11 +212,19 @@ than claiming unsupported transcript coverage.
 
 ### Provider Chat Completions
 
-Provides a one-shot utility for calling the effective Codex provider's
+Provides a one-shot utility for calling the active Codex provider's
 OpenAI-compatible `POST /chat/completions` endpoint with a caller-supplied model
-and messages. It resolves the provider credential inside the runtime, makes one
+and messages. It reads the owner-only cache populated by Codex Sync, makes one
 non-streaming request, and returns a normalized result without adding prompts,
 choosing models, or performing fallback generation.
+
+### Provider Imagegen
+
+Provides the CLI-only raster image workflow. It reads the active provider's
+endpoint and credential headers from the owner-only cache populated by Codex
+Sync, calls the OpenAI-compatible Images generation/edit endpoints, saves local
+files, and verifies a real alpha channel for transparent PNG requests. It never
+uses the built-in `image_gen` tool or asks users to paste credentials.
 
 ## External content synchronization
 
@@ -246,6 +261,7 @@ plugins/provider-chat-completions/
 plugins/fastctx/
 plugins/film-craft-orchestrator/
 plugins/prompt-master/
+plugins/provider-imagegen/
 plugins/web-novel-craft/
 sync-sources.toml
 ```

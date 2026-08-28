@@ -1,12 +1,12 @@
 ---
 name: provider-chat-completions
-description: Call the effective Codex model provider's OpenAI-compatible Chat Completions API when a task explicitly needs a chosen model and caller-supplied messages; do not use for ordinary Codex responses or creative-writing guidance by itself.
+description: Call the active Codex provider's OpenAI-compatible Chat Completions API when a task explicitly needs a chosen model and caller-supplied messages; do not use for ordinary Codex responses or creative-writing guidance by itself.
 ---
 
 # Provider Chat Completions
 
-Use this skill as a transport utility, not as a writing or model-selection
-policy.
+Use this skill as a transport utility for the effective Codex provider, not as a
+writing or model-selection policy.
 
 1. Build the exact `messages` array required by the calling task. Preserve its
    roles, content, order, and named parameters; do not add a system prompt or
@@ -14,14 +14,10 @@ policy.
 2. Set the requested model explicitly. Do not infer a vendor from its name and
    do not silently substitute another model.
 3. Invoke `<plugin-root>/scripts/run.sh` on macOS/Linux or
-   `<plugin-root>/scripts/run.ps1` on Windows with the JSON request on stdin. It
-   resolves the current working directory's effective Codex provider and uses
-   only that provider's configured origin, credential, and headers.
-   On Windows, config discovery prefers `PROVIDER_CHAT_CODEX_BIN`, then the
-   directly launchable helper at `%CODEX_HOME%\plugins\.plugin-appserver\codex.exe`
-   or `%USERPROFILE%\.codex\plugins\.plugin-appserver\codex.exe`. It does not
-   fall back to PATH or the Windows App Execution Alias named `codex`. An
-   explicit override must be an absolute path on every platform.
+   `<plugin-root>/scripts/run.ps1` on Windows with the JSON request on stdin.
+   The CLI reads the credential cache created by Codex Sync after a successful
+   pull and uses only the cached provider origin, headers, and query parameters.
+   It does not launch Codex app-server or parse the live Codex configuration.
    For any response that may exceed the tool display limit, create a private
    temporary path and pass `--output-file <absolute-path>` to the launcher. The
    launcher atomically writes the complete normalized result to that file and
@@ -35,17 +31,30 @@ policy.
    failure boundary to the caller; do not retry, switch providers, or draft a
    replacement unless the caller's own policy explicitly says to do so.
 
-If a Windows helper launch is denied, the utility returns
-`{"ok":false,"stage":"config","code":"codex_launch_denied","retryable":false}`
-with only bounded, redacted startup diagnostics (executable path, Win32/OS
-error, exit code, and stderr presence/byte-count metadata). Raw stderr text is
-never returned. Never expose credentials, authorization headers, tokens, or
-provider response bodies in diagnostics.
+## Credential cache
+
+Codex Sync writes
+`<CODEX_HOME>/plugins/cache/<marketplace>/provider-chat-completions/<version>/.codex-provider/credential.json`
+after it applies synchronized provider settings and converges plugins. The
+directory is owner-only (`0700` on POSIX) and the file is owner-only (`0600`);
+the write is atomic and the cache never enters the synchronization repository.
+The cache contains the active provider endpoint, configured headers, optional
+environment-variable references, query parameters, and a non-secret
+configuration fingerprint. A missing, malformed, symlinked, or weakly
+permissioned cache fails as `credential_cache_missing`,
+`credential_cache_invalid`, or `credential_cache_permissions`.
+
+`env_key` and `env_http_headers` remain references and are resolved only from
+the current process environment. Providers that expose only a Codex login
+session or command-backed auth do not produce a cache and fail safely as
+`credential_cache_missing` or `credential_unavailable`.
 
 The runtime makes one non-streaming `POST /chat/completions` call. It does not
 assemble prompts, validate creative quality, expose reasoning fields, follow
-redirects, or persist credentials. Capture mode persists only the normalized
-result requested by the caller, using owner-only file permissions (including
-removing inherited Windows ACLs); it fails closed if that restriction cannot be
-applied. It never writes authorization headers or provider diagnostics to that
+redirects, or persist credentials. Credential-bearing remote HTTP endpoints
+and credential-like query parameters fail before any request; loopback HTTP is
+reserved for an explicitly configured local gateway. Capture mode persists
+only the normalized result requested by the caller, using owner-only file
+permissions (including removing inherited Windows ACLs); it fails closed if
+that restriction cannot be applied. It never writes authorization headers or provider diagnostics to that
 file. Do not pass a credential in the request or ask the user to paste one.

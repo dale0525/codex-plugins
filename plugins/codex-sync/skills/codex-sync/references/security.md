@@ -24,6 +24,17 @@ from the actual local listing. Remote pushes are ordinary non-force
 fast-forward pushes; remote races fail instead of overwriting someone else's
 commit.
 
+After provider configuration and plugin convergence, pull bootstraps only
+`provider-chat-completions` and `provider-imagegen`. It reads the active provider
+from local `config.toml`, converts a literal bearer token to an Authorization
+header, preserves environment-variable references, and writes each versioned
+plugin cache under `.codex-provider/credential.json`. The directory/file are
+owner-only (`0700`/`0600` on POSIX; inherited ACLs are removed on Windows), the
+write is atomic, symlink targets are rejected, and no credential value appears
+in status output. If explicit credentials are unavailable, a stale cache is
+removed and pull reports `credential_unavailable` without using Codex login
+session files or command-backed auth.
+
 Never synchronize auth/session/history, SQLite state, project trust, caches,
 automations, or plugin provision artifacts. Pull never reads or mutates the
 local automation store; push removes legacy repository automation declarations
@@ -37,3 +48,7 @@ lifecycle hooks. Personal, OpenAI, and
 capture, planning, mutation, and state boundaries. Non-Git marketplaces are
 outside the sync domain. A desired name colliding with a protected or
 non-portable local marketplace fails preflight before any device mutation.
+
+The two provider credential caches are local runtime derivatives, not
+synchronized cache content: they are never copied into the Codex Sync Git cache,
+captured by push, logged, or written into marketplace source directories.

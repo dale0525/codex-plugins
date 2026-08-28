@@ -16,8 +16,9 @@ sync = "python scripts/sync_external_content.py"
 validate = "python scripts/validate_repository.py"
 test = "python -m unittest discover -s tests -v"
 provider-chat-completions-test = "python -m unittest discover -s plugins/provider-chat-completions/tests -v"
+provider-imagegen-test = "python -m unittest discover -s plugins/provider-imagegen/tests -v"
 workflow = "actionlint .github/workflows/*.yml"
 codex-sync-build = "cargo build --manifest-path plugins/codex-sync/engine/Cargo.toml"
 codex-sync-test = "CC=/usr/bin/cc CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/cc cargo test --manifest-path plugins/codex-sync/engine/Cargo.toml"
 fastctx-test = "cargo test --manifest-path plugins/fastctx/engine/Cargo.toml --locked --no-default-features"
-check = { depends-on = ["test", "provider-chat-completions-test", "validate", "workflow", "codex-sync-test", "fastctx-test"] }
+check = { depends-on = ["test", "provider-chat-completions-test", "provider-imagegen-test", "validate", "workflow", "codex-sync-test", "fastctx-test"] }

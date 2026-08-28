@@ -1,13 +1,13 @@
 # Provider Chat Completions
 
 `provider-chat-completions` is a small, one-shot utility for calling the
-effective Codex model provider's OpenAI-compatible `POST /chat/completions`
-endpoint.
+provider credential cache prepared by Codex Sync and the corresponding
+OpenAI-compatible `POST /chat/completions` endpoint.
 
-The caller supplies a model and an ordered `messages` array. The utility resolves
-the effective provider configuration for the current working directory, uses
-only that provider's configured credential and headers, makes one non-streaming
-request, and returns a normalized JSON result.
+The caller supplies a model and an ordered `messages` array. After a successful
+Codex Sync pull, the utility reads only the versioned local cache for the
+provider endpoint, credential headers, and query parameters, makes one
+non-streaming request, and returns a normalized JSON result.
 
 It does not add a system prompt, assemble files, choose a model, retry, switch
 providers, stream SSE, or judge the quality of the returned content. A caller
@@ -48,17 +48,6 @@ manifest and stores the full result at the requested path. Credentials and
 provider response bodies never appear in diagnostics. The launchers
 require Python 3.8 or newer and return `python_unavailable` when it is absent.
 
-When reading the effective Codex provider on Windows, the utility first uses
-`PROVIDER_CHAT_CODEX_BIN` when it is set. Otherwise it checks the directly
-launchable helper at
-`%CODEX_HOME%\plugins\.plugin-appserver\codex.exe`, or
-`%USERPROFILE%\.codex\plugins\.plugin-appserver\codex.exe` when `CODEX_HOME`
-is not set. It never falls back to a PATH-resolved `codex` on Windows, avoiding
-the App Execution Alias and working-directory executable search. If the helper
-is absent, the result is `codex_unavailable`. Set the variable to an absolute
-helper path when the desktop installation uses a different location; relative
-overrides are rejected as `codex_bin_not_absolute` on every platform.
-
 ## Request
 
 ```json
@@ -89,19 +78,18 @@ Without capture mode, success returns `ok`, `model`, `content`, and
 returns them. Capture mode returns a bounded manifest with `ok`, `result_file`,
 `bytes`, and small status metadata; the complete normalized result (including
 `content`, `usage`, and `tool_calls` when present) is in `result_file`.
-Failure always returns `ok: false`, `stage`, `code`, and `retryable`, with
-optional `http_status` and a bounded, redacted `diagnostic` for configuration
-launch failures. The utility never retries automatically.
+Failure always returns `ok: false`, `stage`, `code`, and `retryable`, with an
+optional `http_status`. The utility never retries automatically.
 
-Configuration-launch failures may also include a bounded, redacted `diagnostic`
-object with the executable path, Win32/OS error number, process exit code, and
-stderr presence/byte-count metadata. Raw stderr text is never returned. The
-diagnostic never includes credentials, authorization headers, tokens, or the
-provider response body. A denied Windows launch is reported as
-`stage=config`, `code=codex_launch_denied`, `retryable=false`; no provider
-request is attempted in that case.
-
-The provider is resolved through Codex's `config/read` app-server method. Only
-the effective provider's `base_url`, `env_key`,
-`experimental_bearer_token`, `http_headers`, `env_http_headers`, and query
-parameters are considered. Codex login/session credentials are never used.
+The provider cache is written by Codex Sync at
+`<CODEX_HOME>/plugins/cache/<marketplace>/provider-chat-completions/<version>/.codex-provider/credential.json`.
+Its directory is owner-only (`0700` on POSIX), its file is owner-only (`0600`),
+and the write is atomic. The cache is never part of the synchronized Git
+repository and contains no raw `experimental_bearer_token` field. `env_key` and
+`env_http_headers` remain environment references and are resolved only in the
+plugin process. A missing or unsafe cache returns a structured credential
+failure; the utility does not launch Codex app-server, read `config.toml`, ask
+for a pasted credential, or fall back to a different provider. It also rejects
+credential-bearing remote HTTP endpoints and credential-like query parameters
+before networking; loopback HTTP remains available for an explicitly configured
+local gateway.

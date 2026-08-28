@@ -60,6 +60,140 @@ fn setup_pull_and_push_use_git_and_fixed_author() {
 }
 
 #[test]
+fn pull_bootstraps_provider_credentials_into_installed_plugin_caches() {
+    let (temp, remote, codex_home, sync_home) = fixture();
+    let edit = temp.path().join("provider-bootstrap-edit");
+    run_git(
+        temp.path(),
+        &["clone", remote.to_str().unwrap(), edit.to_str().unwrap()],
+    );
+    fs::write(
+        edit.join("config/common.toml"),
+        r#"model = "remote"
+model_provider = "company"
+
+[model_providers.company]
+base_url = "https://provider.example/v1"
+experimental_bearer_token = "synced-test-token"
+requires_openai_auth = true
+"#,
+    )
+    .unwrap();
+    fs::write(
+        edit.join("marketplaces.toml"),
+        "[[marketplaces]]\nsource = \"git\"\nname = \"market\"\nurl = \"https://example.test/market.git\"\n",
+    )
+    .unwrap();
+    fs::write(
+        edit.join("plugins.toml"),
+        "plugins = [\"provider-chat-completions@market\", \"provider-imagegen@market\"]\n",
+    )
+    .unwrap();
+    run_git(&edit, &["config", "user.name", "Seed"]);
+    run_git(&edit, &["config", "user.email", "seed@example.test"]);
+    run_git(&edit, &["add", "."]);
+    run_git(&edit, &["commit", "-m", "add provider plugins"]);
+    run_git(&edit, &["push", "origin", "main"]);
+
+    let plugin_cache = codex_home.join("plugins/cache/market");
+    let chat_root = plugin_cache.join("provider-chat-completions/0.1.6");
+    let image_root = plugin_cache.join("provider-imagegen/0.1.0");
+    fs::create_dir_all(&chat_root).unwrap();
+    fs::create_dir_all(&image_root).unwrap();
+    let markets_json = temp.path().join("markets.json");
+    let plugins_json = temp.path().join("plugins.json");
+    write_fake_json(
+        &markets_json,
+        &fake_market_json("market", "https://example.test/market.git", "main", ""),
+    );
+    write_fake_json(
+        &plugins_json,
+        &serde_json::json!({
+            "installed": [
+                {
+                    "pluginId": "provider-chat-completions@market",
+                    "version": "0.1.6",
+                    "source": {"path": chat_root},
+                    "installed": true,
+                    "enabled": true
+                },
+                {
+                    "pluginId": "provider-imagegen@market",
+                    "version": "0.1.0",
+                    "source": {"path": image_root},
+                    "installed": true,
+                    "enabled": true
+                }
+            ]
+        })
+        .to_string(),
+    );
+
+    let codex_bin = temp.path().join("codex-cli");
+    command(&codex_home, &sync_home, &codex_bin)
+        .args([
+            "setup",
+            "--repository",
+            remote.to_str().unwrap(),
+            "--device",
+            "test",
+        ])
+        .assert()
+        .success();
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .args(["pull"])
+        .assert()
+        .success();
+
+    for root in [&chat_root, &image_root] {
+        let directory = root.join(".codex-provider");
+        let credential = directory.join("credential.json");
+        let raw = fs::read_to_string(&credential).unwrap();
+        let payload: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        assert_eq!(payload["provider"], "company");
+        assert_eq!(
+            payload["headers"]["Authorization"],
+            "Bearer synced-test-token"
+        );
+        assert!(payload.get("experimental_bearer_token").is_none());
+        assert_eq!(
+            fs::metadata(&directory).unwrap().permissions().mode() & 0o777,
+            0o700
+        );
+        assert_eq!(
+            fs::metadata(&credential).unwrap().permissions().mode() & 0o777,
+            0o600
+        );
+    }
+
+    fs::write(
+        edit.join("config/common.toml"),
+        r#"model = "remote"
+model_provider = "company"
+
+[model_providers.company]
+base_url = "https://provider.example/v1"
+requires_openai_auth = true
+"#,
+    )
+    .unwrap();
+    run_git(&edit, &["add", "config/common.toml"]);
+    run_git(&edit, &["commit", "-m", "remove provider credential"]);
+    run_git(&edit, &["push", "origin", "main"]);
+    command(&codex_home, &sync_home, &codex_bin)
+        .env("FAKE_CODEX_MARKETS_JSON", &markets_json)
+        .env("FAKE_CODEX_PLUGINS_JSON", &plugins_json)
+        .args(["pull"])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("credential_unavailable"));
+    assert!(!chat_root.join(".codex-provider/credential.json").exists());
+    assert!(!image_root.join(".codex-provider/credential.json").exists());
+}
+
+#[test]
 fn push_auto_captures_actor_authorization_header() {
     let (temp, remote, codex_home, sync_home) = fixture();
     let codex_bin = temp.path().join("codex-cli");

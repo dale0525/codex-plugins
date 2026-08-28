@@ -11,6 +11,7 @@ use crate::model::{
     STATE_SCHEMA_VERSION,
 };
 use crate::profiles;
+use crate::provider_credentials;
 use crate::storage::{
     self, acquire_lock, atomic_write, git_text, git_try, load_legacy_state, load_state,
     remove_if_exists, resolve_paths, run_git, save_state,
@@ -223,6 +224,15 @@ pub fn pull(dry_run: bool) -> Result<()> {
         for action in report.actions {
             println!("- {action}");
         }
+        let bootstrap = provider_credentials::bootstrap_provider_plugins(
+            &paths.codex_home,
+            &plugins,
+            &rendered,
+            true,
+        )?;
+        for action in bootstrap.actions {
+            println!("- {action}");
+        }
         return Ok(());
     }
     let preflight = codex::reconcile(&markets, &plugins, &paths.codex_home, true);
@@ -261,6 +271,26 @@ pub fn pull(dry_run: bool) -> Result<()> {
         return Err(error.context(
             "plugin/marketplace convergence failed; core files were retained; rerun pull",
         ));
+    }
+    let applied_config = config::read_current(&paths.codex_home)?;
+    let bootstrap = match provider_credentials::bootstrap_provider_plugins(
+        &paths.codex_home,
+        &plugins,
+        &applied_config,
+        false,
+    ) {
+        Ok(report) => report,
+        Err(error) => {
+            return fail_pull(
+                &paths,
+                &mut state,
+                false,
+                error.context("provider credential bootstrap failed"),
+            )
+        }
+    };
+    for action in bootstrap.actions {
+        println!("{action}");
     }
     let cleanup_migration = state.migration_cleanup_pending
         && state

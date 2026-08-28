@@ -55,74 +55,6 @@ class _Handler(BaseHTTPRequestHandler):
         return
 
 
-class _FakeStdin:
-    def __init__(self):
-        self.closed = False
-
-    def write(self, _data):
-        return None
-
-    def flush(self):
-        return None
-
-    def close(self):
-        self.closed = True
-
-
-class _FakeConfigProcess:
-    def __init__(self):
-        self.stdin = _FakeStdin()
-        self.returncode = 0
-
-    def communicate(self, timeout):
-        if self.stdin is not None:
-            raise ValueError("closed stdin was not detached")
-        if timeout != bridge.CONFIG_TIMEOUT_SECONDS:
-            raise AssertionError("unexpected config timeout")
-        return b'{"id":2,"result":{"config":{"model_provider":"test"}}}\n', b""
-
-
-class _FailedConfigProcess(_FakeConfigProcess):
-    def __init__(self):
-        super().__init__()
-        self.returncode = 7
-
-    def communicate(self, timeout):
-        if self.stdin is not None:
-            raise ValueError("closed stdin was not detached")
-        if timeout != bridge.CONFIG_TIMEOUT_SECONDS:
-            raise AssertionError("unexpected config timeout")
-        return (
-            b"",
-            b'{"token":"json-secret","experimental_bearer_token":"provider-secret"}\n'
-            b"Authorization: Basic basic-secret\n"
-            b"Authorization: Bearer super-secret token=another-secret\n",
-        )
-
-
-class _DeniedWriteStdin(_FakeStdin):
-    def write(self, _data):
-        raise PermissionError(13, "pipe denied")
-
-
-class _IOFailureConfigProcess:
-    def __init__(self):
-        self.stdin = _DeniedWriteStdin()
-        self.returncode = None
-        self.killed = False
-        self.reaped = False
-
-    def kill(self):
-        self.killed = True
-        self.returncode = -9
-
-    def communicate(self, timeout):
-        if timeout != bridge.CONFIG_REAP_TIMEOUT_SECONDS:
-            raise AssertionError("unexpected reap timeout")
-        self.reaped = True
-        return b"", b"token=must-not-leak"
-
-
 class BridgeTests(unittest.TestCase):
     def setUp(self):
         _Handler.status = 200
@@ -142,7 +74,7 @@ class BridgeTests(unittest.TestCase):
         self.thread.start()
         self.provider = {
             "base_url": f"http://127.0.0.1:{self.server.server_port}/v1",
-            "experimental_bearer_token": "test-secret",
+            "http_headers": {"Authorization": "Bearer test-secret"},
             "requires_openai_auth": True,
         }
 
@@ -292,90 +224,55 @@ class BridgeTests(unittest.TestCase):
             self.assertNotIn(result["content"], stdout.getvalue().decode("utf-8"))
             self.assertEqual(json.loads(path.read_text(encoding="utf-8")), result)
 
-    def test_config_reader_detaches_closed_stdin_before_communicating(self):
-        process = _FakeConfigProcess()
-        with patch.object(bridge.subprocess, "Popen", return_value=process), patch.object(
-            bridge.time, "sleep"
-        ):
-            config = bridge.read_effective_config("/tmp", "codex")
-        self.assertEqual(config, {"model_provider": "test"})
-        self.assertTrue(process.stdin is None)
+    def test_cache_loader_reads_sync_file_without_appserver(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache = root / "credential.json"
+            cache.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "provider": "company",
+                        "base_url": "https://provider.example/v1",
+                        "headers": {"Authorization": "Bearer cached-secret"},
+                        "env_http_headers": {},
+                        "query_params": {},
+                        "requires_openai_auth": True,
+                        "fingerprint": "0" * 64,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            os.chmod(root, 0o700)
+            os.chmod(cache, 0o600)
+            provider = bridge.load_cached_provider({"PROVIDER_CHAT_CREDENTIAL_FILE": str(cache)})
+        self.assertEqual(provider["base_url"], "https://provider.example/v1")
+        self.assertEqual(provider["http_headers"]["Authorization"], "Bearer cached-secret")
 
-    def test_windows_helper_is_selected_from_codex_home(self):
-        environment = {
-            "CODEX_HOME": r"C:\Users\logic\.codex",
-            "USERPROFILE": r"C:\Users\logic",
-        }
-        expected = r"C:\Users\logic\.codex\plugins\.plugin-appserver\codex.exe"
-        self.assertEqual(bridge.resolve_codex_binary(environment, platform="nt"), expected)
-
-    def test_windows_helper_uses_userprofile_when_codex_home_is_unset(self):
-        environment = {"USERPROFILE": r"C:\Users\logic"}
-        expected = r"C:\Users\logic\.codex\plugins\.plugin-appserver\codex.exe"
-        self.assertEqual(bridge.resolve_codex_binary(environment, platform="nt"), expected)
-
-    def test_explicit_codex_binary_wins_over_windows_helper(self):
-        environment = {
-            "PROVIDER_CHAT_CODEX_BIN": r"D:\tools\codex.exe",
-            "CODEX_HOME": r"C:\Users\logic\.codex",
-        }
-        self.assertEqual(bridge.resolve_codex_binary(environment, platform="nt"), r"D:\tools\codex.exe")
-
-    def test_windows_helper_never_falls_back_to_path_alias(self):
-        expected = r"C:\Users\logic\.codex\plugins\.plugin-appserver\codex.exe"
-        self.assertEqual(
-            bridge.resolve_codex_binary({"USERPROFILE": r"C:\Users\logic"}, platform="nt"),
-            expected,
-        )
-
-    def test_explicit_codex_binary_must_be_absolute(self):
-        with self.assertRaises(bridge.BridgeError) as error:
-            bridge.resolve_codex_binary({"PROVIDER_CHAT_CODEX_BIN": "codex.exe"}, platform="nt")
-        self.assertEqual(error.exception.code, "codex_bin_not_absolute")
-
-    def test_permission_error_has_explicit_safe_launch_failure(self):
-        launch_error = PermissionError(13, "Access is denied", r"C:\Program Files\WindowsApps\codex.exe")
-        launch_error.winerror = 5
-        with patch.object(bridge.subprocess, "Popen", side_effect=launch_error):
+    def test_cache_loader_rejects_insecure_file_permissions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache = root / "credential.json"
+            cache.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "provider": "company",
+                        "base_url": "https://provider.example/v1",
+                        "headers": {},
+                        "env_http_headers": {},
+                        "query_params": {},
+                        "requires_openai_auth": False,
+                        "fingerprint": "0" * 64,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            os.chmod(root, 0o755)
+            os.chmod(cache, 0o644)
             with self.assertRaises(bridge.BridgeError) as error:
-                bridge.read_effective_config("/tmp", r"C:\Program Files\WindowsApps\codex.exe")
-        self.assertEqual(error.exception.code, "codex_launch_denied")
-        self.assertFalse(error.exception.retryable)
-        result = bridge.failure_result(error.exception)
-        self.assertEqual(result["diagnostic"]["winerror"], 5)
-        self.assertEqual(result["diagnostic"]["executable"], r"C:\Program Files\WindowsApps\codex.exe")
-
-    def test_nonzero_config_exit_captures_redacted_diagnostics(self):
-        process = _FailedConfigProcess()
-        with patch.object(bridge.subprocess, "Popen", return_value=process), patch.object(
-            bridge.time, "sleep"
-        ):
-            with self.assertRaises(bridge.BridgeError) as error:
-                bridge.read_effective_config("/tmp", "codex-helper")
-        self.assertEqual(error.exception.code, "config_read_failed")
-        diagnostic = bridge.failure_result(error.exception)["diagnostic"]
-        self.assertEqual(diagnostic["returncode"], 7)
-        serialized = json.dumps(diagnostic)
-        for secret in (
-            "json-secret",
-            "provider-secret",
-            "basic-secret",
-            "super-secret",
-            "another-secret",
-        ):
-            self.assertNotIn(secret, serialized)
-        self.assertEqual(diagnostic["stderr"]["present"], True)
-        self.assertGreater(diagnostic["stderr"]["bytes"], 0)
-
-    def test_pipe_permission_error_is_reaped_and_not_reported_as_launch_denied(self):
-        process = _IOFailureConfigProcess()
-        with patch.object(bridge.subprocess, "Popen", return_value=process):
-            with self.assertRaises(bridge.BridgeError) as error:
-                bridge.read_effective_config("/tmp", "codex-helper")
-        self.assertEqual(error.exception.code, "config_read_failed")
-        self.assertTrue(process.killed)
-        self.assertTrue(process.reaped)
-        self.assertNotIn("must-not-leak", json.dumps(bridge.failure_result(error.exception)))
+                bridge.load_cached_provider({"PROVIDER_CHAT_CREDENTIAL_FILE": str(cache)})
+        self.assertEqual(error.exception.code, "credential_cache_permissions")
 
     def test_protected_and_streaming_parameters_are_rejected(self):
         with self.assertRaises(bridge.BridgeError) as protected:
@@ -389,7 +286,7 @@ class BridgeTests(unittest.TestCase):
         with self.assertRaises(bridge.BridgeError) as error:
             bridge.process_request(
                 {"cwd": "/tmp", "model": "m", "messages": [{"role": "user", "content": "x"}]},
-                config_resolver=lambda _cwd: {},
+                provider_resolver=lambda: {},
             )
         self.assertEqual(error.exception.code, "cwd_override_not_allowed")
 
@@ -414,7 +311,7 @@ class BridgeTests(unittest.TestCase):
         with self.assertRaises(bridge.BridgeError) as error:
             bridge.process_request(
                 {"model": "", "messages": [{"role": "user", "content": "x"}]},
-                config_resolver=lambda _cwd: calls.append(True),
+                provider_resolver=lambda: calls.append(True),
             )
         self.assertEqual(error.exception.code, "model_required")
         self.assertEqual(calls, [])
@@ -428,7 +325,7 @@ class BridgeTests(unittest.TestCase):
                     "messages": [{"role": "user", "content": "x"}],
                     "timeout_seconds": 10**10000,
                 },
-                config_resolver=lambda _cwd: calls.append(True),
+                provider_resolver=lambda: calls.append(True),
             )
         self.assertEqual(error.exception.code, "timeout_invalid")
         self.assertEqual(calls, [])
@@ -445,12 +342,29 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(_Handler.seen_body["model"], "chosen-model")
         self.assertEqual(_Handler.seen_body["stream"], False)
 
+    def test_remote_http_credentials_are_rejected_before_network(self):
+        provider = {
+            "base_url": "http://provider.example/v1",
+            "http_headers": {"Authorization": "Bearer test-secret"},
+        }
+        with self.assertRaises(bridge.BridgeError) as error:
+            bridge.post_chat_completion(
+                provider,
+                {"model": "chosen-model", "messages": [{"role": "user", "content": "hello"}]},
+            )
+        self.assertEqual(error.exception.code, "insecure_http_credentials")
+
+    def test_credential_query_parameters_are_rejected(self):
+        with self.assertRaises(bridge.BridgeError) as error:
+            bridge.build_endpoint({"base_url": "https://provider.example/v1?api_key=secret"})
+        self.assertEqual(error.exception.code, "credential_in_url_rejected")
+
     def test_env_key_and_headers_are_resolved_without_fallback(self):
         old = os.environ.get("TEST_PROVIDER_KEY")
         os.environ["TEST_PROVIDER_KEY"] = "env-secret"
         try:
             provider = dict(self.provider)
-            provider.pop("experimental_bearer_token")
+            provider.pop("http_headers")
             provider["env_key"] = "TEST_PROVIDER_KEY"
             provider["http_headers"] = {"X-Provider": "configured"}
             result = bridge.post_chat_completion(

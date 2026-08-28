@@ -1,0 +1,39 @@
+{
+  "name": "provider-imagegen",
+  "version": "0.1.0",
+  "description": "Generate and edit raster images through the active Codex provider's OpenAI-compatible Images API.",
+  "author": {
+    "name": "Logic Tan",
+    "email": "logictan89@gmail.com",
+    "url": "https://github.com/dale0525"
+  },
+  "homepage": "https://github.com/dale0525/codex-plugins/tree/main/plugins/provider-imagegen",
+  "repository": "https://github.com/dale0525/codex-plugins",
+  "license": "MIT",
+  "keywords": [
+    "image-generation",
+    "image-editing",
+    "openai-compatible",
+    "transparent-png",
+    "provider"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Provider Imagegen",
+    "shortDescription": "Generate or edit images through the active provider CLI.",
+    "longDescription": "A CLI-only image workflow that reads the active provider credential cache populated by Codex Sync, calls its OpenAI-compatible Images endpoint, saves local raster files, and verifies genuine PNG transparency when requested.",
+    "developerName": "Logic Tan",
+    "category": "Media",
+    "capabilities": [
+      "CLI image generation",
+      "CLI image editing",
+      "Provider credential resolution",
+      "Transparent PNG validation"
+    ],
+    "defaultPrompt": [
+      "Generate an image with the active provider CLI.",
+      "Edit this image with the active provider CLI.",
+      "Generate a genuinely transparent PNG."
+    ]
+  }
+}

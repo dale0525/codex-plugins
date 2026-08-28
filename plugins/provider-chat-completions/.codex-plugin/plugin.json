@@ -1,6 +1,6 @@
 {
   "name": "provider-chat-completions",
-  "version": "0.1.6+codex.20260824054252",
+  "version": "0.1.7",
   "description": "Call the active Codex provider's OpenAI-compatible Chat Completions API with a caller-supplied model and messages.",
   "author": {
     "name": "Logic Tan",
@@ -20,7 +20,7 @@
   "interface": {
     "displayName": "Provider Chat Completions",
     "shortDescription": "Call the active provider with a chosen model and messages.",
-    "longDescription": "Makes one safe OpenAI-compatible Chat Completions call using the effective Codex provider configuration and its existing credential. The caller supplies the model and messages; this plugin does not add prompts, choose models, or perform fallback generation.",
+    "longDescription": "Makes one safe OpenAI-compatible Chat Completions call using the provider credential cache populated by Codex Sync. The caller supplies the model and messages; this plugin does not add prompts, choose models, or perform fallback generation.",
     "developerName": "Logic Tan",
     "category": "Developer Tools",
     "capabilities": [

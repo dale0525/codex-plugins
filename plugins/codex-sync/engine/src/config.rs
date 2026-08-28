@@ -16,8 +16,11 @@ const CODE_MODE_DIRECT_ONLY_PATH: [&str; 3] =
 const SECRET_PARTS: &[&str] = &[
     "access_token",
     "api_key",
+    "apikey",
     "bearer_token",
     "client_secret",
+    "authorization",
+    "cookie",
     "password",
     "private_key",
     "refresh_token",
@@ -89,18 +92,29 @@ pub fn load_managed_values(repository: &Path, device: &str) -> Result<ManagedVal
 
 pub fn validate_values(values: &ManagedValues) -> Result<()> {
     for (path, value) in values {
-        let allowed = path.len() == 3
+        let allowed_bearer = path.len() == 3
             && path[0] == "model_providers"
             && path[2] == "experimental_bearer_token";
-        let key = path
+        let allowed_actor = path.len() == 4
+            && path[0] == "model_providers"
+            && path[2] == "http_headers"
+            && path[3].eq_ignore_ascii_case(ACTOR_AUTHORIZATION_HEADER);
+        let allowed_env_header =
+            path.len() == 4 && path[0] == "model_providers" && path[2] == "env_http_headers";
+        let normalized_key = path
             .last()
             .map(String::as_str)
             .unwrap_or_default()
-            .to_ascii_lowercase();
-        if !allowed
-            && key != "env_key"
-            && !key.ends_with("_env")
-            && SECRET_PARTS.iter().any(|part| key.contains(part))
+            .to_ascii_lowercase()
+            .replace('-', "_");
+        if !allowed_bearer
+            && !allowed_actor
+            && !allowed_env_header
+            && normalized_key != "env_key"
+            && !normalized_key.ends_with("_env")
+            && SECRET_PARTS
+                .iter()
+                .any(|part| normalized_key.contains(part))
         {
             anyhow::bail!(
                 "refusing to synchronize probable secret at {}",
@@ -108,7 +122,7 @@ pub fn validate_values(values: &ManagedValues) -> Result<()> {
             );
         }
         validate_value_strings(value, path)?;
-        if allowed {
+        if allowed_bearer {
             let Some(token) = value.as_str() else {
                 anyhow::bail!("model_providers.*.experimental_bearer_token must be a string");
             };
@@ -428,6 +442,21 @@ mod tests {
             toml::Value::String("token".into()),
         );
         assert!(validate_values(&values).is_err());
+    }
+
+    #[test]
+    fn environment_header_references_are_not_treated_as_literal_secrets() {
+        let mut values = ManagedValues::new();
+        values.insert(
+            vec![
+                "model_providers".into(),
+                "company".into(),
+                "env_http_headers".into(),
+                "Authorization".into(),
+            ],
+            toml::Value::String("COMPANY_TOKEN".into()),
+        );
+        assert!(validate_values(&values).is_ok());
     }
 
     #[test]

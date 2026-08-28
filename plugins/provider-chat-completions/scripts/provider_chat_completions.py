@@ -5,8 +5,8 @@ from __future__ import annotations
 
 import json
 import http.client
+import ipaddress
 import math
-import ntpath
 import os
 import re
 import socket
@@ -14,8 +14,7 @@ import ssl
 import subprocess
 import sys
 import tempfile
-import time
-from typing import Any, Callable, Dict, Mapping, Optional, Sequence
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from urllib.request import (  # nosec B310 - URL is validated before opening
@@ -27,12 +26,12 @@ from urllib.request import (  # nosec B310 - URL is validated before opening
 
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 DEFAULT_TIMEOUT_SECONDS = 120.0
-CONFIG_TIMEOUT_SECONDS = 30.0
-CONFIG_STARTUP_GRACE_SECONDS = 0.5
-CONFIG_REAP_TIMEOUT_SECONDS = 5.0
 OUTPUT_PERMISSION_TIMEOUT_SECONDS = 10.0
 MAX_OUTPUT_FILE_PATH_CHARS = 4096
-MAX_DIAGNOSTIC_PATH_CHARS = 2048
+CREDENTIAL_CACHE_DIRECTORY = ".codex-provider"
+CREDENTIAL_CACHE_FILE = "credential.json"
+CREDENTIAL_CACHE_SCHEMA_VERSION = 1
+MAX_CREDENTIAL_CACHE_BYTES = 512 * 1024
 HEADER_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
 FORBIDDEN_REQUEST_HEADERS = {
     "connection",
@@ -76,20 +75,6 @@ def failure_result(error: BridgeError) -> Dict[str, Any]:
     if error.diagnostic:
         result["diagnostic"] = error.diagnostic
     return result
-
-
-def _json_lines(text: str) -> Sequence[Mapping[str, Any]]:
-    messages = []
-    for line in text.splitlines():
-        if not line.strip():
-            continue
-        try:
-            value = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-        if isinstance(value, dict):
-            messages.append(value)
-    return messages
 
 
 def _reject_json_constant(value: str) -> None:
@@ -252,230 +237,91 @@ def capture_manifest(result: Mapping[str, Any], path: str, byte_count: int) -> D
     return manifest
 
 
-def resolve_codex_binary(
-    environment: Optional[Mapping[str, str]] = None,
-    platform: Optional[str] = None,
-) -> str:
-    """Choose a directly launchable app-server helper for the current platform."""
+def _codex_home(environment: Optional[Mapping[str, str]] = None) -> str:
     env = os.environ if environment is None else environment
-    effective_platform = os.name if platform is None else platform
-    configured = env.get("PROVIDER_CHAT_CODEX_BIN")
-    if isinstance(configured, str) and configured.strip():
-        path_module = ntpath if effective_platform == "nt" else os.path
-        if not path_module.isabs(configured):
-            raise BridgeError("config", "codex_bin_not_absolute")
-        return configured
-
-    if effective_platform == "nt":
-        # The Windows App Execution Alias named ``codex`` can resolve to a
-        # packaged desktop app that a child process is not allowed to launch.
-        # Prefer the helper provisioned for plugin app-server calls instead.
-        code_home = env.get("CODEX_HOME")
-        if not isinstance(code_home, str) or not code_home:
-            user_profile = env.get("USERPROFILE")
-            if isinstance(user_profile, str) and user_profile:
-                code_home = ntpath.join(user_profile, ".codex")
-            else:
-                code_home = os.path.expanduser("~/.codex")
-        helper = ntpath.join(code_home, "plugins", ".plugin-appserver", "codex.exe")
-        if not ntpath.isabs(helper):
-            raise BridgeError("config", "codex_helper_path_invalid")
-        return helper
-    return "codex"
+    value = env.get("CODEX_HOME")
+    if isinstance(value, str) and value.strip():
+        return os.path.expanduser(value)
+    return os.path.expanduser("~/.codex")
 
 
-_DIAGNOSTIC_REDACTIONS = (
-    (
-        re.compile(r"(?i)(authorization\s*[:=]\s*(?:bearer\s+)?)[^\s,;]+"),
-        r"\1[REDACTED]",
-    ),
-    (re.compile(r"(?i)(\bbearer\s+)[^\s,;]+"), r"\1[REDACTED]"),
-    (
-        re.compile(r"(?i)(\b(?:api[_ -]?key|token|secret|password)\s*[:=]\s*)[^\s,;]+"),
-        r"\1[REDACTED]",
-    ),
-    (re.compile(r"(?i)\b(?:sk|rk)-[A-Za-z0-9_-]{8,}\b"), "[REDACTED]"),
-)
+def _cache_file_is_secure(path: str) -> None:
+    import stat
 
-
-def _safe_diagnostic_path(value: str) -> str:
-    text = "".join(
-        character if character in "\t\r\n" or ord(character) >= 0x20 else "�"
-        for character in value
-    )
-    for pattern, replacement in _DIAGNOSTIC_REDACTIONS:
-        text = pattern.sub(replacement, text)
-    text = text.strip()
-    if len(text) > MAX_DIAGNOSTIC_PATH_CHARS:
-        text = text[:MAX_DIAGNOSTIC_PATH_CHARS] + "…"
-    return text or "<unknown>"
-
-
-def _stderr_metadata(value: Any) -> Optional[Dict[str, Any]]:
-    if isinstance(value, bytes):
-        size = len(value)
-    elif isinstance(value, str):
-        size = len(value.encode("utf-8", errors="replace"))
-    else:
-        return None
-    return {"present": size > 0, "bytes": size}
-
-
-def _launch_diagnostic(
-    codex_bin: str,
-    process: Optional[Any] = None,
-    error: Optional[BaseException] = None,
-    stderr: Any = None,
-) -> Dict[str, Any]:
-    diagnostic: Dict[str, Any] = {"executable": _safe_diagnostic_path(str(codex_bin))}
-    winerror = getattr(error, "winerror", None)
-    if isinstance(winerror, int):
-        diagnostic["winerror"] = winerror
-    errno = getattr(error, "errno", None)
-    if isinstance(errno, int):
-        diagnostic["errno"] = errno
-    returncode = getattr(process, "returncode", None)
-    if isinstance(returncode, int):
-        diagnostic["returncode"] = returncode
-    stderr_metadata = _stderr_metadata(stderr)
-    if stderr_metadata is not None:
-        diagnostic["stderr"] = stderr_metadata
-    return diagnostic
-
-
-def _stop_config_process(process: Any) -> Any:
     try:
-        if getattr(process, "stdin", None) is not None:
-            process.stdin.close()
-            process.stdin = None
-    except (OSError, ValueError):
+        parent_lstat = os.lstat(os.path.dirname(path))
+        file_lstat = os.lstat(path)
+        parent_stat = os.stat(os.path.dirname(path))
+        file_stat = os.stat(path)
+    except OSError as exc:
+        raise BridgeError("credential", "credential_cache_unavailable") from exc
+    if stat.S_ISLNK(parent_lstat.st_mode) or stat.S_ISLNK(file_lstat.st_mode) or not stat.S_ISREG(file_stat.st_mode):
+        raise BridgeError("credential", "credential_cache_invalid")
+    if stat.S_IMODE(parent_stat.st_mode) & 0o077 or stat.S_IMODE(file_stat.st_mode) & 0o077:
+        raise BridgeError("credential", "credential_cache_permissions")
+
+
+def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> List[str]:
+    env = os.environ if environment is None else environment
+    override = env.get("PROVIDER_CHAT_CREDENTIAL_FILE")
+    if override:
+        path = os.path.abspath(os.path.expanduser(override))
+        if not os.path.isabs(override):
+            raise BridgeError("credential", "credential_cache_path_invalid")
+        return [path]
+    plugin_root = os.path.realpath(os.path.join(os.path.dirname(__file__), os.pardir))
+    cache_root_raw = os.path.join(_codex_home(env), "plugins", "cache")
+    try:
+        if os.path.islink(cache_root_raw):
+            raise BridgeError("credential", "credential_cache_invalid")
+    except OSError as exc:
+        raise BridgeError("credential", "credential_cache_unavailable") from exc
+    cache_root = os.path.realpath(cache_root_raw)
+    direct = os.path.join(plugin_root, CREDENTIAL_CACHE_DIRECTORY, CREDENTIAL_CACHE_FILE)
+    candidates: List[str] = []
+    try:
+        if os.path.commonpath([plugin_root, cache_root]) == cache_root and os.path.isfile(direct):
+            candidates.append(direct)
+    except ValueError:
         pass
+    return candidates
+
+
+def load_cached_provider(environment: Optional[Mapping[str, str]] = None) -> Mapping[str, Any]:
+    candidates = _candidate_cache_files(environment)
+    if not candidates:
+        raise BridgeError("credential", "credential_cache_missing")
+    path = candidates[0]
+    _cache_file_is_secure(path)
     try:
-        process.kill()
-    except (AttributeError, OSError, ProcessLookupError):
-        pass
+        with open(path, "rb") as stream:
+            raw = stream.read()
+    except OSError as exc:
+        raise BridgeError("credential", "credential_cache_unavailable") from exc
+    if len(raw) > MAX_CREDENTIAL_CACHE_BYTES:
+        raise BridgeError("credential", "credential_cache_too_large")
     try:
-        _, stderr = process.communicate(timeout=CONFIG_REAP_TIMEOUT_SECONDS)
-        return stderr
-    except subprocess.TimeoutExpired:
-        for stream_name in ("stdout", "stderr"):
-            stream = getattr(process, stream_name, None)
-            try:
-                if stream is not None:
-                    stream.close()
-            except OSError:
-                pass
-        return None
-    except (AttributeError, OSError, ValueError):
-        return None
-
-
-def read_effective_config(cwd: str, codex_bin: Optional[str] = None) -> Mapping[str, Any]:
-    """Resolve the effective config without reading config.toml directly."""
-    codex_bin = resolve_codex_binary() if codex_bin is None else codex_bin
-    requests = [
-        {
-            "id": 1,
-            "method": "initialize",
-            "params": {
-                "clientInfo": {
-                    "name": "provider-chat-completions",
-                    "version": "0.1.3",
-                }
-            },
-        },
-        {"method": "initialized", "params": {}},
-        {
-            "id": 2,
-            "method": "config/read",
-            "params": {"cwd": cwd, "includeLayers": False},
-        },
-    ]
-    payload = "\n".join(json.dumps(item, ensure_ascii=True) for item in requests) + "\n"
-    process: Optional[Any] = None
-    stderr_bytes: Any = None
-    try:
-        process = subprocess.Popen(
-            [codex_bin, "app-server", "--stdio"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-    except FileNotFoundError as exc:
-        raise BridgeError(
-            "config",
-            "codex_unavailable",
-            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
-        ) from exc
-    except PermissionError as exc:
-        raise BridgeError(
-            "config",
-            "codex_launch_denied",
-            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
-        ) from exc
-    except (OSError, ValueError) as exc:
-        raise BridgeError(
-            "config",
-            "config_read_failed",
-            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
-        ) from exc
-
-    try:
-        assert process.stdin is not None
-        process.stdin.write(payload.encode("utf-8"))
-        process.stdin.flush()
-        # app-server needs a short turn to publish the response before EOF.
-        time.sleep(CONFIG_STARTUP_GRACE_SECONDS)
-        process.stdin.close()
-        # Python 3.9's communicate() flushes a closed stdin handle unless it is
-        # detached first. Keep communicate() for concurrent stdout draining:
-        # config/read can exceed a pipe buffer and deadlock a plain wait().
-        process.stdin = None
-        stdout_bytes, stderr_bytes = process.communicate(timeout=CONFIG_TIMEOUT_SECONDS)
-    except subprocess.TimeoutExpired as exc:
-        stderr_bytes = _stop_config_process(process)
-        raise BridgeError(
-            "config",
-            "config_read_timeout",
-            retryable=True,
-            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
-        ) from exc
-    except (OSError, ValueError) as exc:
-        stderr_bytes = _stop_config_process(process)
-        raise BridgeError(
-            "config",
-            "config_read_failed",
-            diagnostic=_launch_diagnostic(codex_bin, process, exc, stderr_bytes),
-        ) from exc
-
-    if process.returncode != 0:
-        raise BridgeError(
-            "config",
-            "config_read_failed",
-            diagnostic=_launch_diagnostic(codex_bin, process, stderr=stderr_bytes),
-        )
-
-    stdout = stdout_bytes.decode("utf-8", errors="replace")
-    diagnostic = _launch_diagnostic(codex_bin, process, stderr=stderr_bytes)
-    response = next((item for item in _json_lines(stdout) if item.get("id") == 2), None)
-    if response is None:
-        raise BridgeError("config", "config_read_no_response", diagnostic=diagnostic)
-    if response.get("error") is not None:
-        raise BridgeError("config", "config_read_error", diagnostic=diagnostic)
-    result = response.get("result")
-    if not isinstance(result, dict) or not isinstance(result.get("config"), dict):
-        raise BridgeError("config", "config_read_invalid_result", diagnostic=diagnostic)
-    return result["config"]
-
-
-def resolve_provider(config: Mapping[str, Any]) -> Mapping[str, Any]:
-    provider_name = config.get("model_provider")
-    providers = config.get("model_providers")
-    if not isinstance(provider_name, str) or not provider_name:
-        raise BridgeError("config", "provider_not_selected")
-    if not isinstance(providers, dict) or not isinstance(providers.get(provider_name), dict):
-        raise BridgeError("config", "provider_definition_missing")
-    return providers[provider_name]
+        value = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise BridgeError("credential", "credential_cache_invalid") from exc
+    if not isinstance(value, dict) or value.get("schema_version") != CREDENTIAL_CACHE_SCHEMA_VERSION:
+        raise BridgeError("credential", "credential_cache_invalid")
+    if not isinstance(value.get("provider"), str) or not value["provider"]:
+        raise BridgeError("credential", "credential_cache_invalid")
+    if not isinstance(value.get("fingerprint"), str) or not re.fullmatch(
+        r"[0-9a-f]{64}", value["fingerprint"]
+    ):
+        raise BridgeError("credential", "credential_cache_invalid")
+    if any(key in value for key in ("token", "secret", "experimental_bearer_token", "auth")):
+        raise BridgeError("credential", "credential_cache_invalid")
+    return {
+        "base_url": value.get("base_url"),
+        "http_headers": value.get("headers", {}),
+        "env_http_headers": value.get("env_http_headers", {}),
+        "env_key": value.get("env_key"),
+        "query_params": value.get("query_params", {}),
+        "requires_openai_auth": value.get("requires_openai_auth", False),
+    }
 
 
 def _header_map(value: Any) -> Dict[str, str]:
@@ -511,6 +357,28 @@ def _header_exists(headers: Mapping[str, str], name: str) -> bool:
     return any(key.lower() == wanted for key in headers)
 
 
+def _has_credential_headers(headers: Mapping[str, str]) -> bool:
+    return any(name.lower() not in {"accept", "content-type", "user-agent"} for name in headers)
+
+
+def _is_loopback_host(parsed: Any) -> bool:
+    host = parsed.hostname
+    if not host or host.rstrip(".").lower() == "localhost":
+        return bool(host)
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def _query_has_credential_name(query: str) -> bool:
+    for name, _value in parse_qsl(query, keep_blank_values=True):
+        normalized = name.lower().replace("-", "_")
+        if any(part in normalized for part in ("api_key", "apikey", "authorization", "password", "secret", "token")):
+            return True
+    return False
+
+
 def resolve_headers(provider: Mapping[str, Any]) -> Dict[str, str]:
     headers = _header_map(provider.get("http_headers"))
     environment_headers = provider.get("env_http_headers")
@@ -541,29 +409,15 @@ def resolve_headers(provider: Mapping[str, Any]) -> Dict[str, str]:
 
     if not _header_exists(headers, "Authorization"):
         env_key = provider.get("env_key")
-        token: Optional[str] = None
         if env_key is not None:
             if not isinstance(env_key, str) or not env_key:
                 raise BridgeError("credential", "env_key_invalid")
             token = os.environ.get(env_key)
             if not token:
                 raise BridgeError("credential", "env_key_unavailable")
-        else:
-            configured_token = provider.get("experimental_bearer_token")
-            if configured_token is not None:
-                if not isinstance(configured_token, str) or not configured_token:
-                    raise BridgeError("credential", "bearer_token_invalid")
-                token = configured_token
-        if token is not None:
             if "\r" in token or "\n" in token:
-                raise BridgeError("credential", "bearer_token_invalid")
+                raise BridgeError("credential", "env_key_invalid")
             headers["Authorization"] = "Bearer " + token
-
-    auth = provider.get("auth")
-    if auth is not None:
-        # The app-server contract does not expose a safe, portable command-backed
-        # auth protocol. Never execute an arbitrary configured command here.
-        raise BridgeError("credential", "auth_source_unsupported")
     if provider.get("requires_openai_auth") and not _header_exists(headers, "Authorization"):
         raise BridgeError("credential", "credential_unavailable")
     return headers
@@ -607,6 +461,8 @@ def build_endpoint(provider: Mapping[str, Any]) -> str:
                 query.append((str(key), str(value).lower() if isinstance(value, bool) else str(value)))
             else:
                 raise BridgeError("config", "query_params_invalid")
+    if _query_has_credential_name(urlencode(query)):
+        raise BridgeError("credential", "credential_in_url_rejected")
     try:
         return urlunsplit((parsed.scheme, parsed.netloc, path, urlencode(query), ""))
     except (UnicodeError, ValueError) as exc:
@@ -658,6 +514,16 @@ def post_chat_completion(
         headers["Content-Type"] = "application/json"
     if not _header_exists(headers, "Accept"):
         headers["Accept"] = "application/json"
+    try:
+        parsed_endpoint = urlsplit(endpoint)
+    except ValueError as exc:
+        raise BridgeError("config", "base_url_invalid") from exc
+    if (
+        parsed_endpoint.scheme == "http"
+        and _has_credential_headers(headers)
+        and not _is_loopback_host(parsed_endpoint)
+    ):
+        raise BridgeError("credential", "insecure_http_credentials")
     # Do not let credential-bearing requests inherit HTTP(S)_PROXY settings;
     # that would send the provider credential to an unconfigured intermediary.
     try:
@@ -736,19 +602,17 @@ def normalize_response(response: Any) -> Dict[str, Any]:
 
 def process_request(
     request: Mapping[str, Any],
-    config_resolver: Optional[Callable[[str], Mapping[str, Any]]] = None,
+    provider_resolver: Optional[Callable[[], Mapping[str, Any]]] = None,
 ) -> Dict[str, Any]:
     if not isinstance(request, Mapping):
         raise BridgeError("request", "request_not_object")
     if "cwd" in request:
         raise BridgeError("request", "cwd_override_not_allowed")
     timeout = _validated_timeout(request.get("timeout_seconds", DEFAULT_TIMEOUT_SECONDS))
-    # Validate the complete request body before starting app-server or touching
-    # provider configuration. This keeps malformed input local and cheap.
+    # Validate the complete request body before touching the credential cache.
+    # This keeps malformed input local and cheap.
     _encode_json_body(build_request(request))
-    cwd = os.getcwd()
-    config = (config_resolver or read_effective_config)(cwd)
-    provider = resolve_provider(config)
+    provider = (provider_resolver or load_cached_provider)()
     return post_chat_completion(provider, request, timeout)
 
 

@@ -6,6 +6,7 @@ mod config;
 mod migration;
 mod model;
 mod profiles;
+mod provider_credentials;
 mod storage;
 
 use anyhow::Result;

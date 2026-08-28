@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.6.6 release binary otherwise. On Windows,
+bootstrap downloads and verifies the 0.6.7 release binary otherwise. On Windows,
 it resolves Git independently of the system `PATH`: it uses a reviewed
 `CODEX_SYNC_GIT_BIN` override, a usable installed Git, or FastCtx's portable
 Git when available, otherwise downloads a locked, SHA-256-verified portable Git
@@ -59,7 +59,12 @@ file (removing profiles that are no longer referenced), and registers or
 refreshes desired Git marketplaces before running an unconditional `plugin add`
 for every desired plugin. A final marketplace/plugin listing must exactly match the
 remote non-protected Git sets and report each desired plugin as `installed =
-true` and `enabled = true`. Source identity is `(url, ref, sparse)`; source
+true` and `enabled = true`. After that verification, pull bootstraps only
+`provider-chat-completions` and `provider-imagegen`: it reads the synchronized
+active provider directly from local `config.toml` and atomically writes an
+owner-only credential cache under each installed plugin version. It never sends
+that cache to app-server, Git, or the marketplace source. Source identity is
+`(url, ref, sparse)`; source
 mismatches detach plugins before replacing a marketplace. Personal, `openai`,
 `openai-*`, and non-Git resources remain outside the sync domain. Core files are
 written atomically with one rolling backup. A plugin/marketplace failure leaves
@@ -142,7 +147,9 @@ a literal bearer token; other probable secrets and URLs with embedded
 credentials are rejected. `model_reasoning_effort` is synchronized verbatim.
 
 Do not synchronize auth/session/history, SQLite state, caches, automations, or
-plugin provision artifacts. Automations are entirely device-local: pull ignores
+plugin provision artifacts. The two provider credential caches are device-local
+post-pull runtime artifacts, not repository members or synchronized state.
+Automations are entirely device-local: pull ignores
 legacy repository automation declarations, and the next push removes a legacy
 `automations/` directory from the repository without reading or mutating the
 local automation store. Codex Sync is explicit and does not add lifecycle timers
