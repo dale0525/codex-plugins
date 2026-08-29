@@ -17,6 +17,7 @@ from unittest.mock import patch
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
 RUN_PS1 = SCRIPT_DIR / "run.ps1"
+RUN_SH = SCRIPT_DIR / "run.sh"
 sys.path.insert(0, str(SCRIPT_DIR))
 import provider_chat_completions as bridge  # noqa: E402
 
@@ -82,6 +83,41 @@ class BridgeTests(unittest.TestCase):
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=2)
+
+    def test_unix_launcher_skips_a_broken_python3_shim(self):
+        payload = b'{"model":"chosen-model","messages":[{"role":"user","content":"shim"}]}\n'
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            broken = root / "broken"
+            working = root / "working"
+            broken.mkdir()
+            working.mkdir()
+            broken_python = broken / "python3"
+            broken_python.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+            broken_python.chmod(0o755)
+            working_python = working / "python3"
+            working_python.write_text(
+                "#!/bin/sh\n"
+                "if [ \"${1-}\" = \"-c\" ]; then exit 0; fi\n"
+                "cat\n",
+                encoding="utf-8",
+            )
+            working_python.chmod(0o755)
+            environment = dict(os.environ)
+            environment["PATH"] = os.pathsep.join(
+                (str(broken), str(working), "/usr/bin", "/bin")
+            )
+            completed = subprocess.run(
+                [str(RUN_SH)],
+                input=payload,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=environment,
+                check=False,
+                timeout=30,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr.decode("utf-8", errors="replace"))
+        self.assertEqual(completed.stdout, payload)
 
     def test_windows_launcher_detaches_preflight_stdin(self):
         launcher = RUN_PS1.read_text(encoding="utf-8")
