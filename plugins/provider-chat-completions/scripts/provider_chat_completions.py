@@ -24,8 +24,6 @@ from urllib.request import (  # nosec B310 - URL is validated before opening
     ProxyHandler,
 )
 
-from windows_acl import WindowsAclError, ensure_owner_only
-
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 DEFAULT_TIMEOUT_SECONDS = 120.0
 OUTPUT_PERMISSION_TIMEOUT_SECONDS = 10.0
@@ -247,7 +245,7 @@ def _codex_home(environment: Optional[Mapping[str, str]] = None) -> str:
     return os.path.expanduser("~/.codex")
 
 
-def _cache_file_is_secure(path: str) -> None:
+def _cache_file_is_regular(path: str) -> None:
     import stat
 
     try:
@@ -262,20 +260,6 @@ def _cache_file_is_secure(path: str) -> None:
         or not stat.S_ISREG(file_lstat.st_mode)
     ):
         raise BridgeError("credential", "credential_cache_invalid")
-    if os.name == "nt":
-        try:
-            ensure_owner_only(os.path.dirname(path))
-            ensure_owner_only(path)
-        except WindowsAclError as exc:
-            raise BridgeError("credential", "credential_cache_permissions") from exc
-        return
-    try:
-        parent_stat = os.stat(os.path.dirname(path))
-        file_stat = os.stat(path)
-    except OSError as exc:
-        raise BridgeError("credential", "credential_cache_unavailable") from exc
-    if stat.S_IMODE(parent_stat.st_mode) & 0o077 or stat.S_IMODE(file_stat.st_mode) & 0o077:
-        raise BridgeError("credential", "credential_cache_permissions")
 
 
 def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> List[str]:
@@ -309,7 +293,7 @@ def load_cached_provider(environment: Optional[Mapping[str, str]] = None) -> Map
     if not candidates:
         raise BridgeError("credential", "credential_cache_missing")
     path = candidates[0]
-    _cache_file_is_secure(path)
+    _cache_file_is_regular(path)
     try:
         with open(path, "rb") as stream:
             raw = stream.read()

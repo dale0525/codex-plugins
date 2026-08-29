@@ -12,7 +12,7 @@ import unittest
 from types import SimpleNamespace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
@@ -224,7 +224,7 @@ class BridgeTests(unittest.TestCase):
             self.assertNotIn(result["content"], stdout.getvalue().decode("utf-8"))
             self.assertEqual(json.loads(path.read_text(encoding="utf-8")), result)
 
-    def test_cache_loader_reads_sync_file_without_appserver(self):
+    def test_cache_loader_reads_sync_file_without_appserver_or_permission_gate(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             cache = root / "credential.json"
@@ -243,48 +243,11 @@ class BridgeTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
-            os.chmod(root, 0o700)
-            os.chmod(cache, 0o600)
+            os.chmod(root, 0o755)
+            os.chmod(cache, 0o644)
             provider = bridge.load_cached_provider({"PROVIDER_CHAT_CREDENTIAL_FILE": str(cache)})
         self.assertEqual(provider["base_url"], "https://provider.example/v1")
         self.assertEqual(provider["http_headers"]["Authorization"], "Bearer cached-secret")
-
-    def test_windows_cache_loader_uses_acl_check_not_posix_mode_bits(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            cache = root / "credential.json"
-            cache.write_text(
-                json.dumps(
-                    {
-                        "schema_version": 1,
-                        "provider": "company",
-                        "base_url": "https://provider.example/v1",
-                        "headers": {},
-                        "env_http_headers": {},
-                        "query_params": {},
-                        "requires_openai_auth": False,
-                        "fingerprint": "0" * 64,
-                    }
-                ),
-                encoding="utf-8",
-            )
-            os.chmod(root, 0o755)
-            os.chmod(cache, 0o644)
-            with patch.object(bridge.os, "name", "nt"), patch.object(
-                bridge, "ensure_owner_only"
-            ) as ensure_owner_only:
-                bridge._cache_file_is_secure(str(cache))
-        self.assertEqual(
-            ensure_owner_only.call_args_list,
-            [call(str(root)), call(str(cache))],
-        )
-
-    def test_windows_acl_binds_token_query_to_advapi32(self):
-        source = (SCRIPT_DIR / "windows_acl.py").read_text(encoding="utf-8")
-        self.assertIn("def _current_user_sid(kernel32, advapi32):", source)
-        self.assertIn("advapi32.GetTokenInformation.argtypes", source)
-        self.assertNotIn("kernel32.GetTokenInformation.argtypes", source)
-        self.assertIn("_current_user_sid(kernel32, advapi32)", source)
 
     def test_main_accepts_power_shell_json_encodings(self):
         request = {
@@ -315,30 +278,6 @@ class BridgeTests(unittest.TestCase):
             self.assertEqual(seen, [request])
             self.assertEqual(json.loads(stdout.getvalue().decode("utf-8")), {"ok": True})
 
-    def test_cache_loader_rejects_insecure_file_permissions(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            cache = root / "credential.json"
-            cache.write_text(
-                json.dumps(
-                    {
-                        "schema_version": 1,
-                        "provider": "company",
-                        "base_url": "https://provider.example/v1",
-                        "headers": {},
-                        "env_http_headers": {},
-                        "query_params": {},
-                        "requires_openai_auth": False,
-                        "fingerprint": "0" * 64,
-                    }
-                ),
-                encoding="utf-8",
-            )
-            os.chmod(root, 0o755)
-            os.chmod(cache, 0o644)
-            with self.assertRaises(bridge.BridgeError) as error:
-                bridge.load_cached_provider({"PROVIDER_CHAT_CREDENTIAL_FILE": str(cache)})
-        self.assertEqual(error.exception.code, "credential_cache_permissions")
 
     def test_protected_and_streaming_parameters_are_rejected(self):
         with self.assertRaises(bridge.BridgeError) as protected:

@@ -83,13 +83,13 @@ optional `http_status`. The utility never retries automatically.
 
 The provider cache is written by Codex Sync at
 `<CODEX_HOME>/plugins/cache/<marketplace>/provider-chat-completions/<version>/.codex-provider/credential.json`.
-Its directory is owner-only (`0700` on POSIX), its file is owner-only (`0600`),
-and the write is atomic. The cache is never part of the synchronized Git
+The write is atomic. The CLI reads the cache file directly without checking
+POSIX modes or Windows ACLs. The cache is never part of the synchronized Git
 repository and contains no raw `experimental_bearer_token` field. `env_key` and
 `env_http_headers` remain environment references and are resolved only in the
-plugin process. A missing or unsafe cache returns a structured credential
-failure; the utility does not launch Codex app-server, read `config.toml`, ask
-for a pasted credential, or fall back to a different provider. It also rejects
+plugin process. A missing, malformed, symlinked, or non-regular cache returns a
+structured credential failure; the utility does not launch Codex app-server,
+read `config.toml`, ask for a pasted credential, or fall back to a different provider. It also rejects
 credential-bearing remote HTTP endpoints and credential-like query parameters
 before networking; loopback HTTP remains available for an explicitly configured
 local gateway.

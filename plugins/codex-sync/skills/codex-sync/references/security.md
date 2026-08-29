@@ -28,10 +28,10 @@ After provider configuration and plugin convergence, pull bootstraps only
 `provider-chat-completions` and `provider-imagegen`. It reads the active provider
 from local `config.toml`, converts a literal bearer token to an Authorization
 header, preserves environment-variable references, and writes each versioned
-plugin cache under `.codex-provider/credential.json`. The directory/file are
-owner-only (`0700`/`0600` on POSIX; inherited ACLs are removed on Windows), the
-write is atomic, symlink targets are rejected, and no credential value appears
-in status output. If explicit credentials are unavailable, a stale cache is
+plugin cache under `.codex-provider/credential.json`. The write is atomic,
+symlink targets are rejected, and no credential value appears in status output.
+The provider CLIs read the file directly without checking POSIX modes or Windows
+ACLs. If explicit credentials are unavailable, a stale cache is
 removed and pull reports `credential_unavailable` without using Codex login
 session files or command-backed auth.
 

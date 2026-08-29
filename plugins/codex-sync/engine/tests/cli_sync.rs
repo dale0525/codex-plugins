@@ -158,14 +158,8 @@ requires_openai_auth = true
             "Bearer synced-test-token"
         );
         assert!(payload.get("experimental_bearer_token").is_none());
-        assert_eq!(
-            fs::metadata(&directory).unwrap().permissions().mode() & 0o777,
-            0o700
-        );
-        assert_eq!(
-            fs::metadata(&credential).unwrap().permissions().mode() & 0o777,
-            0o600
-        );
+        assert!(fs::metadata(&directory).unwrap().is_dir());
+        assert!(fs::metadata(&credential).unwrap().is_file());
     }
 
     fs::write(

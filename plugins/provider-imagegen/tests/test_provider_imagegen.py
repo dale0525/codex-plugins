@@ -10,7 +10,7 @@ import struct
 import tempfile
 import threading
 import unittest
-from unittest.mock import call, patch
+from unittest.mock import patch
 import zlib
 
 
@@ -104,7 +104,7 @@ class ProviderImagegenTests(unittest.TestCase):
         error = imagegen.failure_result(imagegen.ImagegenError("config", "bad", diagnostic={"stderr": {"bytes": 1}}))
         self.assertNotIn("secret-token", json.dumps(error))
 
-    def test_cache_loader_reads_sync_file(self):
+    def test_cache_loader_reads_sync_file_without_permission_gate(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             cache = root / "credential.json"
@@ -125,47 +125,10 @@ class ProviderImagegenTests(unittest.TestCase):
             )
             import os
 
-            os.chmod(root, 0o700)
-            os.chmod(cache, 0o600)
-            provider = imagegen.load_cached_provider({"PROVIDER_IMAGEGEN_CREDENTIAL_FILE": str(cache)})
-        self.assertEqual(provider["http_headers"]["Authorization"], "Bearer cached-secret")
-
-    def test_windows_cache_loader_uses_acl_check_not_posix_mode_bits(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            cache = root / "credential.json"
-            cache.write_text(
-                json.dumps(
-                    {
-                        "schema_version": 1,
-                        "provider": "company",
-                        "base_url": "https://provider.example/v1",
-                        "headers": {},
-                        "env_http_headers": {},
-                        "query_params": {},
-                        "requires_openai_auth": False,
-                        "fingerprint": "0" * 64,
-                    }
-                ),
-                encoding="utf-8",
-            )
             os.chmod(root, 0o755)
             os.chmod(cache, 0o644)
-            with patch.object(imagegen.os, "name", "nt"), patch.object(
-                imagegen, "ensure_owner_only"
-            ) as ensure_owner_only:
-                imagegen._cache_file_is_secure(cache)
-        self.assertEqual(
-            ensure_owner_only.call_args_list,
-            [call(root), call(cache)],
-        )
-
-    def test_windows_acl_binds_token_query_to_advapi32(self):
-        source = (SCRIPT_DIR / "windows_acl.py").read_text(encoding="utf-8")
-        self.assertIn("def _current_user_sid(kernel32, advapi32):", source)
-        self.assertIn("advapi32.GetTokenInformation.argtypes", source)
-        self.assertNotIn("kernel32.GetTokenInformation.argtypes", source)
-        self.assertIn("_current_user_sid(kernel32, advapi32)", source)
+            provider = imagegen.load_cached_provider({"PROVIDER_IMAGEGEN_CREDENTIAL_FILE": str(cache)})
+        self.assertEqual(provider["http_headers"]["Authorization"], "Bearer cached-secret")
 
     def test_remote_http_credentials_are_rejected_before_network(self):
         provider = {

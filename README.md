@@ -60,7 +60,7 @@ Start a new Codex task, invoke `$codex-sync`, and connect a selected private
 GitHub configuration repository. Codex Sync previews changes before it updates
 global `AGENTS.md`, native agent profiles, portable `config.toml` values,
 providers, marketplaces, or plugins. After a successful pull applies provider
-settings and converges plugins, Codex Sync bootstraps owner-only credential
+settings and converges plugins, Codex Sync bootstraps local credential
 caches only for `provider-chat-completions` and `provider-imagegen`. A complete
 provider definition, including an explicitly configured plaintext
 `experimental_bearer_token`, can be synchronized through the private repository
@@ -130,7 +130,8 @@ instructions and shared native agent profiles, including `default`,
 `creative_text`, and `image`. Configuration is applied with managed ownership,
 atomic writes, drift detection, scoped secret policy, and pre-apply backups.
 After plugin convergence it writes only the two allowlisted provider credential
-caches; those cache artifacts stay local and owner-only.
+caches; those cache artifacts stay local and the provider CLIs read them directly
+without a POSIX mode or Windows ACL gate.
 
 ### FastCtx
 
@@ -214,14 +215,14 @@ than claiming unsupported transcript coverage.
 
 Provides a one-shot utility for calling the active Codex provider's
 OpenAI-compatible `POST /chat/completions` endpoint with a caller-supplied model
-and messages. It reads the owner-only cache populated by Codex Sync, makes one
+and messages. It reads the cache populated by Codex Sync directly, makes one
 non-streaming request, and returns a normalized result without adding prompts,
 choosing models, or performing fallback generation.
 
 ### Provider Imagegen
 
 Provides the CLI-only raster image workflow. It reads the active provider's
-endpoint and credential headers from the owner-only cache populated by Codex
+endpoint and credential headers directly from the cache populated by Codex
 Sync, calls the OpenAI-compatible Images generation/edit endpoints, saves local
 files, and verifies a real alpha channel for transparent PNG requests. It never
 uses the built-in `image_gen` tool or asks users to paste credentials.

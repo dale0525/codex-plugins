@@ -36,13 +36,12 @@ writing or model-selection policy.
 Codex Sync writes
 `<CODEX_HOME>/plugins/cache/<marketplace>/provider-chat-completions/<version>/.codex-provider/credential.json`
 after it applies synchronized provider settings and converges plugins. The
-directory is owner-only (`0700` on POSIX) and the file is owner-only (`0600`);
-the write is atomic and the cache never enters the synchronization repository.
+write is atomic and the cache never enters the synchronization repository.
 The cache contains the active provider endpoint, configured headers, optional
 environment-variable references, query parameters, and a non-secret
-configuration fingerprint. A missing, malformed, symlinked, or weakly
-permissioned cache fails as `credential_cache_missing`,
-`credential_cache_invalid`, or `credential_cache_permissions`.
+configuration fingerprint. The CLI reads this file directly without checking
+POSIX modes or Windows ACLs. A missing, malformed, symlinked, or non-regular
+cache fails as `credential_cache_missing` or `credential_cache_invalid`.
 
 `env_key` and `env_http_headers` remain references and are resolved only from
 the current process environment. Providers that expose only a Codex login

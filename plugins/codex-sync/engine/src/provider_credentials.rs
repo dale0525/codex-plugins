@@ -599,7 +599,7 @@ fn write_cached_credential(path: &Path, material: &JsonValue) -> Result<()> {
     let parent = path
         .parent()
         .context("provider credential cache has no parent")?;
-    ensure_private_directory(parent)?;
+    ensure_cache_directory(parent)?;
     if let Ok(metadata) = fs::symlink_metadata(path) {
         if metadata.file_type().is_symlink() || !metadata.file_type().is_file() {
             anyhow::bail!("provider credential cache file is not a regular file");
@@ -607,7 +607,6 @@ fn write_cached_credential(path: &Path, material: &JsonValue) -> Result<()> {
     }
     let mut temporary =
         NamedTempFile::new_in(parent).context("create provider credential cache")?;
-    restrict_file_permissions(temporary.path())?;
     std::io::Write::write_all(&mut temporary, &bytes).context("write provider credential cache")?;
     temporary
         .as_file()
@@ -617,7 +616,6 @@ fn write_cached_credential(path: &Path, material: &JsonValue) -> Result<()> {
         .persist(path)
         .map_err(|error| error.error)
         .context("replace provider credential cache")?;
-    restrict_file_permissions(path)?;
     Ok(())
 }
 
@@ -647,7 +645,7 @@ fn remove_cached_credential(path: &Path) -> Result<()> {
     Ok(())
 }
 
-fn ensure_private_directory(path: &Path) -> Result<()> {
+fn ensure_cache_directory(path: &Path) -> Result<()> {
     match fs::symlink_metadata(path) {
         Ok(metadata) if metadata.file_type().is_dir() => {}
         Ok(metadata) if metadata.file_type().is_symlink() => {
@@ -658,76 +656,6 @@ fn ensure_private_directory(path: &Path) -> Result<()> {
             fs::create_dir_all(path).context("create provider credential directory")?
         }
         Err(error) => return Err(error).context("inspect provider credential directory"),
-    }
-    restrict_directory_permissions(path)
-}
-
-#[cfg(unix)]
-fn restrict_directory_permissions(path: &Path) -> Result<()> {
-    use std::os::unix::fs::PermissionsExt;
-    fs::set_permissions(path, fs::Permissions::from_mode(0o700))
-        .context("restrict provider credential directory permissions")?;
-    let mode = fs::metadata(path)
-        .context("inspect provider credential directory permissions")?
-        .permissions()
-        .mode()
-        & 0o777;
-    if mode & 0o077 != 0 {
-        anyhow::bail!("provider credential directory is not owner-only");
-    }
-    Ok(())
-}
-
-#[cfg(windows)]
-fn restrict_directory_permissions(path: &Path) -> Result<()> {
-    restrict_windows_permissions(path)
-}
-
-#[cfg(not(any(unix, windows)))]
-fn restrict_directory_permissions(_path: &Path) -> Result<()> {
-    anyhow::bail!("provider credential permissions are unsupported on this platform")
-}
-
-#[cfg(unix)]
-fn restrict_file_permissions(path: &Path) -> Result<()> {
-    use std::os::unix::fs::PermissionsExt;
-    fs::set_permissions(path, fs::Permissions::from_mode(0o600))
-        .context("restrict provider credential file permissions")?;
-    let mode = fs::metadata(path)
-        .context("inspect provider credential file permissions")?
-        .permissions()
-        .mode()
-        & 0o777;
-    if mode & 0o077 != 0 {
-        anyhow::bail!("provider credential file is not owner-only");
-    }
-    Ok(())
-}
-
-#[cfg(windows)]
-fn restrict_file_permissions(path: &Path) -> Result<()> {
-    restrict_windows_permissions(path)
-}
-
-#[cfg(not(any(unix, windows)))]
-fn restrict_file_permissions(_path: &Path) -> Result<()> {
-    anyhow::bail!("provider credential permissions are unsupported on this platform")
-}
-
-#[cfg(windows)]
-fn restrict_windows_permissions(path: &Path) -> Result<()> {
-    use std::process::{Command, Stdio};
-    let username = std::env::var("USERNAME").context("USERNAME is unavailable")?;
-    let status = Command::new("icacls")
-        .arg(path)
-        .args(["/inheritance:r", "/grant:r"])
-        .arg(format!("{username}:F"))
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .context("restrict provider credential ACL")?;
-    if !status.success() {
-        anyhow::bail!("restrict provider credential ACL failed");
     }
     Ok(())
 }
@@ -766,24 +694,12 @@ env_key = "COMPANY_TOKEN"
         assert_eq!(material["env_http_headers"]["X-Tenant"], "COMPANY_TENANT");
     }
 
-    #[cfg(unix)]
     #[test]
-    fn cache_file_and_directory_are_owner_only() {
-        use std::os::unix::fs::PermissionsExt;
+    fn cache_write_creates_a_regular_file() {
         let temporary = tempfile::tempdir().unwrap();
         let path = temporary.path().join(".codex-provider/credential.json");
         write_cached_credential(&path, &serde_json::json!({"schema_version": 1})).unwrap();
-        assert_eq!(
-            fs::metadata(path.parent().unwrap())
-                .unwrap()
-                .permissions()
-                .mode()
-                & 0o777,
-            0o700
-        );
-        assert_eq!(
-            fs::metadata(path).unwrap().permissions().mode() & 0o777,
-            0o600
-        );
+        assert!(fs::metadata(path.parent().unwrap()).unwrap().is_dir());
+        assert!(fs::metadata(path).unwrap().is_file());
     }
 }

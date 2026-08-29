@@ -15,7 +15,7 @@ query 参数，再由 CLI 直接调用该 provider 的 OpenAI-compatible Images 
 - 用户要生成、编辑、抠图、背景替换或批量生成 PNG/JPEG/WebP 时使用本技能。
 - 目标是 SVG、CSS、canvas、已有矢量图标或可确定性编辑的原生文件时，不使用本技能。
 - 每次真实生成都必须由用户已给出的图片意图、尺寸、质量和输出路径驱动；缺少会改变结果的关键主体或编辑范围时先提问。
-- credential 只允许存在于 Codex Sync 管理的 owner-only 插件 cache；不把图片内容、provider 响应、Authorization header 或完整错误 body 写入日志、诊断、其他持久化副本或回复。图片原子提交允许使用同目录短生命周期临时文件，失败即清理。
+- credential 由 Codex Sync 写入版本化插件 cache；不把图片内容、provider 响应、Authorization header 或完整错误 body 写入日志、诊断、其他持久化副本或回复。图片原子提交允许使用同目录短生命周期临时文件，失败即清理。
 - 不自动重试、换 provider、换模型或删除用户的透明参数。provider 拒绝请求时，报告 `stage`、`code`、HTTP 状态（若有）并停在该边界。
 
 ## CLI 入口
@@ -107,10 +107,10 @@ Avoid: <negative constraints>
 
 ## Provider 与 credential
 
-- Codex Sync 在配置应用和插件收敛后，把当前 provider 写入 `<CODEX_HOME>/plugins/cache/<marketplace>/provider-imagegen/<version>/.codex-provider/credential.json`；目录在 POSIX 上为 `0700`、文件为 `0600`，原子替换且不进入同步仓库。CLI 只读该 cache，不启动 Codex app-server，也不解析或改写 `config.toml`。
+- Codex Sync 在配置应用和插件收敛后，把当前 provider 原子写入 `<CODEX_HOME>/plugins/cache/<marketplace>/provider-imagegen/<version>/.codex-provider/credential.json`，且不把它加入同步仓库。CLI 直接读取该文件，不检查 POSIX mode 或 Windows ACL，不启动 Codex app-server，也不解析或改写 `config.toml`。
 - cache 保存 endpoint、显式 headers、环境变量引用、query 参数和非敏感 fingerprint；字面 bearer token 会被转换为 `Authorization` header，不以 `experimental_bearer_token` 字段保存。`env_key` 与 `env_http_headers` 仍在 CLI 进程中解析。仅有 Codex 登录态 session 或 command-backed auth 的 provider 不生成可用 cache；不要读取 auth 文件或执行任意登录命令。
 - 不要求用户设置或粘贴 `OPENAI_API_KEY`，不执行 provider 的任意 `auth` 命令，不自行把 token 拼入 URL、请求参数、输出文件或诊断信息。
-- 若 cache、provider、base URL 或 credential 缺失，返回 `credential_cache_missing`、`credential_cache_invalid`、`credential_cache_permissions` 或对应的安全结构化失败并停止；先运行 Codex Sync pull 刷新 cache，不要猜测 OpenAI、回退到另一个 provider 或改用内置工具。
+- 若 cache、provider、base URL 或 credential 缺失，或 cache 格式/文件类型无效，返回 `credential_cache_missing`、`credential_cache_invalid` 或对应的结构化失败并停止；先运行 Codex Sync pull 刷新 cache，不要猜测 OpenAI、回退到另一个 provider 或改用内置工具。
 - 网络请求禁用继承的 `HTTP_PROXY`/`HTTPS_PROXY`，禁止 credential-bearing 请求跟随重定向。
 - 带 credential 的远程 HTTP provider 会在网络请求前拒绝；loopback HTTP 只用于用户明确配置的本机 gateway。provider 返回的跨源图片 URL 只允许 HTTPS，并且 DNS 的所有 A/AAAA 结果都必须是公网地址；与已配置 provider 完全同源的 URL 可用于本地 gateway。下载请求不带 provider credential。
 

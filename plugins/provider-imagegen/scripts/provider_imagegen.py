@@ -33,9 +33,6 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 import zlib
 
-from windows_acl import WindowsAclError, ensure_owner_only
-
-
 DEFAULT_MODEL = "gpt-image-2"
 DEFAULT_SIZE = "auto"
 DEFAULT_QUALITY = "medium"
@@ -134,7 +131,7 @@ def _codex_home(environment: Optional[Mapping[str, str]] = None) -> Path:
     return Path(os.path.expanduser("~/.codex"))
 
 
-def _cache_file_is_secure(path: Path) -> None:
+def _cache_file_is_regular(path: Path) -> None:
     try:
         import stat
 
@@ -149,20 +146,6 @@ def _cache_file_is_secure(path: Path) -> None:
         or not stat.S_ISREG(file_lstat.st_mode)
     ):
         raise ImagegenError("credential", "credential_cache_invalid")
-    if os.name == "nt":
-        try:
-            ensure_owner_only(path.parent)
-            ensure_owner_only(path)
-        except WindowsAclError as exc:
-            raise ImagegenError("credential", "credential_cache_permissions") from exc
-        return
-    try:
-        parent_stat = path.parent.stat()
-        file_stat = path.stat()
-    except OSError as exc:
-        raise ImagegenError("credential", "credential_cache_unavailable") from exc
-    if stat.S_IMODE(parent_stat.st_mode) & 0o077 or stat.S_IMODE(file_stat.st_mode) & 0o077:
-        raise ImagegenError("credential", "credential_cache_permissions")
 
 
 def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> List[Path]:
@@ -199,7 +182,7 @@ def load_cached_provider(environment: Optional[Mapping[str, str]] = None) -> Map
     if not candidates:
         raise ImagegenError("credential", "credential_cache_missing")
     path = candidates[0]
-    _cache_file_is_secure(path)
+    _cache_file_is_regular(path)
     try:
         raw = path.read_bytes()
     except OSError as exc:
