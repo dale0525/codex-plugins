@@ -7,6 +7,7 @@ import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import struct
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -70,6 +71,39 @@ class ProviderImagegenTests(unittest.TestCase):
         self.server.server_close()
         self.thread.join(timeout=2)
 
+    def test_unix_launcher_skips_a_broken_python3_shim(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            broken = root / "broken"
+            working = root / "working"
+            broken.mkdir()
+            working.mkdir()
+            broken_python = broken / "python3"
+            broken_python.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+            broken_python.chmod(0o755)
+            working_python = working / "python3"
+            working_python.write_text(
+                "#!/bin/sh\n"
+                "if [ \"${1-}\" = \"-c\" ]; then exit 0; fi\n"
+                "printf '%s\\n' '{\"shim\":\"working\"}'\n",
+                encoding="utf-8",
+            )
+            working_python.chmod(0o755)
+            environment = dict(os.environ)
+            environment["PATH"] = os.pathsep.join(
+                (str(broken), str(working), "/usr/bin", "/bin")
+            )
+            completed = subprocess.run(
+                [str(SCRIPT_DIR / "run.sh"), "--dry-run"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                env=environment,
+                check=False,
+                timeout=30,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr.decode("utf-8", errors="replace"))
+        self.assertEqual(json.loads(completed.stdout.decode("utf-8")), {"shim": "working"})
+
     def test_gpt_image_2_transparency_is_sent_without_local_rejection(self):
         payload = imagegen.build_parameters(
             {
@@ -129,6 +163,96 @@ class ProviderImagegenTests(unittest.TestCase):
             os.chmod(cache, 0o644)
             provider = imagegen.load_cached_provider({"PROVIDER_IMAGEGEN_CREDENTIAL_FILE": str(cache)})
         self.assertEqual(provider["http_headers"]["Authorization"], "Bearer cached-secret")
+
+    def test_cache_loader_falls_back_to_stable_marketplace_cache(self):
+        with tempfile.TemporaryDirectory() as directory:
+            codex_home = Path(directory) / ".codex"
+            plugin_root = codex_home / "plugins/cache/market/provider-imagegen/0.1.4"
+            plugin_root.mkdir(parents=True)
+            stable = (
+                codex_home
+                / "plugins/cache/market/.codex-provider/provider-imagegen/credential.json"
+            )
+            stable.parent.mkdir(parents=True)
+            stable.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "provider": "company",
+                        "base_url": "https://provider.example/v1",
+                        "headers": {"Authorization": "Bearer stable-secret"},
+                        "env_http_headers": {},
+                        "query_params": {},
+                        "requires_openai_auth": True,
+                        "fingerprint": "1" * 64,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with patch.object(
+                imagegen,
+                "__file__",
+                str(plugin_root / "scripts/provider_imagegen.py"),
+            ):
+                provider = imagegen.load_cached_provider({"CODEX_HOME": str(codex_home)})
+        self.assertEqual(provider["http_headers"]["Authorization"], "Bearer stable-secret")
+
+    def test_cache_loader_rejects_stable_cache_ancestor_symlink(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            codex_home = root / ".codex"
+            plugin_root = codex_home / "plugins/cache/market/provider-imagegen/0.1.4"
+            plugin_root.mkdir(parents=True)
+            outside = root / "outside"
+            outside_plugin = outside / "provider-imagegen"
+            outside_plugin.mkdir(parents=True)
+            (outside_plugin / "credential.json").write_text("{}", encoding="utf-8")
+            os.symlink(outside, codex_home / "plugins/cache/market/.codex-provider")
+            with patch.object(
+                imagegen,
+                "__file__",
+                str(plugin_root / "scripts/provider_imagegen.py"),
+            ):
+                with self.assertRaises(imagegen.ImagegenError) as error:
+                    imagegen.load_cached_provider({"CODEX_HOME": str(codex_home)})
+        self.assertEqual(error.exception.code, "credential_cache_invalid")
+
+    @unittest.skipUnless(os.name == "nt", "Windows junction only")
+    def test_cache_loader_rejects_windows_junction_ancestor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            codex_home = root / ".codex"
+            plugin_root = codex_home / "plugins/cache/market/provider-imagegen/0.1.4"
+            plugin_root.mkdir(parents=True)
+            outside = root / "outside"
+            outside_plugin = outside / "provider-imagegen"
+            outside_plugin.mkdir(parents=True)
+            (outside_plugin / "credential.json").write_text("{}", encoding="utf-8")
+            junction = codex_home / "plugins/cache/market/.codex-provider"
+            result = subprocess.run(
+                ["cmd", "/c", "mklink", "/J", str(junction), str(outside)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+            )
+            if result.returncode != 0:
+                self.skipTest("mklink /J is unavailable")
+            try:
+                with patch.object(
+                    imagegen,
+                    "__file__",
+                    str(plugin_root / "scripts/provider_imagegen.py"),
+                ):
+                    with self.assertRaises(imagegen.ImagegenError) as error:
+                        imagegen.load_cached_provider({"CODEX_HOME": str(codex_home)})
+                self.assertEqual(error.exception.code, "credential_cache_invalid")
+            finally:
+                subprocess.run(
+                    ["cmd", "/c", "rmdir", str(junction)],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
 
     def test_remote_http_credentials_are_rejected_before_network(self):
         provider = {

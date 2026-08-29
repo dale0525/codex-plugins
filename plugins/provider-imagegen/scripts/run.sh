@@ -17,12 +17,34 @@ if [ -n "${PROVIDER_IMAGEGEN_PYTHON:-}" ]; then
   exit 1
 fi
 
-for python_bin in python3 python; do
-  if command -v "$python_bin" >/dev/null 2>&1 &&
-    "$python_bin" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
-    exec "$python_bin" "$script" "$@"
-  fi
-done
+find_python() (
+  set -f
+  IFS=:
+  for directory in ${PATH-}; do
+    [ -n "$directory" ] || directory=.
+    candidate="$directory/python3"
+    if [ -x "$candidate" ] &&
+      "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      exit 0
+    fi
+  done
+  for directory in ${PATH-}; do
+    [ -n "$directory" ] || directory=.
+    candidate="$directory/python"
+    if [ -x "$candidate" ] &&
+      "$candidate" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 8) else 1)' >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      exit 0
+    fi
+  done
+  exit 1
+)
+
+python_bin=$(find_python || true)
+if [ -n "$python_bin" ]; then
+  exec "$python_bin" "$script" "$@"
+fi
 
 printf '%s\n' '{"ok":false,"stage":"runtime","code":"python_unavailable","retryable":false}'
 exit 1

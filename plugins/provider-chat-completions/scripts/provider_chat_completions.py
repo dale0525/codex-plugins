@@ -245,21 +245,86 @@ def _codex_home(environment: Optional[Mapping[str, str]] = None) -> str:
     return os.path.expanduser("~/.codex")
 
 
-def _cache_file_is_regular(path: str) -> None:
+def _is_reparse_point(metadata: os.stat_result) -> bool:
+    """Return whether Windows marked this path as a reparse point (for example, a junction)."""
+    return bool(getattr(metadata, "st_file_attributes", 0) & 0x400)
+
+
+def _canonical_cache_root(raw_root: str) -> str:
+    """Resolve the cache root while rejecting a redirect at the root itself."""
+    normalized = os.path.normpath(raw_root)
+    root = os.path.realpath(normalized)
+    expected = os.path.join(os.path.realpath(os.path.dirname(normalized)), os.path.basename(normalized))
+    try:
+        if os.path.normcase(os.path.normpath(root)) != os.path.normcase(os.path.normpath(expected)):
+            raise BridgeError("credential", "credential_cache_invalid")
+    except (OSError, ValueError) as exc:
+        raise BridgeError("credential", "credential_cache_unavailable") from exc
+    return root
+
+
+def _path_is_within(path: str, root: str) -> bool:
+    try:
+        candidate = os.path.normcase(os.path.normpath(os.path.realpath(path)))
+        boundary = os.path.normcase(os.path.normpath(root))
+        return os.path.commonpath([candidate, boundary]) == boundary
+    except (OSError, ValueError):
+        return False
+
+
+def _cache_file_is_regular(path: str, cache_root: Optional[str] = None) -> None:
     import stat
 
     try:
-        parent_lstat = os.lstat(os.path.dirname(path))
+        current = os.path.dirname(path)
+        while current:
+            metadata = os.lstat(current)
+            if (
+                stat.S_ISLNK(metadata.st_mode)
+                or _is_reparse_point(metadata)
+                or not stat.S_ISDIR(metadata.st_mode)
+            ):
+                raise BridgeError("credential", "credential_cache_invalid")
+            if cache_root is None:
+                break
+            if not _path_is_within(current, cache_root):
+                raise BridgeError("credential", "credential_cache_invalid")
+            if os.path.normcase(os.path.normpath(os.path.realpath(current))) == os.path.normcase(
+                os.path.normpath(cache_root)
+            ):
+                break
+            parent = os.path.dirname(current)
+            if parent == current:
+                break
+            current = parent
         file_lstat = os.lstat(path)
     except OSError as exc:
         raise BridgeError("credential", "credential_cache_unavailable") from exc
     if (
-        stat.S_ISLNK(parent_lstat.st_mode)
-        or not stat.S_ISDIR(parent_lstat.st_mode)
-        or stat.S_ISLNK(file_lstat.st_mode)
+        stat.S_ISLNK(file_lstat.st_mode)
+        or _is_reparse_point(file_lstat)
         or not stat.S_ISREG(file_lstat.st_mode)
     ):
         raise BridgeError("credential", "credential_cache_invalid")
+
+
+def _stable_cache_file(plugin_root: str, cache_root: str) -> Optional[str]:
+    plugin_directory = os.path.dirname(plugin_root)
+    marketplace_directory = os.path.dirname(plugin_directory)
+    plugin_name = os.path.basename(plugin_directory)
+    if not plugin_name:
+        return None
+    try:
+        if os.path.commonpath([marketplace_directory, cache_root]) != cache_root:
+            return None
+    except ValueError:
+        return None
+    return os.path.join(
+        marketplace_directory,
+        CREDENTIAL_CACHE_DIRECTORY,
+        plugin_name,
+        CREDENTIAL_CACHE_FILE,
+    )
 
 
 def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> List[str]:
@@ -275,9 +340,14 @@ def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> L
     try:
         if os.path.islink(cache_root_raw):
             raise BridgeError("credential", "credential_cache_invalid")
+        cache_root_metadata = os.lstat(cache_root_raw)
+        if _is_reparse_point(cache_root_metadata):
+            raise BridgeError("credential", "credential_cache_invalid")
+    except FileNotFoundError:
+        pass
     except OSError as exc:
         raise BridgeError("credential", "credential_cache_unavailable") from exc
-    cache_root = os.path.realpath(cache_root_raw)
+    cache_root = _canonical_cache_root(cache_root_raw)
     direct = os.path.join(plugin_root, CREDENTIAL_CACHE_DIRECTORY, CREDENTIAL_CACHE_FILE)
     candidates: List[str] = []
     try:
@@ -285,6 +355,9 @@ def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> L
             candidates.append(direct)
     except ValueError:
         pass
+    stable = _stable_cache_file(plugin_root, cache_root)
+    if stable is not None and os.path.exists(stable):
+        candidates.append(stable)
     return candidates
 
 
@@ -293,7 +366,11 @@ def load_cached_provider(environment: Optional[Mapping[str, str]] = None) -> Map
     if not candidates:
         raise BridgeError("credential", "credential_cache_missing")
     path = candidates[0]
-    _cache_file_is_regular(path)
+    env = os.environ if environment is None else environment
+    cache_root = None
+    if not env.get("PROVIDER_CHAT_CREDENTIAL_FILE"):
+        cache_root = _canonical_cache_root(os.path.join(_codex_home(env), "plugins", "cache"))
+    _cache_file_is_regular(path, cache_root)
     try:
         with open(path, "rb") as stream:
             raw = stream.read()

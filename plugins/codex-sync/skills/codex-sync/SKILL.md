@@ -23,7 +23,7 @@ pwsh -NoProfile -File <plugin-root>\scripts\bootstrap.ps1 <command> [arguments]
 ```
 
 For local development, `CODEX_SYNC_BIN` may point to a reviewed build. The
-bootstrap downloads and verifies the 0.6.8 release binary otherwise. On Windows,
+bootstrap downloads and verifies the 0.6.9 release binary otherwise. On Windows,
 it resolves Git independently of the system `PATH`: it uses a reviewed
 `CODEX_SYNC_GIT_BIN` override, a usable installed Git, or FastCtx's portable
 Git when available, otherwise downloads a locked, SHA-256-verified portable Git
@@ -61,9 +61,10 @@ for every desired plugin. A final marketplace/plugin listing must exactly match 
 remote non-protected Git sets and report each desired plugin as `installed =
 true` and `enabled = true`. After that verification, pull bootstraps only
 `provider-chat-completions` and `provider-imagegen`: it reads the synchronized
-active provider directly from local `config.toml` and atomically writes an
-credential cache under each installed plugin version. The provider CLIs read
-that file directly without a POSIX mode or Windows ACL gate. Codex Sync never sends
+active provider directly from local `config.toml` and atomically writes both a
+versioned credential cache under each installed plugin and a stable sibling cache
+outside the version directory. The provider CLIs read the versioned cache first,
+then the stable sibling, without a POSIX mode or Windows ACL gate. Codex Sync never sends
 the cache to app-server, Git, or the marketplace source. Source identity is
 `(url, ref, sparse)`; source
 mismatches detach plugins before replacing a marketplace. Personal, `openai`,

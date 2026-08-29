@@ -131,21 +131,83 @@ def _codex_home(environment: Optional[Mapping[str, str]] = None) -> Path:
     return Path(os.path.expanduser("~/.codex"))
 
 
-def _cache_file_is_regular(path: Path) -> None:
+def _is_reparse_point(metadata: os.stat_result) -> bool:
+    """Return whether Windows marked this path as a reparse point (for example, a junction)."""
+    return bool(getattr(metadata, "st_file_attributes", 0) & 0x400)
+
+
+def _canonical_cache_root(raw_root: Path) -> Path:
+    """Resolve the cache root while rejecting a redirect at the root itself."""
+    normalized = Path(os.path.normpath(os.fspath(raw_root)))
+    root = normalized.resolve()
+    expected = normalized.parent.resolve() / normalized.name
+    if os.path.normcase(os.path.normpath(os.fspath(root))) != os.path.normcase(
+        os.path.normpath(os.fspath(expected))
+    ):
+        raise ImagegenError("credential", "credential_cache_invalid")
+    return root
+
+
+def _path_is_within(path: Path, root: Path) -> bool:
+    try:
+        candidate = os.path.normcase(os.path.normpath(os.fspath(path.resolve())))
+        boundary = os.path.normcase(os.path.normpath(os.fspath(root)))
+        return os.path.commonpath([candidate, boundary]) == boundary
+    except (OSError, ValueError):
+        return False
+
+
+def _cache_file_is_regular(path: Path, cache_root: Optional[Path] = None) -> None:
     try:
         import stat
 
-        parent_lstat = path.parent.lstat()
+        current = path.parent
+        while True:
+            metadata = current.lstat()
+            if (
+                stat.S_ISLNK(metadata.st_mode)
+                or _is_reparse_point(metadata)
+                or not stat.S_ISDIR(metadata.st_mode)
+            ):
+                raise ImagegenError("credential", "credential_cache_invalid")
+            if cache_root is None:
+                break
+            if not _path_is_within(current, cache_root):
+                raise ImagegenError("credential", "credential_cache_invalid")
+            if os.path.normcase(os.path.normpath(os.fspath(current.resolve()))) == os.path.normcase(
+                os.path.normpath(os.fspath(cache_root))
+            ):
+                break
+            parent = current.parent
+            if parent == current:
+                break
+            current = parent
         file_lstat = path.lstat()
     except OSError as exc:
         raise ImagegenError("credential", "credential_cache_unavailable") from exc
     if (
-        stat.S_ISLNK(parent_lstat.st_mode)
-        or not stat.S_ISDIR(parent_lstat.st_mode)
-        or stat.S_ISLNK(file_lstat.st_mode)
+        stat.S_ISLNK(file_lstat.st_mode)
+        or _is_reparse_point(file_lstat)
         or not stat.S_ISREG(file_lstat.st_mode)
     ):
         raise ImagegenError("credential", "credential_cache_invalid")
+
+
+def _stable_cache_file(plugin_root: Path, cache_root: Path) -> Optional[Path]:
+    plugin_directory = plugin_root.parent
+    marketplace_directory = plugin_directory.parent
+    try:
+        marketplace_directory.relative_to(cache_root)
+    except (ValueError, OSError):
+        return None
+    if not plugin_directory.name:
+        return None
+    return (
+        marketplace_directory
+        / CREDENTIAL_CACHE_DIRECTORY
+        / plugin_directory.name
+        / CREDENTIAL_CACHE_FILE
+    )
 
 
 def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> List[Path]:
@@ -163,9 +225,14 @@ def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> L
     try:
         if cache_root_raw.is_symlink():
             raise ImagegenError("credential", "credential_cache_invalid")
+        cache_root_metadata = cache_root_raw.lstat()
+        if _is_reparse_point(cache_root_metadata):
+            raise ImagegenError("credential", "credential_cache_invalid")
+    except FileNotFoundError:
+        pass
     except OSError as exc:
         raise ImagegenError("credential", "credential_cache_unavailable") from exc
-    cache_root = cache_root_raw.resolve()
+    cache_root = _canonical_cache_root(cache_root_raw)
     direct = plugin_root / CREDENTIAL_CACHE_DIRECTORY / CREDENTIAL_CACHE_FILE
     try:
         plugin_root.relative_to(cache_root.resolve())
@@ -174,6 +241,9 @@ def _candidate_cache_files(environment: Optional[Mapping[str, str]] = None) -> L
     candidates: List[Path] = []
     if direct is not None and direct.exists():
         candidates.append(direct)
+    stable = _stable_cache_file(plugin_root, cache_root)
+    if stable is not None and stable.exists():
+        candidates.append(stable)
     return candidates
 
 
@@ -182,7 +252,11 @@ def load_cached_provider(environment: Optional[Mapping[str, str]] = None) -> Map
     if not candidates:
         raise ImagegenError("credential", "credential_cache_missing")
     path = candidates[0]
-    _cache_file_is_regular(path)
+    env = os.environ if environment is None else environment
+    cache_root = None
+    if not env.get("PROVIDER_IMAGEGEN_CREDENTIAL_FILE"):
+        cache_root = _canonical_cache_root(_codex_home(env) / "plugins" / "cache")
+    _cache_file_is_regular(path, cache_root)
     try:
         raw = path.read_bytes()
     except OSError as exc:

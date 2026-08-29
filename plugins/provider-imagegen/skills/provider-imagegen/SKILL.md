@@ -107,7 +107,7 @@ Avoid: <negative constraints>
 
 ## Provider 与 credential
 
-- Codex Sync 在配置应用和插件收敛后，把当前 provider 原子写入 `<CODEX_HOME>/plugins/cache/<marketplace>/provider-imagegen/<version>/.codex-provider/credential.json`，且不把它加入同步仓库。CLI 直接读取该文件，不检查 POSIX mode 或 Windows ACL，不启动 Codex app-server，也不解析或改写 `config.toml`。
+- Codex Sync 在配置应用和插件收敛后，把当前 provider 原子写入版本化文件 `<CODEX_HOME>/plugins/cache/<marketplace>/provider-imagegen/<version>/.codex-provider/credential.json`，并同时写入稳定文件 `<CODEX_HOME>/plugins/cache/<marketplace>/.codex-provider/provider-imagegen/credential.json`。稳定文件位于插件版本目录之外，可在 Codex 重装插件后继续使用；两者都不加入同步仓库。CLI 先读版本化文件、再回退到稳定文件，不检查 POSIX mode 或 Windows ACL，不启动 Codex app-server，也不解析或改写 `config.toml`。
 - cache 保存 endpoint、显式 headers、环境变量引用、query 参数和非敏感 fingerprint；字面 bearer token 会被转换为 `Authorization` header，不以 `experimental_bearer_token` 字段保存。`env_key` 与 `env_http_headers` 仍在 CLI 进程中解析。仅有 Codex 登录态 session 或 command-backed auth 的 provider 不生成可用 cache；不要读取 auth 文件或执行任意登录命令。
 - 不要求用户设置或粘贴 `OPENAI_API_KEY`，不执行 provider 的任意 `auth` 命令，不自行把 token 拼入 URL、请求参数、输出文件或诊断信息。
 - 若 cache、provider、base URL 或 credential 缺失，或 cache 格式/文件类型无效，返回 `credential_cache_missing`、`credential_cache_invalid` 或对应的结构化失败并停止；先运行 Codex Sync pull 刷新 cache，不要猜测 OpenAI、回退到另一个 provider 或改用内置工具。

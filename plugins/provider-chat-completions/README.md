@@ -5,8 +5,9 @@ provider credential cache prepared by Codex Sync and the corresponding
 OpenAI-compatible `POST /chat/completions` endpoint.
 
 The caller supplies a model and an ordered `messages` array. After a successful
-Codex Sync pull, the utility reads only the versioned local cache for the
-provider endpoint, credential headers, and query parameters, makes one
+Codex Sync pull, the utility reads the versioned local cache (or its stable
+marketplace sibling when a plugin reinstall replaced the version directory) for
+the provider endpoint, credential headers, and query parameters, makes one
 non-streaming request, and returns a normalized JSON result.
 
 It does not add a system prompt, assemble files, choose a model, retry, switch
@@ -81,9 +82,11 @@ returns them. Capture mode returns a bounded manifest with `ok`, `result_file`,
 Failure always returns `ok: false`, `stage`, `code`, and `retryable`, with an
 optional `http_status`. The utility never retries automatically.
 
-The provider cache is written by Codex Sync at
-`<CODEX_HOME>/plugins/cache/<marketplace>/provider-chat-completions/<version>/.codex-provider/credential.json`.
-The write is atomic. The CLI reads the cache file directly without checking
+The provider cache is written atomically by Codex Sync at both
+`<CODEX_HOME>/plugins/cache/<marketplace>/provider-chat-completions/<version>/.codex-provider/credential.json`
+and the stable sibling
+`<CODEX_HOME>/plugins/cache/<marketplace>/.codex-provider/provider-chat-completions/credential.json`.
+The CLI reads the versioned file first, then the stable sibling, without checking
 POSIX modes or Windows ACLs. The cache is never part of the synchronized Git
 repository and contains no raw `experimental_bearer_token` field. `env_key` and
 `env_http_headers` remain environment references and are resolved only in the

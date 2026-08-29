@@ -98,6 +98,9 @@ requires_openai_auth = true
     let plugin_cache = codex_home.join("plugins/cache/market");
     let chat_root = plugin_cache.join("provider-chat-completions/0.1.6");
     let image_root = plugin_cache.join("provider-imagegen/0.1.0");
+    let stable_chat =
+        plugin_cache.join(".codex-provider/provider-chat-completions/credential.json");
+    let stable_image = plugin_cache.join(".codex-provider/provider-imagegen/credential.json");
     fs::create_dir_all(&chat_root).unwrap();
     fs::create_dir_all(&image_root).unwrap();
     let markets_json = temp.path().join("markets.json");
@@ -161,6 +164,12 @@ requires_openai_auth = true
         assert!(fs::metadata(&directory).unwrap().is_dir());
         assert!(fs::metadata(&credential).unwrap().is_file());
     }
+    for credential in [&stable_chat, &stable_image] {
+        let raw = fs::read_to_string(credential).unwrap();
+        let payload: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        assert_eq!(payload["provider"], "company");
+        assert!(payload.get("experimental_bearer_token").is_none());
+    }
 
     fs::write(
         edit.join("config/common.toml"),
@@ -185,6 +194,8 @@ requires_openai_auth = true
         .stdout(predicates::str::contains("credential_unavailable"));
     assert!(!chat_root.join(".codex-provider/credential.json").exists());
     assert!(!image_root.join(".codex-provider/credential.json").exists());
+    assert!(!stable_chat.exists());
+    assert!(!stable_image.exists());
 }
 
 #[test]

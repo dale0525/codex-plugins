@@ -27,12 +27,15 @@ commit.
 After provider configuration and plugin convergence, pull bootstraps only
 `provider-chat-completions` and `provider-imagegen`. It reads the active provider
 from local `config.toml`, converts a literal bearer token to an Authorization
-header, preserves environment-variable references, and writes each versioned
-plugin cache under `.codex-provider/credential.json`. The write is atomic,
-symlink targets are rejected, and no credential value appears in status output.
-The provider CLIs read the file directly without checking POSIX modes or Windows
-ACLs. If explicit credentials are unavailable, a stale cache is
-removed and pull reports `credential_unavailable` without using Codex login
+header, preserves environment-variable references, and writes both a versioned
+plugin cache under `.codex-provider/credential.json` and a stable sibling cache
+under `<marketplace>/.codex-provider/<plugin>/credential.json`. Writes are
+atomic and every existing parent component is checked for symlinks before a
+cache is created, replaced, or removed; no credential value appears in status
+output. The provider CLIs read the versioned file first and the stable sibling
+second, without checking POSIX modes or Windows ACLs. Stable caches for plugins
+that are no longer desired, are not installed, lack a usable version directory,
+or have unavailable credentials are removed. Codex Sync never uses Codex login
 session files or command-backed auth.
 
 Never synchronize auth/session/history, SQLite state, project trust, caches,
@@ -49,6 +52,6 @@ capture, planning, mutation, and state boundaries. Non-Git marketplaces are
 outside the sync domain. A desired name colliding with a protected or
 non-portable local marketplace fails preflight before any device mutation.
 
-The two provider credential caches are local runtime derivatives, not
-synchronized cache content: they are never copied into the Codex Sync Git cache,
+The provider credential caches are local runtime derivatives, not synchronized
+cache content: neither cache location is copied into the Codex Sync Git cache,
 captured by push, logged, or written into marketplace source directories.

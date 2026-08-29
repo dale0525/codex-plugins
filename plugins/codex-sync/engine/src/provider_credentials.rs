@@ -26,6 +26,19 @@ const FORBIDDEN_HEADERS: [&str; 9] = [
     "upgrade",
 ];
 
+#[cfg(windows)]
+fn is_reparse_point(metadata: &fs::Metadata) -> bool {
+    use std::os::windows::fs::MetadataExt;
+
+    // FILE_ATTRIBUTE_REPARSE_POINT covers junctions as well as symbolic links.
+    metadata.file_attributes() & 0x400 != 0
+}
+
+#[cfg(not(windows))]
+fn is_reparse_point(_metadata: &fs::Metadata) -> bool {
+    false
+}
+
 #[derive(Debug, Default)]
 pub struct BootstrapReport {
     pub actions: Vec<String>,
@@ -52,6 +65,9 @@ pub fn bootstrap_provider_plugins(
         .cloned()
         .collect::<Vec<_>>();
     if target_ids.is_empty() {
+        if !dry_run {
+            cleanup_orphan_stable_caches(codex_home, desired_plugins, &[])?;
+        }
         return Ok(BootstrapReport::default());
     }
 
@@ -77,8 +93,15 @@ pub fn bootstrap_provider_plugins(
             continue;
         };
         let credential_path = root.join(CACHE_DIRECTORY).join(CACHE_FILE);
+        let stable_path = stable_credential_path(codex_home, plugin)?;
         let Some(material) = material.as_ref() else {
             if !dry_run {
+                if let Some(path) = stable_path.as_ref() {
+                    remove_cached_credential(
+                        path,
+                        Some(&codex_home.join("plugins").join("cache")),
+                    )?;
+                }
                 cleanup_plugin_caches(codex_home, plugin, None)?;
             }
             report
@@ -91,8 +114,14 @@ pub fn bootstrap_provider_plugins(
             continue;
         }
         write_cached_credential(&credential_path, material)?;
+        if let Some(path) = stable_path.as_ref() {
+            write_cached_credential(path, material)?;
+        }
         cleanup_plugin_caches(codex_home, plugin, Some(&root))?;
         report.actions.push(format!("bootstrap {name}: ready"));
+    }
+    if !dry_run {
+        cleanup_orphan_stable_caches(codex_home, desired_plugins, &installed)?;
     }
     Ok(report)
 }
@@ -401,10 +430,10 @@ fn plugin_cache_root(codex_home: &Path, plugin: &InstalledPlugin) -> Result<Opti
     };
     let source = match source_path.map(PathBuf::from) {
         Some(source) => match fs::symlink_metadata(&source) {
-            Ok(metadata) if metadata.file_type().is_symlink() => {
+            Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
                 anyhow::bail!("provider plugin source path must not be a symlink")
             }
-            Ok(metadata) if metadata.file_type().is_dir() => {
+            Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => {
                 let canonical =
                     fs::canonicalize(&source).context("canonicalize provider plugin cache")?;
                 canonical.starts_with(&cache).then_some(canonical)
@@ -435,6 +464,91 @@ fn plugin_cache_root(codex_home: &Path, plugin: &InstalledPlugin) -> Result<Opti
     Ok(Some(root))
 }
 
+fn stable_credential_path(codex_home: &Path, plugin: &InstalledPlugin) -> Result<Option<PathBuf>> {
+    let Some((cache, _plugin_path)) = plugin_cache_paths(codex_home, plugin)? else {
+        return Ok(None);
+    };
+    let Some(name) = plugin_name(&plugin.plugin_id) else {
+        return Ok(None);
+    };
+    let market = crate::codex::plugin_marketplace(&plugin.plugin_id)?;
+    let market_root = cache.join(market);
+    if !market_root.starts_with(&cache) {
+        anyhow::bail!("provider plugin marketplace path escapes Codex cache root");
+    }
+    Ok(Some(
+        market_root
+            .join(CACHE_DIRECTORY)
+            .join(name)
+            .join(CACHE_FILE),
+    ))
+}
+
+fn cleanup_orphan_stable_caches(
+    codex_home: &Path,
+    desired_plugins: &BTreeSet<String>,
+    installed: &[InstalledPlugin],
+) -> Result<()> {
+    let cache = codex_home.join("plugins").join("cache");
+    let cache_metadata = match fs::symlink_metadata(&cache) {
+        Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => metadata,
+        Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
+            anyhow::bail!("Codex plugin cache must not be a symlink")
+        }
+        Ok(_) => anyhow::bail!("Codex plugin cache is not a directory"),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
+        Err(error) => return Err(error).context("inspect Codex plugin cache"),
+    };
+    let _ = cache_metadata;
+    for market_entry in fs::read_dir(&cache).context("read Codex plugin cache marketplaces")? {
+        let market_entry = market_entry?;
+        let market_metadata = fs::symlink_metadata(market_entry.path())?;
+        if market_metadata.is_symlink() || is_reparse_point(&market_metadata) {
+            anyhow::bail!("provider plugin marketplace cache must not be a symlink");
+        }
+        if !market_metadata.is_dir() {
+            continue;
+        }
+        let market = market_entry.file_name();
+        let market = market
+            .to_str()
+            .context("provider marketplace name is not UTF-8")?;
+        if !safe_path_component(market) {
+            anyhow::bail!("provider plugin marketplace path component is invalid");
+        }
+        let stable_root = market_entry.path().join(CACHE_DIRECTORY);
+        match fs::symlink_metadata(&stable_root) {
+            Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
+                anyhow::bail!("provider stable credential directory must not be a symlink")
+            }
+            Ok(metadata) if !metadata.file_type().is_dir() => {
+                anyhow::bail!("provider stable credential path is not a directory")
+            }
+            Ok(_) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+            Err(error) => {
+                return Err(error).context("inspect provider stable credential directory")
+            }
+        }
+        for name in TARGET_PLUGIN_NAMES {
+            let id = format!("{name}@{market}");
+            let keep = if desired_plugins.contains(&id) {
+                if let Some(plugin) = installed.iter().find(|plugin| plugin.plugin_id == id) {
+                    plugin.installed && plugin_cache_root(codex_home, plugin)?.is_some()
+                } else {
+                    false
+                }
+            } else {
+                false
+            };
+            if !keep {
+                remove_cached_credential(&stable_root.join(name).join(CACHE_FILE), Some(&cache))?;
+            }
+        }
+    }
+    Ok(())
+}
+
 fn plugin_cache_paths(
     codex_home: &Path,
     plugin: &InstalledPlugin,
@@ -442,8 +556,8 @@ fn plugin_cache_paths(
     crate::codex::validate_plugin_id(&plugin.plugin_id)?;
     let plugins = codex_home.join("plugins");
     match fs::symlink_metadata(&plugins) {
-        Ok(metadata) if metadata.file_type().is_dir() => {}
-        Ok(metadata) if metadata.file_type().is_symlink() => {
+        Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => {}
+        Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
             anyhow::bail!("Codex plugin directory must not be a symlink")
         }
         Ok(_) => anyhow::bail!("Codex plugin directory is not a directory"),
@@ -452,8 +566,8 @@ fn plugin_cache_paths(
     }
     let cache = plugins.join("cache");
     match fs::symlink_metadata(&cache) {
-        Ok(metadata) if metadata.file_type().is_dir() => {}
-        Ok(metadata) if metadata.file_type().is_symlink() => {
+        Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => {}
+        Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
             anyhow::bail!("Codex plugin cache must not be a symlink")
         }
         Ok(_) => anyhow::bail!("Codex plugin cache is not a directory"),
@@ -475,8 +589,8 @@ fn plugin_cache_paths(
     }
     let plugin_path = cache.join(market).join(name);
     let metadata = match fs::symlink_metadata(&plugin_path) {
-        Ok(metadata) if metadata.file_type().is_dir() => metadata,
-        Ok(metadata) if metadata.file_type().is_symlink() => {
+        Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => metadata,
+        Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
             anyhow::bail!("provider plugin cache path must not be a symlink")
         }
         Ok(_) => anyhow::bail!("provider plugin cache path is not a directory"),
@@ -505,7 +619,8 @@ fn cleanup_plugin_caches(
     };
     for market_entry in fs::read_dir(&cache).context("read Codex plugin cache marketplaces")? {
         let market_entry = market_entry?;
-        if market_entry.file_type()?.is_symlink() {
+        let market_metadata = fs::symlink_metadata(market_entry.path())?;
+        if market_metadata.file_type().is_symlink() || is_reparse_point(&market_metadata) {
             anyhow::bail!("provider plugin marketplace cache must not be a symlink");
         }
         if !market_entry.file_type()?.is_dir() {
@@ -513,8 +628,10 @@ fn cleanup_plugin_caches(
         }
         let plugin_path = market_entry.path().join(name);
         let metadata = match fs::symlink_metadata(&plugin_path) {
-            Ok(metadata) if metadata.file_type().is_dir() => metadata,
-            Ok(metadata) if metadata.file_type().is_symlink() => {
+            Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => {
+                metadata
+            }
+            Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
                 anyhow::bail!("provider plugin cache path must not be a symlink")
             }
             Ok(_) => anyhow::bail!("provider plugin cache path is not a directory"),
@@ -531,7 +648,8 @@ fn cleanup_plugin_caches(
             fs::read_dir(&plugin_path).context("read provider plugin cache versions")?
         {
             let version_entry = version_entry?;
-            if version_entry.file_type()?.is_symlink() {
+            let version_metadata = fs::symlink_metadata(version_entry.path())?;
+            if version_metadata.file_type().is_symlink() || is_reparse_point(&version_metadata) {
                 anyhow::bail!("provider plugin cache version must not be a symlink");
             }
             if !version_entry.file_type()?.is_dir() {
@@ -544,7 +662,10 @@ fn cleanup_plugin_caches(
             if keep.is_some_and(|path| path == version_root.as_path()) {
                 continue;
             }
-            remove_cached_credential(&version_root.join(CACHE_DIRECTORY).join(CACHE_FILE))?;
+            remove_cached_credential(
+                &version_root.join(CACHE_DIRECTORY).join(CACHE_FILE),
+                Some(&cache),
+            )?;
         }
     }
     Ok(())
@@ -565,8 +686,8 @@ fn ensure_not_git_worktree(path: &Path) -> Result<()> {
 
 fn existing_cache_directory(cache: &Path, candidate: &Path) -> Result<Option<PathBuf>> {
     let metadata = match fs::symlink_metadata(candidate) {
-        Ok(metadata) if metadata.file_type().is_dir() => metadata,
-        Ok(metadata) if metadata.file_type().is_symlink() => {
+        Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => metadata,
+        Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
             anyhow::bail!("provider plugin cache version must not be a symlink")
         }
         Ok(_) => anyhow::bail!("provider plugin cache version is not a directory"),
@@ -601,7 +722,10 @@ fn write_cached_credential(path: &Path, material: &JsonValue) -> Result<()> {
         .context("provider credential cache has no parent")?;
     ensure_cache_directory(parent)?;
     if let Ok(metadata) = fs::symlink_metadata(path) {
-        if metadata.file_type().is_symlink() || !metadata.file_type().is_file() {
+        if metadata.file_type().is_symlink()
+            || is_reparse_point(&metadata)
+            || !metadata.file_type().is_file()
+        {
             anyhow::bail!("provider credential cache file is not a regular file");
         }
     }
@@ -619,23 +743,17 @@ fn write_cached_credential(path: &Path, material: &JsonValue) -> Result<()> {
     Ok(())
 }
 
-fn remove_cached_credential(path: &Path) -> Result<()> {
+fn remove_cached_credential(path: &Path, boundary: Option<&Path>) -> Result<()> {
     if let Some(parent) = path.parent() {
-        match fs::symlink_metadata(parent) {
-            Ok(metadata) if metadata.file_type().is_dir() => {}
-            Ok(metadata) if metadata.file_type().is_symlink() => {
-                anyhow::bail!("refusing to inspect symlink provider credential directory")
-            }
-            Ok(_) => anyhow::bail!("provider credential directory is not a directory"),
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
-            Err(error) => return Err(error).context("inspect provider credential directory"),
+        if !existing_directory_chain_is_safe(parent, boundary)? {
+            return Ok(());
         }
     }
     match fs::symlink_metadata(path) {
-        Ok(metadata) if metadata.file_type().is_file() => {
+        Ok(metadata) if metadata.file_type().is_file() && !is_reparse_point(&metadata) => {
             fs::remove_file(path).context("remove stale provider credential cache")?
         }
-        Ok(metadata) if metadata.file_type().is_symlink() => {
+        Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
             anyhow::bail!("refusing to remove symlink provider credential cache")
         }
         Ok(_) => anyhow::bail!("provider credential cache is not a regular file"),
@@ -646,18 +764,70 @@ fn remove_cached_credential(path: &Path) -> Result<()> {
 }
 
 fn ensure_cache_directory(path: &Path) -> Result<()> {
-    match fs::symlink_metadata(path) {
-        Ok(metadata) if metadata.file_type().is_dir() => {}
-        Ok(metadata) if metadata.file_type().is_symlink() => {
-            anyhow::bail!("provider credential directory must not be a symlink")
+    let mut missing = Vec::new();
+    let mut current = path.to_path_buf();
+    loop {
+        match fs::symlink_metadata(&current) {
+            Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => break,
+            Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
+                anyhow::bail!("provider credential directory must not be a symlink")
+            }
+            Ok(_) => anyhow::bail!("provider credential path is not a directory"),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                missing.push(current.clone());
+                current = current
+                    .parent()
+                    .context("provider credential directory has no parent")?
+                    .to_path_buf();
+            }
+            Err(error) => return Err(error).context("inspect provider credential directory"),
         }
-        Ok(_) => anyhow::bail!("provider credential path is not a directory"),
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            fs::create_dir_all(path).context("create provider credential directory")?
+    }
+    for directory in missing.into_iter().rev() {
+        match fs::symlink_metadata(&directory) {
+            Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => {}
+            Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
+                anyhow::bail!("provider credential directory must not be a symlink")
+            }
+            Ok(_) => anyhow::bail!("provider credential path is not a directory"),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                fs::create_dir(&directory).context("create provider credential directory")?
+            }
+            Err(error) => return Err(error).context("inspect provider credential directory"),
         }
-        Err(error) => return Err(error).context("inspect provider credential directory"),
     }
     Ok(())
+}
+
+fn existing_directory_chain_is_safe(path: &Path, boundary: Option<&Path>) -> Result<bool> {
+    let boundary = boundary
+        .map(fs::canonicalize)
+        .transpose()
+        .context("canonicalize provider credential cache boundary")?;
+    let mut current = Some(path);
+    while let Some(directory) = current {
+        match fs::symlink_metadata(directory) {
+            Ok(metadata) if metadata.file_type().is_dir() && !is_reparse_point(&metadata) => {
+                let at_boundary = boundary.as_ref().is_some_and(|root| {
+                    directory == root
+                        || fs::canonicalize(directory)
+                            .ok()
+                            .is_some_and(|canonical| canonical == *root)
+                });
+                if at_boundary {
+                    break;
+                }
+                current = directory.parent();
+            }
+            Ok(metadata) if metadata.file_type().is_symlink() || is_reparse_point(&metadata) => {
+                anyhow::bail!("provider credential directory must not be a symlink")
+            }
+            Ok(_) => anyhow::bail!("provider credential path is not a directory"),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(false),
+            Err(error) => return Err(error).context("inspect provider credential directory"),
+        }
+    }
+    Ok(true)
 }
 
 #[cfg(test)]
@@ -701,5 +871,57 @@ env_key = "COMPANY_TOKEN"
         write_cached_credential(&path, &serde_json::json!({"schema_version": 1})).unwrap();
         assert!(fs::metadata(path.parent().unwrap()).unwrap().is_dir());
         assert!(fs::metadata(path).unwrap().is_file());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn cache_write_rejects_a_symlinked_parent() {
+        use std::os::unix::fs::symlink;
+
+        let temporary = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let cache = temporary.path().join("cache");
+        fs::create_dir(&cache).unwrap();
+        symlink(outside.path(), cache.join(CACHE_DIRECTORY)).unwrap();
+        let path = cache
+            .join(CACHE_DIRECTORY)
+            .join("provider-chat-completions")
+            .join(CACHE_FILE);
+        let error =
+            write_cached_credential(&path, &serde_json::json!({"schema_version": 1})).unwrap_err();
+        assert!(error.to_string().contains("must not be a symlink"));
+        assert!(!outside.path().join("provider-chat-completions").exists());
+    }
+
+    #[test]
+    fn orphan_stable_caches_are_removed_when_plugin_is_not_desired() {
+        let temporary = tempfile::tempdir().unwrap();
+        let path = temporary
+            .path()
+            .join("plugins/cache/market/.codex-provider/provider-chat-completions/credential.json");
+        write_cached_credential(&path, &serde_json::json!({"schema_version": 1})).unwrap();
+        cleanup_orphan_stable_caches(temporary.path(), &BTreeSet::new(), &[]).unwrap();
+        assert!(!path.exists());
+    }
+
+    #[test]
+    fn stable_cache_is_removed_when_installed_version_directory_is_missing() {
+        let temporary = tempfile::tempdir().unwrap();
+        let path = temporary
+            .path()
+            .join("plugins/cache/market/.codex-provider/provider-chat-completions/credential.json");
+        write_cached_credential(&path, &serde_json::json!({"schema_version": 1})).unwrap();
+        let desired = BTreeSet::from(["provider-chat-completions@market".to_owned()]);
+        let installed = [InstalledPlugin {
+            plugin_id: "provider-chat-completions@market".to_owned(),
+            marketplace_name: Some("market".to_owned()),
+            version: Some("0.1.13".to_owned()),
+            source: None,
+            marketplace_source: None,
+            installed: true,
+            enabled: true,
+        }];
+        cleanup_orphan_stable_caches(temporary.path(), &desired, &installed).unwrap();
+        assert!(!path.exists());
     }
 }

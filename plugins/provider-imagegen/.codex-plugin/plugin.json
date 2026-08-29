@@ -1,6 +1,6 @@
 {
   "name": "provider-imagegen",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Generate and edit raster images through the active Codex provider's OpenAI-compatible Images API.",
   "author": {
     "name": "Logic Tan",

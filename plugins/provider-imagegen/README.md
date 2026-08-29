@@ -2,9 +2,10 @@
 
 Provider Imagegen 用本地 CLI 调用当前 Codex provider 的 OpenAI-compatible
 Images API，生成或编辑 PNG/JPEG/WebP。Codex Sync 在成功 pull 后把当前
-provider 的 endpoint、headers、环境变量引用和 query 参数写入版本化插件 cache；
-CLI 直接读取该 cache，不需要用户粘贴密钥，也不使用系统内置 `image_gen`。
-cache 会原子替换且不进入同步仓库；CLI 不检查 POSIX mode 或 Windows ACL。
+provider 的 endpoint、headers、环境变量引用和 query 参数写入版本化插件 cache，
+并写入插件版本目录之外的稳定 sibling cache；CLI 先读版本化 cache，缺失时读
+sibling cache，不需要用户粘贴密钥，也不使用系统内置 `image_gen`。
+两处 cache 都会原子替换且不进入同步仓库；CLI 不检查 POSIX mode 或 Windows ACL。
 字面 bearer token 只以 `Authorization` header 形式存在于该 cache，CLI
 不回显或记录它。仅有 Codex 登录态 session 或 command-backed auth 的 provider 不会
 生成可用 cache，也不会读取 auth 文件或执行任意登录命令。
