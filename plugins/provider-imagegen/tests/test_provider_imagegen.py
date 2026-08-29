@@ -160,6 +160,13 @@ class ProviderImagegenTests(unittest.TestCase):
             [call(root), call(cache)],
         )
 
+    def test_windows_acl_binds_token_query_to_advapi32(self):
+        source = (SCRIPT_DIR / "windows_acl.py").read_text(encoding="utf-8")
+        self.assertIn("def _current_user_sid(kernel32, advapi32):", source)
+        self.assertIn("advapi32.GetTokenInformation.argtypes", source)
+        self.assertNotIn("kernel32.GetTokenInformation.argtypes", source)
+        self.assertIn("_current_user_sid(kernel32, advapi32)", source)
+
     def test_remote_http_credentials_are_rejected_before_network(self):
         provider = {
             "base_url": "http://provider.example/v1",

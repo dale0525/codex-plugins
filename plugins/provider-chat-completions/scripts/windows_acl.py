@@ -81,32 +81,33 @@ def ensure_no_reparse_ancestors(path: Path) -> None:
         current = parent
 
 
-def _current_user_sid(kernel32):
+def _current_user_sid(kernel32, advapi32):
+    # Token APIs are exported by advapi32; process and handle helpers live in kernel32.
     kernel32.GetCurrentProcess.restype = wintypes.HANDLE
-    kernel32.OpenProcessToken.argtypes = [
+    advapi32.OpenProcessToken.argtypes = [
         wintypes.HANDLE,
         wintypes.DWORD,
         ctypes.POINTER(wintypes.HANDLE),
     ]
-    kernel32.OpenProcessToken.restype = wintypes.BOOL
-    kernel32.GetTokenInformation.argtypes = [
+    advapi32.OpenProcessToken.restype = wintypes.BOOL
+    advapi32.GetTokenInformation.argtypes = [
         wintypes.HANDLE,
         wintypes.DWORD,
         ctypes.c_void_p,
         wintypes.DWORD,
         ctypes.POINTER(wintypes.DWORD),
     ]
-    kernel32.GetTokenInformation.restype = wintypes.BOOL
+    advapi32.GetTokenInformation.restype = wintypes.BOOL
     kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
     kernel32.CloseHandle.restype = wintypes.BOOL
     token = wintypes.HANDLE()
-    if not kernel32.OpenProcessToken(
+    if not advapi32.OpenProcessToken(
         kernel32.GetCurrentProcess(), TOKEN_QUERY, ctypes.byref(token)
     ):
         _raise()
     try:
         required = wintypes.DWORD()
-        kernel32.GetTokenInformation(
+        advapi32.GetTokenInformation(
             token,
             TOKEN_USER_INFORMATION,
             None,
@@ -116,7 +117,7 @@ def _current_user_sid(kernel32):
         if required.value <= 0:
             _raise()
         storage = _aligned_buffer(required.value)
-        if not kernel32.GetTokenInformation(
+        if not advapi32.GetTokenInformation(
             token,
             TOKEN_USER_INFORMATION,
             ctypes.byref(storage),
@@ -207,7 +208,7 @@ def ensure_owner_only(path: Path) -> None:
     descriptor = ctypes.c_void_p()
     owner = ctypes.c_void_p()
     dacl = ctypes.c_void_p()
-    current_sid, _sid_storage = _current_user_sid(kernel32)
+    current_sid, _sid_storage = _current_user_sid(kernel32, advapi32)
     try:
         result = advapi32.GetNamedSecurityInfoW(
             path_value,

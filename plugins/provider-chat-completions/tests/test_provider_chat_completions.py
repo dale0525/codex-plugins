@@ -279,6 +279,13 @@ class BridgeTests(unittest.TestCase):
             [call(str(root)), call(str(cache))],
         )
 
+    def test_windows_acl_binds_token_query_to_advapi32(self):
+        source = (SCRIPT_DIR / "windows_acl.py").read_text(encoding="utf-8")
+        self.assertIn("def _current_user_sid(kernel32, advapi32):", source)
+        self.assertIn("advapi32.GetTokenInformation.argtypes", source)
+        self.assertNotIn("kernel32.GetTokenInformation.argtypes", source)
+        self.assertIn("_current_user_sid(kernel32, advapi32)", source)
+
     def test_main_accepts_power_shell_json_encodings(self):
         request = {
             "model": "chosen-model",
