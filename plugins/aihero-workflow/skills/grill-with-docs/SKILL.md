@@ -14,6 +14,11 @@ for a small, already-specified change or for a no-repository idea.
 1. Read the applicable `AGENTS.md`, relevant code, `CONTEXT.md`, and ADRs.
 2. Use the bundled `grilling` procedure: ask related questions in rounds, wait
    for the user's answers, and show the current understanding after each round.
+   In particular, follow its question rules for every question: use everyday
+   Chinese without technical terms, and put one short, project-related example
+   immediately after the question. Take the example from the repository or
+   the user's stated goal; do not make up project details or lead the user to a
+   choice.
 3. Use the bundled `domain-modeling` rules when a term is vague, overloaded, or
    inconsistent with the repository vocabulary.
 4. Write a resolved term to the relevant `CONTEXT.md` immediately. Keep that
@@ -24,6 +29,12 @@ for a small, already-specified change or for a no-repository idea.
    answer.
 6. Stop after the requested change is sufficiently defined. Do not implement,
    publish issues, commit, or broaden scope.
+
+Before each round, verify that every question is understandable to a
+non-technical reader, has one simple example grounded in this project, and
+does not contain a hidden decision. If the repository and the user's message
+do not provide enough detail for a grounded example, ask for that context first
+and keep the example tied to the user's own words.
 
 ## Concurrency and reporting
 
