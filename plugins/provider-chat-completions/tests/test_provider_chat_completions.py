@@ -12,7 +12,7 @@ import unittest
 from types import SimpleNamespace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 
 SCRIPT_DIR = Path(__file__).resolve().parents[1] / "scripts"
@@ -248,6 +248,65 @@ class BridgeTests(unittest.TestCase):
             provider = bridge.load_cached_provider({"PROVIDER_CHAT_CREDENTIAL_FILE": str(cache)})
         self.assertEqual(provider["base_url"], "https://provider.example/v1")
         self.assertEqual(provider["http_headers"]["Authorization"], "Bearer cached-secret")
+
+    def test_windows_cache_loader_uses_acl_check_not_posix_mode_bits(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            cache = root / "credential.json"
+            cache.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "provider": "company",
+                        "base_url": "https://provider.example/v1",
+                        "headers": {},
+                        "env_http_headers": {},
+                        "query_params": {},
+                        "requires_openai_auth": False,
+                        "fingerprint": "0" * 64,
+                    }
+                ),
+                encoding="utf-8",
+            )
+            os.chmod(root, 0o755)
+            os.chmod(cache, 0o644)
+            with patch.object(bridge.os, "name", "nt"), patch.object(
+                bridge, "ensure_owner_only"
+            ) as ensure_owner_only:
+                bridge._cache_file_is_secure(str(cache))
+        self.assertEqual(
+            ensure_owner_only.call_args_list,
+            [call(str(root)), call(str(cache))],
+        )
+
+    def test_main_accepts_power_shell_json_encodings(self):
+        request = {
+            "model": "chosen-model",
+            "messages": [{"role": "user", "content": "你好"}],
+        }
+        request_text = json.dumps(request, ensure_ascii=False)
+        encoded_inputs = [
+            request_text.encode("utf-8"),
+            b"\xef\xbb\xbf" + request_text.encode("utf-8"),
+            request_text.encode("utf-16le"),
+            request_text.encode("utf-16be"),
+            b"\xff\xfe" + request_text.encode("utf-16le"),
+            b"\xfe\xff" + request_text.encode("utf-16be"),
+        ]
+        for encoded in encoded_inputs:
+            seen = []
+            stdout = io.BytesIO()
+            with patch.object(
+                bridge, "process_request", side_effect=lambda value: seen.append(value) or {"ok": True}
+            ), patch.object(
+                bridge.sys,
+                "stdin",
+                SimpleNamespace(buffer=io.BytesIO(encoded)),
+            ), patch.object(bridge.sys, "stdout", SimpleNamespace(buffer=stdout)):
+                return_code = bridge.main([])
+            self.assertEqual(return_code, 0)
+            self.assertEqual(seen, [request])
+            self.assertEqual(json.loads(stdout.getvalue().decode("utf-8")), {"ok": True})
 
     def test_cache_loader_rejects_insecure_file_permissions(self):
         with tempfile.TemporaryDirectory() as directory:

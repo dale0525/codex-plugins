@@ -24,6 +24,8 @@ from urllib.request import (  # nosec B310 - URL is validated before opening
     ProxyHandler,
 )
 
+from windows_acl import WindowsAclError, ensure_owner_only
+
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 DEFAULT_TIMEOUT_SECONDS = 120.0
 OUTPUT_PERMISSION_TIMEOUT_SECONDS = 10.0
@@ -251,12 +253,27 @@ def _cache_file_is_secure(path: str) -> None:
     try:
         parent_lstat = os.lstat(os.path.dirname(path))
         file_lstat = os.lstat(path)
+    except OSError as exc:
+        raise BridgeError("credential", "credential_cache_unavailable") from exc
+    if (
+        stat.S_ISLNK(parent_lstat.st_mode)
+        or not stat.S_ISDIR(parent_lstat.st_mode)
+        or stat.S_ISLNK(file_lstat.st_mode)
+        or not stat.S_ISREG(file_lstat.st_mode)
+    ):
+        raise BridgeError("credential", "credential_cache_invalid")
+    if os.name == "nt":
+        try:
+            ensure_owner_only(os.path.dirname(path))
+            ensure_owner_only(path)
+        except WindowsAclError as exc:
+            raise BridgeError("credential", "credential_cache_permissions") from exc
+        return
+    try:
         parent_stat = os.stat(os.path.dirname(path))
         file_stat = os.stat(path)
     except OSError as exc:
         raise BridgeError("credential", "credential_cache_unavailable") from exc
-    if stat.S_ISLNK(parent_lstat.st_mode) or stat.S_ISLNK(file_lstat.st_mode) or not stat.S_ISREG(file_stat.st_mode):
-        raise BridgeError("credential", "credential_cache_invalid")
     if stat.S_IMODE(parent_stat.st_mode) & 0o077 or stat.S_IMODE(file_stat.st_mode) & 0o077:
         raise BridgeError("credential", "credential_cache_permissions")
 
@@ -616,11 +633,50 @@ def process_request(
     return post_chat_completion(provider, request, timeout)
 
 
+def _decode_stdin_json(raw: bytes) -> str:
+    """Decode JSON from UTF-8 or the UTF-16 forms emitted by Windows PowerShell."""
+    encodings = []
+    if raw.startswith(b"\xef\xbb\xbf"):
+        encodings.append("utf-8-sig")
+    elif raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        encodings.append("utf-16")
+    elif len(raw) >= 4 and len(raw) % 2 == 0:
+        # Windows PowerShell 5.1 can pass UTF-16LE without a BOM when a native
+        # process is on the receiving end of a pipeline.  JSON punctuation is
+        # ASCII, so the zero-byte distribution provides a useful first guess.
+        even_zeroes = raw[0::2].count(0)
+        odd_zeroes = raw[1::2].count(0)
+        threshold = max(1, len(raw) // 4)
+        if odd_zeroes >= threshold and odd_zeroes > even_zeroes:
+            encodings.append("utf-16-le")
+        elif even_zeroes >= threshold and even_zeroes > odd_zeroes:
+            encodings.append("utf-16-be")
+    encodings.extend(("utf-8", "utf-16-le", "utf-16-be"))
+
+    seen = set()
+    for encoding in encodings:
+        if encoding in seen:
+            continue
+        seen.add(encoding)
+        try:
+            text = raw.decode(encoding)
+        except UnicodeDecodeError:
+            continue
+        try:
+            json.loads(text)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        return text
+    # Preserve the normal exception boundary for malformed or undecodable
+    # input; main() maps either decode or parse failure to invalid_json.
+    return raw.decode("utf-8")
+
+
 def main(arguments: Optional[Sequence[str]] = None) -> int:
     output_file: Optional[str] = None
     try:
         output_file = parse_cli_arguments(sys.argv[1:] if arguments is None else arguments)
-        request = json.loads(sys.stdin.buffer.read().decode("utf-8"))
+        request = json.loads(_decode_stdin_json(sys.stdin.buffer.read()))
         if not isinstance(request, dict):
             raise BridgeError("request", "request_not_object")
         result = process_request(request)

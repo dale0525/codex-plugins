@@ -172,6 +172,7 @@ def _validate_provider_chat_completions(
         Path("README.md"),
         Path("skills/provider-chat-completions/SKILL.md"),
         Path("scripts/provider_chat_completions.py"),
+        Path("scripts/windows_acl.py"),
         Path("scripts/run.sh"),
         Path("scripts/run.ps1"),
         Path("tests/test_provider_chat_completions.py"),

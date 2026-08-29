@@ -33,6 +33,8 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 import zlib
 
+from windows_acl import WindowsAclError, ensure_owner_only
+
 
 DEFAULT_MODEL = "gpt-image-2"
 DEFAULT_SIZE = "auto"
@@ -137,13 +139,28 @@ def _cache_file_is_secure(path: Path) -> None:
         import stat
 
         parent_lstat = path.parent.lstat()
-        parent_stat = path.parent.stat()
         file_lstat = path.lstat()
+    except OSError as exc:
+        raise ImagegenError("credential", "credential_cache_unavailable") from exc
+    if (
+        stat.S_ISLNK(parent_lstat.st_mode)
+        or not stat.S_ISDIR(parent_lstat.st_mode)
+        or stat.S_ISLNK(file_lstat.st_mode)
+        or not stat.S_ISREG(file_lstat.st_mode)
+    ):
+        raise ImagegenError("credential", "credential_cache_invalid")
+    if os.name == "nt":
+        try:
+            ensure_owner_only(path.parent)
+            ensure_owner_only(path)
+        except WindowsAclError as exc:
+            raise ImagegenError("credential", "credential_cache_permissions") from exc
+        return
+    try:
+        parent_stat = path.parent.stat()
         file_stat = path.stat()
     except OSError as exc:
         raise ImagegenError("credential", "credential_cache_unavailable") from exc
-    if stat.S_ISLNK(parent_lstat.st_mode) or not path.is_file() or stat.S_ISLNK(file_lstat.st_mode):
-        raise ImagegenError("credential", "credential_cache_invalid")
     if stat.S_IMODE(parent_stat.st_mode) & 0o077 or stat.S_IMODE(file_stat.st_mode) & 0o077:
         raise ImagegenError("credential", "credential_cache_permissions")
 
