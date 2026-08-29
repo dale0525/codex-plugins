@@ -131,6 +131,55 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr.decode("utf-8", errors="replace"))
         self.assertEqual(completed.stdout.decode("utf-8"), payload)
 
+    def test_windows_launcher_forwards_powershell_pipeline_input(self):
+        launcher_text = RUN_PS1.read_text(encoding="utf-8")
+        self.assertIn("$MyInvocation.ExpectingInput", launcher_text)
+        self.assertIn("StandardInput.BaseStream", launcher_text)
+
+        if platform.system() != "Windows":
+            return
+        powershell = shutil.which("pwsh") or shutil.which("powershell")
+        if powershell is None:
+            self.skipTest("PowerShell is not installed")
+
+        with tempfile.TemporaryDirectory() as directory:
+            launcher = Path(directory) / "run.ps1"
+            core = Path(directory) / "provider_chat_completions.py"
+            launcher.write_text(RUN_PS1.read_text(encoding="utf-8"), encoding="utf-8")
+            core.write_text(
+                "import sys\n"
+                "sys.stdout.buffer.write(sys.stdin.buffer.read())\n",
+                encoding="utf-8",
+            )
+            escaped_launcher = str(launcher).replace("'", "''")
+            command = (
+                "$payload = [Console]::In.ReadToEnd(); "
+                f"$payload | & '{escaped_launcher}'; "
+                "exit $LASTEXITCODE"
+            )
+            payload = (
+                '{"model":"chosen-model","messages":[{"role":"user",'
+                '"content":"pipeline stdin must survive"}]}\n'
+            )
+            completed = subprocess.run(
+                [
+                    powershell,
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-Command",
+                    command,
+                ],
+                input=payload.encode("utf-8"),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                check=False,
+                timeout=30,
+            )
+        self.assertEqual(completed.returncode, 0, completed.stderr.decode("utf-8", errors="replace"))
+        self.assertEqual(completed.stdout.decode("utf-8"), payload)
+
     def test_request_keeps_messages_and_owns_stream(self):
         request = bridge.build_request(
             {
