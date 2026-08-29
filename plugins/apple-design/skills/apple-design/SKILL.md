@@ -1,6 +1,6 @@
 ---
 name: apple-design
-description: Apple's approach to interface design and fluid, physical motion, translated for the web. Use when the user asks for Apple/HIG-inspired interface principles, physical gesture/material guidance, or Apple-style design. Do not trigger for generic UI implementation, generic code review, or ordinary animation work without an Apple-design request.
+description: Apple's approach to interface design and fluid, physical motion, translated for the web. Use when building or reviewing gesture-driven UI, spring animations, drag/swipe/sheet interactions, momentum and interruptible transitions, translucent materials and depth, typography (optical sizing, tracking, leading), reduced-motion, or the design foundations (feedback, spatial consistency, restraint) behind Apple-style interfaces. Do not trigger for generic UI implementation, generic code review, or ordinary animation work without an Apple-design request.
 ---
 
 # Apple Design

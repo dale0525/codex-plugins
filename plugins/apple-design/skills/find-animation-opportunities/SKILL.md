@@ -1,6 +1,6 @@
 ---
 name: find-animation-opportunities
-description: Search a codebase or UI for places that don't animate but should, and reject everything that shouldn't. Read-only; it proposes motion with exact values, it does not implement it. Use only when the user explicitly asks to find, list, or audit animation opportunities without changing code. Do not trigger for "make this feel more alive" implementation requests, existing-motion fixes, or general UX review; use animate, improve-animations, or review-animations as appropriate.
+description: Search a codebase or UI for places that don't animate but should, and reject everything that shouldn't. Read-only; it proposes motion with exact values, it does not implement it. Use when the user asks "what could be animated here?" or wants to "make this feel more alive". For fixing existing animations, use improve-animations or review-animations instead. Use only when the user explicitly asks to find, list, or audit animation opportunities without changing code. Do not trigger for "make this feel more alive" implementation requests, existing-motion fixes, or general UX review; use animate, improve-animations, or review-animations as appropriate.
 ---
 
 # Finding Animation Opportunities
