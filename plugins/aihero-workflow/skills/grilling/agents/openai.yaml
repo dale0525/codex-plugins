@@ -1,6 +1,6 @@
 interface:
   display_name: "Grilling"
-  short_description: "Run a decision interview only when explicitly requested."
-  default_prompt: "Use $grilling only when explicitly invoked for a bounded decision interview."
+  short_description: "Clarify ambiguous no-repository decisions"
+  default_prompt: "Use $grilling to clarify this no-repository idea through a bounded decision interview."
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

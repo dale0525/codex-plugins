@@ -1,12 +1,12 @@
 ---
 name: grilling
-description: Run a bounded, multi-question decision interview without silently deciding for the user. Use only when explicitly invoked as the internal primitive of grill-with-docs or when the user explicitly requests a decision interview; do not trigger for ordinary implementation planning.
+description: Run a bounded, multi-question decision interview for an idea or requested outcome with no repository change in scope when unresolved goals, recipients, boundaries, observable behavior, or acceptance checks could materially change the result. Skip repository changes, ordinary implementation planning, and requests whose decisions are already stable.
 ---
 
 # Grilling primitive
 
-Use this as the interview primitive for `grill-with-docs`. It is not a product
-implementation step.
+Use this as a standalone decision interview and as the interview primitive for
+`grill-with-docs`. It is not a product implementation step.
 
 ## Procedure
 

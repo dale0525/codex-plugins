@@ -1,0 +1,6 @@
+interface:
+  display_name: "Grill with Docs"
+  short_description: "Clarify ambiguous repository changes"
+  default_prompt: "Use $grill-with-docs to clarify this ambiguous repository change and record only durable decisions."
+policy:
+  allow_implicit_invocation: true
