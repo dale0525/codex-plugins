@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import re
 import unittest
 from pathlib import Path
 
@@ -15,6 +17,37 @@ def skill_description(path: Path) -> str:
 
 
 class SkillTriggerPolicyTests(unittest.TestCase):
+    def test_aihero_workflow_version_is_bumped_for_native_input_routing(self) -> None:
+        manifest = ROOT / "plugins/aihero-workflow/.codex-plugin/plugin.json"
+        self.assertEqual(json.loads(manifest.read_text(encoding="utf-8"))["version"], "0.1.4")
+
+    def test_grilling_routes_each_round_through_native_user_input_when_available(self) -> None:
+        grilling = (
+            ROOT / "plugins/aihero-workflow/skills/grilling/SKILL.md"
+        ).read_text(encoding="utf-8")
+        with_docs = (
+            ROOT / "plugins/aihero-workflow/skills/grill-with-docs/SKILL.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("request_user_input", grilling)
+        self.assertIn("one tool call", grilling)
+        self.assertIn("1–3", grilling)
+        self.assertIn("tool is unavailable", grilling)
+        self.assertIn("free-form", grilling)
+        self.assertIn("same sentence as a parenthetical", grilling)
+        self.assertIn("valid call shape", grilling)
+        native_question = re.search(r'question: "([^"]+)"', grilling)
+        self.assertIsNotNone(native_question)
+        self.assertEqual(native_question.group(1).count("？"), 1)
+        self.assertIn("（例如", native_question.group(1))
+        self.assertNotIn("。", native_question.group(1))
+        self.assertIn("[grilling procedure](../grilling/SKILL.md)", with_docs)
+        self.assertIn("mode forbids writes", with_docs)
+        self.assertIn("pending persistence", with_docs)
+        self.assertIn("target `CONTEXT.md` path", with_docs)
+        self.assertIn("recovery condition", with_docs)
+        self.assertIn("first action", with_docs)
+        self.assertIn("待持久化", with_docs)
+
     def test_high_risk_local_skills_are_explicit_only(self) -> None:
         paths = (
             "plugins/aihero-workflow/skills/improve-codebase-architecture/agents/openai.yaml",
