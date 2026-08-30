@@ -51,7 +51,7 @@ class WebNovelPluginTests(unittest.TestCase):
         )
         self.assertEqual(manifest["name"], "web-novel-craft")
         self.assertEqual(manifest["author"]["name"], "Logic Tan")
-        self.assertEqual(manifest["version"], "0.2.1")
+        self.assertEqual(manifest["version"], "0.2.2")
         self.assertEqual(manifest["skills"], "./skills/")
         actual = {path.parent.name for path in SKILLS.glob("*/SKILL.md")}
         self.assertEqual(actual, EXPECTED_SKILLS)
@@ -75,6 +75,30 @@ class WebNovelPluginTests(unittest.TestCase):
             self.assertIn("../web-novel-craft/", text)
             resolved = (SKILLS / skill_name / "../web-novel-craft").resolve()
             self.assertEqual(resolved, SHARED.resolve())
+
+    def test_chapter_length_contract_is_shared_by_chapter_workflows(self) -> None:
+        workflow = (SHARED / "references" / "writer-workflow.md").read_text(
+            encoding="utf-8"
+        )
+        for required_rule in (
+            "2500–2800 字",
+            "原则上不得少于 2500 字",
+            "序章、尾声和番外",
+            "不计标题、标点、空格、章节说明或其他元数据",
+            "已有 2380 字",
+            "预计会超过 2800 字",
+            "局部场景或句段交付不单独套用整章字数",
+        ):
+            self.assertIn(required_rule, workflow)
+
+        for skill_name in (
+            "web-novel-craft",
+            "web-novel-structure",
+            "web-novel-prose-craft",
+            "web-novel-revision",
+        ):
+            skill = (SKILLS / skill_name / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("writer-workflow.md", skill)
 
     def test_project_management_layer_is_absent(self) -> None:
         actual_skills = {path.name for path in SKILLS.iterdir() if path.is_dir()}

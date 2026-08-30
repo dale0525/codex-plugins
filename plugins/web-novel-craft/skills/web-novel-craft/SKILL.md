@@ -13,7 +13,7 @@ description: 仅当同一请求同时跨越至少两个分技能负责的创作�
 
 ## 路由
 
-先读 `references/writer-workflow.md` 和 `references/web-novel-routing.md`，然后加载最少的主题资料。任务同时涉及人物两难、代价传播和场景余波时，读取 `references/choice-cost-experience.md`。
+先读 `references/writer-workflow.md` 和 `references/web-novel-routing.md`，然后加载最少的主题资料。章节写作、章节大纲、章节续写、章节修订和章节评价都必须遵守 `references/writer-workflow.md` 的“章节篇幅”规则。任务同时涉及人物两难、代价传播和场景余波时，读取 `references/choice-cost-experience.md`。
 
 | 创作任务 | 技能 |
 | --- | --- |
