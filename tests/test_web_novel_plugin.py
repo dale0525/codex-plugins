@@ -22,7 +22,10 @@ EXPECTED_SKILLS = {
     "web-novel-prose-craft",
     "web-novel-revision",
     "web-novel-evidence-research",
+    "humanizer-zh",
 }
+
+INDEPENDENT_SKILLS = {"humanizer-zh"}
 
 REMOVED_MANAGEMENT_FILES = {
     "ai-canonical-state.md",
@@ -51,7 +54,7 @@ class WebNovelPluginTests(unittest.TestCase):
         )
         self.assertEqual(manifest["name"], "web-novel-craft")
         self.assertEqual(manifest["author"]["name"], "Logic Tan")
-        self.assertEqual(manifest["version"], "0.2.2")
+        self.assertEqual(manifest["version"], "0.2.3")
         self.assertEqual(manifest["skills"], "./skills/")
         actual = {path.parent.name for path in SKILLS.glob("*/SKILL.md")}
         self.assertEqual(actual, EXPECTED_SKILLS)
@@ -69,8 +72,18 @@ class WebNovelPluginTests(unittest.TestCase):
         for skill_name in EXPECTED_SKILLS - {"web-novel-craft"}:
             self.assertIn(f"${skill_name}", text)
 
+    def test_humanizer_is_explicit_and_preserves_source_facts(self) -> None:
+        skill_root = SKILLS / "humanizer-zh"
+        text = (skill_root / "SKILL.md").read_text(encoding="utf-8")
+        policy = (skill_root / "agents" / "openai.yaml").read_text(encoding="utf-8")
+        self.assertIn("仅在用户明确要求去除 AI 痕迹", text)
+        self.assertIn("不新增原文没有的事实", text)
+        self.assertIn("allow_implicit_invocation: false", policy)
+        self.assertNotIn("软件更新添加了批处理、键盘快捷键和离线模式", text)
+        self.assertNotIn("开发社区有一半人疯了", text)
+
     def test_focused_skills_resolve_shared_root(self) -> None:
-        for skill_name in EXPECTED_SKILLS - {"web-novel-craft"}:
+        for skill_name in EXPECTED_SKILLS - {"web-novel-craft"} - INDEPENDENT_SKILLS:
             text = (SKILLS / skill_name / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("../web-novel-craft/", text)
             resolved = (SKILLS / skill_name / "../web-novel-craft").resolve()

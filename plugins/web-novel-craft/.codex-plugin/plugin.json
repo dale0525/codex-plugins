@@ -1,6 +1,6 @@
 {
   "name": "web-novel-craft",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "An evidence-grounded AI web novelist for ideation, writing, critique, revision, and evaluation.",
   "author": {
     "name": "Logic Tan",
@@ -25,7 +25,7 @@
   "interface": {
     "displayName": "Web Novel Craft",
     "shortDescription": "Ideate, write, critique, and revise compelling web novels.",
-    "longDescription": "Nine coordinated skills make Codex a capable web novelist and editor: developing premises, characters, worlds, causal long-form structure, progression, Chinese mainstream genre craft, scene prose, direct chapter writing, critique, revision, evaluation, and explicitly invoked evidence research for web-novel craft.",
+    "longDescription": "Ten coordinated skills make Codex a capable web novelist and editor: developing premises, characters, worlds, causal long-form structure, progression, Chinese mainstream genre craft, scene prose, direct chapter writing, critique, revision, evaluation, AI-text humanization, and explicitly invoked evidence research for web-novel craft.",
     "developerName": "Logic Tan",
     "category": "Writing",
     "capabilities": [
@@ -38,6 +38,7 @@
       "Evidence-based manuscript critique, revision, and comparative evaluation",
       "Lightweight long-form continuity without project-management overhead",
       "Chinese scene prose, narrative distance, action, sensation, emotion, dialogue, and sentence rhythm",
+      "Humanization and AI-pattern cleanup for prose and other text",
       "Timestamped YouTube and Bilibili craft-evidence distillation"
     ],
     "defaultPrompt": [

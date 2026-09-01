@@ -14,6 +14,13 @@
       "ref": "main",
       "commit": "2bd92518e26bf659e21e3d9ab90573fcf3ddeccb",
       "destination": "plugins/prompt-master/skills/prompt-master"
+    },
+    "humanizer-zh": {
+      "kind": "git-tree",
+      "repository": "https://github.com/op7418/humanizer-zh.git",
+      "ref": "main",
+      "commit": "91f3d394db8419c20d67ebe22a96cf8fee0a404b",
+      "destination": "plugins/web-novel-craft/skills/humanizer-zh"
     }
   }
 }

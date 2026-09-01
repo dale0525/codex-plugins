@@ -12,6 +12,7 @@
 | 设计升级、能力、资源、身份或谜题进展 | `$web-novel-progression` | `progression.md` | 负责规则、成本、反制和选项变化 |
 | 写或修场景、动作、感官、情绪、对白和句群 | `$web-novel-prose-craft` | `scene-prose-craft.md` 及对应文体页 | 场景目的不清时先回结构/人物 |
 | 阅读原稿、批评、提建议、修改或评价 | `$web-novel-revision` | `revision.md`、`writing-evaluation.md` | 先完整阅读，意见必须有文本证据 |
+| 去除 AI 生成痕迹、使文本更自然 | `$humanizer-zh` | 上游技能正文 | 只处理文本表达，不替代网文结构、人物或场景判断 |
 | 蒸馏视频写作知识 | `$web-novel-evidence-research` | `evidence-policy.md` | 标题与声誉不是证据，必须完整审阅 |
 
 跨越两个以上创作决定时使用 `$web-novel-craft`。单一任务直接进入对应技能，不要求用户先完成其他阶段。

@@ -293,8 +293,10 @@ def _normalize_skill_frontmatter(
     skill_path: Path,
     fields: tuple[str, ...],
     description_suffixes: tuple[tuple[str, str], ...],
+    skill_name: str | None = None,
 ) -> None:
-    suffix = dict(description_suffixes).get(skill_path.parent.name)
+    skill_name = skill_name or skill_path.parent.name
+    suffix = dict(description_suffixes).get(skill_name)
     if not fields and suffix is None:
         return
     text = skill_path.read_text(encoding="utf-8")
@@ -308,11 +310,19 @@ def _normalize_skill_frontmatter(
 
     field_set = set(fields)
     normalized = [lines[0]]
+    skip_field = False
     for line in lines[1:end]:
+        # A frontmatter field can contain an indented block scalar, sequence,
+        # or mapping. Skip that complete block until the next top-level key;
+        # removing only the key line would leave invalid YAML behind.
         match = re.match(r"^([A-Za-z0-9_-]+):", line)
-        if match and match.group(1) in field_set:
+        if match:
+            skip_field = match.group(1) in field_set
+            if not skip_field:
+                normalized.append(line)
             continue
-        normalized.append(line)
+        if not skip_field:
+            normalized.append(line)
     if suffix is not None:
         description_indexes = [
             index for index, line in enumerate(normalized) if line.startswith("description:")
@@ -321,10 +331,23 @@ def _normalize_skill_frontmatter(
             raise SyncError(f"cannot adapt skill description: {skill_path}")
         index = description_indexes[0]
         line = normalized[index]
-        newline = "\n" if line.endswith("\n") else ""
-        body = line[:-1] if newline else line
-        if suffix not in body:
-            normalized[index] = f"{body} {suffix.strip()}{newline}"
+        value = line.split(":", 1)[1].strip()
+        if value.startswith(("|", ">")):
+            block_end = next(
+                (
+                    position
+                    for position in range(index + 1, len(normalized))
+                    if re.match(r"^[A-Za-z0-9_-]+:", normalized[position])
+                ),
+                len(normalized),
+            )
+            if not any(suffix in item for item in normalized[index + 1 : block_end]):
+                normalized.insert(block_end, f"  {suffix.strip()}\n")
+        else:
+            newline = "\n" if line.endswith("\n") else ""
+            body = line[:-1] if newline else line
+            if suffix not in body:
+                normalized[index] = f"{body} {suffix.strip()}{newline}"
     normalized.extend(lines[end:])
     skill_path.write_text("".join(normalized), encoding="utf-8")
 
@@ -332,10 +355,12 @@ def _normalize_skill_frontmatter(
 def _normalize_skill_invocation_policy(
     skill_path: Path,
     policies: tuple[tuple[str, bool], ...],
+    skill_name: str | None = None,
 ) -> None:
     """Apply repository-owned invocation policy to synchronized skills."""
 
-    allow_implicit = dict(policies).get(skill_path.parent.name)
+    skill_name = skill_name or skill_path.parent.name
+    allow_implicit = dict(policies).get(skill_name)
     if allow_implicit is None:
         return
     policy_path = skill_path.parent / "agents/openai.yaml"
@@ -365,7 +390,6 @@ def _normalize_skill_invocation_policy(
         policy_path.write_text(updated, encoding="utf-8")
         return
 
-    skill_name = skill_path.parent.name
     display_name = skill_name.replace("-", " ").title()
     policy_path.parent.mkdir(parents=True, exist_ok=True)
     policy_path.write_text(
@@ -382,11 +406,13 @@ def _normalize_skill_invocation_policy(
 def _normalize_skill_text(
     skill_path: Path,
     replacements: tuple[tuple[str, str, str], ...],
+    skill_name: str | None = None,
 ) -> None:
+    skill_name = skill_name or skill_path.parent.name
     applicable = [
         (find, replace)
-        for skill_name, find, replace in replacements
-        if skill_name == skill_path.parent.name
+        for target_skill, find, replace in replacements
+        if target_skill == skill_name
     ]
     if not applicable:
         return
@@ -432,12 +458,17 @@ def _stage_source(
     shutil.copytree(source_path, staged_content, ignore=shutil.ignore_patterns(".git"))
     destination = _safe_repository_path(repository_root, spec.destination)
     for skill_path in staged_content.rglob("SKILL.md"):
+        relative_skill_dir = skill_path.parent.relative_to(staged_content)
+        skill_name = (
+            destination.name
+            if relative_skill_dir == Path(".")
+            else skill_path.parent.name
+        )
         # Invocation policy files are repository-owned compatibility metadata.
         # Preserve a tracked local interface when upstream does not provide one;
         # otherwise a full-tree replacement would reset it on every sync.
         staged_policy = skill_path.parent / "agents/openai.yaml"
         if not staged_policy.exists():
-            relative_skill_dir = skill_path.parent.relative_to(staged_content)
             local_policy = destination / relative_skill_dir / "agents/openai.yaml"
             if local_policy.is_symlink():
                 raise SyncError(f"destination contains a symlink: {local_policy}")
@@ -448,14 +479,17 @@ def _stage_source(
             skill_path,
             spec.remove_frontmatter_fields,
             spec.skill_description_suffixes,
+            skill_name,
         )
         _normalize_skill_invocation_policy(
             skill_path,
             spec.skill_implicit_invocation,
+            skill_name,
         )
         _normalize_skill_text(
             skill_path,
             spec.skill_text_replacements,
+            skill_name,
         )
 
     license_content = None

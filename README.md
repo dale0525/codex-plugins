@@ -116,6 +116,10 @@ Prompt Master packages the MIT-licensed prompt-engineering skill from
 [nidhinjs/prompt-master](https://github.com/nidhinjs/prompt-master). Its
 upstream content and license are synchronized daily.
 
+Web Novel Craft packages the MIT-licensed Chinese text-humanization skill from
+[op7418/Humanizer-zh](https://github.com/op7418/Humanizer-zh). Its upstream
+content and license are synchronized daily.
+
 ## Included plugins
 
 ### Apple Design
@@ -199,17 +203,19 @@ agents, image and video generators, and other AI tools.
 
 ### Web Novel Craft
 
-Provides one writer/editor orchestration skill and eight focused skills for web-novel
+Provides one writer/editor orchestration skill and nine focused skills for web-novel
 development, long-form structure, characters and viewpoint, progression and
 LitRPG systems, Chinese mainstream genres, scene prose, direct writing,
-evidence-based critique, revision, evaluation, and explicitly invoked
-web-novel craft evidence research. It
+evidence-based critique, revision, evaluation, AI-text humanization, and
+explicitly invoked web-novel craft evidence research. It
 deliberately excludes scheduling, backlog, team, publishing, provider, and
 engineering-oriented production management. Its shared corpus deeply distills 67
 YouTube and Bilibili sources into timestamped claims, boundaries,
 counterexamples, and executable procedures without distributing raw captions.
 One source retains an explicitly excluded, uncharacterized media-tail gap rather
-than claiming unsupported transcript coverage.
+than claiming unsupported transcript coverage. After installing this plugin,
+invoke `$humanizer-zh` for general text humanization; web-novel structure,
+character, and scene decisions stay with their focused skills.
 
 ### Provider Chat Completions
 

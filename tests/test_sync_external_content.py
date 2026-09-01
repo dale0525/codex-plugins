@@ -7,6 +7,8 @@ import unittest
 from unittest.mock import patch
 from pathlib import Path
 
+import yaml
+
 from scripts.sync_external_content import (
     SyncError,
     load_config,
@@ -30,6 +32,12 @@ class ExternalContentSyncTests(unittest.TestCase):
             "name: example-skill\n"
             "description: Example skill for synchronization tests.\n"
             "disable-model-invocation: true\n"
+            "allowed-tools:\n"
+            "  - Read\n"
+            "  - Write\n"
+            "metadata:\n"
+            "  trigger: test synchronization\n"
+            "  source: fixture\n"
             "---\n\n"
             "# Example\n",
             encoding="utf-8",
@@ -70,7 +78,7 @@ class ExternalContentSyncTests(unittest.TestCase):
             "plugin_manifest = \"plugins/apple-design/.codex-plugin/plugin.json\"\n"
             "license_source = \"LICENSE\"\n"
             "license_destination = \"plugins/apple-design/third-party/upstream-LICENSE\"\n"
-            "remove_skill_frontmatter_fields = [\"disable-model-invocation\"]\n"
+            "remove_skill_frontmatter_fields = [\"disable-model-invocation\", \"allowed-tools\", \"metadata\"]\n"
             "skill_description_suffixes = { example-skill = \"Use only when explicitly requested.\" }\n"
             "skill_implicit_invocation = { example-skill = false }\n"
             "skill_text_replacements = [{ skill = \"example-skill\", find = \"# Example\", replace = \"# Normalized Example\" }]\n",
@@ -167,6 +175,12 @@ class ExternalContentSyncTests(unittest.TestCase):
         skill = self.root / "plugins/apple-design/skills/example-skill/SKILL.md"
         self.assertTrue(skill.is_file())
         self.assertNotIn("disable-model-invocation", skill.read_text(encoding="utf-8"))
+        frontmatter = skill.read_text(encoding="utf-8").split("---", 2)[1]
+        parsed = yaml.safe_load(frontmatter)
+        self.assertEqual(parsed["name"], "example-skill")
+        self.assertNotIn("allowed-tools", frontmatter)
+        self.assertNotIn("metadata:", frontmatter)
+        self.assertNotIn("trigger: test synchronization", frontmatter)
         self.assertIn(
             "Use only when explicitly requested.",
             skill.read_text(encoding="utf-8"),
@@ -196,6 +210,69 @@ class ExternalContentSyncTests(unittest.TestCase):
 
         self.assertTrue(synchronize(self.config, self.lock))
         self.assertEqual(self._version(), "1.2.5")
+
+    def test_root_skill_uses_destination_name_for_policy(self) -> None:
+        standalone = self.upstream / "standalone"
+        standalone.mkdir()
+        (standalone / "SKILL.md").write_text(
+            "---\n"
+            "name: root-skill\n"
+            "description: Root-level skill synchronization test.\n"
+            "---\n\n"
+            "# Root skill\n",
+            encoding="utf-8",
+        )
+        self._commit("Add root-level skill")
+
+        manifest = self.root / "plugins/root-plugin/.codex-plugin/plugin.json"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(
+            json.dumps({"name": "root-plugin", "version": "0.1.0"}) + "\n",
+            encoding="utf-8",
+        )
+        with self.config.open("a", encoding="utf-8") as handle:
+            handle.write(
+                "\n[[sources]]\n"
+                'id = "root-skill"\n'
+                f'repository = "{self.upstream.as_uri()}"\n'
+                'ref = "main"\n'
+                'source = "standalone"\n'
+                'destination = "plugins/root-plugin/skills/root-skill"\n'
+                'plugin_manifest = "plugins/root-plugin/.codex-plugin/plugin.json"\n'
+                'skill_implicit_invocation = { root-skill = true }\n'
+            )
+
+        self.assertTrue(synchronize(self.config, self.lock))
+        policy = self.root / "plugins/root-plugin/skills/root-skill/agents/openai.yaml"
+        self.assertTrue(policy.is_file())
+        self.assertIn("allow_implicit_invocation: true", policy.read_text(encoding="utf-8"))
+
+    def test_description_suffix_supports_yaml_block_scalar(self) -> None:
+        upstream_skill = self.upstream / "skills/example-skill/SKILL.md"
+        upstream_skill.write_text(
+            "---\n"
+            "name: example-skill\n"
+            "description: |\n"
+            "  First description line.\n"
+            "  Second description line.\n"
+            "metadata:\n"
+            "  source: fixture\n"
+            "---\n\n"
+            "# Example\n",
+            encoding="utf-8",
+        )
+        self._commit("Use a block scalar description")
+
+        self.assertTrue(synchronize(self.config, self.lock))
+        skill = self.root / "plugins/apple-design/skills/example-skill/SKILL.md"
+        frontmatter = skill.read_text(encoding="utf-8").split("---", 2)[1]
+        parsed = yaml.safe_load(frontmatter)
+        self.assertEqual(
+            parsed["description"],
+            "First description line.\nSecond description line.\n"
+            "Use only when explicitly requested.\n",
+        )
+        self.assertNotIn("metadata", parsed)
 
     def test_config_rejects_destination_escape(self) -> None:
         text = self.config.read_text(encoding="utf-8")

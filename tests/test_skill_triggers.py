@@ -106,7 +106,7 @@ class SkillTriggerPolicyTests(unittest.TestCase):
         skills = ROOT / "plugins/web-novel-craft/skills"
         shared_root = skills / "web-novel-craft"
         for path in skills.glob("*/SKILL.md"):
-            if path.parent.name == "web-novel-craft":
+            if path.parent.name in {"web-novel-craft", "humanizer-zh"}:
                 continue
             text = path.read_text(encoding="utf-8")
             self.assertNotIn("`references/", text)
