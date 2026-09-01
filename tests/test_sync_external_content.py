@@ -43,6 +43,9 @@ class ExternalContentSyncTests(unittest.TestCase):
             encoding="utf-8",
         )
         (self.upstream / "LICENSE").write_text("Example license\n", encoding="utf-8")
+        (self.upstream / "skills/example-skill/README.md").write_text(
+            "Upstream-only README\n", encoding="utf-8"
+        )
         self._commit("Initial upstream")
 
         manifest = self.root / "plugins/apple-design/.codex-plugin/plugin.json"
@@ -78,6 +81,7 @@ class ExternalContentSyncTests(unittest.TestCase):
             "plugin_manifest = \"plugins/apple-design/.codex-plugin/plugin.json\"\n"
             "license_source = \"LICENSE\"\n"
             "license_destination = \"plugins/apple-design/third-party/upstream-LICENSE\"\n"
+            "remove_paths = [\"example-skill/README.md\"]\n"
             "remove_skill_frontmatter_fields = [\"disable-model-invocation\", \"allowed-tools\", \"metadata\"]\n"
             "skill_description_suffixes = { example-skill = \"Use only when explicitly requested.\" }\n"
             "skill_implicit_invocation = { example-skill = false }\n"
@@ -174,6 +178,7 @@ class ExternalContentSyncTests(unittest.TestCase):
         self.assertTrue(synchronize(self.config, self.lock))
         skill = self.root / "plugins/apple-design/skills/example-skill/SKILL.md"
         self.assertTrue(skill.is_file())
+        self.assertFalse((skill.parent / "README.md").exists())
         self.assertNotIn("disable-model-invocation", skill.read_text(encoding="utf-8"))
         frontmatter = skill.read_text(encoding="utf-8").split("---", 2)[1]
         parsed = yaml.safe_load(frontmatter)
@@ -273,6 +278,24 @@ class ExternalContentSyncTests(unittest.TestCase):
             "Use only when explicitly requested.\n",
         )
         self.assertNotIn("metadata", parsed)
+
+    def test_remove_paths_reject_escape(self) -> None:
+        text = self.config.read_text(encoding="utf-8")
+        self.config.write_text(
+            text.replace('remove_paths = ["example-skill/README.md"]', 'remove_paths = ["../outside"]'),
+            encoding="utf-8",
+        )
+        with self.assertRaises(SyncError):
+            load_config(self.config, self.root)
+
+    def test_remove_paths_fail_closed_when_target_is_missing(self) -> None:
+        text = self.config.read_text(encoding="utf-8")
+        self.config.write_text(
+            text.replace('remove_paths = ["example-skill/README.md"]', 'remove_paths = ["missing.md"]'),
+            encoding="utf-8",
+        )
+        with self.assertRaises(SyncError):
+            synchronize(self.config, self.lock)
 
     def test_config_rejects_destination_escape(self) -> None:
         text = self.config.read_text(encoding="utf-8")

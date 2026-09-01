@@ -44,6 +44,7 @@ class SourceSpec:
     plugin_manifest: str
     license_source: str | None
     license_destination: str | None
+    remove_paths: tuple[str, ...]
     remove_frontmatter_fields: tuple[str, ...]
     skill_description_suffixes: tuple[tuple[str, str], ...]
     skill_implicit_invocation: tuple[tuple[str, bool], ...]
@@ -121,6 +122,15 @@ def load_config(config_path: Path, repository_root: Path = REPOSITORY_ROOT) -> l
             raise SyncError(f"{context}.remove_skill_frontmatter_fields must be strings")
         if {"name", "description"}.intersection(fields):
             raise SyncError(f"{context} cannot remove required skill frontmatter fields")
+        remove_paths = raw.get("remove_paths", [])
+        if not isinstance(remove_paths, list) or not all(
+            isinstance(item, str) and item.strip() for item in remove_paths
+        ):
+            raise SyncError(f"{context}.remove_paths must contain relative paths")
+        for item in remove_paths:
+            relative = Path(item)
+            if relative.is_absolute() or not relative.parts or ".." in relative.parts:
+                raise SyncError(f"{context}.remove_paths must stay inside the source")
         suffixes = raw.get("skill_description_suffixes", {})
         if not isinstance(suffixes, dict) or not all(
             isinstance(name, str) and isinstance(suffix, str) and suffix.strip()
@@ -177,6 +187,7 @@ def load_config(config_path: Path, repository_root: Path = REPOSITORY_ROOT) -> l
             plugin_manifest=manifest_value,
             license_source=license_source,
             license_destination=license_destination,
+            remove_paths=tuple(remove_paths),
             remove_frontmatter_fields=tuple(fields),
             skill_description_suffixes=tuple(sorted(suffixes.items())),
             skill_implicit_invocation=tuple(sorted(implicit_invocation.items())),
@@ -456,6 +467,14 @@ def _stage_source(
 
     staged_content = temporary_root / f"content-{spec.source_id}"
     shutil.copytree(source_path, staged_content, ignore=shutil.ignore_patterns(".git"))
+    for relative in spec.remove_paths:
+        target = staged_content.joinpath(*Path(relative).parts)
+        if not target.exists():
+            raise SyncError(f"configured remove_path does not exist: {spec.source_id}/{relative}")
+        if target.is_dir():
+            shutil.rmtree(target)
+        else:
+            target.unlink()
     destination = _safe_repository_path(repository_root, spec.destination)
     for skill_path in staged_content.rglob("SKILL.md"):
         relative_skill_dir = skill_path.parent.relative_to(staged_content)

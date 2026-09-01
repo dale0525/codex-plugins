@@ -34,6 +34,7 @@ destination = "plugins/web-novel-craft/skills/humanizer-zh"
 plugin_manifest = "plugins/web-novel-craft/.codex-plugin/plugin.json"
 license_source = "LICENSE"
 license_destination = "plugins/web-novel-craft/third-party/humanizer-zh-LICENSE"
+remove_paths = ["README.md", ".gitignore"]
 remove_skill_frontmatter_fields = ["allowed-tools", "metadata"]
 skill_description_suffixes = { humanizer-zh = "仅在用户明确要求去除 AI 痕迹或进行人性化改写时使用；不得新增原文没有的事实、经历、观点或题外内容，也不替代结构、人物、场景和连续性修订。" }
 skill_implicit_invocation = { humanizer-zh = false }
@@ -43,9 +44,26 @@ skill_text_replacements = [
   { skill = "humanizer-zh", find = "**有观点。** 不要只是报告事实——对它们做出反应。\"我真的不知道该怎么看待这件事\"比中立地列出利弊更有人味。", replace = "**保留已有观点。** 原文有明确立场时，让它表达得更自然；原文只陈述事实时，不替作者新增态度。" },
   { skill = "humanizer-zh", find = "**适当使用\"我\"。** 第一人称不是不专业——而是诚实。\"我一直在思考……\"或\"让我困扰的是……\"表明有真实的人在思考。", replace = "**谨慎使用\"我\"。** 只有原文已有第一人称主体或用户明确提供相关经历时才保留；不要虚构作者经历。" },
   { skill = "humanizer-zh", find = "**允许一些混乱。** 完美的结构感觉像算法。跑题、题外话和半成型的想法是人性的体现。", replace = "**允许自然的不齐整。** 可以调整句式和节奏，但不要为了显得像人而添加跑题内容或改变信息结构。" },
+  { skill = "humanizer-zh", find = "> 沉重的节拍增加了攻击性的基调。", replace = "> 节拍构成了这首歌的攻击性氛围。" },
   { skill = "humanizer-zh", find = "**承认复杂性。** 真实的人有复杂的感受。\"这令人印象深刻但也有点不安\"胜过\"这令人印象深刻\"。", replace = "**保留已有复杂性。** 原文已经表达不确定或矛盾感受时，让这种复杂性自然呈现；没有相关信息时不要自行添加感受。" },
   { skill = "humanizer-zh", find = "**对感受要具体。** 不是\"这令人担忧\"，而是\"凌晨三点没人看着的时候，智能体还在不停地运转，这让人不安\"。", replace = "**对已有感受要具体。** 原文提供了具体场景或感受时，可以保留并改得更清楚；没有相关细节时不要虚构场景。" },
   { skill = "humanizer-zh", find = "> 我真的不知道该怎么看待这件事。300 万行代码，在人类大概睡觉的时候生成的。开发社区有一半人疯了，另一半人在解释为什么这不算数。真相可能在无聊的中间某处——但我一直在想那些通宵工作的智能体。", replace = "> 实验产生了有趣的结果。智能体生成了 300 万行代码。一些开发者印象深刻，另一些则持怀疑态度。影响尚不明确。" },
+  { skill = "humanizer-zh", find = "> 加泰罗尼亚统计局成立于 1989 年，负责独立于西班牙国家统计局收集和发布区域统计数据。", replace = "> 加泰罗尼亚统计局于 1989 年成立。这是在西班牙分散行政职能、加强区域治理的背景下进行的。" },
+  { skill = "humanizer-zh", find = "> 在 2024 年《纽约时报》的采访中，她认为 AI 监管应该关注结果而不是方法。", replace = "> 她的观点曾被《纽约时报》、BBC、《金融时报》和《印度教徒报》引用，社交媒体粉丝超过 50 万。" },
+  { skill = "humanizer-zh", find = "> 寺庙使用蓝色、绿色和金色。建筑师表示这些颜色是为了呼应当地的蓝帽花和墨西哥湾海岸。", replace = "> 寺庙使用蓝色、绿色和金色，与当地的蓝帽花、墨西哥湾和其他景观相呼应。" },
+  { skill = "humanizer-zh", find = "> Alamata Raya Kobo 是埃塞俄比亚贡德尔地区的一座城镇，以其每周集市和 18 世纪教堂而闻名。", replace = "> Alamata Raya Kobo 是埃塞俄比亚贡德尔地区的一座城镇，有文化遗产和自然景观。" },
+  { skill = "humanizer-zh", find = "> 根据中国科学院 2019 年的调查，浩来河支持多种特有鱼类。", replace = "> 浩来河因其独特特征引起研究人员和保护主义者关注；其生态作用需要具体来源支持。" },
+  { skill = "humanizer-zh", find = "> 2015 年三个新 IT 园区开业后，交通拥堵加剧。市政公司于 2022 年启动了雨水排水项目，以解决反复发生的洪水。", replace = "> Korattur 的工业发展伴随着交通拥堵和水资源短缺。" },
+  { skill = "humanizer-zh", find = "> 索马里菜肴还包括骆驼肉，被认为是一种美味。在意大利殖民期间引入的意大利面菜肴仍然很常见，尤其是在南部。", replace = "> 索马里菜肴使用骆驼肉和意大利面；后者受到意大利殖民历史影响。" },
+  { skill = "humanizer-zh", find = "> Gallery 825 是 LAAA 的当代艺术展览空间。画廊有四个房间，总面积 3000 平方英尺。", replace = "> Gallery 825 是 LAAA 的当代艺术展览空间，有四个独立空间，面积超过 3000 平方英尺。" },
+  { skill = "humanizer-zh", find = "> 活动包括演讲和小组讨论。会议之间还有非正式社交的时间。", replace = "> 活动包括主题演讲、小组讨论和社交活动。" },
+  { skill = "humanizer-zh", find = "> 这本书涵盖了大爆炸、恒星形成和当前关于暗物质的理论。", replace = "> 内容涵盖大爆炸、宇宙网、恒星的诞生与死亡，以及暗物质。" },
+  { skill = "humanizer-zh", find = "> 更新改进了界面，通过优化算法加快了加载时间，并添加了端到端加密。", replace = "> 更新改进了界面和性能，并增加了端到端加密。" },
+  { skill = "humanizer-zh", find = "> 产品在第三季度发布。用户研究显示更喜欢简单。下一步：安排后续会议。", replace = "> 产品在第三季度发布。用户更喜欢简单。下一步是安排后续会议。" },
+  { skill = "humanizer-zh", find = "> 法国大革命始于 1789 年，当时财政危机和粮食短缺导致了广泛的动荡。", replace = "> 法国大革命概述。" },
+  { skill = "humanizer-zh", find = "> 根据注册文件，该公司成立于 1994 年。", replace = "> 该公司可能成立于 20 世纪 90 年代，但现有资料不足以确定具体年份。" },
+  { skill = "humanizer-zh", find = "> 该公司计划明年再开设两个地点。", replace = "> 该公司仍在追求发展。" },
+  { skill = "humanizer-zh", find = "   - 使用具体细节而不是模糊的主张", replace = "   - 只使用原文已有的具体细节；不把模糊主张改写成虚构事实" },
   { skill = "humanizer-zh", find = "> 软件更新添加了批处理、键盘快捷键和离线模式。来自测试用户的早期反馈是积极的，大多数报告任务完成速度更快。", replace = "> 这次软件更新改进了用户完成任务的体验。至于具体功能、效率变化和用户反馈，原文没有提供，改写时不能自行补充。" },
   { skill = "humanizer-zh", find = "- 添加了具体功能和具体反馈", replace = "- 没有虚构原文未提供的具体功能或用户反馈" },
 ]

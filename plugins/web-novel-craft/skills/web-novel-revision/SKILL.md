@@ -9,7 +9,7 @@ description: 仅在网络/连载小说的跨场景或全稿诊断、修订、优
 
 共享根是 `../web-novel-craft/`。章节修订或章节评价先读 `../web-novel-craft/references/writer-workflow.md`，并遵守其中的“章节篇幅”规则；再读 `../web-novel-craft/references/revision.md` 和 `../web-novel-craft/references/writing-evaluation.md`；按问题加载其他主题 reference，不一次读完整证据库。
 
-类型专项缺陷转 `$web-novel-genre-craft`；叙述距离、动作、感官、情绪、对白和句群执行转 `$web-novel-prose-craft`。需要去除 AI 生成痕迹、识别模板化表达或进行通用人性化改写时转 `$humanizer-zh`；本技能继续负责跨场景的网文诊断与修订排序。
+类型专项缺陷转 `$web-novel-genre-craft`；叙述距离、动作、感官、情绪、对白和句群执行转 `$web-novel-prose-craft`。仅当用户明确要求去除 AI 生成痕迹、识别模板化表达或进行通用人性化改写时转 `$humanizer-zh`；本技能继续负责跨场景的网文诊断与修订排序。
 
 ## 工作流
 

@@ -54,7 +54,7 @@ class WebNovelPluginTests(unittest.TestCase):
         )
         self.assertEqual(manifest["name"], "web-novel-craft")
         self.assertEqual(manifest["author"]["name"], "Logic Tan")
-        self.assertEqual(manifest["version"], "0.2.3")
+        self.assertEqual(manifest["version"], "0.2.4")
         self.assertEqual(manifest["skills"], "./skills/")
         actual = {path.parent.name for path in SKILLS.glob("*/SKILL.md")}
         self.assertEqual(actual, EXPECTED_SKILLS)
@@ -81,6 +81,15 @@ class WebNovelPluginTests(unittest.TestCase):
         self.assertIn("allow_implicit_invocation: false", policy)
         self.assertNotIn("软件更新添加了批处理、键盘快捷键和离线模式", text)
         self.assertNotIn("开发社区有一半人疯了", text)
+        self.assertNotIn("沉重的节拍增加了攻击性的基调", text)
+        for unsupported in (
+            "每周集市和 18 世纪教堂",
+            "中国科学院 2019 年的调查",
+            "根据注册文件，该公司成立于 1994 年",
+            "计划明年再开设两个地点",
+        ):
+            self.assertNotIn(unsupported, text)
+        self.assertFalse((skill_root / "README.md").exists())
 
     def test_focused_skills_resolve_shared_root(self) -> None:
         for skill_name in EXPECTED_SKILLS - {"web-novel-craft"} - INDEPENDENT_SKILLS:
