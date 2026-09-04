@@ -7,7 +7,7 @@ description: 在网络/连载小说中设计或诊断主线、大纲、卷/篇�
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。章节或章节大纲先读 `../web-novel-craft/references/writer-workflow.md`，并遵守其中的“章节篇幅”规则；再读 `../web-novel-craft/references/structure.md`；长篇续写需要轻量事实时读 `../web-novel-craft/references/story-bible.md`。
+共享根是 `../web-novel-craft/`。每次创作先读 `../web-novel-craft/references/narrative-effect-contract.md`；章节或章节大纲再读 `../web-novel-craft/references/writer-workflow.md`，并遵守其中的“章节篇幅”规则；随后读 `../web-novel-craft/references/structure.md`；长篇续写需要轻量事实时读 `../web-novel-craft/references/story-bible.md`。
 
 若问题集中在 romance、悬疑、喜剧、历史或中段—高潮—结尾的类型机制，转 `$web-novel-genre-craft` 并按需读取 `../web-novel-craft/references/genre-craft.md` 和对应专项资料。
 

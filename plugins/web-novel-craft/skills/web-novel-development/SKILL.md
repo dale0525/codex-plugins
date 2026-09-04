@@ -7,7 +7,7 @@ description: 仅在网络/连载小说的题材定位或目标读者尚未冻结
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/development.md`；跨阶段创作再读 `../web-novel-craft/references/writer-workflow.md` 和 `../web-novel-craft/references/web-novel-routing.md`。
+共享根是 `../web-novel-craft/`。每次创作先读 `../web-novel-craft/references/narrative-effect-contract.md`，再读 `../web-novel-craft/references/development.md`；跨阶段创作再读 `../web-novel-craft/references/writer-workflow.md` 和 `../web-novel-craft/references/web-novel-routing.md`。
 
 ## 工作流
 

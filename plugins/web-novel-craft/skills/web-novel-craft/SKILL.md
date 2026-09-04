@@ -11,9 +11,11 @@ description: 仅当同一请求同时跨越至少两个分技能负责的创作�
 
 共享根就是本技能目录。详细知识只从这里的 `references/` 按需加载；网文分技能不复制资料。`humanizer-zh` 是独立的通用文本编辑技能，不读取本共享根。
 
+所有创作、续写、改写和评价先加载 `references/narrative-effect-contract.md`。它用一条紧凑链条校准读者承诺、人物发动机、压力/选项、选择/责任、后果/体验和文本实现；它不是要求每个节点机械套模板。
+
 ## 路由
 
-先读 `references/writer-workflow.md` 和 `references/web-novel-routing.md`，然后加载最少的主题资料。章节写作、章节大纲、章节续写、章节修订和章节评价都必须遵守 `references/writer-workflow.md` 的“章节篇幅”规则。任务同时涉及人物两难、代价传播和场景余波时，读取 `references/choice-cost-experience.md`。
+先读 `references/narrative-effect-contract.md`，再读 `references/writer-workflow.md` 和 `references/web-novel-routing.md`，然后加载最少的主题资料。章节写作、章节大纲、章节续写、章节修订和章节评价都必须遵守 `references/writer-workflow.md` 的“章节篇幅”规则。任务同时涉及人物两难、代价传播和场景余波时，读取 `references/choice-cost-experience.md`。
 
 | 创作任务 | 技能 |
 | --- | --- |
@@ -24,7 +26,7 @@ description: 仅当同一请求同时跨越至少两个分技能负责的创作�
 | 力量、技能、身份、关系、谜题成长与 LitRPG 规则 | `$web-novel-progression` |
 | 场景、叙述距离、动作、感官、情绪、对白与句群节奏 | `$web-novel-prose-craft` |
 | 完整阅读、诊断、提意见、结构/章节/文字修改与评价 | `$web-novel-revision` |
-| 人性化改写、识别并修复 AI 生成痕迹 | `$humanizer-zh` |
+| 人性化改写、识别并修复 AI 生成痕迹 | `$humanizer-zh`（用户显式模式；编排文字扫描使用 `orchestrated_fiction_edit`） |
 | 明确要求从写作视频/访谈蒸馏网络小说方法并保留时间码证据 | `$web-novel-evidence-research` |
 
 ## 作家工作流

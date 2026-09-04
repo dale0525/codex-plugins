@@ -7,7 +7,7 @@ description: 设计或诊断网络小说的力量、技能、数值、资源、�
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/progression.md`；需要续写时只把已经进入正文的规则、成本和能力状态写入 `../web-novel-craft/references/story-bible.md` 所述轻量笔记。
+共享根是 `../web-novel-craft/`。每次创作先读 `../web-novel-craft/references/narrative-effect-contract.md`，再读 `../web-novel-craft/references/progression.md`；需要续写时只把已经进入正文的规则、成本和能力状态写入 `../web-novel-craft/references/story-bible.md` 所述轻量笔记。
 
 ## 工作流
 

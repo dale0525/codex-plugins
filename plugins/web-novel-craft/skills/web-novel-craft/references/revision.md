@@ -4,6 +4,15 @@
 
 Preserve the intended reader contract unless the user approves changing it. Describe the defect with evidence from the text, its reader effect, likely cause, and smallest adequate repair. Separate fact, interpretation, and preference.
 
+## 双轴验收：正向效果+完整性保护
+
+以 `narrative-effect-contract.md` 的链条为共同基准，每次修订或评价都同时回答两件事：
+
+- **正向效果**：改动是否更清楚、更有力地兑现目标读者承诺，让人物的特有欲望、选择、关系/谜题推进、紧张/喜悦或声音真正可感知？
+- **完整性保护**：改动是否保留既有事实、因果、知识权限、人物责任、承诺、规则、声音和后续选项，没有用道德净化、夸张伤害或漂亮句子掩盖损失？
+
+只有两轴都通过才接受候选；一轴改善而另一轴受损时，回到造成冲突的上游决定，缩小改动或退回创作提供方，不用新增检查表替代判断。
+
 Revise in descending leverage:
 
 1. reader contract and premise;
@@ -67,7 +76,7 @@ Assume the reader cannot see the author's mental model. Revise toward concrete a
 
 ## Regression check
 
-After revision, rerun promise, causality, information, character, experience-residue, progression, and continuity checks. A local improvement fails if it contradicts existing text, steals a later payoff, changes voice, erases a needed rule, breaks a cost carrier, or replaces lived consequence with rubric-shaped symptoms.
+After revision, rerun the narrative-effect contract, promise, causality, information, character, experience-residue, progression, and continuity checks. A local improvement fails if it contradicts existing text, steals a later payoff, changes voice, erases a needed rule, breaks a cost carrier, or replaces lived consequence with rubric-shaped symptoms.
 
 For genre-specific work, rerun the relevant relationship, clue-fairness, comic/subtext, climax/ending, or historical-evidence check. For AI-generated text, compare original and revision directly, reject unsupported new facts, and judge it by the same character, causality, prose and reader-effect standards as any other draft.
 

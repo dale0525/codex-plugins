@@ -7,7 +7,7 @@ description: 仅在中文网络/连载小说的具体场景或局部文体执行
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。写作、续写和修订先读 `../web-novel-craft/references/writer-workflow.md`；只有交付对象是完整章节时才执行其中的“章节篇幅”规则，局部场景或句段不单独套用整章字数。场景总流程再读 `../web-novel-craft/references/scene-prose-craft.md`；按问题加载其他主题资料。
+共享根是 `../web-novel-craft/`。每次创作先读 `../web-novel-craft/references/narrative-effect-contract.md`，再读 `../web-novel-craft/references/writer-workflow.md`；只有交付对象是完整章节时才执行其中的“章节篇幅”规则，局部场景或句段不单独套用整章字数。场景总流程再读 `../web-novel-craft/references/scene-prose-craft.md`；按问题加载其他主题资料。
 
 ## 路由边界
 

@@ -11,6 +11,16 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REFS = ROOT / "references"
+NARRATIVE_EFFECT_CONTRACT = REFS / "narrative-effect-contract.md"
+CREATIVE_SKILLS = (
+    "web-novel-development",
+    "web-novel-structure",
+    "web-novel-characters",
+    "web-novel-genre-craft",
+    "web-novel-progression",
+    "web-novel-prose-craft",
+    "web-novel-revision",
+)
 DATASETS = (
     {
         "label": "base",
@@ -58,6 +68,32 @@ def load(name: str) -> dict[str, Any]:
 def require(condition: bool, message: str, errors: list[str]) -> None:
     if not condition:
         errors.append(message)
+
+
+def validate_creative_skill_structure(errors: list[str]) -> None:
+    """Keep the shared narrative-effect contract discoverable from every creative skill."""
+
+    require(
+        NARRATIVE_EFFECT_CONTRACT.is_file(),
+        "shared narrative-effect contract is missing",
+        errors,
+    )
+    reference = "../web-novel-craft/references/narrative-effect-contract.md"
+    for skill_name in CREATIVE_SKILLS:
+        skill_path = ROOT.parent / skill_name / "SKILL.md"
+        if not skill_path.is_file():
+            require(False, f"creative skill is missing: {skill_path}", errors)
+            continue
+        try:
+            text = skill_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            require(False, f"cannot read creative skill {skill_path}: {exc}", errors)
+            continue
+        require(
+            reference in text,
+            f"{skill_name}: must reference {reference}",
+            errors,
+        )
 
 
 def by_id(
@@ -177,6 +213,7 @@ def validate_dataset(spec: dict[str, Any], errors: list[str]) -> set[str]:
 
 def validate() -> list[str]:
     errors: list[str] = []
+    validate_creative_skill_structure(errors)
     all_ids: set[str] = set()
     total = 0
     for spec in DATASETS:

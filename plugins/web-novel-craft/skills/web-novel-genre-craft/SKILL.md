@@ -7,7 +7,7 @@ description: 仅在已确定为网络/连载小说且类型承诺已命名时，
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/genre-craft.md`，再按任务加载 `../web-novel-craft/references/xianxia-progression.md`、`../web-novel-craft/references/urban-business.md`、`../web-novel-craft/references/infinite-horror.md`、`../web-novel-craft/references/ensemble-war-factions.md`、`../web-novel-craft/references/science-fiction-worldbuilding.md`、`../web-novel-craft/references/fanfiction-source-craft.md`、`../web-novel-craft/references/female-revenge-era-rebirth.md`、`../web-novel-craft/references/romance.md`、`../web-novel-craft/references/mystery.md`、`../web-novel-craft/references/comedy-dialogue.md`、`../web-novel-craft/references/long-form-endings.md` 或 `../web-novel-craft/references/historical-research.md`。
+共享根是 `../web-novel-craft/`。每次创作先读 `../web-novel-craft/references/narrative-effect-contract.md`，再读 `../web-novel-craft/references/genre-craft.md`，按任务加载 `../web-novel-craft/references/xianxia-progression.md`、`../web-novel-craft/references/urban-business.md`、`../web-novel-craft/references/infinite-horror.md`、`../web-novel-craft/references/ensemble-war-factions.md`、`../web-novel-craft/references/science-fiction-worldbuilding.md`、`../web-novel-craft/references/fanfiction-source-craft.md`、`../web-novel-craft/references/female-revenge-era-rebirth.md`、`../web-novel-craft/references/romance.md`、`../web-novel-craft/references/mystery.md`、`../web-novel-craft/references/comedy-dialogue.md`、`../web-novel-craft/references/long-form-endings.md` 或 `../web-novel-craft/references/historical-research.md`。
 
 ## 路由边界
 

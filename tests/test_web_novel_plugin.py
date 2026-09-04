@@ -54,7 +54,7 @@ class WebNovelPluginTests(unittest.TestCase):
         )
         self.assertEqual(manifest["name"], "web-novel-craft")
         self.assertEqual(manifest["author"]["name"], "Logic Tan")
-        self.assertEqual(manifest["version"], "0.2.4")
+        self.assertEqual(manifest["version"], "0.3.0")
         self.assertEqual(manifest["skills"], "./skills/")
         actual = {path.parent.name for path in SKILLS.glob("*/SKILL.md")}
         self.assertEqual(actual, EXPECTED_SKILLS)
@@ -90,6 +90,32 @@ class WebNovelPluginTests(unittest.TestCase):
         ):
             self.assertNotIn(unsupported, text)
         self.assertFalse((skill_root / "README.md").exists())
+
+    def test_orchestrated_humanizer_and_effect_contract_boundaries_are_persistent(self) -> None:
+        humanizer = (SKILLS / "humanizer-zh" / "SKILL.md").read_text(encoding="utf-8")
+        sync_config = (ROOT / "sync-sources.toml").read_text(encoding="utf-8")
+        routing = (SHARED / "references" / "web-novel-routing.md").read_text(
+            encoding="utf-8"
+        )
+        effect_contract = (
+            SHARED / "references" / "narrative-effect-contract.md"
+        ).read_text(encoding="utf-8")
+
+        for required in (
+            "orchestrated_fiction_edit",
+            "语义等价的表达层最小修改",
+            "保留有功能的排比/反复/破折号/金句/残句",
+            "退回 `provider`",
+            "没有可安全修改的片段就保持原文",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, humanizer)
+                self.assertIn(required, sync_config)
+        self.assertNotIn("重写每个有问题的部分", humanizer)
+        self.assertNotIn("effect_contract:", routing)
+        self.assertIn("不要求作者或调用方预填", routing)
+        self.assertIn("低选择过渡", effect_contract)
+        self.assertIn("不强造一次重大选择", effect_contract)
 
     def test_focused_skills_resolve_shared_root(self) -> None:
         for skill_name in EXPECTED_SKILLS - {"web-novel-craft"} - INDEPENDENT_SKILLS:

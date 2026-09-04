@@ -7,7 +7,7 @@ description: 在网络/连载小说中设计或诊断主角、反派、配角、
 
 ## 共享知识
 
-共享根是 `../web-novel-craft/`。先读 `../web-novel-craft/references/characters.md`；需要续写记忆时读 `../web-novel-craft/references/story-bible.md`。
+共享根是 `../web-novel-craft/`。每次创作先读 `../web-novel-craft/references/narrative-effect-contract.md`，再读 `../web-novel-craft/references/characters.md`；需要续写记忆时读 `../web-novel-craft/references/story-bible.md`。
 
 人物动机、视角与声音留在本技能；以 romance 类型承诺为核心的关系 beat、slow burn 与 HEA/HFN 验收转 `$web-novel-genre-craft` 并读 `../web-novel-craft/references/romance.md`。
 
