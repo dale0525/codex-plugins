@@ -3,8 +3,11 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+
+from scripts.sync_external_content import _normalize_skill_text, load_config
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,7 +57,7 @@ class WebNovelPluginTests(unittest.TestCase):
         )
         self.assertEqual(manifest["name"], "web-novel-craft")
         self.assertEqual(manifest["author"]["name"], "Logic Tan")
-        self.assertEqual(manifest["version"], "0.3.0")
+        self.assertEqual(manifest["version"], "0.3.1")
         self.assertEqual(manifest["skills"], "./skills/")
         actual = {path.parent.name for path in SKILLS.glob("*/SKILL.md")}
         self.assertEqual(actual, EXPECTED_SKILLS)
@@ -116,6 +119,52 @@ class WebNovelPluginTests(unittest.TestCase):
         self.assertIn("不要求作者或调用方预填", routing)
         self.assertIn("低选择过渡", effect_contract)
         self.assertIn("不强造一次重大选择", effect_contract)
+
+    def test_humanizer_sync_transform_rebuilds_the_orchestration_boundary(self) -> None:
+        spec = next(
+            item
+            for item in load_config(ROOT / "sync-sources.toml", ROOT)
+            if item.source_id == "humanizer-zh"
+        )
+        replacements = [
+            (find, replace)
+            for skill, find, replace in spec.skill_text_replacements
+            if skill == "humanizer-zh"
+        ]
+        self.assertGreater(len(replacements), 10)
+
+        with tempfile.TemporaryDirectory(prefix="humanizer-transform-test-") as temporary:
+            skill_path = Path(temporary) / "humanizer-zh" / "SKILL.md"
+            skill_path.parent.mkdir(parents=True)
+            skill_path.write_text(
+                "---\nname: humanizer-zh\ndescription: fixture\n---\n\n"
+                + "\n\n".join(find for find, _ in replacements),
+                encoding="utf-8",
+            )
+
+            _normalize_skill_text(
+                skill_path,
+                spec.skill_text_replacements,
+                "humanizer-zh",
+            )
+            transformed = skill_path.read_text(encoding="utf-8")
+            for find, replace in replacements:
+                with self.subTest(find=find[:40]):
+                    self.assertNotIn(find, transformed)
+                    self.assertIn(replace, transformed)
+            self.assertIn("orchestrated_fiction_edit", transformed)
+            self.assertIn("没有可安全修改的片段就保持原文", transformed)
+            self.assertNotIn("重写每个有问题的部分", transformed)
+
+            # A daily sync may apply the same repository transform again; the
+            # result must remain byte-identical rather than stacking policy text.
+            before_second_pass = skill_path.read_bytes()
+            _normalize_skill_text(
+                skill_path,
+                spec.skill_text_replacements,
+                "humanizer-zh",
+            )
+            self.assertEqual(skill_path.read_bytes(), before_second_pass)
 
     def test_focused_skills_resolve_shared_root(self) -> None:
         for skill_name in EXPECTED_SKILLS - {"web-novel-craft"} - INDEPENDENT_SKILLS:
